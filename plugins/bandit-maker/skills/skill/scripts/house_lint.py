@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""House lint: check a skill folder against Leo's rulebook (MyNotes/_skills/rulebook.md).
+"""House lint: check a skill folder against Leo's rulebook (references/rulebook.md).
 
 Usage:
     python -m scripts.house_lint <skill-folder> [<skill-folder> ...] [--names FILE ...]
@@ -8,11 +8,12 @@ Exit 0 = ships (warnings allowed) · 1 = blocked: a must breaks, or R7 (the size
 package_skill.py runs this first and refuses to build a blocked skill.
 Checks only what code can check. Judgment rules (R2 trigger quality, R4 one owner,
 R6 obvious content, R8 railroading, R12 findings, R13 homes, R14 overwrites) stay with
-the Skill Manager audit.
+review in bandit-maker:skill.
 
-R15 (unique command names) compares the skill against every sibling skill folder (a
-folder next to it holding a SKILL.md), so build from a folder that holds copies of every
-in-scope skill. --names adds files whose bare `/name` commands also count as taken
+R15 (unique command names) compares the skill against every other skill in the marketplace
+repo (`plugins/*/skills/*` with a SKILL.md, found from the skill's own path), or, outside the
+repo, every sibling skill folder. Commands are written `/plugin:skill command` (or the bare
+`/skill command`). --names adds files whose bare `/name` commands also count as taken
 (e.g. the cheat sheet).
 """
 import re
@@ -26,7 +27,7 @@ DESC_HARD = 1024         # R1: the save limit
 DESC_WARN = 1000         # R1: the next edit will break it
 UUID = re.compile(r"\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b", re.I)
 EMOJI_H2 = re.compile(r"^## [^\w\s`*]", re.M)
-SKILL_CMD = re.compile(r"`/([a-z][a-z0-9-]*) ([a-z][a-z0-9-]*)")  # `/skill command
+SKILL_CMD = re.compile(r"`/([a-z][a-z0-9-]*(?::[a-z][a-z0-9-]*)?) ([a-z][a-z0-9-]*)")  # `/plugin:skill command
 BARE_CMD = re.compile(r"`/([a-z][a-z0-9-]*)`")                     # `/command` alone
 
 
@@ -42,19 +43,29 @@ def _commands(folder):
     skill_cmds, bare = {}, {}
     for f, text in _texts(folder):
         for skill, word in SKILL_CMD.findall(text):
-            if skill == folder.name:
+            if skill.split(":")[-1] == folder.name:
                 skill_cmds.setdefault(word, skill)
         for word in BARE_CMD.findall(text):
             bare.setdefault(word, f.relative_to(folder).as_posix())
     return skill_cmds, bare
 
 
+def sibling_skills(folder):
+    """Every other skill folder: the marketplace repo's plugins/*/skills/*, else the folder's siblings."""
+    me = Path(folder).resolve()
+    for up in me.parents:
+        if up.name == "plugins" and up.is_dir():
+            found = sorted(up.glob("*/skills/*/SKILL.md"))
+            return [s.parent for s in found if s.parent.resolve() != me]
+    return [p for p in sorted(me.parent.iterdir())
+            if p.is_dir() and p.resolve() != me and (p / "SKILL.md").exists()]
+
+
 def check_r15(folder, others=None, names=()):
-    """R15 · no bare `/name` command reuses a skill's command word (e.g. `/triage` vs `/bandit-tasks triage`)."""
+    """R15 · no bare `/name` command reuses a skill's command word (e.g. `/triage` vs `/bandit:tasks triage`)."""
     folder = Path(folder)
     if others is None:
-        others = [p for p in sorted(folder.resolve().parent.iterdir())
-                  if p.is_dir() and p.resolve() != folder.resolve() and (p / "SKILL.md").exists()]
+        others = sibling_skills(folder)
     skills = {folder.name} | {Path(o).name for o in others}
     own_cmds, own_bare = _commands(folder)
     taken = {}  # word -> "/skill word"

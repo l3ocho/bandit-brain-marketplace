@@ -1,6 +1,6 @@
 ---
-name: "myskill-creator"
-description: "Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, edit, or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy. Also use for \"turn this into a skill\" or \"make it house-standard\". Do NOT use for writing a prompt for Claude Code or an agent (prompt-engineer), for Claude.ai project instructions (project-settings), or for one-off instructions that don't need to be a skill (just answer)."
+name: "skill"
+description: "Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, edit, or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy. Also use for \"turn this into a skill\" or \"make it house-standard\". Do NOT use for writing a prompt for Claude Code or an agent (prompt-engineer), for Claude.ai project instructions (bandit:project), or for one-off instructions that don't need to be a skill (just answer)."
 ---
 
 # Skill Creator
@@ -29,15 +29,15 @@ Then after the skill is done (but again, the order is flexible), you can also ru
 
 ## 🏠 House standard (Leo's skills)
 
-Every skill built or edited here must pass Leo's rulebook. Read `MyNotes/_skills/rulebook.md` in BanditCloud when it's reachable; it wins over this summary. The minimum shape:
+Every skill built or edited here must pass Leo's rulebook. Read `references/rulebook.md` (this skill); it wins over this summary. The minimum shape:
 
 - **Description** is a trigger: when to use it, the phrases Leo uses, and a **Do NOT use for** line naming the neighbouring skill. ≤ 1024 characters.
-- **`bandit-` prefix** only for a skill that owns a Bandit system (BanditBrains, the MyNotes vault).
+- **Short names.** The plugin namespace is the brand (`bandit:tasks`, `bandit-dev:sprint`); a skill's name never repeats it.
 - **`## ⚠️ Gotchas`**: one line per real failure, "what went wrong → what to do instead". A new skill starts with `None logged yet.`
 - **`## 🚫 Never`** section, and an emoji-anchored H2 per section.
 - Settings and state live outside the skill folder (read-only in Claude.ai); conventions owned by another skill are named, not copied.
 - **The house gate is code.** `package_skill.py` runs `scripts/house_lint.py` first and refuses to build a skill that breaks a must or goes over 500 lines. Before a skill-update card, run `python -m scripts.house_lint <folder>` on the exact file the card will carry: ❌ → no card.
-- **Command names are unique (R15).** A bare `/name` command a skill defines never reuses another skill's command word (a repo "triage" command next to `/bandit-tasks triage`). The lint checks it against the sibling skill folders, so build in a folder that holds copies of every in-scope skill.
+- **Command names are unique (R15).** A bare `/name` command a skill defines never reuses another skill's command word (a repo "triage" command next to `/bandit:tasks triage`). The lint checks it against every skill in the marketplace repo's `plugins/*/skills/`.
 
 ---
 

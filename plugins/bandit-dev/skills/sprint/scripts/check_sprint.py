@@ -1,0 +1,183 @@
+#!/usr/bin/env python3
+"""Checks bandit-sprint records in a MyNotes domain vault. Exit 1 on any error.
+
+Rules (each one a failure, not a warning):
+  SP1  every sprint folder has its plan, handover prompt and ledger, named {project}-sprint-{name}-{record}.md
+  SP2  a brief whose board-task is a card of a sprint (from the ledger's wave table) lives inside that sprint folder
+  SP3  no two .md files in the domain share a filename (Obsidian links resolve by filename)
+  SP5  a project with sprint folders keeps only its hub note {project}.md, its sprint-* folders and planning/ (WBS, project plan, architecture) at its root
+  SP4  frontmatter parses as YAML (skipped for Leo's own inbox notes: no frontmatter or status inbox)
+  SP6  one brief per card: a card has at most one brief outside _archive (a card detached from a closing sprint carries
+       everything into that one note, which waits in the inbox; its ledger row says "detached")
+
+Usage:
+  check_sprint.py [--vault ~/Documents/MyNotes] [--domain BanditLabs]
+  check_sprint.py --hook   (Stop hook: reads the hook JSON on stdin, checks only when the
+                            session touched the vault, blocks the stop once with exit 2)
+"""
+import argparse
+import json
+import os
+import re
+import sys
+from collections import defaultdict
+from pathlib import Path
+
+import yaml
+
+RECORDS = ("plan", "handover-prompt", "progress")
+CARD_ROW = re.compile(r"^\|\s*[^|]+\|\s*((?:[A-Z]+-\d+)(?:\s*,\s*[A-Z]+-\d+)*)\s*\|", re.M)
+CARD_ID = re.compile(r"[A-Z]+-\d+")
+
+
+def frontmatter(path: Path) -> tuple[dict | None, str | None]:
+    text = path.read_text(encoding="utf-8", errors="replace")
+    if not text.startswith("---\n"):
+        return None, None
+    end = text.find("\n---", 4)
+    if end < 0:
+        return None, "frontmatter has no closing ---"
+    try:
+        data = yaml.safe_load(text[4:end])
+    except yaml.YAMLError as exc:
+        return None, f"frontmatter is not valid YAML ({str(exc).splitlines()[0]})"
+    return (data if isinstance(data, dict) else {}), None
+
+
+def sprint_folders(domain: Path) -> list[tuple[str, Path]]:
+    found = []
+    for base in (domain / "Projects", domain / "_archive" / "Projects"):
+        if not base.is_dir():
+            continue
+        for project in sorted(p for p in base.iterdir() if p.is_dir()):
+            for folder in sorted(project.glob("sprint-*")):
+                if folder.is_dir():
+                    found.append((project.name, folder))
+    return found
+
+
+def check(domain: Path) -> list[str]:
+    errors: list[str] = []
+    md_files = [p for p in domain.rglob("*.md") if not any(part.startswith(".") for part in p.relative_to(domain).parts)]
+    # Settings mirrors (Claude/, its archive) and templates (Templater syntax) are not notes.
+    md_files = [p for p in md_files if not (set(p.relative_to(domain).parts[:2]) & {"Claude", "_templates"})]
+
+    # SP3 duplicate filenames
+    by_name = defaultdict(list)
+    for p in md_files:
+        by_name[p.name].append(p.relative_to(domain))
+    for name, paths in sorted(by_name.items()):
+        if len(paths) > 1 and name != "README.md":
+            errors.append(f"SP3 duplicate filename {name}: " + ", ".join(str(x) for x in paths))
+
+    # SP4 frontmatter, and an index of briefs by board-task
+    briefs_by_card = defaultdict(list)
+    for p in md_files:
+        rel = p.relative_to(domain)
+        data, problem = frontmatter(p)
+        in_inbox = rel.parts[0] == "_inbox"
+        if problem:
+            if in_inbox and data is None and "status: triaged" not in p.read_text(errors="replace")[:600]:
+                continue
+            errors.append(f"SP4 {rel}: {problem}")
+            continue
+        if not data:
+            continue
+        card = data.get("board-task")
+        if card and data.get("type") == "brief" or (card and re.search(r"-\d{4}-\d{2}-\d{2}\.md$", p.name)):
+            briefs_by_card[str(card)].append(rel)
+
+    # SP6 one brief per card outside the archive
+    for card, paths in sorted(briefs_by_card.items()):
+        live = [x for x in paths if x.parts[0] != "_archive"]
+        if len(live) > 1:
+            errors.append(f"SP6 more than one brief for {card}: " + ", ".join(str(x) for x in live) + " (merge them into one note per card)")
+
+    # SP5 project root holds only the hub and sprint folders
+    projects = domain / "Projects"
+    if projects.is_dir():
+        for project in sorted(p for p in projects.iterdir() if p.is_dir()):
+            if not any(c.is_dir() and c.name.startswith("sprint-") for c in project.iterdir()):
+                continue
+            for item in sorted(project.iterdir()):
+                if item.name.startswith("."):
+                    continue
+                if item.is_dir() and item.name.startswith("sprint-"):
+                    continue
+                if item.is_dir() and item.name == "planning":
+                    continue
+                if item.name == f"{project.name}.md":
+                    continue
+                errors.append(f"SP5 {item.relative_to(domain)}: only {project.name}.md, sprint-* folders and planning/ may sit in Projects/{project.name}/; move it into the sprint folder it belongs to")
+
+    # SP1 and SP2
+    for project, folder in sprint_folders(domain):
+        name = folder.name[len("sprint-"):]
+        rel_folder = folder.relative_to(domain)
+        for record in RECORDS:
+            expected = folder / f"{project}-sprint-{name}-{record}.md"
+            if not expected.exists():
+                errors.append(f"SP1 {rel_folder}: missing {expected.name}")
+        ledger = folder / f"{project}-sprint-{name}-progress.md"
+        if not ledger.exists():
+            continue
+        cards = set()
+        detached = set()
+        for match in CARD_ROW.finditer(ledger.read_text(errors="replace")):
+            ids = CARD_ID.findall(match.group(1))
+            line_end = ledger.read_text(errors="replace").find("\n", match.start())
+            row = ledger.read_text(errors="replace")[match.start():line_end if line_end > 0 else None]
+            if "detached" in row.lower():
+                detached.update(ids)
+            cards.update(ids)
+        # A card detached at close keeps its single brief in the inbox for the next plan to file.
+        for card in sorted(cards - detached):
+            for brief in briefs_by_card.get(card, []):
+                if brief.parent != rel_folder:
+                    errors.append(f"SP2 brief for {card} is outside its sprint: {brief} (belongs in {rel_folder}/)")
+    return errors
+
+
+def session_touched_vault(payload: dict) -> bool:
+    transcript = payload.get("transcript_path")
+    if not transcript or not os.path.exists(transcript):
+        return False
+    with open(transcript, encoding="utf-8", errors="replace") as fh:
+        text = fh.read()
+    return "MyNotes/" in text or "bandit-sprint" in text
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--vault", default=os.path.expanduser("~/Documents/MyNotes"))
+    ap.add_argument("--domain", default="BanditLabs")
+    ap.add_argument("--hook", action="store_true")
+    args = ap.parse_args()
+
+    if args.hook:
+        try:
+            payload = json.load(sys.stdin)
+        except Exception:
+            payload = {}
+        if payload.get("stop_hook_active") or not session_touched_vault(payload):
+            return 0
+
+    domain = Path(args.vault) / args.domain
+    if not domain.is_dir():
+        print(f"check_sprint: no domain folder at {domain}", file=sys.stderr)
+        return 0 if args.hook else 1
+
+    errors = check(domain)
+    if not errors:
+        if not args.hook:
+            print(f"OK: {domain} passes SP1-SP6 ({len(sprint_folders(domain))} sprint folders)")
+        return 0
+    out = sys.stderr if args.hook else sys.stdout
+    print(f"bandit-sprint check FAILED in {domain} ({len(errors)}). Fix these before finishing:", file=out)
+    for line in errors:
+        print(f"- {line}", file=out)
+    return 2 if args.hook else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

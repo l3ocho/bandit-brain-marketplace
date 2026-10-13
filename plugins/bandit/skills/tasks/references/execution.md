@@ -1,0 +1,136 @@
+# ▶️ Execution
+
+**Commands:** `/bandit-tasks today` `/bandit-tasks doing` `/bandit-tasks done` `/bandit-tasks bump`
+**Owns:** the six Execution columns · dependency gates · the five-item cap
+
+---
+
+## 🗂️ The six columns
+
+`get_execution_board` returns them in fixed order. Empty columns are included.
+
+| # | Column | Settable via `set_task_execution_state`? |
+|---|---|---|
+| 1 | **Backlog** | ✅ `backlog` |
+| 2 | **Assigned** | ✅ `assigned` |
+| 3 | **Next** | ✅ `next` — **gated** |
+| 4 | **Doing** | ✅ `doing` — **gated** |
+| 5 | **Stand By** | ✅ `standby` |
+| 6 | **Done** | 🔴 **Not settable.** A task reaches Done by being completed |
+
+🗣️ **This is the Execution Backlog.** Never say bare "backlog" — the project Backlog column is a different thing entirely.
+
+---
+
+## 🚧 The dependency gates
+
+| Target | Requires |
+|---|---|
+| **Next** | Every blocking task at **Next or beyond** |
+| **Doing** | Every blocking task **complete**. A blocker in **Stand By is not complete**: refused with `BLOCKED_BY_INCOMPLETE_TASK` |
+| Backlog · Assigned · Stand By | Nothing |
+
+**Any column but Done can be set explicitly**, from any column; only Next and Doing are gated. A
+sprint plan may seed its whole batch to Assigned in one `bulk_set_execution_state`.
+
+`complete_task` is refused while any blocker is incomplete.
+
+⛔ When a gate refuses: **name the blocking task**, do not retry, do not route around it. `relatedId` in the refusal is the blocker — resolve it to a title before reporting. Codes: `references/errors.md`.
+
+📌 **Known gap, BB-94:** Doing would accept a blocker in Stand By (a chained card worked while its
+blocker waits for Leo's test). Not built: until BB-94 ships, the gate above holds.
+
+---
+
+## 📥 What the board contains
+
+Tasks that are **assigned to a project** and either:
+
+- still due at any age, or
+- due this week, or
+- completed this week
+
+📌 Tasks with no project never appear here. They are in Untriaged — that is Triage's problem, not Execution's.
+
+📌 **The midnight job** (`actor: system`) already moved anything due today or overdue into **Assigned**. `/bandit-tasks today` reads that result. **Do not synthesise a today-list** — the board is the list.
+
+---
+
+## 🖐️ The five-item cap
+
+More than five items live across **Next + Doing** is the signal to stop and say so.
+
+Report the breach. Propose what moves back to Assigned or Stand By. **Do not silently trim.**
+
+---
+
+## ⚙️ Procedures
+
+### `/bandit-tasks today`
+
+1. `get_execution_board`
+2. Report **Doing** first, then **Next**, then Assigned
+3. Flag: cap breach · anything overdue · anything in Stand By older than a week, **except** a
+   card carrying a `sprint/*` tag or a sprint card (`references/dev.md` → Sprint card): those wait
+   in Stand By for Leo's test on purpose
+4. Stop. `/bandit-tasks today` is a read.
+
+### `/bandit-tasks doing`
+
+1. Resolve the named task — `list_tasks` or the board just read
+2. `set_task_execution_state` → `doing`
+3. On a gate refusal, name the blocker and stop
+
+### `/bandit-tasks done`
+
+1. `complete_task` — this is what moves it to Done
+2. **If it was a recurring occurrence**, completion advances the series and creates the next occurrence. Say so, and report the next date
+3. If the whole series just ended because the rule ran out, say that too
+
+⚠️ `uncomplete_task` returns the task to Backlog and makes it movable. On a recurring occurrence it also removes the next occurrence, and only when that one is an unedited fresh copy and this is the series' latest completion; otherwise it is refused (`references/errors.md`).
+
+### `/bandit-tasks bump`
+
+Bumping is a **date** change, not a column change.
+
+1. `set_task_due_date`, or `bulk_set_due_date` for several
+2. Refused if the new date puts it out of order with something it blocks or that blocks it — report which
+3. Refused outright on a recurring occurrence — **its date comes from the rule.** Offer `skip_occurrence` instead
+
+📌 Three bumps on the same task is a right-sizing signal. Say it once. Do not nag.
+
+---
+
+## 📦 Bulk
+
+`bulk_set_execution_state` — same gates, applied per task. Done is not a destination.
+
+`bulk_complete_tasks` · `bulk_set_due_date` — cap 100.
+
+**Completing blockers and their dependents:** blockers first, dependents in a **second** call.
+Whether one call completes them in list order is **unchecked**; a dependent sent with its blocker
+may be refused by name.
+
+Over 100, or malformed → **whole call refused, nothing changed.**
+
+---
+
+## 🎚️ The three variables
+
+Read them off the task; do not invent them.
+
+| Field | Scale |
+|---|---|
+| 🧩 **Complexity** | Simple 1 · Medium 2 · Complex 3 |
+| ⏱️ **Effort** | XS 1 · S 2 · M 3 · L 4 · XL 5 |
+| 🔺 **Priority** | Low 1 · Medium 2 · High 3 · Urgent 4 |
+
+Priority is **urgency only** and is independent. A Complex XL task can be Urgent.
+
+Effort L or XL sitting in Doing is a split candidate — propose, never act. On a `dev: true` board only XL is (L cards are allowed there, `references/dev-workflow.md` B7).
+
+---
+
+## 🕐 A note on `dueTime`
+
+`HH:MM`, 24-hour, **display only.** It never affects placement and never affects whether something is overdue. Do not use it to sequence a day.

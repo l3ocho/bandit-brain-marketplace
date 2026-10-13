@@ -1,6 +1,6 @@
 ---
-name: "bandit-tasks"
-description: "Operates the BanditBrains task board: inbox triage, daily execution, week planning, capture, recurring rules, hygiene audits, email → proposed tasks, WBS load, the board step of onboarding, and on dev projects the card workflow (spec, plan-tech, stage, pick-ready). Invoked as /bandit-tasks + a command (triage, inbox, today, doing, done, bump, week, plan, review, capture, audit, email, load, onboard, spec, plan-tech, stage, pick-ready). Also trigger on \"what's in my inbox\", \"what should I do now\", \"what does my week look like\", \"add a task\", \"remind me to\", \"make this repeat\", \"mark that done\", \"push that to tomorrow\", \"what's blocked\", \"am I overloaded\", \"clean up the board\", \"this project is finished\", \"anything in my email to act on\", \"load the WBS\", \"write the card\", \"move it to ready\", and any request to file, schedule, complete, defer or review tasks. Do NOT use to write the WBS (wbs-generator), plan notes (bandit-notes), plan a sprint (bandit-sprint) or design a board freehand."
+name: "tasks"
+description: "Operates the BanditBrains task board: inbox triage, daily execution, week planning, capture, recurring rules, hygiene audits, email → proposed tasks, WBS load, the board step of onboarding, and on dev projects the card workflow (spec, plan-tech, stage, pick-ready). Invoked as /bandit:tasks + a command (triage, inbox, today, doing, done, bump, week, review, capture, audit, email, load, onboard, spec, plan-tech, stage, pick-ready). Also trigger on \"what's in my inbox\", \"what should I do now\", \"what does my week look like\", \"add a task\", \"remind me to\", \"make this repeat\", \"mark that done\", \"push that to tomorrow\", \"what's blocked\", \"am I overloaded\", \"clean up the board\", \"this project is finished\", \"anything in my email to act on\", \"load the WBS\", \"write the card\", \"move it to ready\", and any request to file, schedule, complete, defer or review tasks. Do NOT use to write the WBS (bandit:plan), plan notes (bandit:notes), plan a sprint (bandit-dev:sprint) or design a board freehand."
 ---
 
 # 🗂️ Bandit Tasks
@@ -15,8 +15,8 @@ One skill, nine surfaces. Everything shared lives here; each surface has its own
 
 ## 🧭 Router
 
-**Invocation:** `/bandit-tasks <command> [args]`, the same form as `/bandit-notes`. The first word
-after `/bandit-tasks` is the command. `/bandit-tasks` with no command → offer this table as a
+**Invocation:** `/bandit:tasks <command> [args]`, the same form as `/bandit:notes`. The first word
+after `/bandit:tasks` is the command. `/bandit:tasks` with no command → offer this table as a
 numbered list and ask which one.
 
 Read the matching reference file **before acting**. Do not work from this page alone.
@@ -25,12 +25,12 @@ Read the matching reference file **before acting**. Do not work from this page a
 |---|---|---|---|
 | 📥 **Triage** | `triage` `inbox` | `references/triage.md` | Inbox board. **The only holder of `move_task` and `bulk_move_tasks`**. Right-sizing during review |
 | ▶️ **Execution** | `today` `doing` `done` `bump` | `references/execution.md` | The six Execution columns, dependency gates, the five-item cap |
-| 📅 **Week** | `week` `plan` `review` | `references/week.md` | Week board, workload, projections, `skip_occurrence` |
+| 📅 **Week** | `week` `review` | `references/week.md` | Week board, workload, projections, `skip_occurrence` |
 | ✍️ **Capture** | `capture` | `references/capture.md` | Task creation, brain dumps, **the whole repeat-rule lifecycle** |
 | 🧹 **Audit** | `audit` | `references/audit.md` | Hygiene checks, `archive_project` |
 | 📧 **Email** | `email` | `references/email.md` | Gmail → **proposals only, zero writes** |
 | 🏗️ **Load** | `load` | `references/load.md` | WBS → a new Deliverable project: columns, tasks, subtasks, dependencies |
-| 🚀 **Onboard** | `onboard` | `references/onboard.md` | The board step of project onboarding, **run by project-settings**: resolve the board scope, or create one **empty** project |
+| 🚀 **Onboard** | `onboard` | `references/onboard.md` | The board step of project onboarding, **run by bandit:project**: resolve the board scope, or create one **empty** project |
 | 🛠️ **Dev** | `spec` `plan-tech` `stage` `pick-ready` | `references/dev.md` (board rules) · `references/dev-workflow.md` (the commands) | **Dev projects only.** Lanes, stages, card sections and fields, the dev board shape · surface roles, card boundaries, the card procedures. `sprint` = old name of `pick-ready`, one release |
 
 **Only Load and Onboard create projects.** Only Load, and the dev board shape's `PM` step, create columns.
@@ -50,7 +50,7 @@ both files — the point of merging was to make that free.
 
 Read the `board:` line of the `## 🧭 Project Context` section — in the Claude.ai project
 instructions, or in the repo's `CLAUDE.md` on Claude Code. The block's format is owned by
-project-settings.
+bandit:project.
 
 ```
 board: project "App: BanditBrains"
@@ -64,7 +64,7 @@ board: pending
 |---|---|
 | `project` / `folder` / `global` | Call `list_projects` to resolve that **name** to an ID, then read anywhere, write inside it |
 | `none` | Not board-backed. Read anywhere, **write nothing**. Say the project has no board |
-| `pending` | The board isn't designed yet. Read anywhere, **write nothing** — except `/bandit-tasks load`, which *is* the design step for a WBS-backed project, and `/bandit-tasks onboard`, which sets the scope. Otherwise say: design the board, then update the `board:` line |
+| `pending` | The board isn't designed yet. Read anywhere, **write nothing** — except `/bandit:tasks load`, which *is* the design step for a WBS-backed project, and `/bandit:tasks onboard`, which sets the scope. Otherwise say: design the board, then update the `board:` line |
 | Neither a Project Context nor a legacy scope section (a plain chat, no project) | Unchanged: behave as before this section existed |
 
 **Legacy fallback:** no Project Context but a `## 🗺️ Task Board Scope` section with a
@@ -150,7 +150,7 @@ They are **instruments**, not decoration.
 | 🤖 **Handler** | `claude-code` · `claude-design` · `claude-ai` |
 | 🏊 **Lane** (dev boards) | `lane/incident` · `lane/issue` · `lane/feature` · `lane/maintenance` · `lane/content` · `lane/tech-debt` |
 | 🪜 **Stage** (dev boards) | `stage/spec` · `stage/planned` · `stage/ready` |
-| 🏁 **Sprint** (dev boards) | `sprint/{name}`, one per sprint, created with it (bandit-sprint) |
+| 🏁 **Sprint** (dev boards) | `sprint/{name}`, one per sprint, created with it (bandit-dev:sprint) |
 
 A sprint has no entity of its own: it is its tag. `list_sprints` lists every `sprint/*` tag with
 open, completed and total counts and the earliest and latest due date; `list_tasks(tagName:
@@ -190,7 +190,7 @@ There is no bulk create and no bulk delete.
 `<ul>`, `<ol>` or `<blockquote>` (app code: `rich-text.ts` → `looksLikeHtml`). Anything else, a
 value starting with `<b>` or bare text included, is shown as plain text: every tag appears as
 literal characters. Applies to every surface that writes one: capture, email, load, dev, triage
-splits, and bandit-sprint's sprint card.
+splits, and bandit-dev:sprint's sprint card.
 
 | Tag | For |
 |---|---|
@@ -259,15 +259,15 @@ conversation with raw tools, every time. There is no repeated procedure to encod
 interview answer produces a bad board.
 
 **Three exceptions are procedures:**
-- **`/bandit-tasks load`:** a WBS maps onto a Deliverable project mechanically (deliverables →
+- **`/bandit:tasks load`:** a WBS maps onto a Deliverable project mechanically (deliverables →
   columns, work packages → tasks). It builds only what the WBS says. Anything beyond the mapping
   is back to the design conversation.
-- **`/bandit-tasks onboard`:** creates one empty project (the protected Backlog column only) as an
-  approved row of project-settings' onboarding proposal. Columns and lanes come later, from a
+- **`/bandit:tasks onboard`:** creates one empty project (the protected Backlog column only) as an
+  approved row of bandit:project' onboarding proposal. Columns and lanes come later, from a
   load or the design conversation (with `dev: true`, onboard adds the dev board shape rows).
 - **Dev board shape** (`references/dev.md`): creates the missing `lane/*` / `stage/*` tags, sets
   the six dev lanes and adds the `PM` column, as approved rows — from `onboard` with `dev: true`, a
-  bandit-audit S9 fix row, or (the `PM` column only) a sprint plan. Nothing else.
+  bandit:audit S9 fix row, or (the `PM` column only) a sprint plan. Nothing else.
 
 `archive_project` is the other exception, and it lives in audit because audit is what discovers the
 need for it.
@@ -276,7 +276,7 @@ need for it.
 
 ## ⚠️ Gotchas
 
-- **2026-09-24 · Commands were bangs (`!triage`).** They're now `/bandit-tasks triage`, the same
+- **2026-09-24 · Commands were bangs (`!triage`).** They're now `/bandit:tasks triage`, the same
   form as every other skill. → A `!command` typed from habit means the same command: run it.
 - **2026-09-27 · Said a Sun–Thu repeat wasn't possible.** `capture.md` listed the rule vocabulary
   without `days`, which the tool supports on weekly rules. → Check the tool's `rule` schema before

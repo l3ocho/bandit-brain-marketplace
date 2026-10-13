@@ -18,7 +18,7 @@ report per row: done / refused (with reason). A refused row doesn't undo the oth
 
 ---
 
-### `/bandit-notes onboard [Domain]`
+### `/bandit:notes onboard [Domain]`
 
 Brings an existing domain in line with the conventions. It runs in **stages**, each proposed and
 confirmed separately, because a structure change should be settled before hundreds of file edits
@@ -38,14 +38,14 @@ are planned against it.
   | `Outstanding/`, `Asks/` | `Requests/` + `requests` module |
   | `Agents/` | `Claude/` |
   | `Claude/claude-ai-settings/`, `Agents/{Project}/claude-ai-settings/` | `Claude/ai-{slug}/` (slug from the Project Context `project:`, or ask) |
-  | `Claude/claude-ai-skills/`, `Claude.ai-Skills/`, any skills folder | `MyNotes/_skills/` (merge by skill name) |
+  | `Claude/claude-ai-skills/`, `Claude.ai-Skills/`, any skills folder | `_archive/` (skill sources live in the bandit-brain-marketplace repo) |
 
 - Folders that fit nothing (e.g. `Career/`, `Apps/`): offer map-to-module, move under
   `Projects/`, or "propose a new module" (a change to this skill — stop and say so).
 - Anything in `Claude/` that isn't settings → its proper folder.
 
 After Stage A moves a settings folder, **the project instructions still point to the old path.**
-Say so and tell Leo to run project-settings (targeted update) to set the Project Context
+Say so and tell Leo to run bandit:project (targeted update) to set the Project Context
 `domain:` and `project:` and the derived `webdav_folder`. Don't edit instructions from here.
 
 **Stage B — Templates.** Read every file in `_templates/`. Propose the frontmatter
@@ -82,15 +82,15 @@ approves them by number (Part 1 → scope exceptions).
 
 ---
 
-### Onboarding rows (run by project-settings)
+### Onboarding rows (run by bandit:project)
 
-The vault step of project onboarding. project-settings passes `domain`, `project` (slug), `type`,
+The vault step of project onboarding. bandit:project passes `domain`, `project` (slug), `type`,
 `dev` (when set), whether the project has a Claude Code surface (item 8 decides on these two),
 the hub-note summary drafted in its interview, and, for a new domain, the chosen modules. This
-procedure returns rows; project-settings puts them in its one combined proposal.
+procedure returns rows; bandit:project puts them in its one combined proposal.
 
 1. `nc_webdav_list_directory("MyNotes")`. The domain isn't there → return the `init` rows (step
-   3 of `init` below, with the modules project-settings passed) and stop here.
+   3 of `init` below, with the modules bandit:project passed) and stop here.
 2. List the domain root, `_templates/`, `Projects/` and `Claude/`. Return a row for **every
    missing item** of the domain's core structure (Part 2 §1: every domain has all of them) and of
    this project, in this order, whatever the project type:
@@ -125,23 +125,23 @@ procedure returns rows; project-settings puts them in its one combined proposal.
 
 ---
 
-### `/bandit-notes init {Domain}`
+### `/bandit:notes init {Domain}`
 
 For a new domain — a new job, a new business area.
 
 1. Check `MyNotes/{Domain}` doesn't exist. If it does, stop and offer `onboard` instead. Typed
-   in a project chat to set up a new project: say that's project-settings' onboarding and stop.
+   in a project chat to set up a new project: say that's bandit:project' onboarding and stop.
 2. Ask which modules to enable (multi-select from the Part 2 §2 list).
 3. Propose: the domain folder, core folders, module folders, pre-filled starter
    `_templates/new-note.md` (and `meeting-entry.md` / `request.md` when those modules are on),
    and the README.
 4. On confirmation, create them in that order, then run `home`.
 5. Obsidian creates `.obsidian/` the first time Leo opens the folder as a vault. Tell him to do
-   that, close it again, and then run `/bandit-notes settings {Domain}` to apply Part 2 §11.
+   that, close it again, and then run `/bandit:notes settings {Domain}` to apply Part 2 §11.
 
 ---
 
-### `/bandit-notes home [Domain]`
+### `/bandit:notes home [Domain]`
 
 Rebuilds `{Domain}/README.md` from the **README template** in `references/readme-template.md`. Runs unattended from a
 scheduled task, so it **never asks** and writes only the README.
@@ -177,7 +177,7 @@ changed (counts), or "no changes".
 
 ---
 
-### `/bandit-notes file [Domain] [note…]`
+### `/bandit:notes file [Domain] [note…]`
 
 The review: takes inbox notes Leo puts up and moves them to their homes, compliant. With note
 names, reviews only those; without, the whole inbox. This is the command Leo uses most — keep
@@ -194,7 +194,7 @@ it fast.
      its `planning/` or a sprint folder on a project with sprint folders: Part 2 §1).
      Everything else stays in `_inbox` for the workflow project; list those in one line
    - **Destination not onboarded yet:** `file-to: Projects/{slug}/` and that folder doesn't
-     exist → stop that row and point to project-settings onboarding first (the note stays in
+     exist → stop that row and point to bandit:project onboarding first (the note stays in
      `_inbox` untouched). Once the hub exists, filing adds `project: "[[{slug}]]"` (Part 2 §5)
    - filename per Part 2 §4, checked for uniqueness
    - frontmatter: add the missing keys, remove `file-to` (its job is done), `status: triaged`
@@ -223,8 +223,8 @@ it fast.
    there (bare-hex `if_match`) → apply any approved body rows → move or rename the attachments
    listed in the row. A failed move leaves the inbox note untouched; a failed edit leaves the
    note in its home folder unedited, reported as half-done.
-5. Report per row. Suggest a `/bandit-tasks capture` for notes that describe work with no
-   `board-task` — suggest only; bandit-tasks does the capture.
+5. Report per row. Suggest a `/bandit:tasks capture` for notes that describe work with no
+   `board-task` — suggest only; bandit:tasks does the capture.
 
 **Plan notes (dev projects, Part 2 §13).** Filing a `type: plan` note:
 - sets `status: active` (not `triaged`);
@@ -232,12 +232,12 @@ it fast.
   (`- [[{plan-note}]] — plan: {card title}`), edited with its etag. This is the plan note's inbound
   link; skipping the row leaves it an orphan;
 - its report resolves `board-task` to the card's **current** title live (`get_task`, read-only) and
-  adds: *card {title} can move to `stage/planned`: run `/bandit-tasks stage {card} planned`*. This
+  adds: *card {title} can move to `stage/planned`: run `/bandit:tasks stage {card} planned`*. This
   skill never writes the board.
 
 ---
 
-### `/bandit-notes lint [Domain]`
+### `/bandit:notes lint [Domain]`
 
 Read-only report whose rows are the fixes. Nothing is written until Leo answers.
 
@@ -263,7 +263,7 @@ Checks (each row: file, breach, proposed fix):
 | Orphans | A filed note with **no inbound link** from any other note, the README included (outbound links don't count). Fix: link it from its hub, a related note or the README's lists — or archive it |
 | Customer data | Account-number patterns, customer names or addresses in any note body (report the line, propose a placeholder) |
 | Ambiguous dates | `NN/NN/YYYY` in a body where both parts are ≤ 12 |
-| Obsidian settings | Each row of the §11 table, read from `.obsidian/*.json`; property types per §5. Fix → `/bandit-notes settings` |
+| Obsidian settings | Each row of the §11 table, read from `.obsidian/*.json`; property types per §5. Fix → `/bandit:notes settings` |
 | Conflicts | Sync-conflict copies |
 | Version | README `mynotes-version` older than the current convention version → suggest `onboard` |
 | Plan notes (dev projects only) | Resolving each `board-task` id live, read-only: a `plan` note with no `board-task` · a plan note whose card is complete but the note isn't `done` (propose `done` + archive) · a plan note whose task id no longer resolves (card deleted). A renamed card still resolves: never report it as deleted |
@@ -275,7 +275,7 @@ In project scope, lint only the project's own areas.
 
 ---
 
-### `/bandit-notes settings [Domain]`
+### `/bandit:notes settings [Domain]`
 
 Aligns the vault's Obsidian settings with Part 2 §11. Domain scope only. Never unattended.
 
@@ -295,7 +295,7 @@ Aligns the vault's Obsidian settings with Part 2 §11. Domain scope only. Never 
    write (`if_match`) → re-read and verify. Report per row: done / skipped (with reason).
 5. Finish with the after-run steps from §11 (wait for sync, open desktop first, check the UI).
 
-**Roll back:** `/bandit-notes settings {Domain} restore` lists the backups in
+**Roll back:** `/bandit:notes settings {Domain} restore` lists the backups in
 `.obsidian/mynotes-backup/` newest first. Leo picks one per file; with Obsidian closed
 everywhere: back up the current live file first (so a restore can itself be undone), read its
 etag, then `nc_webdav_copy_resource(source=backup, destination=live, overwrite: true,
@@ -304,7 +304,7 @@ since the read. Re-read and confirm it parses.
 
 ---
 
-### `/bandit-notes delete {path…}`
+### `/bandit:notes delete {path…}`
 
 1. Resolve each argument to an exact path (`nc_webdav_find_by_name` for a bare note name). Zero
    or several matches → ask; never pick one.
@@ -319,7 +319,7 @@ still needs his approval.
 
 ---
 
-### `/bandit-notes archive [Domain]` · `/bandit-notes restore {note}`
+### `/bandit:notes archive [Domain]` · `/bandit:notes restore {note}`
 
 **Archive**
 1. Find notes with `status: done` outside `_archive/` (read frontmatter folder by folder).
@@ -327,7 +327,7 @@ still needs his approval.
 3. On approval: stamp `archived-from` + `archived` (edit in place) → create missing mirror
    folders → move.
 
-**A sprint folder** (Part 2 §1 → Archiving a sprint), named by Leo or by bandit-sprint's close:
+**A sprint folder** (Part 2 §1 → Archiving a sprint), named by Leo or by bandit-dev:sprint's close:
 one row per note setting `status: done` on the plan, execution prompt, ledger and report, one row
 stamping every note in the folder, the mirror folders under `_archive/Projects/{slug}/` as rows,
 then one move row for the folder itself. Stamp all, then move once; a failed stamp stops the move.
@@ -335,12 +335,12 @@ then one move row for the folder itself. Stamp all, then move once; a failed sta
 **Settings versions** (structure rulebook S7)
 
 Old `{prefix}-instructions-v{N}.md` and `{prefix}-prompt-reference-v{N}.md` files leave
-`Claude/ai-{slug}/` for `_archive/Claude/ai-{slug}/`. project-settings owns the files but never
+`Claude/ai-{slug}/` for `_archive/Claude/ai-{slug}/`. bandit:project owns the files but never
 moves them; this skill does the move.
 
-1. **Input:** the exact file paths, from an approved bandit-audit S7 row or named by Leo. This
+1. **Input:** the exact file paths, from an approved bandit:audit S7 row or named by Leo. This
    skill doesn't decide which version is in production: that comes from the self-check stamp,
-   which bandit-audit reads. No list given → ask for one; never pick "everything but the highest".
+   which bandit:audit reads. No list given → ask for one; never pick "everything but the highest".
 2. **Refuse** a path that isn't a settings file in `Claude/ai-{slug}/`, and any file of a project
    whose S5 is unchecked.
 3. **Propose** one row per file, plus any missing `_archive/Claude/ai-{slug}/` mirror folder as
@@ -349,7 +349,7 @@ moves them; this skill does the move.
    settings files carry an HTML metadata comment, never frontmatter, so nothing is edited. The
    mirrored path is the only record of where a file came from.
 5. **Report** per row. Run from a product project, this is outside its scope: it runs from the
-   workflow project or as a bandit-audit row.
+   workflow project or as a bandit:audit row.
 
 **Restore**
 1. Locate the note in `_archive/` with `nc_webdav_find_by_name`.

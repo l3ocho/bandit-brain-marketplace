@@ -6,7 +6,7 @@
 tag merging · card fields · the sprint card's board shape · the **dev board shape** procedure
 
 This file holds what the board itself enforces or expects. How work moves through it is
-`references/dev-workflow.md`. Planning a sprint is `bandit-sprint`'s (Claude Code): it calls the
+`references/dev-workflow.md`. Planning a sprint is `bandit-dev:sprint`'s (Claude Code): it calls the
 rules here and never restates them.
 
 ---
@@ -14,7 +14,7 @@ rules here and never restates them.
 ## 🚦 Gate — dev projects only
 
 Everything in this file and in `references/dev-workflow.md` applies **only** when the current
-Project Context has `dev: true` (key owned by project-settings). No `dev` line → every other command
+Project Context has `dev: true` (key owned by bandit:project). No `dev` line → every other command
 behaves as it always has, and a Dev command says *"this project isn't a dev project (no `dev: true`
 in its Project Context)"* and stops. Family, Personal and the domain workflow boards are never
 touched.
@@ -42,7 +42,7 @@ The gate always reads the **current** project's Project Context, never the board
 | Stage | Means | Set by |
 |---|---|---|
 | `stage/spec` | Scope agreed, `Spec` written | `spec` |
-| `stage/planned` | Plan note reviewed and filed by Leo | `stage … planned`, after `/bandit-notes file` |
+| `stage/planned` | Plan note reviewed and filed by Leo | `stage … planned`, after `/bandit:notes file` |
 | `stage/ready` | Leo approved; a sprint candidate | `stage … ready`, or Leo by hand |
 
 **Stage tags stay after a card is completed.** Completion clears nothing (38 completed BanditBrain
@@ -121,19 +121,19 @@ Every dev card is written **complete**, in one `create_task`, then read back (`g
 | `complexity` | Always set |
 | `effort` | Always set. Claude.ai's is a first estimate; `plan-tech` confirms it. Max L (B7, `references/dev-workflow.md`) |
 | `assignedTo` | Leo, resolved live (`list_project_members`) |
-| `dueDate` | Empty. Only `pick-ready` and a sprint plan date cards; **only the sprint plan sets a sprint batch's due date** (bandit-sprint). Incident: today |
+| `dueDate` | Empty. Only `pick-ready` and a sprint plan date cards; **only the sprint plan sets a sprint batch's due date** (bandit-dev:sprint). Incident: today |
 | Execution state | Left as created. The midnight run moves it when due; `pick-ready` sets Assigned for a card picked for today; a sprint plan may seed its whole batch to Assigned. Incident: `assigned` straight away |
 | `dependencies` | `blockedBy` / `blocks` for every known link, in the same call |
 | `subtasks` | Claude Code only: the build steps, when it writes the card or at `plan-tech`. Claude.ai writes none. Order as SKILL.md → Sub-tasks |
 | `description` | **🃏 Card sections**, written per SKILL.md → Card descriptions |
-| Brief | One `brief` note per card through bandit-notes, `board-task` = the card's short id. Its body is bandit-notes' rule |
+| Brief | One `brief` note per card through bandit:notes, `board-task` = the card's short id. Its body is bandit:notes' rule |
 
 ---
 
 ## 🏁 Sprint card — board shape
 
 A sprint runs on one **sprint card**, the umbrella for a batch of cards. Its sections and sub-tasks
-(the planning steps, one per wave) are bandit-sprint's (`templates.md` there); this file holds only
+(the planning steps, one per wave) are bandit-dev:sprint's (`templates.md` there); this file holds only
 what the board sees.
 
 | Part | Value |
@@ -144,13 +144,13 @@ what the board sees.
 | Batch | Every card in the sprint is a **blocker** of the sprint card (`add_dependency`, card → sprint card). The live blockers are the source of truth |
 | Sprint tag | `sprint/{name}` on each batch card, never on the sprint card. `list_sprints` lists every sprint tag with open, completed and total counts; `list_tasks(tagName: "sprint/{name}")` gives its cards |
 | Effort | Its own size as the umbrella; B7 applies to the batch cards, not to it |
-| Records | Plan, execution prompt, ledger, report and the batch's briefs, in the sprint folder (bandit-notes owns the names and the folder) |
+| Records | Plan, execution prompt, ledger, report and the batch's briefs, in the sprint folder (bandit:notes owns the names and the folder) |
 
 ---
 
 ## 🏗️ Dev board shape — procedure
 
-Run from `onboard` (approved rows) or as a fix row for bandit-audit S9; the PM step also from a
+Run from `onboard` (approved rows) or as a fix row for bandit:audit S9; the PM step also from a
 sprint plan. The one lane and column procedure in this skill; any other lane or column design is
 still a design conversation. **Never silently:** every step is an approved row.
 

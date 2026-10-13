@@ -1,6 +1,6 @@
 # ▶️ Execution
 
-**Commands:** `/bandit-tasks today` `/bandit-tasks doing` `/bandit-tasks done` `/bandit-tasks bump`
+**Commands:** `/bandit:tasks today` `/bandit:tasks doing` `/bandit:tasks done` `/bandit:tasks bump`
 **Owns:** the six Execution columns · dependency gates · the five-item cap
 
 ---
@@ -52,7 +52,7 @@ Tasks that are **assigned to a project** and either:
 
 📌 Tasks with no project never appear here. They are in Untriaged — that is Triage's problem, not Execution's.
 
-📌 **The midnight job** (`actor: system`) already moved anything due today or overdue into **Assigned**. `/bandit-tasks today` reads that result. **Do not synthesise a today-list** — the board is the list.
+📌 **The midnight job** (`actor: system`) already moved anything due today or overdue into **Assigned**. `/bandit:tasks today` reads that result. **Do not synthesise a today-list** — the board is the list.
 
 ---
 
@@ -66,22 +66,22 @@ Report the breach. Propose what moves back to Assigned or Stand By. **Do not sil
 
 ## ⚙️ Procedures
 
-### `/bandit-tasks today`
+### `/bandit:tasks today`
 
 1. `get_execution_board`
 2. Report **Doing** first, then **Next**, then Assigned
 3. Flag: cap breach · anything overdue · anything in Stand By older than a week, **except** a
    card carrying a `sprint/*` tag or a sprint card (`references/dev.md` → Sprint card): those wait
    in Stand By for Leo's test on purpose
-4. Stop. `/bandit-tasks today` is a read.
+4. Stop. `/bandit:tasks today` is a read.
 
-### `/bandit-tasks doing`
+### `/bandit:tasks doing`
 
 1. Resolve the named task — `list_tasks` or the board just read
 2. `set_task_execution_state` → `doing`
 3. On a gate refusal, name the blocker and stop
 
-### `/bandit-tasks done`
+### `/bandit:tasks done`
 
 1. `complete_task` — this is what moves it to Done
 2. **If it was a recurring occurrence**, completion advances the series and creates the next occurrence. Say so, and report the next date
@@ -89,7 +89,7 @@ Report the breach. Propose what moves back to Assigned or Stand By. **Do not sil
 
 ⚠️ `uncomplete_task` returns the task to Backlog and makes it movable. On a recurring occurrence it also removes the next occurrence, and only when that one is an unedited fresh copy and this is the series' latest completion; otherwise it is refused (`references/errors.md`).
 
-### `/bandit-tasks bump`
+### `/bandit:tasks bump`
 
 Bumping is a **date** change, not a column change.
 

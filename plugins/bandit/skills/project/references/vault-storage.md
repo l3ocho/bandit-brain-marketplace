@@ -1,6 +1,6 @@
 # 🗄️ Vault Folder (WebDAV) — Procedures
 
-> How project-settings writes, versions and audits its two files in the project's settings folder. Read before any write to `webdav_folder` and before auditing it.
+> How bandit:project writes, versions and audits its two files in the project's settings folder. Read before any write to `webdav_folder` and before auditing it.
 
 ## Folder Naming Convention
 
@@ -16,8 +16,8 @@ Files follow this pattern: `{webdav_folder}/{prefix}-{type}-v{N}.md`
 
 Full example: `MyNotes/Personal/Claude/ai-bandit-infra/bi-instructions-v0.md`
 
-These files start with the `<!-- project-settings: ... -->` comment on line 1, so they carry no
-YAML frontmatter. The `bandit-notes` skill exempts `Claude/ai-*` files from its frontmatter and
+These files start with the `<!-- bandit-project: ... -->` comment on line 1, so they carry no
+YAML frontmatter. The `bandit:notes` skill exempts `Claude/ai-*` files from its frontmatter and
 filename rules for exactly this reason — never add frontmatter to them.
 
 **Version numbers are independent per file.** Instructions might be at `v3` while the prompt
@@ -57,7 +57,7 @@ every version bump.
 Before the first write, call `nc_webdav_list_directory` on `webdav_folder`.
 
 - **Folder exists** → proceed.
-- **404 / not found** → during onboarding it's already a row: bandit-notes' onboarding rows
+- **404 / not found** → during onboarding it's already a row: bandit:notes' onboarding rows
   include `Claude/ai-{slug}/` when it's missing, and the settings files depend on that row. Outside
   onboarding (a custom path), **ask before creating it**: create it at this path, re-enter the
   path, or switch to artifact-only. Never call `nc_webdav_create_directory` without an approved
@@ -178,7 +178,7 @@ sits in a MyNotes domain (settings written before the MyNotes convention), or `d
 `none` and `webdav_folder` doesn't equal `MyNotes/{domain}/Claude/ai-{project}`,
 flag it in the audit report as ⚠️ **Legacy settings path**. The fix is two steps, and this skill
 does only the second:
-1. Moving the folder is `bandit-notes onboard`'s job (this skill never moves or renames files).
+1. Moving the folder is `bandit:notes onboard`'s job (this skill never moves or renames files).
 2. Once the folder exists at the derived path, set the Project Context `domain` and `project`
    and the metadata `webdav_folder` on the next write, and update any path the instructions
    mention (e.g. External References).

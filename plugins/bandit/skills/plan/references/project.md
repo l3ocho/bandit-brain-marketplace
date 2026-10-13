@@ -1,8 +1,3 @@
----
-name: "project-planner"
-description: "Guides a solo operator through the project planning lifecycle, from raw idea to architecture-ready documentation: a Project Plan (Phase 1) and an Architecture Document (Phase 2), saved in the project's folder of the MyNotes vault. Use this skill whenever the user says \"start a new project,\" \"new project,\" \"plan a project,\" \"project plan,\" \"let's plan this,\" \"create a project plan,\" \"architecture document,\" \"system architecture,\" \"continue the project plan,\" \"continue planning,\" \"where are we on the project,\" \"move to architecture,\" or \"start architecture phase.\" Also trigger when planning a project from scratch or moving from ideation to technical design. Do NOT trigger for WBS creation (wbs-generator), putting tasks on the board (bandit-tasks), code generation, or general brainstorming."
----
-
 # 🧭 Project Planner
 
 Takes a solo operator from raw idea through two phases — **Idealization** (Project Plan) and
@@ -16,10 +11,10 @@ This skill does NOT do these. It tells the user when to invoke them:
 | Skill | When |
 |---|---|
 | **clarify** | The user is stuck articulating something (4-D method) |
-| **text-rewriter** | The user starts with a messy brain dump: clean it first |
-| **wbs-generator** | After Phase 2: breaks the plan and architecture into a WBS |
-| **bandit-tasks** | After the WBS: the board step wbs-generator offers (`/bandit-tasks load`, or the dev route on `dev: true`) |
-| **project-settings** | Project instructions and the Project Context block |
+| **bandit:rewrite** | The user starts with a messy brain dump: clean it first |
+| **`/bandit:plan wbs`** | After Phase 2: breaks the plan and architecture into a WBS |
+| **bandit:tasks** | After the WBS: the board step `wbs` mode offers (`/bandit:tasks load`, or the dev route on `dev: true`) |
+| **bandit:project** | Project instructions and the Project Context block |
 | **Claude Design** (not a skill) | Phase 2 § 5, when an architecture diagram or screen mockup helps |
 
 ---
@@ -28,15 +23,15 @@ This skill does NOT do these. It tells the user when to invoke them:
 
 | What | Where |
 |---|---|
-| Folder | `MyNotes/{domain}/Projects/{project}/`, or its `planning/` once the project has sprint folders (bandit-notes conventions §1 names it), with `domain` and `project` from the `## 🧭 Project Context` section (owned by project-settings). Missing, or `domain: none` → ask for the folder once. Never guess |
+| Folder | `MyNotes/{domain}/Projects/{project}/`, or its `planning/` once the project has sprint folders (bandit:notes conventions §1 names it), with `domain` and `project` from the `## 🧭 Project Context` section (owned by bandit:project). Missing, or `domain: none` → ask for the folder once. Never guess |
 | Project plan | `{project}-project-plan.md` |
 | Architecture | `{project}-architecture.md` |
-| WBS | `{project}-wbs.md`, written by wbs-generator, not this skill |
-| Note format | Frontmatter, keys and YAML style follow the **bandit-notes** conventions. Read that skill before the first write. `type: reference`, `project` links the hub note |
+| WBS | `{project}-wbs.md`, written by `wbs` mode (`references/wbs.md`), not this mode |
+| Note format | Frontmatter, keys and YAML style follow the **bandit:notes** conventions. Read that skill before the first write. `type: reference`, `project` links the hub note |
 
 Planning documents go straight into that folder, not through `_inbox/`: they are worked on
 across many sessions, and the inbox is Leo's. If the hub note `{project}.md` is
-missing, say so and point to `/bandit-notes onboard`; don't create it here.
+missing, say so and point to `/bandit:notes onboard`; don't create it here.
 
 ### 🧾 State comes from the files
 
@@ -47,10 +42,10 @@ No metadata block, no stored IDs. Read the folder at session start:
 | missing | — | **Phase 1 · New** |
 | `status: active` | — | **Phase 1 · Resume** at the first section still holding `_Pending_` |
 | `status: triaged` | missing or `status: active` | **Phase 2** (new or resume the same way) |
-| `status: triaged` | `status: triaged` | **Done**: point to wbs-generator; it offers the board step |
+| `status: triaged` | `status: triaged` | **Done**: point to `/bandit:plan wbs`; it offers the board step |
 | unclear | | **Ask**: "Are we starting a new project plan or working on the architecture?" |
 
-`active` = being worked on. `triaged` = settled, nothing pending (the bandit-notes meaning).
+`active` = being worked on. `triaged` = settled, nothing pending (the bandit:notes meaning).
 Sections not confirmed yet hold the single line `_Pending_`.
 
 When resuming, greet with the state:
@@ -78,7 +73,7 @@ Ask the user:
 
 - **Brain dump path:** Let them dump freely. Parse the dump and pre-fill as many sections
   as possible. Then walk through each section to confirm/adjust. If the dump is messy,
-  suggest running text-rewriter first.
+  suggest running bandit:rewrite first.
 - **Section-by-section path:** Walk through sections in order, one at a time.
 
 ### Interview Sections
@@ -247,8 +242,8 @@ After all sections are confirmed:
 2. Check whether Phase 2 changed the plan: new scope items, technical constraints that
    change deliverables, new risks
 3. If so: show the changes, and on confirmation edit the plan in place (etag rules above)
-4. Summary: "Architecture saved. Project plan updated (added X, Y). Next: wbs-generator to
-   break this into a WBS; it offers the board step." The route after the WBS is wbs-generator's.
+4. Summary: "Architecture saved. Project plan updated (added X, Y). Next: `/bandit:plan wbs` to
+   break this into a WBS; it offers the board step." The route after the WBS is `wbs` mode's.
 
 ---
 
@@ -284,9 +279,9 @@ None logged yet.
 
 ## 🚫 What This Skill Does NOT Do
 
-- Generate the WBS → wbs-generator
-- Create projects or tasks on the board → `/bandit-tasks load`
-- Edit project instructions → project-settings
+- Generate the WBS → `wbs` mode
+- Create projects or tasks on the board → `/bandit:tasks load`
+- Edit project instructions → bandit:project
 - Store note or task IDs anywhere
 - Write code
 

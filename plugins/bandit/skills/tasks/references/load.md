@@ -1,6 +1,6 @@
 # 🏗️ Load
 
-**Command:** `/bandit-tasks load`
+**Command:** `/bandit:tasks load`
 **Owns:** turning a WBS into a Deliverable project — the project, its columns, tasks, subtasks and dependencies. **The only surface that creates projects and columns.**
 
 ---
@@ -9,19 +9,19 @@
 
 **Build exactly what the WBS says. Nothing more.**
 
-The WBS is the design; load only transcribes it. No dates, no tags, no priorities, no extra columns, no lanes. Scheduling is `/bandit-tasks plan`, sizing and tagging is triage. If Leo wants a shape the WBS doesn't describe, stop: that's the design conversation, not a load.
+The WBS is the design; load only transcribes it. No dates, no tags, no priorities, no extra columns, no lanes. Scheduling is `/bandit:tasks week`, sizing and tagging is triage. If Leo wants a shape the WBS doesn't describe, stop: that's the design conversation, not a load.
 
 ---
 
 ## 📥 Input
 
-A WBS in the **wbs-generator** format. That format is fixed on purpose: this surface consumes it.
+A WBS in the **bandit:plan** format. That format is fixed on purpose: this surface consumes it.
 
 | Source | How |
 |---|---|
 | Attached or pasted in the chat | Use it as given |
 | The project's vault folder | `MyNotes/{domain}/Projects/{project}/{project}-wbs.md`, `domain` and `project` from the Project Context. Read it with the WebDAV tools |
-| Neither | Ask for it. Not a WBS at all → say so and offer wbs-generator |
+| Neither | Ask for it. Not a WBS at all → say so and offer bandit:plan |
 
 What load reads from it:
 
@@ -48,9 +48,9 @@ Read the `board:` line as usual (SKILL.md → *Scope*). Load's own behaviour per
 | `none` | Refuse. The project isn't board-backed |
 
 🛠️ **Dev projects are never loaded.** Project Context `dev: true` → stop and say cards are created
-one work package at a time through `/bandit-tasks spec` (`references/dev-workflow.md`, B4).
+one work package at a time through `/bandit:tasks spec` (`references/dev-workflow.md`, B4).
 
-After a load that created a project, say: *set `board: project "{name}"` through project-settings.* Load never edits project instructions.
+After a load that created a project, say: *set `board: project "{name}"` through bandit:project.* Load never edits project instructions.
 
 ---
 
@@ -73,7 +73,7 @@ After a load that created a project, say: *set `board: project "{name}"` through
 
 1. **Resolve scope.** `list_projects` once: target folder or project, its columns and type.
 2. **Parse the WBS** into packages: ID, name, column, subtasks, blockers.
-3. **Validate before any write:** every dependency ID exists in the WBS · no cycles · no task above **30** links (both directions together). A failure → report it and stop; the WBS needs fixing in wbs-generator.
+3. **Validate before any write:** every dependency ID exists in the WBS · no cycles · no task above **30** links (both directions together). A failure → report it and stop; the WBS needs fixing in bandit:plan.
 4. **Match what already exists** (resume or load into an existing project): columns by exact name, tasks by exact title within that project (`list_tasks(projectId)`). Existing ones are reused, never duplicated or changed.
 5. ✋ **Show the plan and wait:** project (new / existing), columns (new · existing), tasks (new · existing), dependency links. Counts first, then the column list.
 6. **Create** on confirmation:
@@ -86,7 +86,7 @@ After a load that created a project, say: *set `board: project "{name}"` through
 
 ## 🚫 Never
 
-- Set due dates, tags, priority, effort or complexity. That's `/bandit-tasks plan` and triage
+- Set due dates, tags, priority, effort or complexity. That's `/bandit:tasks week` and triage
 - Set `origin`. Leo asked for this load; it isn't another system
 - Add lanes, rename columns or touch the protected Backlog
 - Delete or rewrite anything that already exists — a mismatch is reported, not fixed

@@ -1,6 +1,6 @@
 ---
-name: "text-rewriter"
-description: "Rewrites text the user already has (messy notes, docs, brain dumps, text transcripts) into clean, scannable, ND-friendly markdown with emoji-anchored headings, in one pass, no questions asked. Output: the same content, restructured, nothing added. Use whenever the user gives content (pasted or attached) and asks to clean up, rewrite, restructure, reorganize, deduplicate or process it, or to \"make this clearer\" or \"make this readable\" — especially when they mention readability or neurodivergent-friendly formatting. Trigger for phrases like \"process this,\" \"clean this up,\" \"rewrite this clearly,\" \"organize my notes,\" \"deduplicate this,\" or \"turn this into something I can actually read.\" Do NOT trigger for: a bare \"clarify\" or thinking through a vague idea with no content to rewrite (clarify); meeting audio or video recordings (meeting-minutes); filing or saving notes into the MyNotes vault (bandit-notes); code refactoring, data analysis, or slides."
+name: "rewrite"
+description: "Rewrites text the user already has (messy notes, docs, brain dumps, text transcripts) into clean, scannable, ND-friendly markdown with emoji-anchored headings, in one pass, no questions asked. Output: the same content, restructured, nothing added. Use whenever the user gives content (pasted or attached) and asks to clean up, rewrite, restructure, reorganize, deduplicate or process it, or to \"make this clearer\" or \"make this readable\" — especially when they mention readability or neurodivergent-friendly formatting. Trigger for phrases like \"process this,\" \"clean this up,\" \"rewrite this clearly,\" \"organize my notes,\" \"deduplicate this,\" or \"turn this into something I can actually read.\" Do NOT trigger for: a bare \"clarify\" or thinking through a vague idea with no content to rewrite (clarify); meeting audio or video recordings (bandit:minutes); filing or saving notes into the MyNotes vault (bandit:notes); code refactoring, data analysis, or slides."
 ---
 
 # Text Rewriter
@@ -117,9 +117,9 @@ Before outputting:
 
 ## 📝 Output Format
 
-The final output is always markdown. Deliver it as a `.md` file (or inline for short input). If the user wants it in the MyNotes vault, hand the result to bandit-notes to file it.
+The final output is always markdown. Deliver it as a `.md` file (or inline for short input). If the user wants it in the MyNotes vault, hand the result to bandit:notes to file it.
 
-If the rewrite turned up gaps or open questions (the "missing clarity" spots from Step 1), list them in a short `## ❓ Open questions` section at the end, and offer to run `/clarify` on them. Don't answer them yourself.
+If the rewrite turned up gaps or open questions (the "missing clarity" spots from Step 1), list them in a short `## ❓ Open questions` section at the end, and offer to run `/bandit:clarify` on them. Don't answer them yourself.
 
 Structure:
 ```
@@ -151,7 +151,7 @@ Every document starts with a title, a summary blockquote, and an overview sectio
 
 - Adds ideas, opinions or recommendations that weren't in the source → expand only what's there; flag gaps instead of filling them.
 - Drops content during the merge → the final pass checks every inventory item made it in.
-- Writes straight into BanditCloud with a hard-coded path → deliver the file; vault saves go through bandit-notes.
+- Writes straight into BanditCloud with a hard-coded path → deliver the file; vault saves go through bandit:notes.
 - Treats a bare "clarify" with no content as its job → that's clarify.
 
 ## 🚫 Never

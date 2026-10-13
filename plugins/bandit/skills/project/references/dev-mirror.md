@@ -24,7 +24,7 @@
   Obsidian hides dot-folders), stamp, one-line `systemMessage`. The copy gets a fresh date, which
   S11 reads as the mirror date.
 - **Target missing** (no synced vault on this machine, or `code-{slug}/` not created) → a
-  `systemMessage`, nothing copied, no stamp. It never creates the folder: that's bandit-notes'.
+  `systemMessage`, nothing copied, no stamp. It never creates the folder: that's bandit:notes'.
 - A copy that fails → `systemMessage`, stamp left alone, retried next turn. Never blocks the turn.
 - `domain` and `project` come from the `## 🧭 Project Context` in `CLAUDE.md`. Missing or
   `domain: none` → `systemMessage`, nothing copied.
@@ -68,7 +68,7 @@ The script copies the files itself; Claude never moves them, so no model call an
 auto-mode check is involved. Nextcloud desktop sync uploads the copies to the vault.
 No change -> exit 0, silent. Change -> copy, stamp, one-line systemMessage.
 Vault root: $MYNOTES_DIR, else ~/Documents/MyNotes. Target folder must already exist
-(bandit-notes creates it at onboarding): MyNotes/{domain}/Claude/code-{project}/.
+(bandit:notes creates it at onboarding): MyNotes/{domain}/Claude/code-{project}/.
 """
 import hashlib
 import json
@@ -141,7 +141,7 @@ def main():
     target = vault / domain / "Claude" / f"code-{slug}"
     if not target.is_dir():
         return say(f"{target} doesn't exist (no synced vault here, or the folder isn't created); "
-                   "nothing mirrored. Set MYNOTES_DIR, or have bandit-notes create the folder.")
+                   "nothing mirrored. Set MYNOTES_DIR, or have bandit:notes create the folder.")
     done = []
     try:
         for rel in changed:
@@ -162,25 +162,13 @@ if __name__ == "__main__":
     sys.exit(main())
 ```
 
-**Optional: the sprint checker**, for a dev repo that runs sprints with bandit-sprint (Claude
-Code). A second `Stop` command hook, in the same `hooks.Stop` group as the mirror's, runs
-bandit-sprint's checker (rules SP2–SP5, structure rulebook S13–S16). It stays silent on a machine
-without bandit-sprint:
-
-```json
-{
-  "type": "command",
-  "command": "f=\"$HOME/.claude/skills/bandit-sprint/scripts/check_sprint.py\"; [ -f \"$f\" ] || exit 0; if command -v python3 >/dev/null 2>&1; then exec python3 \"$f\" --hook; else exec python \"$f\" --hook; fi"
-}
-```
-
-The checker itself is bandit-sprint's; this file only wires it. A machine that already registers it
-by hand in the user settings (`~/.claude/settings.json`) runs it twice per turn once the repo has
-it: remove that user-level entry there (Leo, by hand). Whether the checker is quiet outside a
-sprint project: **unchecked**.
+**The sprint checker is not wired here.** It ships with the `bandit-dev` plugin as that plugin's
+own `Stop` hook (`hooks/hooks.json`, `${CLAUDE_PLUGIN_ROOT}`): installing `bandit-dev` turns it on in
+every repo, and a repo adds nothing. A machine that still registers the old checker by hand in the
+user settings (`~/.claude/settings.json`) runs it twice: remove that user-level entry (Leo, by hand).
 
 **4. First run:** no stamp yet, so the first Stop copies every file into `code-{slug}/`
-(bandit-notes creates the folder at onboarding) and stamps. Upgrading from the old script (the one
+(bandit:notes creates the folder at onboarding) and stamps. Upgrading from the old script (the one
 that asked Claude to write through WebDAV): replace the file, delete `.claude/mirror-stamp.json` if
 there is one, and end a turn: the whole mirror is recopied.
 

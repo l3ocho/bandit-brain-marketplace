@@ -8,8 +8,8 @@
 
 | File | From | How |
 |---|---|---|
-| `rules.yaml` | `MyNotes/_skills/structure-rules.yaml` | `nc_webdav_read_file` raw, saved byte for byte |
-| `rulebook.md` | `MyNotes/_skills/structure-rulebook.md` | `nc_webdav_read_file` raw, saved byte for byte |
+| `rules.yaml` | `references/structure-rules.yaml` (this skill) | Copied byte for byte |
+| `rulebook.md` | `references/structure-rulebook.md` (this skill) | Copied byte for byte |
 | `snapshot.json` | The reads below | Built to the schema below |
 
 A read that fails → stop and say which. Don't build a partial snapshot: the script can't tell a
@@ -100,7 +100,7 @@ unchecked too).
 | `….files` | `nc_webdav_read_file` raw | `CLAUDE.md`, `claude/settings.json` and `claude/hooks/workdir.py`, when listed, verbatim. Nothing else |
 | `….repo` | nothing | Always `null`. S11 no longer dates the mirror (GitHub's last push lags the real remote); the key stays so older snapshots still load |
 | `….workdir` | `nc_webdav_read_file` raw of `MyNotes/{D}/Projects/{slug}/workdir-manifest.json` (`{slug}` = the folder name after `code-`), parsed | `code-*` of a project **without** `dev: true` only: the JSON object as-is. Missing file, `design-*`, or dev → `null`. Never rebuilt or tidied: S12 reads it field by field |
-| `stamps` | `nc_webdav_read_file("MyNotes/_skills/.audit/stamps.json")` | Its `projects` object, as-is. Missing ledger → `{}` |
+| `stamps` | `nc_webdav_read_file("MyNotes/BanditLabs/Projects/bandit-brain-marketplace/.audit/stamps.json")` | Its `projects` object, as-is. Missing ledger → `{}` |
 | `board.sprint_cards` | `list_tasks(tagPrefix: "sprint/")`, open and completed (not archived) | One entry per card: `id`, `short_id` (`shortId`, or `null`), `sprints` = its tag **names** starting `sprint/`, as-is |
 | `vault.projects.{D}` | `nc_webdav_find_by_name(pattern="%", scope="MyNotes/{D}/Projects")` | One key per folder directly under `Projects/`. `entries`: every file and folder inside it, `name` relative to that folder (`sprint-x/note.md`), `dir` as listed. Results must equal `total_found`; fewer → stop (a partial listing) |
 | `….frontmatter` | `nc_webdav_read_file` raw of **every** `.md` in a project that has a `sprint-*` folder at its root; none for other projects (`{}`) | The text between the first two `---` lines, verbatim, without them. A file that doesn't start with `---` → `null`. The script refuses a sprint project with a note left unread |

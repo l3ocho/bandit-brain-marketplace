@@ -1,18 +1,18 @@
 # 🚀 Onboard — the board step of project onboarding
 
-**Command:** `/bandit-tasks onboard`
+**Command:** `/bandit:tasks onboard`
 
-**Run by project-settings.** Onboarding is one command, owned by project-settings: it interviews,
-then loads this file for the board rows and bandit-notes for the vault rows, and puts all of
+**Run by bandit:project.** Onboarding is one command, owned by bandit:project: it interviews,
+then loads this file for the board rows and bandit:notes for the vault rows, and puts all of
 them in **one** proposal. This file only produces rows and executes the approved ones. It never
-shows its own proposal or asks for its own approval when project-settings runs it.
+shows its own proposal or asks for its own approval when bandit:project runs it.
 
-Run on its own (`/bandit-tasks onboard` typed directly), it produces the same rows as its own
-proposal, then tells Leo the `board:` line to set through project-settings.
+Run on its own (`/bandit:tasks onboard` typed directly), it produces the same rows as its own
+proposal, then tells Leo the `board:` line to set through bandit:project.
 
 ---
 
-## Inputs (from project-settings)
+## Inputs (from bandit:project)
 
 | Input | Example |
 |---|---|
@@ -37,7 +37,7 @@ proposal, then tells Leo the `board:` line to set through project-settings.
    | New project | `create board project` · name · type · folder (or top level) | `project "{name}"` |
    | Global | none | `global` |
    | None | none | `none` |
-   | A name that doesn't resolve | none: stop and report it; project-settings asks again | — |
+   | A name that doesn't resolve | none: stop and report it; bandit:project asks again | — |
 
    A new project whose name already exists on the board is not created twice: report it and
    offer to use the existing one.
@@ -49,9 +49,9 @@ proposal, then tells Leo the `board:` line to set through project-settings.
    dev rows.
 
    **A new board's name follows the structure rulebook**, S2 and S3 in
-   `MyNotes/_skills/structure-rulebook.md`: read it before proposing the row. A name that breaks
+   bandit:audit `references/structure-rulebook.md`: read it before proposing the row. A name that breaks
    it is reported with the rule number and a compliant name, never created as given.
-3. **Hand the rows and the `board:` line back** to project-settings.
+3. **Hand the rows and the `board:` line back** to bandit:project.
 4. **Execute only an approved row:** `create_project(name, type, folderId)`, the folder ID resolved
    live from step 1. The project starts with the protected Backlog column and nothing else. Dev
    board shape rows run after it, as `references/dev.md` says.
@@ -61,7 +61,7 @@ proposal, then tells Leo the `board:` line to set through project-settings.
 
 ## 🚫 Never
 
-- Add columns, lanes, tasks or tags. The board's shape comes later: `/bandit-tasks load` from a
+- Add columns, lanes, tasks or tags. The board's shape comes later: `/bandit:tasks load` from a
   WBS, or the design conversation. **Exception:** the dev board shape rows (tags, lanes and the
   `PM` column) for a `dev: true` project
 - Create a folder on the board. If the folder Leo names doesn't exist, report it and offer top

@@ -1,17 +1,17 @@
 ---
 name: "clarify"
-description: "Turns a fuzzy idea the user can't put into words yet into a spec, by asking 1–2 multiple-choice questions at a time. Input: a thought, not a document. Output: a Clarified Specification that project-planner or wbs-generator can build from. Use this skill whenever the user says \"clarify\", \"help me clarify\", \"help me think through this\", \"I'm not sure how to say this\", \"what do I need to decide\", or gives a vague request where they clearly need help structuring their thoughts. Also trigger when another skill delegates with \"use the 4-D method\" or \"delegate to clarify.\" Use this skill even when the user simply says \"clarify\" with no other context — that alone is a trigger. Do NOT trigger for code refactoring, data analysis, general questions with clear answers, or when the user already has a well-structured request."
+description: "Turns a fuzzy idea the user can't put into words yet into a spec, by asking 1–2 multiple-choice questions at a time. Input: a thought, not a document. Output: a Clarified Specification that bandit:plan can build from. Use this skill whenever the user says \"clarify\", \"help me clarify\", \"help me think through this\", \"I'm not sure how to say this\", \"what do I need to decide\", or gives a vague request where they clearly need help structuring their thoughts. Also trigger when another skill delegates with \"use the 4-D method\" or \"delegate to clarify.\" Use this skill even when the user simply says \"clarify\" with no other context — that alone is a trigger. Do NOT trigger for code refactoring, data analysis, general questions with clear answers, or when the user already has a well-structured request."
 ---
 
 # Clarify
 
 A support skill that helps users who are stuck articulating what they want. It works through
 the 4-D method (Deconstruct, Diagnose, Develop, Deliver) with neurodivergent-friendly pacing,
-and produces a clarified specification that other skills (project-planner, wbs-generator,
+and produces a clarified specification that other skills (bandit:plan,
 etc.) can consume.
 
 It only clarifies and delivers a specification. Pasted content that needs rewriting is
-text-rewriter's job, not this one's.
+bandit:rewrite's job, not this one's.
 
 ## 🔄 Core Process: 4-D Methodology
 
@@ -128,29 +128,24 @@ After the spec, offer one line. **The destination follows the subject:**
 
 | The spec is about | Offer |
 |---|---|
-| Changing one or more **skills** | **"Save as proposals in `_skills/_proposed/`?"** — one `MyNotes/_skills/_proposed/{skill}/proposal.md` **per skill touched**, each naming its companions |
+| Changing one or more **skills** | **"Save as a Marketplace card plus brief?"** — one card in the **Marketplace** column of the bandit-brain-marketplace project's board, with one brief naming every skill touched. See *Marketplace card plus brief* below |
 | Anything else | **Both, by default:** "Save this as a note in the {Domain} `_inbox` **and** a card on the board, linked? Say *note only* or *card only* to drop one." See *Note + card* below |
 
 **Note + card** (only after Leo says yes; a plain "yes" means both):
 
-1. **Card first, through bandit-tasks `capture`.** Title = the spec's Summary; description names
-   the note's filename. Scope comes from the `board:` line, exactly as bandit-tasks resolves it.
-2. **Then the note, through bandit-notes,** into the `domain:` `_inbox`, with `board-task` = the
+1. **Card first, through bandit:tasks `capture`.** Title = the spec's Summary; description names
+   the note's filename. Scope comes from the `board:` line, exactly as bandit:tasks resolves it.
+2. **Then the note, through bandit:notes,** into the `domain:` `_inbox`, with `board-task` = the
    new card's id. The card and the note point at each other; neither is ever left orphaned.
 3. **When one side can't be written,** say so in the offer itself instead of silently dropping it:
    `domain: none` or no Project Context → no note ("no domain here, card only?"); `board: none`
    or `pending` → no card ("no board here, note only?"). Both unavailable → no offer.
 
-**Writing a proposal** (only after Leo says yes; `_proposed/` belongs to Skill Manager, not bandit-notes):
-
-1. **Existing file:** read it first. Skill Manager's `MyNotes/_skills/README.md` shows that skill
-   with no pending proposal (delivered) → offer to **replace** it. A proposal still pending →
-   offer to **add a section**. Either way, only on Leo's explicit approval.
-2. **Safe writes:** a new file omits `if_match` (fails closed); an edit sends the bare-hex etag
-   from the read (strip `W/`, `"` and `-gzip`). Never `if_match: "*"`.
-3. **Proposal format, not note format:** no vault frontmatter, no `[[wikilinks]]`. H1
-   `{emoji} {skill} — {change}`, a `>` line with the date and origin, then `## Rows`,
-   `## Dependents`, `## Delivery`, matching the existing proposals.
+**Marketplace card plus brief** (only after Leo says yes): the **Note + card** steps above, aimed at
+the bandit-brain-marketplace project instead of the current one. The card goes through bandit:tasks
+`capture` into that project's **Marketplace** column; the brief goes through bandit:notes into that
+project's domain `_inbox`, with `file-to:` that project's folder. The spec's Requirements name each
+skill touched and the change for it.
 
 ## 🚩 Anti-Pattern Detection
 
@@ -223,7 +218,7 @@ This skill is frequently used on mobile. Design every interaction for:
 
 ## ⚠️ Gotchas
 
-- Fires when the user pastes notes and says "clarify this" → that's a rewrite: hand off to text-rewriter.
+- Fires when the user pastes notes and says "clarify this" → that's a rewrite: hand off to bandit:rewrite.
 - Rapid-fires a wall of questions → one block of 1–2 questions, then wait.
 - Asks open-ended questions with no options → every question gets 2–4 options plus "Other".
 - Delivers the spec before the user confirms the assumptions → echo back and let them correct first.
@@ -234,16 +229,15 @@ This skill is frequently used on mobile. Design every interaction for:
   then guessed which feature was meant. → Check references in Phase 1; name a missing one as an
   assumption.
 - **2026-09-28 · Skill spec saved to Summitt/_inbox.** The save offer always pointed at the domain
-  inbox, so a spec changing bandit-tasks and bandit-notes landed in a vault. → The destination
-  follows the subject: skill changes go to `_skills/_proposed/`, everything else to the domain `_inbox`.
+  inbox, so a spec changing bandit:tasks and bandit:notes landed in a vault. → The destination
+  follows the subject: skill changes go to a Marketplace card plus brief, everything else to the domain `_inbox`.
 - **2026-10-07 · Inbox note with no card.** The offer was note-only, so specs sat in `_inbox` with
   nothing on the board pointing at them, and got lost or binned. → Offer note **and** card by
   default, linked via `board-task`; Leo drops one by saying so.
 
 ## 🚫 Never
 
-- Generate code, project plans or WBS documents, or modify files (except writing an approved
-  proposal in `_skills/_proposed/`). Hand the spec to project-planner or wbs-generator.
-- Save to BanditCloud or the board directly. Notes go through bandit-notes and cards through
-  bandit-tasks, except `_skills/_proposed/`, which Skill Manager owns and bandit-notes excludes.
+- Generate code, project plans or WBS documents, or modify files. Hand the spec to bandit:plan.
+- Save to BanditCloud or the board directly. Notes go through bandit:notes and cards through
+  bandit:tasks.
 - Ask more than 2 questions in one turn.

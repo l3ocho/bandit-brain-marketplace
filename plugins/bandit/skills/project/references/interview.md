@@ -27,7 +27,7 @@ Each phase may take 1–2 messages when mixing both question types — that's fi
    - **Claude Code surface** (whenever the project has no `dev: true`: every `workflow` project,
      and a `product_service` or `claude_marketplace` project that answered No to the dev question)
      — *"Will this project also run in Claude Code? 1. Yes 2. No"*. Yes → onboarding creates
-     `Claude/code-{slug}/` (bandit-notes) and this skill produces the Claude Code twin (SKILL.md, **Claude Code twin**). No → neither.
+     `Claude/code-{slug}/` (bandit:notes) and this skill produces the Claude Code twin (SKILL.md, **Claude Code twin**). No → neither.
      No Project Context key: the answer goes to the onboarding hand-off only.
 2. **What is this project?** (open-ended) — Purpose, domain, who it's for. Ask them to describe
    it like they'd explain it to a colleague in 2–3 sentences.
@@ -47,8 +47,8 @@ Each phase may take 1–2 messages when mixing both question types — that's fi
    - "Not board-backed"
    - "Decide later"
 
-   The answer goes to bandit-tasks' board step (**🚀 Onboarding**, step 3). What each answer
-   becomes, the `board:` line it returns and what it may create are bandit-tasks' rules
+   The answer goes to bandit:tasks' board step (**🚀 Onboarding**, step 3). What each answer
+   becomes, the `board:` line it returns and what it may create are bandit:tasks' rules
    (`references/onboard.md`), not this skill's. Write back the `board:` line it returns.
 
    **Slug and prefix** are asked in Phase 4 (folder backend). When the output is artifact-only,
@@ -121,7 +121,7 @@ Quick resolution of optionals and output preference.
 
 3. **Folder, slug and prefix** — only when the output includes the vault folder. The folder is
    **derived, not typed**. Settings live in the project's settings folder of the MyNotes vault,
-   as defined by the `bandit-notes` skill: `MyNotes/{domain}/Claude/ai-{project}`. Ask:
+   as defined by the `bandit:notes` skill: `MyNotes/{domain}/Claude/ai-{project}`. Ask:
    - **Domain** (single select via `ask_user_input`) — list the live domains with
      `nc_webdav_list_directory("MyNotes")`: every folder whose name doesn't start with `_` or
      `.`. Add a last option, "Outside MyNotes (custom path)". Store the choice as the Project
@@ -141,8 +141,8 @@ Quick resolution of optionals and output preference.
    - Claude Code settings (configured in the repo): `MyNotes/Summitt/Claude/code-cs-notes`
 
    Every project type, **workflow included**, gets both folders (settings and shared project
-   docs); which folders a project has is bandit-notes' rule, not this skill's. Show both paths.
-   Store the settings path as `webdav_folder`. The `Projects/` and `Claude/` folders are **vault rows** from bandit-notes'
+   docs); which folders a project has is bandit:notes' rule, not this skill's. Show both paths.
+   Store the settings path as `webdav_folder`. The `Projects/` and `Claude/` folders are **vault rows** from bandit:notes'
    onboarding procedure (see **🚀 Onboarding**), never created outside the approved proposal.
 
    **"Outside MyNotes"** is the escape hatch for folders the vault conventions don't cover:
@@ -169,7 +169,7 @@ After the interview completes:
 4. **Dedup check** — scan for any information repeated across sections. Merge or cut.
 5. **Token budget check** — compare against the target for the project's complexity tier. If over,
    suggest what to offload to External References.
-6. **Add metadata block** — `<!-- project-settings: {...} -->` as first line, in the shape the
+6. **Add metadata block** — `<!-- bandit-project: {...} -->` as first line, in the shape the
    reference template defines. Always set `storage_backend`; with vault output, populate the
    storage fields (see **Metadata Storage Fields** in SKILL.md).
 7. **Generate the Project Context** — always insert a `## 🧭 Project Context` section,

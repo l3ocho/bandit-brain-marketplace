@@ -11,9 +11,9 @@
    - the Claude.ai project name, if the session shows it. Not shown → ask Leo for it (one line), or
      record `null`.
    No `**Version:**` line or no Project Context → no stamp. Propose the fix row instead:
-   `project-settings` audit of this project, which adds the missing line or block. Run it on Leo's yes.
+   `bandit:project` audit of this project, which adds the missing line or block. Run it on Leo's yes.
 2. **Find the vault folder.** `domain` ≠ `none` → `MyNotes/{domain}/Claude/ai-{project}`.
-   `domain: none` → ask Leo for the path (Skill Manager's is `MyNotes/_skills/_project`).
+   `domain: none` → ask Leo for the path.
    List it with `nc_webdav_list_directory`.
 3. **Read the vault versions.** For each `{prefix}-instructions-v{N}.md`, read the file raw and take
    its `**Version:**` line. Stop reading once one matches.
@@ -23,7 +23,7 @@
 
    ```
    | # | Action | Path | Effect | Why |
-   | 1 | stamp {domain}/{project} = 9.0.0 | MyNotes/_skills/.audit/stamps.json | one ledger entry | S5 check for the domain audit |
+   | 1 | stamp {domain}/{project} = 9.0.0 | MyNotes/BanditLabs/Projects/bandit-brain-marketplace/.audit/stamps.json | one ledger entry | S5 check for the domain audit |
    ```
 
 6. **Write the ledger.** Read it first and keep its etag. Missing → create it (omit `if_match`).
@@ -46,7 +46,7 @@
 
 ## 🗂️ Ledger format
 
-`MyNotes/_skills/.audit/stamps.json`, pretty-printed, keys sorted:
+`MyNotes/BanditLabs/Projects/bandit-brain-marketplace/.audit/stamps.json`, pretty-printed, keys sorted:
 
 ```json
 {

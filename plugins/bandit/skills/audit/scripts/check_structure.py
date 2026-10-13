@@ -6,7 +6,7 @@ Usage:
       --snapshot snapshot.json [--domain D ...] [--project D/slug] [--out DIR]
   check_structure.py --replay report.md --rules ... --rulebook ... --snapshot ...
   check_structure.py --project Personal/ai-fran --rules ... --rulebook ... --snapshot ...
-      (one project only, for /bandit-audit check: its rows, no domain block, nothing written)
+      (one project only, for /bandit:audit check: its rows, no domain block, nothing written)
 
 Same inputs → same bytes. Exit 0 = scored, 2 = an input broke its contract
 (nothing scored), 3 = replay mismatch (the report is not what these inputs produce).
@@ -358,13 +358,13 @@ class Domain:
         s5 = None
         if not stamp:
             s5 = self.res("S5", "unchecked", "No stamp", "stamps")
-            unchecked.append(f"{folder}: no stamp → run `/bandit-audit check` inside it")
+            unchecked.append(f"{folder}: no stamp → run `/bandit:audit check` inside it")
         elif prod and prod[0] == newest[0]:
             s5 = self.res("S5", "ok", f"Runs {stamp['version']} = `{prod[0]}`", f"stamps.{stamp_key}")
         elif prod:
             s5 = self.res("S5", "warn", f"Vault `{newest[0]}` ({newest[1]['tok']}) not pasted yet; "
                           f"Claude.ai runs {stamp['version']}", f"stamps.{stamp_key}")
-            rows.append(Row(f"Paste `{newest[0]}` into {title}, then run `/bandit-audit check` there",
+            rows.append(Row(f"Paste `{newest[0]}` into {title}, then run `/bandit:audit check` there",
                                  f"{path}/{newest[0]}", self.rules["owners"]["self_check"], "S5"))
         elif newest and vkey(str(stamp["version"])) > max(vkey(f["tok"]) for f in files.values()):
             s5 = self.res("S5", "bad", f"Critical: Claude.ai runs {stamp['version']}, newer than every vault file",
@@ -374,7 +374,7 @@ class Domain:
         elif newest and stamp.get("checked", "") < max(dates.get(n, "") for n in files):
             s5 = self.res("S5", "unchecked", f"Stamp {stamp['version']} ({stamp.get('checked')}) is older than "
                           f"the newest file and matches none", f"stamps.{stamp_key}")
-            unchecked.append(f"{folder}: stamp {stamp['version']} matches no file → run `/bandit-audit check` inside it")
+            unchecked.append(f"{folder}: stamp {stamp['version']} matches no file → run `/bandit:audit check` inside it")
         else:
             s5 = self.res("S5", "warn", f"Drift: stamp {stamp['version']}, vault newest {newest[1]['tok'] if newest else '—'}",
                           f"stamps.{stamp_key}")

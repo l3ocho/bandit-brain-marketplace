@@ -185,7 +185,7 @@ This default can be customized (e.g., scoped to architecture-only decisions) but
 
 **Dev projects (`dev: true`) also get:**
 
-> **Always:** When a scope is agreed, propose the card and, on Leo's yes, write it through `/bandit-tasks spec`. `/bandit-tasks stage … ready` (on his approval) and `/bandit-tasks pick-ready` write the board the same way. These need no separate standing instruction.
+> **Always:** When a scope is agreed, propose the card and, on Leo's yes, write it through `/bandit:tasks spec`. `/bandit:tasks stage … ready` (on his approval) and `/bandit:tasks pick-ready` write the board the same way. These need no separate standing instruction.
 
 Any other Hard Rule that forbids board writes is scoped to exclude them ("…except the dev commands `spec`, `stage … ready` and `pick-ready`").
 
@@ -428,7 +428,7 @@ These are always present in generated instructions regardless of interview answe
 Every generated instruction set includes this HTML comment as the first line:
 
 ```
-<!-- project-settings: {"storage_backend": null, "webdav_folder": null, "instructions_etag": null, "prompt_ref_etag": null, "instructions_version": null, "prompt_ref_version": null, "ref_version": "1.4", "last_sync": null} -->
+<!-- bandit-project: {"storage_backend": null, "webdav_folder": null, "instructions_etag": null, "prompt_ref_etag": null, "instructions_version": null, "prompt_ref_version": null, "ref_version": "1.4", "last_sync": null} -->
 ```
 
 - `storage_backend` — `"webdav"` when the files live in the vault folder, `null` for
@@ -451,7 +451,7 @@ Every generated instruction set includes this HTML comment as the first line:
   written before reference 1.3 carry them here as `vault_domain`, `vault_project`,
   `project_type`, `note_prefix` and `taskops_scope`; the audit migrates them (⚠️ Legacy context).
 - **Legacy fields.** Instructions written before 1.4 may carry `note_id`, `ref_doc_note_id`,
-  `note_category` (Notes-app storage) and `lifecycle` (old project-planner state). The audit
+  `note_category` (Notes-app storage) and `lifecycle` (old bandit:plan state). The audit
   flags them (⚠️ Legacy Notes backend, ⚠️ Legacy lifecycle) and drops them on the updated version.
 - **Naming fields (`webdav_folder`, the Project Context `prefix:`) are set once during the first
   write and reused on every version bump.** The user must explicitly request changes.

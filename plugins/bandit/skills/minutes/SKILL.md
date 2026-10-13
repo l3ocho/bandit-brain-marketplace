@@ -1,13 +1,13 @@
 ---
-name: "meeting-minutes"
-description: "Turn a meeting audio recording (attached, or located in BanditCloud) into professional minutes: a two-column Subject Item / Summary table in .md, in full and/or short form, saved to BanditCloud, by default into the MyNotes vault (domain _inbox, filed to Meetings/) following the bandit-notes conventions. Use whenever the user attaches or names a meeting recording (audio or video: m4a, mp3, wav, mp4…) and asks for minutes, meeting notes, a summary of the meeting, action items, or \"what did we decide\" — including supervisors, department and project meetings. Do NOT use for text transcripts or notes that only need cleaning up (text-rewriter), or for filing existing notes (bandit-notes)."
+name: "minutes"
+description: "Turn a meeting audio recording (attached, or located in BanditCloud) into professional minutes: a two-column Subject Item / Summary table in .md, in full and/or short form, saved to BanditCloud, by default into the MyNotes vault (domain _inbox, filed to Meetings/) following the bandit:notes conventions. Use whenever the user attaches or names a meeting recording (audio or video: m4a, mp3, wav, mp4…) and asks for minutes, meeting notes, a summary of the meeting, action items, or \"what did we decide\" — including supervisors, department and project meetings. Do NOT use for text transcripts or notes that only need cleaning up (bandit:rewrite), or for filing existing notes (bandit:notes)."
 ---
 
 # 🎙️ Meeting Minutes from Audio
 
 Turns a meeting recording into professional, human-sounding minutes (Markdown), saved to BanditCloud.
 
-**Vault conventions are owned by `bandit-notes`.** Before writing into the vault, read its
+**Vault conventions are owned by `bandit:notes`.** Before writing into the vault, read its
 `references/conventions.md`: §4 (filenames, including the minutes slugs), §5 (frontmatter keys,
 YAML style, key order) and §12 (note body shape). **Saving to the vault** below adds only what's
 specific to minutes; it never restates those rules.
@@ -25,7 +25,7 @@ specific to minutes; it never restates those rules.
 2. **Resolve the vault domain** before asking anything: read `domain:` (and `project:`) from
    the `## 🧭 Project Context` section of the project instructions (or the repo's `CLAUDE.md`
    on Claude Code). Legacy fallback: `vault_domain` and `vault_project` in the
-   `<!-- project-settings: {...} -->` metadata. Neither, or `domain: none` → the domain is
+   `<!-- bandit-project: {...} -->` metadata. Neither, or `domain: none` → the domain is
    unknown and Q2 asks for it.
 3. **Ask the setup questions** in a single `AskUserQuestion` call, before any processing:
    - **Q1 — "Which version of the minutes?"** (header: `Version`, single select)
@@ -70,12 +70,12 @@ specific to minutes; it never restates those rules.
 
 Applies when Q2 resolved to a MyNotes domain.
 
-**Filenames:** the minutes pattern and the uniqueness check in `bandit-notes` §4. The date in the
+**Filenames:** the minutes pattern and the uniqueness check in `bandit:notes` §4. The date in the
 name is the **meeting date**, and the full and short versions are written as a pair.
 
 **Frontmatter** goes above the `# … Minutes` title of both versions. The keys, their order and
-the YAML style are `bandit-notes` §5; this is the filled shape for minutes (keys that don't
-apply are left out). `bandit-notes home` reads it to list the minutes on the domain home page:
+the YAML style are `bandit:notes` §5; this is the filled shape for minutes (keys that don't
+apply are left out). `bandit:notes home` reads it to list the minutes on the domain home page:
 
 ```yaml
 ---
@@ -107,17 +107,17 @@ tags:
 - Both versions link each other in `related` (and in a `## Related` line, see the formats), so
   neither is an orphan. With only one version, leave `related` out unless the meeting links a
   project hub.
-- Don't add keys `bandit-notes` §5 doesn't define.
+- Don't add keys `bandit:notes` §5 doesn't define.
 
 **Write, then file:**
 1. Write both files to `MyNotes/{Domain}/_inbox/` as new files (`if_match` omitted). New notes
    always land in the inbox first; that's the vault rule.
-2. **Workflow project or no project metadata** (the `bandit-notes` domain scope): ask once "File them
+2. **Workflow project or no project metadata** (the `bandit:notes` domain scope): ask once "File them
    to `Meetings/` now?" On yes, for each file: remove `file-to` in place (read → bare-hex
    `if_match` → write), then move with `nc_webdav_move_resource(overwrite=false)` to
    `MyNotes/{Domain}/Meetings/{same name}`. On no, or with nobody there to answer, leave them in
-   `_inbox` with `file-to` so `/bandit-notes file` can finish the job later.
-   **Regular project** (the `bandit-notes` project scope, which can't write to `Meetings/`): don't
+   `_inbox` with `file-to` so `/bandit:notes file` can finish the job later.
+   **Regular project** (the `bandit:notes` project scope, which can't write to `Meetings/`): don't
    offer the move. Leave both files in `_inbox` with `file-to: Meetings/` and say the workflow
    project will file them. Default the meeting type to `project` with
    `project: "[[{project}]]"` (the Project Context slug) unless the transcript clearly says otherwise.
@@ -125,7 +125,7 @@ tags:
    overwrite, and don't rename on your own.
 
 If the domain has no `Meetings/` folder, don't create one. Leave the files in `_inbox` and say
-that the `meetings` module isn't set up in this domain (`/bandit-notes onboard` handles it).
+that the `meetings` module isn't set up in this domain (`/bandit:notes onboard` handles it).
 
 ## 📝 Minutes format — full
 

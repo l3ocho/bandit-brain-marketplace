@@ -1,7 +1,7 @@
 # 🛠️ Dev workflow — the card commands
 
-**Commands:** `/bandit-tasks spec` `/bandit-tasks spec reconcile` `/bandit-tasks plan-tech`
-`/bandit-tasks stage` `/bandit-tasks pick-ready`
+**Commands:** `/bandit:tasks spec` `/bandit:tasks spec reconcile` `/bandit:tasks plan-tech`
+`/bandit:tasks stage` `/bandit:tasks pick-ready`
 **Owns:** surface roles · card boundaries · record homes · the dev card procedures
 **Board rules** (lanes, stages, lane template headings, Spec lock, tag merging, card fields, the
 sprint card, the dev board shape): `references/dev.md`. Read it first; its gate applies here too.
@@ -10,13 +10,13 @@ One card workflow shared by Claude.ai and Claude Code. The card is the record (G
 retired; Gitea keeps PRs, the wiki, releases and CI). Project specifics (branch prefixes, gates,
 how work lands, where records live) stay in the repo; its `lane-triage.md` points here. Repo
 commands never reuse a command word of this skill (rulebook R15): a repo triage command is not
-named after `/bandit-tasks triage`.
+named after `/bandit:tasks triage`.
 
-**Sprints are bandit-sprint's** (Claude Code): its 11 planning steps, the batch's dates, seeding the
+**Sprints are bandit-dev:sprint's** (Claude Code): its 11 planning steps, the batch's dates, seeding the
 batch to Assigned, the wave sub-tasks and the sprint card's sections. Only its sprint plan sets a
 batch's due date. It calls `spec reconcile` and the `plan-tech` card-write rules (drift check, read
 before writing, show old and new before replacing) from its own steps instead of restating them.
-`pick-ready` and `/bandit-tasks plan` only pick and date ready work; neither plans a sprint.
+`pick-ready` and `/bandit:tasks week` only pick and date ready work; neither plans a sprint.
 
 ---
 
@@ -54,15 +54,15 @@ can do it (*"`plan-tech` runs in Claude Code, from the repo"*).
 |---|---|
 | B1 | One card = one lane, one branch, one landing, one "done" signal, pickable into a sprint on its own. **Landing** is however the repo lands work (a merge, or a PR); an Incident's merge to `main` plus its back-merge counts as one |
 | B2 | No WBS for simple work. A WBS only for work spanning more than one branch or more than one sprint |
-| B3 | The WBS lives in the vault (wbs-generator). L1 and L2 never become cards |
+| B3 | The WBS lives in the vault (bandit:plan). L1 and L2 never become cards |
 | B4 | Lazy: the next L3 work package becomes a card only through `spec`, which cites its `WBS-X.Y.Z` |
 | B5 | Thin card: `Spec` + `Technical plan`, each short. Everything else goes in the doc |
 | B6 | Before creating: merge check (below). Skipped for Incident |
 | B7 | Up to **L**. An L card's plan note lays out the landing/commit sequence. **XL splits** into 2+ cards, wherever the size is set: at `spec`, at `plan-tech` and at a sprint's sizing step. Each new card keeps the original's lane, stage and `sprint/{name}` tag, and stays in the same sprint (a blocker of the sprint card) |
 
-**WBS on dev projects.** Level names are wbs-generator's. Here: **L3 work package = one card**,
-created lazily through `spec` (B4). **Dev projects are never loaded** (`/bandit-tasks load` refuses
-them). Where L4 lines go is bandit-sprint's.
+**WBS on dev projects.** Level names are bandit:plan's. Here: **L3 work package = one card**,
+created lazily through `spec` (B4). **Dev projects are never loaded** (`/bandit:tasks load` refuses
+them). Where L4 lines go is bandit-dev:sprint's.
 
 ---
 
@@ -73,7 +73,7 @@ The card is the work record. Every other record a lane produces has its home in 
 
 | Record | Lane |
 |---|---|
-| Plan note | Any lane with a `Technical plan` (the vault, through bandit-notes) |
+| Plan note | Any lane with a `Technical plan` (the vault, through bandit:notes) |
 | Postmortem | Incident |
 | Maintenance log entry | Maintenance |
 | Decision record | Feature, Tech Debt |
@@ -90,11 +90,11 @@ runbook needs no plan note: its `Technical plan` carries `Runbook: {repo path} �
 
 ## ⚙️ Procedures
 
-### `/bandit-tasks spec` — create or update one card
+### `/bandit:tasks spec` — create or update one card
 
 1. **Gate and role** (above). Resolve scope (SKILL.md → Scope).
 2. **Place it** by the column rule (`references/dev.md` → Card fields), never parked. Lane from the
-   agreed scope. A WBS exists for the project → cite the matching `WBS-X.Y.Z` (bandit-notes finds
+   agreed scope. A WBS exists for the project → cite the matching `WBS-X.Y.Z` (bandit:notes finds
    the doc).
 3. **Merge check (B6):** `list_tasks(projectColumnId, tagId: {lane tag id}, completed: false)`
    (filters combine with AND). An open card with the same outcome → propose adding a subtask to it
@@ -109,16 +109,16 @@ runbook needs no plan note: its `Technical plan` carries `Runbook: {repo path} �
    is locked (`references/dev.md` → Spec lock): show old and new, override only on Leo's yes →
    `update_task`. Claude Code never rewrites a `Spec` whose `Source` is Claude.ai (it adds a
    `Spec change needed:` comment instead). Tags per `references/dev.md` → Tag merging.
-6. **Brief:** hand bandit-notes the card's brief (new, or updated when it exists), `board-task` =
+6. **Brief:** hand bandit:notes the card's brief (new, or updated when it exists), `board-task` =
    the card's short id; the Spec's `Brief:` line names its filename.
-7. **WBS link:** the card cites a `WBS-X.Y.Z` → hand bandit-notes one approval row adding the
-   Card links row to `{slug}-wbs.md` (bandit-notes owns the write and the path, wbs-generator the
+7. **WBS link:** the card cites a `WBS-X.Y.Z` → hand bandit:notes one approval row adding the
+   Card links row to `{slug}-wbs.md` (bandit:notes owns the write and the path, bandit:plan the
    format).
 
-### `/bandit-tasks spec reconcile {card…}` — bring locked Specs in line with decisions
+### `/bandit:tasks spec reconcile {card…}` — bring locked Specs in line with decisions
 
 For cards whose Spec is locked and has fallen behind decisions taken since (in comments, the brief,
-the sprint card). bandit-sprint calls it from its planning steps.
+the sprint card). bandit-dev:sprint calls it from its planning steps.
 
 1. **Gate and role** (above). Per card: `get_task` → current `Spec`, comments, linked brief.
 2. Build the new `Spec` from the same template headings: answered questions move into Decisions,
@@ -128,7 +128,7 @@ the sprint card). bandit-sprint calls it from its planning steps.
 4. **One yes** (all, or a list of cards) applies them: `update_task` with the new description and
    `overrideSpecLock: true`, then `get_task` and check it. A card Leo leaves out keeps its `Spec`.
 5. Add a comment on each changed card: `Spec reconciled {date}: {one line on what changed}`. The brief
-   gets the same change and a Change log line through bandit-notes.
+   gets the same change and a Change log line through bandit:notes.
 
 **Incident** (`/incident` in the repo → `spec` with `lane/incident`, Claude Code): no stage tag, no
 merge check, `dueDate` today, created in its area column, then `set_task_execution_state` →
@@ -136,33 +136,33 @@ merge check, `dueDate` today, created in its area column, then `set_task_executi
 too late for an incident. The postmortem cites the card title and lives where the repo's Record homes
 table says (**🗂️ Record homes**).
 
-### `/bandit-tasks plan-tech` — Claude Code only
+### `/bandit:tasks plan-tech` — Claude Code only
 
-Steps 1 and 5 are the **card-write rules** bandit-sprint calls for a sprint's cards.
+Steps 1 and 5 are the **card-write rules** bandit-dev:sprint calls for a sprint's cards.
 
 1. **Drift check first.** Compare the repo `CLAUDE.md` Project Context with the **production**
    Claude.ai block: the instructions version matching the project's self-check stamp, read the way
-   project-settings reads its vault folder. Report any difference before anything else; don't fix it.
+   bandit:project reads its vault folder. Report any difference before anything else; don't fix it.
 2. **List** the `stage/spec` cards (`list_tasks(projectId, tagId: stage/spec, completed: false)`). Separately list the
-   ones whose plan note is already filed (ask bandit-notes whether the filename in `Technical plan`
+   ones whose plan note is already filed (ask bandit:notes whether the filename in `Technical plan`
    exists in the project folder) and offer the `planned` flip for them.
 3. Leo picks a card → technical discussion.
-4. **Plan note** through bandit-notes: a new `plan` note in `_inbox/` (type, filename and keys are
-   bandit-notes' rules), `board-task` = this card's id.
+4. **Plan note** through bandit:notes: a new `plan` note in `_inbox/` (type, filename and keys are
+   bandit:notes' rules), `board-task` = this card's id.
 5. **Card:** `get_task` → read the current `Technical plan` first (rulebook R14). Write only the
    lines that are missing (plan-note filename, branch, size, summary). A line already there with a
    different value (above all the branch, the merge commit or the PR URL) → show both and ask Leo;
    never replace it silently. Every other line stays. → `update_task` with `effort` ≤ L (XL →
    propose the split, B7); a Claude.ai estimate that differs → show both and ask → the build steps
    as sub-tasks, ordered and read back (SKILL.md → Sub-tasks).
-6. **The card stays `stage/spec`.** It moves only after Leo files the note (`/bandit-notes file`).
+6. **The card stays `stage/spec`.** It moves only after Leo files the note (`/bandit:notes file`).
 
-### `/bandit-tasks stage {card} {spec|planned|ready}` — the only stage writer
+### `/bandit:tasks stage {card} {spec|planned|ready}` — the only stage writer
 
 1. **Role:** `ready` is set only on Leo's explicit approval, on either surface (or by Leo by hand).
    Claude.ai sets nothing else. Claude Code sets `spec` and `planned` on its own judgement.
 2. `get_task` → refuse on a `lane/incident` card.
-3. **`planned`:** its plan note must be filed (bandit-notes lookup of the filename in `Technical
+3. **`planned`:** its plan note must be filed (bandit:notes lookup of the filename in `Technical
    plan`), or, on a recurring card, a `Runbook:` line must name the runbook (**🗂️ Record homes**).
    A **shared sprint plan** counts: one filed plan note whose filename sits in the `Technical plan`
    of several cards of the same sprint. Each card still needs its own plan lines (branch, size,
@@ -172,13 +172,13 @@ Steps 1 and 5 are the **card-write rules** bandit-sprint calls for a sprint's ca
 4. **Write the tags** per `references/dev.md` → Tag merging (one `stage/*`, every other tag kept),
    `set_task_tags` with the full merged set.
 
-### `/bandit-tasks pick-ready` — Week `plan` over ready cards
+### `/bandit:tasks pick-ready` — Week `plan` over ready cards
 
-Runs `/bandit-tasks plan` (`references/week.md`) with its `stage/ready` filter, and adds nothing: a
+Runs **Dating the week** (`/bandit:tasks week`, `references/week.md`) with its `stage/ready` filter, and adds nothing: a
 weekly pick of approved cards, not sprint planning. Picked cards get due dates only; the midnight
 job moves them into Assigned when due. A card picked for today → also `set_task_execution_state` →
 `assigned`, since the midnight run has already passed. Cards already in a sprint (`sprint/*` tag)
 keep the sprint plan's dates: they are not candidates.
 
-**`/bandit-tasks sprint`** is the old name, kept as an alias for one release: it runs `pick-ready`
+**`/bandit:tasks sprint`** is the old name, kept as an alias for one release: it runs `pick-ready`
 and says the new name. It never plans a sprint.

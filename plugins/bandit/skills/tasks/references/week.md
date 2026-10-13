@@ -1,6 +1,6 @@
 # 📅 Week
 
-**Commands:** `/bandit-tasks week` `/bandit-tasks plan` `/bandit-tasks review`
+**Commands:** `/bandit:tasks week` `/bandit:tasks review`
 **Owns:** the Week board · workload · projections · `skip_occurrence`
 
 ---
@@ -47,22 +47,22 @@ Both are counts. **Neither knows how long anything takes.** Weight by `effort` i
 
 ## ⚙️ Procedures
 
-### `/bandit-tasks week` — read only
+### `/bandit:tasks week` — read, then date on request
 
 1. `get_week_board`
 2. Report: overdue first (if the Due column exists), then day by day
 3. Mark projections explicitly as recurring, not as tasks
 4. Flag the heaviest day and any empty stretch
-5. **Stop.** No writes.
+5. **Stop.** No writes, unless Leo asks to plan or date the week: then run **Dating the week** below.
 
 🪫 **If the board is empty**, check before concluding under-planning:
 `list_tasks(completed: false)` — zero incomplete tasks means the board is **unpopulated**, which is a capture problem, not a planning one. Say which.
 
-### `/bandit-tasks plan` — write
+#### Dating the week — write, on request (folds the former week-planning verb)
 
 1. Read the week first. Always
 2. `list_tasks(completed: false, projectId: …)` for candidates — undated tasks in the relevant projects.
-   **`stage/ready` filter** (called by `/bandit-tasks pick-ready` on a dev project): add `tagId` = the
+   **`stage/ready` filter** (called by `/bandit:tasks pick-ready` on a dev project): add `tagId` = the
    `stage/ready` tag and `noTagWithPrefix: "sprint/"`, so only approved cards outside a sprint are
    candidates (a sprint's dates are its plan's, `references/dev.md` → Card fields). Nothing else changes
 3. Propose dates as a list. One line per task
@@ -75,7 +75,7 @@ Both are counts. **Neither knows how long anything takes.** Weight by `effort` i
 
 ⛔ Dating is refused outright on a recurring occurrence.
 
-### `/bandit-tasks review` — read, then propose
+### `/bandit:tasks review` — read, then propose
 
 1. `get_week_board` for the week ending
 2. `list_events(start, end)` — every state change, with actor

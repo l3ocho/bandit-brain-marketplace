@@ -1,8 +1,3 @@
----
-name: "wbs-generator"
-description: "Generate a complete Work Breakdown Structure (WBS) from project documentation: briefs, PRDs, SOWs, scope docs, notes, brain dumps, or the project plan and architecture in the project's vault folder. Runs a completeness gap analysis, asks the user to resolve gaps with options and a recommendation, then produces a numbered, ND-friendly markdown WBS. Use whenever the user asks to \"create a WBS,\" \"break down this project,\" \"build a work breakdown structure,\" \"decompose this project into tasks,\" \"generate project tasks from this doc,\" or similar — or uploads a project brief and asks \"what needs to happen to deliver this?\" Do NOT trigger for simple to-do lists, Gantt charts, sprint planning or backlog grooming, nor for putting the WBS on the board — that's /bandit-tasks load."
----
-
 # 🏗️ WBS Generator
 
 Transform project documentation into a structured, numbered Work Breakdown Structure with gap analysis, dependency mapping, and ND-friendly formatting.
@@ -27,7 +22,7 @@ Phase 5: RECONCILE → Backport findings into the source document and deliver up
 
 When the chat has a `## 🧭 Project Context` with `domain` and `project`, look in the project's
 planning folder before asking for uploads: `MyNotes/{domain}/Projects/{project}/`, or its
-`planning/` on a project with sprint folders (bandit-notes conventions §1 names the folder):
+`planning/` on a project with sprint folders (bandit:notes conventions §1 names the folder):
 
 | Found | Do |
 |---|---|
@@ -35,22 +30,22 @@ planning folder before asking for uploads: `MyNotes/{domain}/Projects/{project}/
 | The plan only | Read it. Tell the user the WBS will be thinner on technical work without the architecture |
 | Neither, or no Project Context | Ask for uploaded docs as usual |
 
-**Dev projects.** A Project Context with `dev: true` (key owned by project-settings) switches on
+**Dev projects.** A Project Context with `dev: true` (key owned by bandit:project) switches on
 the dev variant: the level glossary in the header, the empty `## 🔗 Card links` section, and the
 dev closing offer. Nothing else in the format changes. How cards map onto the levels is
-bandit-tasks' (`references/dev-workflow.md` → WBS on dev projects).
+bandit:tasks' (`references/dev-workflow.md` → WBS on dev projects).
 
 ### Sprint mode (a batch of existing cards)
 
-Run by bandit-sprint's planning (its step 6) on a `dev: true` project, before it splits waves.
+Run by bandit-dev:sprint's planning (its step 6) on a `dev: true` project, before it splits waves.
 
 | | Sprint mode |
 |---|---|
-| Input | A set of existing cards (`get_task`, read-only) and their briefs (through bandit-notes) |
+| Input | A set of existing cards (`get_task`, read-only) and their briefs (through bandit:notes) |
 | Output | The same `{slug}-wbs.md`, same format. The sprint plan note links it; nothing is embedded |
 | Phases | 1–4 as usual. **Phase 5 is skipped**, as in migration mode: it would edit the briefs, which aren't this skill's |
 | Card links | One row per card the WBS maps (below) |
-| Sizes | None. The WBS carries no sizes; sprint sizing is bandit-sprint's step 4 |
+| Sizes | None. The WBS carries no sizes; sprint sizing is bandit-dev:sprint's step 4 |
 
 ### Migration mode (an existing WBS)
 
@@ -186,7 +181,7 @@ Use WBS IDs for references. Only map direct dependencies — if A→B→C, item 
 
 Deliver the WBS as a **markdown file** presented to the user.
 
-Use this exact structure. It is fixed on purpose: **`/bandit-tasks load` parses it** (the
+Use this exact structure. It is fixed on purpose: **`/bandit:tasks load` parses it** (the
 `WBS-0` heading, the `#### WBS-X.Y:` deliverable headings, the work-package tables and the
 dictionary). Changing the headings or table columns breaks the load. The optional
 `## 🔗 Card links` section is last, after everything load parses, and load ignores it. Its card
@@ -273,7 +268,7 @@ For each critical-path or high-risk work package, include a dictionary entry:
 ## 🔗 Card links
 
 <!-- dev projects only: omit this section entirely without `dev: true`. Empty at generation,
-     except in sprint mode. A row is added (through bandit-notes) when a work package's card is
+     except in sprint mode. A row is added (through bandit:notes) when a work package's card is
      created, or, in sprint mode, for each existing card the WBS maps. -->
 
 | WBS id | Card id | Card title (at creation) | Created |
@@ -372,14 +367,14 @@ After the WBS is finalized, review the source document against these categories:
 When the source was `{project}-project-plan.md` from the vault, don't produce a copy. Show the
 backport as a short list of changes; on confirmation, edit the plan **in place**: read it for
 its etag, write with `if_match` = that bare-hex etag, never `"*"`. A 412 means it changed since
-you read it: re-read, say so, ask. The plan's format belongs to project-planner and bandit-notes;
+you read it: re-read, say so, ask. The plan's format belongs to `project` mode and bandit:notes;
 change content only.
 
 ---
 
 ## 💾 Saving the WBS to the Vault
 
-**Ask bandit-notes for the folder**, never hard-code it: `Projects/{slug}/`, or
+**Ask bandit:notes for the folder**, never hard-code it: `Projects/{slug}/`, or
 `Projects/{slug}/planning/` on a project with sprint folders (its conventions §1). When that folder
 exists, offer: *"Save this WBS as `{project}-wbs.md` in {folder}?"*
 
@@ -391,30 +386,30 @@ else in the vault.
 | No `{project}-wbs.md` yet | Create it with **no `if_match`** (fails closed if it appeared meanwhile: stop and ask) |
 | It exists | Show that it will be replaced, then on confirmation read its etag and write with `if_match` = that etag. **Carry its `## 🔗 Card links` rows over unchanged** |
 
-Frontmatter follows the bandit-notes conventions (`type: reference`, `status: triaged`, `project`
+Frontmatter follows the bandit:notes conventions (`type: reference`, `status: triaged`, `project`
 linking the hub note). No version numbers, no copies, no stored IDs (the one exception: card ids
 in `## 🔗 Card links` on dev projects), never delete.
 
 **Card links rows for cards that already exist** (sprint mode): this chat writes them, through
-bandit-notes, as its own approval row on the saved file (an etag-guarded edit, `updated` bumped).
-The row format is this skill's; the write is bandit-notes'.
+bandit:notes, as its own approval row on the saved file (an etag-guarded edit, `updated` bumped).
+The row format is this skill's; the write is bandit:notes'.
 
-Next step to offer: *"Want it on the board? `/bandit-tasks load` builds the project from it."*
-With `dev: true`, offer the dev route instead: `/bandit-tasks spec` per work package, then
-`/bandit-sprint plan` in Claude Code (bandit-tasks `references/dev-workflow.md`); in sprint mode,
-hand back to bandit-sprint.
+Next step to offer: *"Want it on the board? `/bandit:tasks load` builds the project from it."*
+With `dev: true`, offer the dev route instead: `/bandit:tasks spec` per work package, then
+`/bandit-dev:sprint plan` in Claude Code (bandit:tasks `references/dev-workflow.md`); in sprint mode,
+hand back to bandit-dev:sprint.
 
 ---
 
 ## 🧩 Edge Cases
 
-- **Very small project** (< 10 work packages): Still follow the full structure but collapse Levels — you may only need L0 → L1 → L2 (no L3). Mention this in the output. **Not on dev projects:** there L3 always exists (bandit-tasks `references/dev-workflow.md` → WBS on dev projects).
+- **Very small project** (< 10 work packages): Still follow the full structure but collapse Levels — you may only need L0 → L1 → L2 (no L3). Mention this in the output. **Not on dev projects:** there L3 always exists (bandit:tasks `references/dev-workflow.md` → WBS on dev projects).
 - **Very large project** (> 100 work packages): Suggest splitting into sub-projects or program-level WBS. Offer to generate one phase at a time.
 - **No uploaded document — just a chat description**: Treat the chat context as the "document." Phase 2 gap analysis will likely surface more gaps, which is expected.
 - **Multiple documents**: Ingest all of them. Cross-reference for contradictions and flag any.
 - **Document is a brain dump / messy notes**: That's fine — the skill is designed for this. Extract what you can, gap-analyze the rest.
 - **User wants to iterate**: After generating, the user may say "add X" or "remove Y" or "break down WBS-3.2 further." Update the artifact in place, preserving all IDs (don't renumber existing items — append new sub-IDs).
-- **User asks for estimates**: The WBS itself does NOT include time or cost estimates (WHAT, not WHEN or HOW MUCH). If asked, offer to add an "Estimated Effort" column to the work package tables as a separate pass, but note this is supplementary. **In sprint mode, never:** the WBS carries no sizes; sizing is bandit-sprint's step 4.
+- **User asks for estimates**: The WBS itself does NOT include time or cost estimates (WHAT, not WHEN or HOW MUCH). If asked, offer to add an "Estimated Effort" column to the work package tables as a separate pass, but note this is supplementary. **In sprint mode, never:** the WBS carries no sizes; sizing is bandit-dev:sprint's step 4.
 
 ---
 
@@ -443,14 +438,14 @@ Before presenting the final WBS, verify:
 ## ⚠️ Gotchas
 
 - **Reported 2026-10-09 · A WBS draft stayed in the inbox.** It was saved to `_inbox/` and the final
-  went to the project, leaving a leftover. → Save only the final file, in the folder bandit-notes
+  went to the project, leaving a leftover. → Save only the final file, in the folder bandit:notes
   names (**💾 Saving the WBS to the Vault**).
 
 ---
 
 ## 🚫 Never
 
-- Put tasks on the board — that's `/bandit-tasks load` (and `/bandit-tasks spec` on dev projects)
-- Change the output structure `/bandit-tasks load` parses
+- Put tasks on the board — that's `/bandit:tasks load` (and `/bandit:tasks spec` on dev projects)
+- Change the output structure `/bandit:tasks load` parses
 - Add time or cost estimates unless asked (and then as a separate column)
 - Overwrite a vault file without its etag, delete anything, or store note IDs

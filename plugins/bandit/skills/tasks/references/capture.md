@@ -1,6 +1,6 @@
 # ✍️ Capture
 
-**Command:** `/bandit-tasks capture`
+**Command:** `/bandit:tasks capture`
 **Owns:** task creation · brain dumps · **the whole repeat-rule lifecycle**
 
 ---
@@ -48,7 +48,7 @@ A titled task in Untriaged is a success. An interrogation that ends with a perfe
 2. `create_task` per line — **there is no bulk create.** Do not pretend otherwise
 3. Land them in **Untriaged** unless the project is obvious from the line itself
 4. Report the count created
-5. Offer `/bandit-tasks triage`. Do not start triaging
+5. Offer `/bandit:tasks triage`. Do not start triaging
 
 ⛔ Do not de-duplicate, re-order, re-word or merge lines during a dump. That is triage, and doing it here loses the user's own phrasing.
 

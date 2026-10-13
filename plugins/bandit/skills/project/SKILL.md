@@ -1,6 +1,6 @@
 ---
-name: "project-settings"
-description: "Bootstraps and maintains Claude.ai project instruction sets, and is the one command that onboards a project: interviews for new ones, audits existing ones, runs the vault step (bandit-notes) and the board step (bandit-tasks) in one approval, writes the Project Context block (domain, project, type, board, prefix, optional dev) that every other skill reads, resolves the BanditBrains board scope, and syncs the instructions and their reference doc to the project's vault folder, MyNotes/{Domain}/Claude/ai-{slug}. Use when the user says \"project settings\", \"onboard this project\", \"onboard a new project\", \"set up this project\", \"write the project instructions\", \"audit these instructions\", \"update the instructions\", \"sync the instructions\", \"fix the Project Context\", or pastes project instructions and asks for a review. Do NOT use for planning the project itself (project-planner), filing vault notes (bandit-notes) or working the task board (bandit-tasks)."
+name: "project"
+description: "Bootstraps and maintains Claude.ai project instruction sets, and is the one command that onboards a project: interviews for new ones, audits existing ones, runs the vault step (bandit:notes) and the board step (bandit:tasks) in one approval, writes the Project Context block (domain, project, type, board, prefix, optional dev) that every other skill reads, resolves the BanditBrains board scope, and syncs the instructions and their reference doc to the project's vault folder, MyNotes/{Domain}/Claude/ai-{slug}. Use when the user says \"project settings\", \"onboard this project\", \"onboard a new project\", \"set up this project\", \"write the project instructions\", \"audit these instructions\", \"update the instructions\", \"sync the instructions\", \"fix the Project Context\", or pastes project instructions and asks for a review. Do NOT use for planning the project itself (bandit:plan), filing vault notes (bandit:notes) or working the task board (bandit:tasks)."
 ---
 
 # 🛠️ Project Settings Manager
@@ -18,14 +18,14 @@ is the backbone.
 ## 🚀 Onboarding — one command for the whole project
 
 **This skill is the only way a project gets onboarded.** Leo runs it once; it does the
-instructions, the vault and the board together. bandit-notes and bandit-tasks keep owning their
+instructions, the vault and the board together. bandit:notes and bandit:tasks keep owning their
 own rules: this skill loads them and runs their onboarding procedures, it never restates them.
 
 | Step | What | Who |
 |---|---|---|
 | 1 | Interview (new project) or audit (existing project): the five Project Context values (+ optional `dev`), the hub-note summary, and the modules when the domain is new | This skill |
-| 2 | **Vault rows:** load the `bandit-notes` skill and run its *Onboarding rows* (Part 3) with `domain`, `project`, `type`, `dev` (when set), whether the project has a Claude Code surface, the summary and the modules | bandit-notes |
-| 3 | **Board rows:** load the `bandit-tasks` skill and run `references/onboard.md` with the board answer, project name, board type and folder, plus `dev: true` when set (onboard then adds its dev board shape rows to the same proposal) | bandit-tasks |
+| 2 | **Vault rows:** load the `bandit:notes` skill and run its *Onboarding rows* (Part 3) with `domain`, `project`, `type`, `dev` (when set), whether the project has a Claude Code surface, the summary and the modules | bandit:notes |
+| 3 | **Board rows:** load the `bandit:tasks` skill and run `references/onboard.md` with the board answer, project name, board type and folder, plus `dev: true` when set (onboard then adds its dev board shape rows to the same proposal) | bandit:tasks |
 | 4 | **Settings rows:** the instructions and reference doc files in `Claude/ai-{slug}/` (see **Vault Folder**) | This skill |
 | 5 | **One proposal** with every row from steps 2–4 and a fix row for every finding, then the closing line | This skill |
 | 6 | Execute exactly the approved rows, in order: vault → board → settings files. Report per row | Each owner's procedure |
@@ -46,7 +46,7 @@ own rules: this skill loads them and runs their onboarding procedures, it never 
 
 **Findings come fixed.** Anything noticed along the way (a legacy folder elsewhere in the
 domain, a stale `board:` line) is a **row in the same table**, step `fix`, with its owner's exact
-action (vault fixes come from bandit-notes as `domain` rows). Never a bare list. Two valid fixes →
+action (vault fixes come from bandit:notes as `domain` rows). Never a bare list. Two valid fixes →
 one row with both, recommended first. Then: *Nothing is created or changed until you answer all,
 a list, or none.*
 
@@ -56,7 +56,7 @@ a list, or none.*
   for a twin. Over the tier's target in **Token Budget Targets** (`references/reference-template.md`,
   never above 1,000) → the trim is built first and is row 1 of the same proposal: cut what the
   reference doc already holds, move detail there. Never write or hand over a version over the budget.
-- **Step 3 is bandit-tasks' procedure, loaded and run.** Never swap it for a quick check of your
+- **Step 3 is bandit:tasks' procedure, loaded and run.** Never swap it for a quick check of your
   own. Each board row cites the `list_projects` entry it came from.
 - **Approval covers the approved rows and nothing else.** Every finding has its own row, so one
   "all" fixes everything; a row Leo didn't approve never runs. Nothing outside this project's own
@@ -65,10 +65,10 @@ a list, or none.*
   the settings files without `Claude/ai-{slug}/`).
 - The Project Context written into the instructions reflects what was approved: `domain:` is the
   real domain whenever a vault is used (`none` only for a custom path or artifact-only), and
-  `board:` is the line bandit-tasks returned.
+  `board:` is the line bandit:tasks returned.
 - **Existing projects run the same flow.** Audit the instructions, then steps 2–7 propose only
   what's missing (a wrong `domain:`, a missing folder, no board scope). Nothing missing → say so.
-- bandit-notes' `init`/`onboard` and bandit-tasks' `onboard`, typed directly in a project chat to
+- bandit:notes' `init`/`onboard` and bandit:tasks' `onboard`, typed directly in a project chat to
   set up a project, point back here.
 
 ---
@@ -83,7 +83,7 @@ Determine which mode to operate in based on the current project state.
 |-----------|------|--------|
 | No instructions, or only a project name / placeholder text | **New Project** | Run the interview flow |
 | Substantive instructions already present | **Existing Project** | Run the audit flow |
-| The change is for **another** project (bandit-audit runs a settings row, or Leo names a project that isn't this one) | **Vault update** | Run **🎯 Targeted update from the vault**. Never interview: this chat's own instructions aren't the target |
+| The change is for **another** project (bandit:audit runs a settings row, or Leo names a project that isn't this one) | **Vault update** | Run **🎯 Targeted update from the vault**. Never interview: this chat's own instructions aren't the target |
 
 If ambiguous (e.g., a few lines that might be intentional or might be a stub), ask the user:
 > "I see some brief instructions already in this project. Should I treat this as a fresh start
@@ -96,7 +96,7 @@ If ambiguous (e.g., a few lines that might be intentional or might be a stub), a
 No instructions yet → read `references/interview.md` and follow it: four chunked phases
 (context and stack, role and authority, conditional sections, optional sections and output),
 then generation. It fills every Project Context key, and its board question hands off to
-bandit-tasks exactly like **🚀 Onboarding** step 3.
+bandit:tasks exactly like **🚀 Onboarding** step 3.
 
 ---
 
@@ -140,8 +140,8 @@ template section. Note:
   Overview, with all five required keys and valid values? A `dev:` line must say `true`; any
   other value → propose fixing or removing the line. No `dev:` line is never a finding. Check them live: `domain` is a folder in
   `MyNotes` (or `none`), `board` resolves via `list_projects` (or is `none` / `pending`).
-  Naming, board type and footprint aren't judged here: run `/bandit-audit check` in this project
-  and carry its rows into the proposal (skip it for `domain: none`: bandit-audit scores domain
+  Naming, board type and footprint aren't judged here: run `/bandit:audit check` in this project
+  and carry its rows into the proposal (skip it for `domain: none`: bandit:audit scores domain
   projects only).
   - **Missing (legacy instructions)** → flag ⚠️ **Legacy context** and build the block from what
     the old instructions carry: `vault_domain` → `domain` (`null` → `none`), `vault_project` →
@@ -150,7 +150,7 @@ template section. Note:
     `board` (neither → `none`). Propose it as a fix, and on the updated version drop those
     five fields from the metadata comment and the old scope section.
 - **Legacy lifecycle** — a `lifecycle` object in the metadata, or a `## 🔄 Project Lifecycle
-  Workflow` section, is left over from the old project-planner. project-planner now keeps its
+  Workflow` section, is left over from the old planning skill. `/bandit:plan project` now keeps its
   plan, architecture and WBS in the vault's `Projects/{project}/` and reads its state from those
   files. Flag ⚠️ **Legacy lifecycle** and, on the updated version, drop both. Take `project_slug`
   and `prefix` into the Project Context `project:` / `prefix:` if those are still empty. Old
@@ -228,7 +228,7 @@ version bump using the existing naming convention; the new version files are row
 ## 🎯 Targeted update from the vault
 
 Updates **another** project's instructions from its vault copy, because only a project can see
-its own instructions. bandit-audit runs this for its settings rows. Leo can run it too ("update
+its own instructions. bandit:audit runs this for its settings rows. Leo can run it too ("update
 the Family instructions: board is now …").
 
 **Inputs:** the settings folder (`MyNotes/{domain}/Claude/ai-{project}`), the production file
@@ -247,8 +247,8 @@ folder and ask, never assume the highest `v{N}`), and the exact change.
    `references/vault-storage.md`, as an approved row. The prompt-reference file is not bumped.
    **Project copy** is skipped: this chat's project is not the target.
 5. **Hand over** the file name and the full text to paste, with the Claude.ai project it goes into.
-   After the paste: `/bandit-audit check` in that project, unless it has `domain: none`
-   (bandit-audit scores domain projects only).
+   After the paste: `/bandit:audit check` in that project, unless it has `domain: none`
+   (bandit:audit scores domain projects only).
 
 ---
 
@@ -310,7 +310,7 @@ goes to the project (see **Project copy**).
 
 After outputting, remind:
 > "Copy the instruction set into your project's Custom Instructions field in Claude.ai.
-> The `<!-- project-settings: ... -->` comment on line 1 is invisible in the UI but
+> The `<!-- bandit-project: ... -->` comment on line 1 is invisible in the UI but
 > helps me track versions during future audits.
 > The reference doc is saved in this project as `claude/{name}` — it's your project's living memory."
 
@@ -346,7 +346,7 @@ that it wasn't saved to the project.
 ## 🧭 Project Context Section
 
 This skill **owns the Project Context**: the one block every skill reads to learn which project
-it is in (`bandit-notes`, `meeting-minutes`, `bandit-tasks`, `project-planner`, `wbs-generator`). The same block works on every surface: in the
+it is in (`bandit:notes`, `bandit:minutes`, `bandit:tasks`, `bandit:plan`). The same block works on every surface: in the
 Claude.ai project instructions, and in a repo's `CLAUDE.md` on Claude Code. Other skills read it
 and point here; they never restate its format.
 
@@ -363,7 +363,7 @@ board: {board}
 prefix: {prefix}
 {dev: true — this line only when the project opted in}
 
-Read by bandit-notes, meeting-minutes, bandit-tasks, project-planner and wbs-generator.
+Read by bandit:notes, bandit:minutes, bandit:tasks, bandit:plan.
 **Read anywhere. Write inside `board` only.**
 Names only: skills resolve IDs live via `list_projects`. No hardcoded IDs, ever.
 ```
@@ -375,7 +375,7 @@ Names only: skills resolve IDs live via `list_projects`. No hardcoded IDs, ever.
 | `type` | `product_service` · `workflow` · `claude_marketplace` | Phase 1 question 1 |
 | `board` | `project "{name}"` · `folder "{name}"` · `global` · `none` · `pending` | Phase 1 question 5. Names exactly as `list_projects` returns them, quoted |
 | `prefix` | 2–3 character filename prefix, or `none` | Phase 4 prefix. `none` when artifact-only |
-| `dev` *(optional)* | `true`, or the line is absent | Phase 1 dev question (`references/interview.md`). Only for technical development projects that use the dev card workflow (bandit-tasks, bandit-notes) and sprints (bandit-sprint, Claude Code) |
+| `dev` *(optional)* | `true`, or the line is absent | Phase 1 dev question (`references/interview.md`). Only for technical development projects that use the dev card workflow (bandit:tasks, bandit:notes) and sprints (bandit-dev:sprint, Claude Code) |
 
 **Format rules** (other skills parse this, so it is fixed): the heading text is `Project
 Context`; one `key: value` per line; these five required keys, lower-case, plus the optional
@@ -386,8 +386,8 @@ cross-board reads, but work from this project must never land on another project
 **How readers treat it:** a missing required key → ask; a missing `dev` line → not a dev project
 (never ask); a value that doesn't check out (the board name no
 longer resolves, the domain isn't in `MyNotes`) → stop and say so, never guess at the nearest
-match. `board: none` or `pending` → bandit-tasks reads anywhere and writes nothing (except
-`/bandit-tasks load` on `pending`).
+match. `board: none` or `pending` → bandit:tasks reads anywhere and writes nothing (except
+`/bandit:tasks load` on `pending`).
 
 ### Repo copy (Claude Code)
 
@@ -431,20 +431,20 @@ Claude Code update its `CLAUDE.md`.*
 ## ⚠️ Gotchas
 
 - **2026-09-24 · Onboarding was split across three skills.** Leo set up the bandit-labs project
-  here, got `domain: none`, and then bandit-notes refused to create anything and the board was
+  here, got `domain: none`, and then bandit:notes refused to create anything and the board was
   never set. → Onboarding is one run of this skill: vault, board and settings rows in one
   proposal (**🚀 Onboarding**). `domain:` is never `none` when a vault is used.
 - **2026-09-25 · Workflow projects had no project folder.** Onboarding showed only the settings
   path for `type: workflow`, so those projects had nowhere to keep their own docs. → Every
-  project gets both paths; the vault rows come from bandit-notes, which owns that rule.
+  project gets both paths; the vault rows come from bandit:notes, which owns that rule.
 - **2026-09-25 · The reference doc reached the project only sometimes, and was shown in full in
   the chat.** → Always save it with **Project copy** (`present_to_user: false`, one-line
   confirmation).
 - **2026-09-27 · The Personal onboarding audit skipped the board step.** The chat ran its own
-  `list_projects` check instead of loading bandit-tasks' onboard step, never opened the structure
+  `list_projects` check instead of loading bandit:tasks' onboard step, never opened the structure
   rulebook, and wrote "no board rows, scope is already correct". The board names were wrong. →
   Step 3 is loaded and run, never swapped for a quick check (**🚀 Onboarding** rules); structure is
-  judged by `/bandit-audit check`.
+  judged by `/bandit:audit check`.
 - **2026-09-29 · Audits flagged problems and stopped.** Findings sat in a list below the proposal,
   and the audit asked "want me to generate an updated version?" instead of building it. → Findings
   come fixed: every finding is a row in the one proposal, and the updated version is built
@@ -466,7 +466,7 @@ Claude Code update its `CLAUDE.md`.*
 ## 🚫 What This Skill Never Does
 
 - **Leave a finding without a fix row**, or stop an audit at a question when the fix is known
-- **Create, rename or restructure anything on a BanditBrains board** — except what bandit-tasks'
+- **Create, rename or restructure anything on a BanditBrains board** — except what bandit:tasks'
   onboard procedure proposes as approved rows: one empty project, and for `dev: true` its dev
   board shape (lane and stage tags, lanes). No folders, columns or tasks
 - **Store an ID** — no project, folder, note or task IDs in metadata or instructions. Names
@@ -486,15 +486,15 @@ Claude Code update its `CLAUDE.md`.*
   would destroy a version. Omit `if_match` and let the write fail closed
 - **Compare or send an etag without normalising it to bare hex** — the read tool's `W/"…` form
   produces false drift reports and false "concurrent edit" failures
-- **Create a directory in Nextcloud outside an approved row** — folders come from bandit-notes'
+- **Create a directory in Nextcloud outside an approved row** — folders come from bandit:notes'
   onboarding rows or an explicit yes, never on the side
-- **Move or rename a settings folder** — migrating to the MyNotes convention is `bandit-notes
+- **Move or rename a settings folder** — migrating to the MyNotes convention is `bandit:notes
   onboard`'s job; this skill only updates the metadata once the folder is in place
 - **Put anything but the two settings files into `Claude/ai-{slug}/`**, or add YAML frontmatter
   to them
 - **Write to the Nextcloud Notes app** — legacy projects are migrated to the vault, never
   written to the Notes app
-- **Add a lifecycle block or lifecycle section** — project-planner reads its state from the
+- **Add a lifecycle block or lifecycle section** — bandit:plan reads its state from the
   vault; this skill only removes the legacy ones on an approved update
 - **Write past a file missing from the listing** — see *If an Expected File Is Missing* in
   `references/vault-storage.md`

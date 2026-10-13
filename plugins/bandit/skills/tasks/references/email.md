@@ -1,6 +1,6 @@
 # 📧 Email
 
-**Command:** `/bandit-tasks email`
+**Command:** `/bandit:tasks email`
 **Owns:** Gmail → **proposals only**
 
 ---
@@ -16,7 +16,7 @@
 
 A wrong task is a nuisance. A wrongly archived email is gone from view and nobody knows it happened.
 
-⛔ Even if the user says *"and archive them"* — that is a separate, explicit instruction, confirmed one thread at a time. It is not part of `/bandit-tasks email`.
+⛔ Even if the user says *"and archive them"* — that is a separate, explicit instruction, confirmed one thread at a time. It is not part of `/bandit:tasks email`.
 
 ---
 
@@ -77,7 +77,7 @@ in:inbox is:unread -in:draft newer_than:7d
 
 **Untriaged**, by default. `create_task(title)` with no `projectId`.
 
-Email proposals are captured, not filed. Filing is `/bandit-tasks triage`.
+Email proposals are captured, not filed. Filing is `/bandit:tasks triage`.
 
 **Set a `dueDate` only when the message states one.** An invented date pollutes the Week board with fiction.
 

@@ -1,9 +1,9 @@
 # 📁 Working folder — the S12 guard for a Claude Code twin
 
 > Read when onboarding a project with a Claude Code twin, on any twin version change, and for a
-> bandit-audit S12 row. Holds the layout, the guard (`scripts/workdir.py` in this skill), its
+> bandit:audit S12 row. Holds the layout, the guard (`scripts/workdir.py` in this skill), its
 > settings, the Environment line, and the rollout. The rule itself is S12 in
-> `MyNotes/_skills/structure-rulebook.md`. Hook format checked against the Claude Code hooks docs
+> bandit:audit `references/structure-rulebook.md`. Hook format checked against the Claude Code hooks docs
 > (https://code.claude.com/docs/en/hooks) on 2026-09-29.
 
 ## 🗂️ Layout
@@ -17,7 +17,7 @@ The twin's working folder is the folder Claude Code runs from (`$CLAUDE_PROJECT_
 | `work/{prefix}-{task}/` | One folder per board task: drafts, SQL, scripts, analyses |
 | `data/{prefix}-{task}/` | That task's data files. Purged on close, never archived |
 | `scratch/` | Throwaway. Deleted after 7 days, as an approved row |
-| `_closed/{prefix}-{task}/` | Closed work, moved there by `/bandit-tasks done`. Deleted after 30 days, as an approved row |
+| `_closed/{prefix}-{task}/` | Closed work, moved there by `/bandit:tasks done`. Deleted after 30 days, as an approved row |
 | `_backup/` | Settings rollback copies only, flat: `CLAUDE.md.{version}`, `settings.json.{version}`, `workdir.py.{version}`. No clock; deleted only by an approved row. A changelog's undo path points here |
 | `{folder}/` with its own `CLAUDE.md` | A hosted project: its own settings apply, the guard leaves it alone |
 
@@ -40,14 +40,14 @@ The twin's working folder is the folder Claude Code runs from (`$CLAUDE_PROJECT_
 | `permissions.allow` | `Edit(/work/**)`, `Edit(/data/**)`, `Edit(/scratch/**)`: allowed writes don't prompt. They never widen the guard: exit 2 wins over allow rules |
 
 **What it can't catch:** a script that writes files itself, or Bash (`mv`, `>`, `tee`). The
-manifest shows those, and bandit-audit S12 turns them into fix rows. Content isn't scanned:
+manifest shows those, and bandit:audit S12 turns them into fix rows. Content isn't scanned:
 customer names pasted into a `.md` draft stay a prose rule.
 
 ## 📦 The twin change (vault rows, then handed to Claude Code)
 
 **1. `code-{slug}/claude/hooks/workdir.py`** — this skill's `scripts/workdir.py`, byte for byte.
 Never edited per project: `domain`, `project` and `prefix` come from the twin's `CLAUDE.md`.
-bandit-audit compares its hash with `s12.hook_sha12` in `structure-rules.yaml`.
+bandit:audit compares its hash with `s12.hook_sha12` in `structure-rules.yaml`.
 
 **2. `code-{slug}/claude/settings.json`** — merge into what's there (keep existing `permissions`
 and hooks):
@@ -83,7 +83,7 @@ and hooks):
 twin core and S10 are untouched):
 
 ```
-- **Working folder** (S12, enforced by `.claude/hooks/workdir.py`): `work/{prefix}-{task}/` per board task, data files only in `data/{prefix}-{task}/`, throwaway in `scratch/`. `/bandit-tasks done` closes a task's folders.
+- **Working folder** (S12, enforced by `.claude/hooks/workdir.py`): `work/{prefix}-{task}/` per board task, data files only in `data/{prefix}-{task}/`, throwaway in `scratch/`. `/bandit:tasks done` closes a task's folders.
 ```
 
 Written with the project's real `prefix`. The Never line about `code-{slug}/` (reference
@@ -101,5 +101,5 @@ All three vault files are rows of one proposal, with the twin version bump. The 
 ## 🔁 Rollout to an existing twin
 
 A targeted update with the change above. The first `SessionStart` after it writes the manifest;
-the next `/bandit-audit` scores S12 from it. Until a manifest reaches the vault, S12 is
+the next `/bandit:audit` scores S12 from it. Until a manifest reaches the vault, S12 is
 **unchecked** for that project.

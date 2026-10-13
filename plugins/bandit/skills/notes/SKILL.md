@@ -1,6 +1,6 @@
 ---
-name: "bandit-notes"
-description: "Owns the MyNotes vault conventions in BanditCloud (Obsidian over WebDAV): folders, filenames, frontmatter, status, archiving, and each domain's README home page. Invoked as /bandit-notes followed by a command (onboard, init, home, file, lint, settings, archive, restore, delete). Also runs the vault step of project onboarding for project-settings. Also use for reviewing and filing inbox notes (\"file my inbox\"), moving or archiving notes, scaffolding a domain, applying Obsidian vault settings, or before any skill writes a note into MyNotes. Do NOT use for the Nextcloud Notes app, for MyNotes/_skills (the Skill Manager project owns it), or for tasks on the board (bandit-tasks)."
+name: "notes"
+description: "Owns the MyNotes vault conventions in BanditCloud (Obsidian over WebDAV): folders, filenames, frontmatter, status, archiving, and each domain's README home page. Invoked as /bandit:notes followed by a command (onboard, init, home, file, lint, settings, archive, restore, delete). Also runs the vault step of project onboarding for bandit:project. Also use for reviewing and filing inbox notes (\"file my inbox\"), moving or archiving notes, scaffolding a domain, applying Obsidian vault settings, or before any skill writes a note into MyNotes. Do NOT use for the Nextcloud Notes app, for skill sources (the bandit-brain-marketplace repo), or for tasks on the board (bandit:tasks)."
 ---
 
 # 🗂️ Bandit Notes
@@ -26,7 +26,7 @@ the product:
 
 ```
 MyNotes/                         ← BanditCloud root of all domains
-├── _skills/                     ← root "_" folder: NOT a domain, ignored by every scan
+├── _{name}/                     ← any root "_" folder: NOT a domain, ignored by every scan
 ├── .templates/                  ← any dot folder: ignored
 └── {Domain}/                    ← one domain = one Obsidian vault (has its own .obsidian/)
     ├── README.md                ← generated home page; frontmatter = domain config
@@ -52,13 +52,13 @@ MyNotes/                         ← BanditCloud root of all domains
 
 1. **Project Context first.** Read the `## 🧭 Project Context` section: in the Claude.ai
    project instructions, or in the repo's `CLAUDE.md` on Claude Code. `domain:` names the
-   domain and `project:` the project slug. The block's format is owned by project-settings.
+   domain and `project:` the project slug. The block's format is owned by bandit:project.
    - `domain: none` → this project has no vault. Say so and stop.
    - **Legacy fallback:** no Project Context section → read `vault_domain` and `vault_project`
-     from the `<!-- project-settings: {...} -->` metadata instead.
-2. **Run by project-settings (onboarding).** The project's instructions aren't pasted yet, so take
-   `domain`, `project` and `type` from project-settings instead. See *Onboarding* below.
-3. **Explicit argument.** `/bandit-notes home Summitt` — the scheduled home refresh always passes it.
+     from the `<!-- bandit-project: {...} -->` metadata instead.
+2. **Run by bandit:project (onboarding).** The project's instructions aren't pasted yet, so take
+   `domain`, `project` and `type` from bandit:project instead. See *Onboarding* below.
+3. **Explicit argument.** `/bandit:notes home Summitt` — the scheduled home refresh always passes it.
 4. **Otherwise ask**, listing the live domains from `nc_webdav_list_directory("MyNotes")`.
 
 Never guess the nearest match. If the named domain isn't in the listing, stop and say so.
@@ -77,7 +77,7 @@ Claude/code-cs-notes/     ← Claude Code settings: the repo mirror (CLAUDE.md +
 ```
 
 The Claude Code side reaches `Projects/{slug}/` through the same `## 🧭 Project Context` section,
-placed in the repo's `CLAUDE.md`: with it, `/bandit-notes` gets the same project scope in Claude Code
+placed in the repo's `CLAUDE.md`: with it, `/bandit:notes` gets the same project scope in Claude Code
 as in Claude.ai. That file is configured in the repo, not by this skill.
 
 **Scope comes from the Project Context `type:`** (legacy fallback: `project_type` in the
@@ -87,7 +87,7 @@ metadata), resolved together with the domain:
 |---|---|
 | `type: workflow` (e.g. Summitt Workflow) | **Domain**: the whole domain. Oversees every project, and like every project has its own `Claude/ai-{slug}/` and `Projects/{slug}/` with its hub note |
 | `type: product_service` or `type: claude_marketplace`, with `project:` | **Project**: the table below |
-| No Project Context and no project metadata (e.g. the scheduled `/bandit-notes home Summitt`) | **Domain** |
+| No Project Context and no project metadata (e.g. the scheduled `/bandit:notes home Summitt`) | **Domain** |
 
 **Project scope:**
 
@@ -95,7 +95,7 @@ metadata), resolved together with the domain:
 |---|---|---|
 | `_inbox/` | All of it (Leo's inputs) | Create new notes; review (`file`) notes **only** into `Projects/{slug}/`, and only the ones Leo puts up for review |
 | `Projects/{slug}/` | ✓ | ✓ |
-| `Claude/ai-{slug}/`, `Claude/code-{slug}/` | ✓ | Create the folder only; the twin belongs to project-settings, the mirror to the repo's Stop hook |
+| `Claude/ai-{slug}/`, `Claude/code-{slug}/` | ✓ | Create the folder only; the twin belongs to bandit:project, the mirror to the repo's Stop hook |
 | `_templates/` | ✓ | ✓ Edit templates directly, no need to switch to the workflow project |
 | `_archive/Projects/{slug}/` | ✓ | Archive and restore its own notes |
 | `Meetings/`, `Requests/` | Only notes with `project: "[[{slug}]]"` | ✗ read-only |
@@ -125,7 +125,7 @@ place when Leo explicitly asks for that change. Conditions: etag-guarded write, 
 `status` and `file-to` unchanged, and the change summarised back to him. Leo's own notes (`inbox`
 or no status) stay untouchable, and so does any skill-written note from an earlier conversation.
 
-**The rules apply at review.** Review is `/bandit-notes file`: Leo runs it (for the whole inbox or for
+**The rules apply at review.** Review is `/bandit:notes file`: Leo runs it (for the whole inbox or for
 named notes) when he wants a note processed. That is the only moment the conventions touch it,
 and the note leaves the inbox in the same step. The status says which side of that line a note
 is on:
@@ -200,7 +200,7 @@ WebDAV mechanics (verified against the BanditCloud MCP):
 - **Excluded-tag errors** are deliberate exclusions. Report them; never work around them.
 - **Never edit non-markdown files** (images, PDFs, audio, `.canvas`, `.excalidraw`). Move them
   only as part of an approved proposal.
-- **`.obsidian/` is written only by `/bandit-notes settings`**, only the allowlisted files and keys
+- **`.obsidian/` is written only by `/bandit:notes settings`**, only the allowlisted files and keys
   in Part 2 §11, only on approval, only with Obsidian closed on every device, and always with a
   backup first. Every other command treats `.obsidian/` as read-only.
 
@@ -217,19 +217,19 @@ Obsidian never resolves a bare `[[alias]]` to a note.
 
 | Command | Does | Writes |
 |---|---|---|
-| `/bandit-notes onboard [Domain]` | Audits an existing domain against the conventions and proposes the migration | On confirm |
-| `/bandit-notes init {Domain}` | Scaffolds a new domain: core folders, chosen modules, starter README | On confirm |
-| `/bandit-notes home [Domain]` | Rebuilds the domain README home page | Auto |
-| `/bandit-notes file [Domain] [note…]` | Reviews inbox notes Leo puts up: destination, filename, frontmatter; body changes only as separate rows | On confirm |
-| `/bandit-notes lint [Domain]` | Reports every convention breach, each with its fix row | Fixes on confirm |
-| `/bandit-notes settings [Domain]` | Checks the vault's Obsidian settings against Part 2 §11 and proposes the changes; can roll back from backup | On confirm, Obsidian closed |
-| `/bandit-notes archive [Domain]` | Proposes moving `status: done` notes into `_archive`, and old settings versions named by a structure audit (S7) | On confirm |
-| `/bandit-notes restore {note}` | Moves an archived note back to its `archived-from` path | On confirm |
-| `/bandit-notes delete {path…}` | Deletes the named notes, files or folders | On confirm |
+| `/bandit:notes onboard [Domain]` | Audits an existing domain against the conventions and proposes the migration | On confirm |
+| `/bandit:notes init {Domain}` | Scaffolds a new domain: core folders, chosen modules, starter README | On confirm |
+| `/bandit:notes home [Domain]` | Rebuilds the domain README home page | Auto |
+| `/bandit:notes file [Domain] [note…]` | Reviews inbox notes Leo puts up: destination, filename, frontmatter; body changes only as separate rows | On confirm |
+| `/bandit:notes lint [Domain]` | Reports every convention breach, each with its fix row | Fixes on confirm |
+| `/bandit:notes settings [Domain]` | Checks the vault's Obsidian settings against Part 2 §11 and proposes the changes; can roll back from backup | On confirm, Obsidian closed |
+| `/bandit:notes archive [Domain]` | Proposes moving `status: done` notes into `_archive`, and old settings versions named by a structure audit (S7) | On confirm |
+| `/bandit:notes restore {note}` | Moves an archived note back to its `archived-from` path | On confirm |
+| `/bandit:notes delete {path…}` | Deletes the named notes, files or folders | On confirm |
 
-**Invocation:** `/bandit-notes <command> [args]` — the slash command is the guaranteed trigger, so it's
-the documented form everywhere, including scheduled tasks. The first word after `/bandit-notes` is the
-command; the rest are its arguments. `/bandit-notes` with no command → offer the command table as a
+**Invocation:** `/bandit:notes <command> [args]` — the slash command is the guaranteed trigger, so it's
+the documented form everywhere, including scheduled tasks. The first word after `/bandit:notes` is the
+command; the rest are its arguments. `/bandit:notes` with no command → offer the command table as a
 numbered list and ask which one. Plain language ("file my inbox") also reaches this skill, but
 it depends on description matching, so never rely on it for scheduled or unattended runs.
 
@@ -239,12 +239,12 @@ on the project's own areas when the scope is Project. Procedures are in Part 3
 
 ---
 
-## 🚀 Onboarding — the vault step, run by project-settings
+## 🚀 Onboarding — the vault step, run by bandit:project
 
-**Onboarding a project is one command, owned by project-settings.** It interviews Leo, then loads
-this skill for the vault rows and bandit-tasks for the board rows, and shows **one** proposal.
+**Onboarding a project is one command, owned by bandit:project.** It interviews Leo, then loads
+this skill for the vault rows and bandit:tasks for the board rows, and shows **one** proposal.
 This skill only produces the vault rows and executes the approved ones; it never shows its own
-proposal or asks for its own approval when project-settings runs it. Procedure: *Onboarding rows*
+proposal or asks for its own approval when bandit:project runs it. Procedure: *Onboarding rows*
 in Part 3.
 
 | Situation | Vault rows |
@@ -263,37 +263,37 @@ built with the `onboard` Stage B/C procedure (Part 3), after the create rows.
 
 Any note created by another skill or in a chat follows the same rules: it's created in
 `{Domain}/_inbox/` as a **new** file, carries the standard frontmatter (including `summary`) with
-`status: triaged`, follows the body shape in Part 2 §12, and may set `file-to:` so `/bandit-notes file`
+`status: triaged`, follows the body shape in Part 2 §12, and may set `file-to:` so `/bandit:notes file`
 (or the writing skill itself, after Leo confirms) can move it to its home in one step. Skills
 create new notes in the inbox; they never edit an existing one there, except their own draft
 from this conversation on Leo's explicit request (see *The inbox is Leo's*).
 
-- **project-settings** owns the files inside `Claude/ai-{slug}/`. Those files start with an
+- **bandit:project** owns the files inside `Claude/ai-{slug}/`. Those files start with an
   HTML metadata comment on line 1, so they are **exempt from frontmatter**; never add YAML to
   them. The folder path is derived from the Project Context: `MyNotes/{domain}/Claude/ai-{project}`.
-  project-settings also owns the **Claude Code twin** in `Claude/code-{slug}/`: its `CLAUDE.md`,
+  bandit:project also owns the **Claude Code twin** in `Claude/code-{slug}/`: its `CLAUDE.md`,
   `claude/settings.json` and `claude/hooks/workdir.py`, for any project without `dev: true`.
 - **The working-folder manifest** (`Projects/{slug}/workdir-manifest.json`, structure rule S12) is
   written straight there by the twin's Claude Code session, asked by its `SessionStart` hook. Machine
-  data for bandit-audit, not a note: no inbox, no frontmatter, create fail-closed, edit with the etag.
+  data for bandit:audit, not a note: no inbox, no frontmatter, create fail-closed, edit with the etag.
 - **The dev mirror** is copied straight into `Claude/code-{slug}/` by the repo's `Stop` hook script,
-  through the Nextcloud-synced folder (project-settings `references/dev-mirror.md`). It's a settings
+  through the Nextcloud-synced folder (bandit:project `references/dev-mirror.md`). It's a settings
   copy, not a note: no inbox, no frontmatter, never edited by hand.
-- **meeting-minutes** writes minutes to `_inbox` with `file-to: Meetings/`.
+- **bandit:minutes** writes minutes to `_inbox` with `file-to: Meetings/`.
 - **Sprint records** on dev projects (plan, execution prompt, ledger, report and the sprint's
   briefs) are written **straight into `Projects/{slug}/sprint-{name}/`** for the same reason as the
   planning documents below (Part 2 §1 → Sprint folders).
-- **project-planner** and **wbs-generator** are the other exception to the inbox rule: they write
+- **bandit:plan** (both modes) is the other exception to the inbox rule: it writes
   a project's planning documents (`{slug}-project-plan.md`, `{slug}-architecture.md`,
   `{slug}-wbs.md`) **straight into `Projects/{slug}/`**, or `Projects/{slug}/planning/` on a project
   with sprint folders (Part 2 §1 → Sprint project root), because they're worked on across many
-  sessions. They ask this skill for the folder, still follow Part 2 (frontmatter, `status`, YAML
+  sessions. It asks this skill for the folder, still follow Part 2 (frontmatter, `status`, YAML
   style), create fail-closed and edit only with the etag. Drafts never go to `_inbox/`.
 - **Leftovers.** A note used only to produce another (an inbox draft filed elsewhere, a superseded
   draft, an applied feedback note) is archived with the usual stamps (Part 2 §7), or deleted on
   Leo's word, **in the same step that consumed it**, and only on proof: the successor exists and was
   read. Never because a note looks done or its card is missing; unsure → it stays.
-- **bandit-tasks** owns the task vocabulary. Frontmatter reuses it verbatim (`kind`, `handler`,
+- **bandit:tasks** owns the task vocabulary. Frontmatter reuses it verbatim (`kind`, `handler`,
   `lane` as the bare value) and links tasks via `board-task`. This skill never writes to the board.
 - **Dev projects** (`dev: true` in the Project Context): plan notes and the WBS card links exist
   **only** there (Part 2 §13). Without the flag nothing changes. Plan notes go **inbox-first**, like
@@ -301,9 +301,9 @@ from this conversation on Leo's explicit request (see *The inbox is Leo's*).
   folder. Because `type: plan` exists only on dev projects, `file` and `lint`
   apply the plan-note rules to any `type: plan` note, whichever project they run from (usually the
   domain workflow project).
-- **Lookup for bandit-tasks.** bandit-tasks asks whether a plan-note **filename** is filed; this
+- **Lookup for bandit:tasks.** bandit:tasks asks whether a plan-note **filename** is filed; this
   skill answers with `nc_webdav_find_by_name(pattern="{filename}", scope="MyNotes/{Domain}")` and
-  checks the match sits in `Projects/{slug}/`, its `planning/` or one of its sprint folders. Vault paths stay here; bandit-tasks never restates them.
+  checks the match sits in `Projects/{slug}/`, its `planning/` or one of its sprint folders. Vault paths stay here; bandit:tasks never restates them.
 
 ---
 
@@ -323,11 +323,11 @@ from this conversation on Leo's explicit request (see *The inbox is Leo's*).
 - **2026-09-24 · A waiting proposal looked like a failure.** Leo ran the command, got a proposal,
   and saw nothing created. → End every proposal with the "nothing happens until you answer" line.
 - **2026-09-24 · Project onboarding was split across three skills.** `init` run from a project
-  chat was silently swapped for a project onboard. → Onboarding runs from project-settings, which
+  chat was silently swapped for a project onboard. → Onboarding runs from bandit:project, which
   runs this skill's *Onboarding rows*. Typed directly in a project chat, `init` or `onboard` says
-  which command applies and why, and points to project-settings for a new project.
+  which command applies and why, and points to bandit:project for a new project.
 - **2026-09-24 · A `domain: none` stop gave no fix.** → Name the setting and the fix: a
-  project-settings targeted update in that project sets `domain:`. This skill never edits
+  bandit:project targeted update in that project sets `domain:`. This skill never edits
   project instructions.
 - **2026-09-25 · Leo asked to amend a draft a skill had just written.** The rules had no path for
   this, and the edit went ahead on his explicit ask. → A triaged, skill-written draft from this
@@ -346,14 +346,14 @@ from this conversation on Leo's explicit request (see *The inbox is Leo's*).
 
 ## 🚫 Never
 
-- Treat a root `_` folder (`_skills`) or any dot folder as a domain, or scan inside it (the one
+- Treat a root `_` folder or any dot folder as a domain, or scan inside it (the one
   exception: `.obsidian/` settings files, read by `lint` and `settings`, Part 2 §11)
 - Put anything but settings under `Claude/` — no project logs, working notes, decision journals, discussion records, reports or drafts (those go to `Projects/{slug}/`) — or a general skill anywhere under a domain
 - Invent a module, status value or frontmatter key that isn't in Part 2
   — propose a change to this skill instead
 - Impose a layout inside `Projects/{slug}/` beyond its hub note `{slug}.md` and, on a project with
   sprint folders, the root rule (Part 2 §1) — the project's own settings decide the rest
-- Write to `.obsidian/` outside `/bandit-notes settings`, touch a file or key not on its allowlist,
+- Write to `.obsidian/` outside `/bandit:notes settings`, touch a file or key not on its allowlist,
   write it while Obsidian may be open, or write it without a backup
 - Edit, rename, reformat or move a note in `_inbox/` that Leo didn't put up for review in this
   conversation, or leave a reviewed note half-edited in the inbox (sole exception: a skill's own

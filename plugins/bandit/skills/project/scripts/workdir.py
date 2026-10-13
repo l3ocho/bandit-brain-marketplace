@@ -11,18 +11,18 @@ Installed as `.claude/hooks/workdir.py` in the twin's working folder
                        data/) and, once a day, asks Claude to upload it to the vault.
 
 Layout (root = $CLAUDE_PROJECT_DIR):
-  CLAUDE.md  .claude/   settings, owned by project-settings
+  CLAUDE.md  .claude/   settings, owned by bandit:project
   repos/                read-only clones
   work/{prefix}-{task}/ one folder per board task
   data/{prefix}-{task}/ data files for that task, purged on close
   scratch/              throwaway
-  _closed/              closed work, written only by `/bandit-tasks done`
+  _closed/              closed work, written only by `/bandit:tasks done`
   _backup/              rollback copies of settings only: CLAUDE.md.*, settings.json.*, workdir.py.*
 Superseded work stays in its task folder (work/{prefix}-{task}/superseded/), never _backup/.
 A folder with its own CLAUDE.md is a hosted project: its own settings apply.
 
-The constants below mirror `s12` in MyNotes/_skills/structure-rules.yaml.
-Change one, change the other: bandit-audit checks this file's hash.
+The constants below mirror `s12` in bandit:audit references/structure-rules.yaml.
+Change one, change the other: bandit:audit checks this file's hash.
 """
 import datetime, json, os, re, sys
 from pathlib import Path
@@ -92,7 +92,7 @@ def guard():
     if not rel:
         return 0
     if rel == ("CLAUDE.md",) or rel[0] == ".claude":
-        return 0  # settings, handed over by project-settings
+        return 0  # settings, handed over by bandit:project
     if hosted(root, rel):
         return 0
     top, ext = rel[0], p.suffix.lower()
@@ -112,7 +112,7 @@ def guard():
             return block(f"{ext} is a data file: write it to data/{{prefix}}-{{task}}/, never scratch/")
         return 0
     if top == "_closed":
-        return block("_closed/ is filled only by `/bandit-tasks done` (a move), never written")
+        return block("_closed/ is filled only by `/bandit:tasks done` (a move), never written")
     if top == "_backup":
         if len(rel) != 2 or not BACKUP_NAME.match(rel[1]) or ext in DATA_EXT:
             return block("_backup/ holds settings rollback copies only, flat: CLAUDE.md.{version}, "
@@ -220,7 +220,7 @@ def manifest():
         stamp.write_text(today + "\n")
         print(f"Upload .claude/workdir-manifest.json, as-is, to MyNotes/{m['domain']}/Projects/{m['project']}/"
               f"workdir-manifest.json through BanditCloud (new file: omit if_match; existing: its bare-hex etag). "
-              f"It feeds /bandit-audit S12. One line to Leo when done, nothing else.")
+              f"It feeds /bandit:audit S12. One line to Leo when done, nothing else.")
     return 0
 
 

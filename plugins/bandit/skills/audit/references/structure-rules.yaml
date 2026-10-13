@@ -1,0 +1,165 @@
+# Structure rules as data. The prose and the why live in structure-rulebook.md.
+# Change a rule → change both in the same approved proposal, and keep
+# `rulebook_updated` equal to the rulebook's `updated:` frontmatter.
+# check_structure.py refuses to run when they differ.
+schema: 1
+rulebook_updated: 2026-10-13
+
+levels:            # must → ❌ on a break · should → ⚠️
+  S1: must
+  S2: must
+  S3: must
+  S4: must
+  S5: must
+  S6: should
+  S7: should
+  S8: should
+  S9: must         # added 2026-09-28 as a preventive must (rulebook: Changing this rulebook)
+  S10: must        # Claude Code twin; added 2026-09-28 as a preventive must, widened 2026-09-29 to every project without dev: true
+  S11: should      # dev mirror; added 2026-09-28 as a preventive should
+  S12: must        # Claude Code working folder; added 2026-09-29 as a preventive must
+  S13: should      # sprint brief in its sprint folder; S13–S16 added 2026-10-09 as preventive shoulds
+  S14: should      # no filename twice across Projects/ and _inbox/
+  S15: should      # frontmatter parses
+  S16: should      # sprint project root: hub, sprint-* folders and planning/ only
+
+exempt:
+  system_owner: true          # boards with a systemOwner are listed, never scored
+
+names:
+  claude_prefix: "{L} - "     # Claude.ai only; stripped before S2 compares
+  workflow_suffix: " - wkflw" # workflow board only
+  settings_folder: "ai-{slug}"
+  # Claude Code and Claude Design surfaces of the same project: same slug, not
+  # projects of their own. A surface with no ai-{slug}/ is listed as unchecked.
+  surface_folders: ["code-{slug}", "design-{slug}"]
+  banned_board_patterns:      # S2: no other prefixes or suffixes on boards
+    - "^(App|APP|DBT):"
+    - "flow$"
+
+workflow:
+  board_type: workflow
+  project_type: workflow
+  # Decision 2026-09-27 (option C): a workflow project's board: line names its
+  # own `- wkflw` board. Its wider, limited scope comes from type: workflow.
+  context_board_is_wkflw: true
+
+project_context:
+  required_keys: [domain, project, type, board, prefix]
+  optional_keys: [dev]
+  # Strings, not booleans: the snapshot stores Project Context values as text.
+  dev_values: ["true"]
+  types: [product_service, workflow, claude_marketplace]
+  # S4: `project "…"` naming an existing board, or `none`.
+  # `folder "…"`, `global` and `pending` do not pass (rulebook 2026-09-27).
+  board_forms: [project, none]
+  prefix_pattern: "^[a-z]{2,3}$"   # S8: short prefix, never a full name
+
+settings_files:
+  instructions: "^{prefix}-instructions-v(\\d+)\\.md$"
+  prompt_reference: "^{prefix}-prompt-reference-v(\\d+)\\.md$"
+  subfolders_allowed: false
+
+version:
+  # The running version is the first token after **Version:**.
+  # "4.2.1 · **Last Updated:** 2026-09-26" → 4.2.1 · "8 (file …)" → 8
+  token: first
+
+s5:
+  # Order matters: first match wins. This order is implemented in the script;
+  # changing it here without a script update makes the script refuse to run.
+  - {when: no_stamp, result: unchecked}
+  - {when: stamp_matches_newest, result: ok}
+  - {when: stamp_matches_older, result: warn, note: "not pasted yet"}
+  - {when: stamp_newer_than_all, result: fail, note: "critical: vault copy missing"}
+  - {when: stamp_before_newest_file_date, result: unchecked, note: "stamp older than the newest file: run check"}
+  - {when: otherwise, result: warn, note: "drift"}
+
+s7:
+  # Instructions: keep the production file and anything newer (S5 not pasted).
+  # Prompt reference: keep the highest v{N} only.
+  prompt_reference_keep: highest
+
+surfaces:
+  # S8 per kind for code-{slug}/. The {prefix}-…-v{N}.md pattern and S7 apply to ai-{slug}/ only.
+  twin_files: [CLAUDE.md, claude/settings.json, claude/hooks/workdir.py]   # no dev: true (any type); settings + guard: S12
+  mirror_files: [CLAUDE.md]               # dev: true, plus everything under mirror_dir
+  mirror_dir: claude                      # the repo's .claude/, stored without the dot
+  forbidden: [".claude", "settings.local.json"]   # present anywhere → ❌, even though S8 is a should
+
+s10:
+  # Claude Code twin (any project without dev: true): code-{slug}/CLAUDE.md vs the ai-{slug}/ production file (S5).
+  # Same **Version:** token, and the text outside this heading hashes the same.
+  # Behind → warn "not applied yet"; same version, core differs → fail. Never picks a winner.
+  file: CLAUDE.md
+  environment_heading: "## 🖥️ Environment"
+
+s11:
+  # Dev mirror: these files in code-{slug}/, the Stop hook in settings.json runs hook_script.
+  # Freshness isn't scored (2026-09-30): GitHub's pushed_at lags the real remote, and the hook
+  # reports a failed copy in the Claude Code session itself.
+  required_files: [CLAUDE.md, claude/settings.json, claude/hooks/mirror-check.py]
+  settings_file: claude/settings.json
+  hook_event: Stop
+  hook_script: mirror-check.py
+
+s12:
+  # Claude Code working folder (any project with a twin, no dev: true). The guard's
+  # constants (bandit:project scripts/workdir.py) mirror this block: change both.
+  hook_file: claude/hooks/workdir.py
+  hook_sha12: 3212f5f7c2fe          # sha256[:12] of bandit:project's scripts/workdir.py; a twin copy that differs is outdated
+  settings_file: claude/settings.json
+  hook_events: [PreToolUse, SessionStart]   # each needs a command hook running hook_script
+  hook_script: workdir.py
+  manifest: "MyNotes/{domain}/Projects/{slug}/workdir-manifest.json"   # uploaded by the twin; missing → unchecked
+  manifest_max_age_days: 7          # older → unchecked
+  root_allowed: [CLAUDE.md, .claude, repos, work, data, scratch, _closed, _backup]   # plus hosted projects (own CLAUDE.md)
+  task_dirs: [work, data, _closed]  # only {prefix}-{task} folders inside, no loose files
+  task_folder_pattern: "^{prefix}-[a-z0-9]+(-[a-z0-9]+)*$"
+  data_extensions: [.csv, .tsv, .xls, .xlsx, .xlsm, .parquet, .feather, .jsonl, .ndjson, .db, .sqlite, .sqlite3, .duckdb]
+  retention_days: {scratch: 7, _closed: 30}   # older → a delete row, run only on approval
+  backup_dir: _backup               # settings rollback copies only, flat, no retention clock; never work
+  backup_name_pattern: "^(CLAUDE\\.md|settings\\.json|workdir\\.py)\\..+$"
+
+vault_content:
+  # S13–S16: vault content (snapshot schema 5). The conventions are bandit:notes' (§1, §4, §5);
+  # bandit-dev:sprint's local checker enforces the same rules at write time (SP2–SP5).
+  # A sprint project is a Projects/{slug}/ with at least one sprint folder at its root.
+  sprint_folder_pattern: "^sprint-[a-z0-9]+(-[a-z0-9]+)*$"
+  sprint_tag_prefix: "sprint/"      # board tag sprint/{name} ↔ folder sprint-{name}
+  planning_dir: planning            # S16: the one other folder at a sprint project's root
+  brief_type: brief                 # S13: notes with this type and a board-task in a sprint
+  unique_exempt: [README.md]        # S14: the domain home page
+  unique_scope: [_inbox, Projects]  # S14 compares .md filenames here; implemented in the script
+
+s9:
+  # Dev board shape. With `dev: true`: every lane tag has a lane, the first lane is
+  # Incident, and every tag below exists. Without it: no lane matches any of them.
+  # Needs snapshot schema 2 (lanes + tags); schema 1 scores unchecked.
+  first_lane_tag: lane/incident
+  lane_tags: [lane/incident, lane/issue, lane/feature, lane/maintenance, lane/content, lane/tech-debt]
+  stage_tags: [stage/spec, stage/planned, stage/ready]
+
+owners:
+  board_rename: bandit:tasks
+  board_retype: bandit:tasks
+  board_folder_rename: bandit:tasks
+  dev_board_shape: bandit:tasks
+  settings_archive: bandit:notes archive
+  vault_move: bandit:notes
+  vault_folder_rename: bandit:notes
+  context_update: bandit:project
+  claude_rename: Leo (by hand)
+  self_check: Leo (/bandit:audit check in the project)
+  decide: Leo
+  twin_update: bandit:project       # S10
+  dev_mirror: bandit:project        # S11: hook or script missing
+  surface_folder: bandit:notes        # S11: code-{slug}/ missing
+  workdir_guard: bandit:project     # S12: guard missing or outdated
+  workdir_fix: Claude Code in the project   # S12: layout rows, run in the twin's own session
+  brief_move: bandit:notes            # S13
+  duplicate_name: bandit:notes        # S14: archive the consumed copy on proof, or rename one
+  frontmatter_fix: bandit:notes       # S15
+  root_move: bandit:notes             # S16
+
+row_order: [bandit:notes, bandit:notes archive, bandit:project, bandit:tasks, Claude Code in the project, Leo (by hand), Leo (/bandit:audit check in the project), Leo]

@@ -37,7 +37,7 @@ python {skill folder}/scripts/check_structure.py --rules rules.yaml --rulebook r
 
 1. Execute in the order SKILL.md sets (vault → settings → board), each row through its owner's
    procedure. Skip rows that depend on a declined or failed row.
-2. Settings rows: load `project-settings` and run its targeted update **from the vault**, with the
+2. Settings rows: load `bandit:project` and run its targeted update **from the vault**, with the
    project's folder, its production file (the one matching the stamp) and the change. It writes
    the next version file and returns the text to paste.
 3. Report per row, then the close-out lines from SKILL.md.
@@ -52,7 +52,7 @@ Two new files per domain, both written on one approved row (new files: omit `if_
 | `MyNotes/{domain}/Projects/{workflow-project}/audit-{YYYY-MM-DD}.snapshot.json` | The `snapshot.json` it scored |
 
 - Never into `Claude/ai-*`: that's the settings folder, for instructions and the reference doc only — never project logs, working notes, decision journals, discussion records, reports, briefs, plans or drafts.
-- The workflow project's `Projects/` folder missing → a separate row (`bandit-notes` creates it).
+- The workflow project's `Projects/` folder missing → a separate row (`bandit:notes` creates it).
 - A live report already there → replay it first (see Close), then ask: close it, or replace it (an
   edit with its etag, the snapshot too). A **superseded** one (see Replay) gets one more row in the
   same proposal: archive it and its snapshot, as-is, before the new report is written.
@@ -86,5 +86,5 @@ python {skill folder}/scripts/check_structure.py --rules rules.yaml --rulebook r
    and say why.
 3. Ask Leo whether its fix rows are done. Not done → stop; closing is his call.
 4. One row: move both files to `MyNotes/{domain}/_archive/Projects/{workflow-project}/` with
-   `nc_webdav_move_resource`. A missing target folder is a separate row (`bandit-notes` creates it).
+   `nc_webdav_move_resource`. A missing target folder is a separate row (`bandit:notes` creates it).
 5. Confirm by listing both folders.

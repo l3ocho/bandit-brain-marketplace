@@ -1,6 +1,6 @@
 # 📥 Triage
 
-**Commands:** `/bandit-tasks triage` `/bandit-tasks inbox`
+**Commands:** `/bandit:tasks triage` `/bandit:tasks inbox`
 **Owns:** the Inbox board · `move_task` · `bulk_move_tasks` · right-sizing during review
 
 ---
@@ -83,10 +83,10 @@ Triage is where wrong-sized items get caught, because it is the only pass that s
 
 | | Use |
 |---|---|
-| Setting execution state | `/bandit-tasks today` — Execution |
-| Setting due dates in bulk as a planning act | `/bandit-tasks plan` — Week |
-| Creating tasks | `/bandit-tasks capture` |
-| Creating or renaming columns | Design conversation. Outside the skill — except a WBS load (`/bandit-tasks load`) and the dev board shape's `PM` column (`references/dev.md`) |
+| Setting execution state | `/bandit:tasks today` — Execution |
+| Setting due dates in bulk as a planning act | `/bandit:tasks week` — Week |
+| Creating tasks | `/bandit:tasks capture` |
+| Creating or renaming columns | Design conversation. Outside the skill — except a WBS load (`/bandit:tasks load`) and the dev board shape's `PM` column (`references/dev.md`) |
 
 🛠️ **Dev projects (`dev: true`).** Triage run **from the dev project** turns a parked item into a
 card: the move into its area column stays here (`move_task`), and `spec` (`references/dev-workflow.md`)

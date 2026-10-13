@@ -19,6 +19,7 @@ restates them.
 | `audit` | Scores this project's instructions against the template; builds the updated version straight away | `references/audit.md` |
 | `update {project}` | Targeted change to **another** project's instructions from its vault copy (used by bandit:audit settings rows) | `references/update.md` |
 | `sync` | Saves the instructions and reference doc to the vault settings folder | `references/output.md` · `references/vault-storage.md` |
+| `instructions` | Generates the project's instructions from the one-page template for its type (workflow, product_service, dev) | `references/instructions.md` |
 
 | Read | When |
 |---|---|
@@ -37,10 +38,12 @@ restates them.
    all, a list, or none.*
 3. **Owners run their own steps.** Vault rows come from bandit:notes, board rows from bandit:tasks'
    `onboard`, loaded and run: never swapped for a quick check of your own
-4. **Leo pastes.** Instructions are never written into Claude.ai by a tool; the repo `CLAUDE.md` is a
+4. **Instructions come from the templates** in `assets/instructions/` (`references/instructions.md`); the
+   Claude.ai agent of a `dev: true` project stops at spec
+5. **Leo pastes.** Instructions are never written into Claude.ai by a tool; the repo `CLAUDE.md` is a
    hand-over to Claude Code, never written by this skill
-5. **No IDs, ever.** Names and paths only, resolved live
-6. **Vault writes follow bandit:notes write safety**; settings files are versioned, never overwritten,
+6. **No IDs, ever.** Names and paths only, resolved live
+7. **Vault writes follow bandit:notes write safety**; settings files are versioned, never overwritten,
    moved or deleted (`references/vault-storage.md`)
 
 ## ⚠️ Gotchas

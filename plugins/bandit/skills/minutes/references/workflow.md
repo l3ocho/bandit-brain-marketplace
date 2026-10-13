@@ -8,7 +8,7 @@
 2. **Resolve the vault domain** before asking anything: read `domain:` (and `project:`) from
    the `## 🧭 Project Context` section of the project instructions (or the repo's `CLAUDE.md`
    on Claude Code). Legacy fallback: `vault_domain` and `vault_project` in the
-   `<!-- bandit-project: {...} -->` metadata. Neither, or `domain: none` → the domain is
+   line-1 metadata comment (any label: bandit:project `references/reference-template.md` → Marker). Neither, or `domain: none` → the domain is
    unknown and Q2 asks for it.
 3. **Ask the setup questions** in a single `AskUserQuestion` call, before any processing:
    - **Q1 — "Which version of the minutes?"** (header: `Version`, single select)

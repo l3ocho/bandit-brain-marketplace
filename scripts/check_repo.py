@@ -355,6 +355,34 @@ def check_recipe():
     report("Y1", not bad, "; ".join(bad) or f"recipe.py: {len(cases)} fixture cases (keys, tail, refusal by name)")
 
 
+# ── L5 · project instructions templates are one page, and the project skill ships them as-is ─
+TEMPLATE_MAX_LINES, TEMPLATE_MAX_WORDS = 60, 450
+
+
+def check_l5():
+    canon = ROOT / "templates" / "instructions"
+    shipped = PLUGINS / "bandit" / "skills" / "project" / "assets" / "instructions"
+    names = sorted(p.name for p in canon.glob("*.md")) if canon.is_dir() else []
+    bad = []
+    if names != ["dev.md", "product_service.md", "workflow.md"]:
+        bad.append(f"templates/instructions holds {names}, expected dev, product_service, workflow")
+    for n in names:
+        text = (canon / n).read_text(encoding="utf-8")
+        body = text.split("\n", 1)[1] if text.startswith("<!--") else text
+        lines, words = body.count("\n") + 1, len(body.split())
+        if lines > TEMPLATE_MAX_LINES or words > TEMPLATE_MAX_WORDS:
+            bad.append(f"{n} {lines} lines / {words} words > one page ({TEMPLATE_MAX_LINES} / {TEMPLATE_MAX_WORDS})")
+        for need in ("## 🧭 Project Context", "Stage → command", "## 🧩 Modes"):
+            if need not in text:
+                bad.append(f"{n} lacks `{need}`")
+        if not (shipped / n).exists() or (shipped / n).read_bytes() != (canon / n).read_bytes():
+            bad.append(f"{n}: project/assets/instructions copy differs from templates/")
+    extra = sorted(p.name for p in shipped.glob("*")) if shipped.is_dir() else []
+    if extra != names:
+        bad.append(f"project/assets/instructions holds {extra}")
+    report("L5", not bad, "; ".join(bad) or f"{len(names)} templates ≤ one page, shipped byte for byte in bandit:project")
+
+
 def main(argv):
     use_cli = "--no-cli" not in argv
     check_manifests()
@@ -372,6 +400,7 @@ def main(argv):
     check_audit_contract()
     check_sp7()
     check_recipe()
+    check_l5()
     for rule, ok, msg in results:
         print(f"{'✅' if ok else '❌'} {rule} {msg}")
     failed = [r for r, ok, _ in results if not ok]

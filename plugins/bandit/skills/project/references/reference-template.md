@@ -431,6 +431,9 @@ Every generated instruction set includes this HTML comment as the first line:
 <!-- bandit-project: {"storage_backend": null, "webdav_folder": null, "instructions_etag": null, "prompt_ref_etag": null, "instructions_version": null, "prompt_ref_version": null, "ref_version": "1.4", "last_sync": null} -->
 ```
 
+- **Marker.** The comment's label is `bandit-project:`. Instructions written before the marketplace
+  (2026-10-13) carry the previous skill's name as the label, with the same JSON: read them exactly
+  the same way, and write `bandit-project:` on the next version.
 - `storage_backend` — `"webdav"` when the files live in the vault folder, `null` for
   artifact-only. Read it before any other storage field.
 - `webdav_folder` — full folder path, relative to the Nextcloud root with no leading slash

@@ -35,7 +35,7 @@ MyNotes/                         ← BanditCloud root of all domains
    domain and `project:` the project slug. The block's format is owned by bandit:project.
    - `domain: none` → this project has no vault. Say so and stop.
    - **Legacy fallback:** no Project Context section → read `vault_domain` and `vault_project`
-     from the `<!-- bandit-project: {...} -->` metadata instead.
+     from the line-1 metadata comment (any label: bandit:project `references/reference-template.md` → Marker) instead.
 2. **Run by bandit:project (onboarding).** The project's instructions aren't pasted yet, so take
    `domain`, `project` and `type` from bandit:project instead. See *Onboarding* below.
 3. **Explicit argument.** `/bandit:notes home Acme` — the scheduled home refresh always passes it.

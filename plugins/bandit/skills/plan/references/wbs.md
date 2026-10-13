@@ -50,7 +50,7 @@ Run by bandit-dev:sprint's planning (its step 6) on a `dev: true` project, befor
 ### Migration mode (an existing WBS)
 
 When the input is an existing breakdown rather than project docs (e.g. the Gitea wiki page
-`WBS: CS Notes Templates`), rewrite it into the Output Format below instead of generating from
+`WBS: Home Reno Templates`), rewrite it into the Output Format below instead of generating from
 scratch: map its levels onto L1 phase · L2 deliverable · L3 work package · L4 sub-step, keep its
 IDs' meaning, and list everything that didn't map under **⚠️ Assumptions & Gaps** as a gap.
 Skip Phase 5 (the source isn't a file this skill edits). Save `{slug}-wbs.md` as below; the old page becomes a pointer, changed wherever it lives (Claude Code for a repo wiki).
@@ -432,20 +432,3 @@ Before presenting the final WBS, verify:
 - [ ] Source document changelog lists every modification made
 - [ ] Updated source preserves original structure and formatting
 - [ ] Both files (WBS + updated source) are presented, or the vault plan was edited in place
-
----
-
-## ⚠️ Gotchas
-
-- **Reported 2026-10-09 · A WBS draft stayed in the inbox.** It was saved to `_inbox/` and the final
-  went to the project, leaving a leftover. → Save only the final file, in the folder bandit:notes
-  names (**💾 Saving the WBS to the Vault**).
-
----
-
-## 🚫 Never
-
-- Put tasks on the board — that's `/bandit:tasks load` (and `/bandit:tasks spec` on dev projects)
-- Change the output structure `/bandit:tasks load` parses
-- Add time or cost estimates unless asked (and then as a separate column)
-- Overwrite a vault file without its etag, delete anything, or store note IDs

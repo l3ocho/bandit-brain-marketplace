@@ -28,7 +28,7 @@ python {skill folder}/scripts/check_structure.py --rules rules.yaml --rulebook r
   fixed.**
 - **Extra fix rows.** A finding the rules don't cover yet goes **below** the report, never inside
   it, as an `Extra fix rows` table numbered after the script's rows: action, owner (**🔧 Who fixes
-  what** in SKILL.md), exact target, why. Leo approves them with the script's rows in one answer.
+  what** in `references/fix-rows.md`), exact target, why. Leo approves them with the script's rows in one answer.
   A finding with two valid fixes is one row with both options, the recommended one first.
 - Pure context that needs no fix (e.g. the denominator change below) is a one-line **Note**, never
   a finding.

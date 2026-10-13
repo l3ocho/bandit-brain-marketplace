@@ -92,7 +92,12 @@ runbook needs no plan note: its `Technical plan` carries `Runbook: {repo path} �
 
 ### `/bandit:tasks spec` — create or update one card
 
-1. **Gate and role** (above). Resolve scope (SKILL.md → Scope).
+1. **Gate and role** (above). Resolve scope (`references/scope.md`).
+   **Input.** A conversation, a parked card from triage, or a **Clarified Specification** from
+   bandit:clarify. A Clarified Specification maps straight in: Summary → Outcome, In/Out of Scope →
+   Scope in/out, Requirements (Must/Should) → Acceptance, verified Assumptions → Decisions,
+   unverified ones and Open Questions → Open questions. The Spec's `Source` names it:
+   `Source: clarify, {date}`, and the brief keeps the full specification.
 2. **Place it** by the column rule (`references/dev.md` → Card fields), never parked. Lane from the
    agreed scope. A WBS exists for the project → cite the matching `WBS-X.Y.Z` (bandit:notes finds
    the doc).
@@ -154,7 +159,7 @@ Steps 1 and 5 are the **card-write rules** bandit-dev:sprint calls for a sprint'
    different value (above all the branch, the merge commit or the PR URL) → show both and ask Leo;
    never replace it silently. Every other line stays. → `update_task` with `effort` ≤ L (XL →
    propose the split, B7); a Claude.ai estimate that differs → show both and ask → the build steps
-   as sub-tasks, ordered and read back (SKILL.md → Sub-tasks).
+   as sub-tasks, ordered and read back (`references/board.md` → Sub-tasks).
 6. **The card stays `stage/spec`.** It moves only after Leo files the note (`/bandit:notes file`).
 
 ### `/bandit:tasks stage {card} {spec|planned|ready}` — the only stage writer

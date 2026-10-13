@@ -41,7 +41,7 @@
 
    Show its output as printed. Domain-wide rules (S1 folder, S3 one workflow) need the whole domain:
    they're `audit {domain}`'s job. Its fix rows are shown with the stamp row and run on Leo's yes,
-   through their owners (SKILL.md → **▶️ Executing approved rows**).
+   through their owners (`references/fix-rows.md` → **▶️ Executing approved rows**).
 8. **Report in one line:** the S5 result and what was stamped, then the script's table.
 
 ## 🗂️ Ledger format

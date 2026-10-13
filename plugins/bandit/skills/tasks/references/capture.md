@@ -139,6 +139,6 @@ Read links with `get_task`: in `blockedBy` and `blocks`, `id` is the **link** (p
 
 ## 🏷️ Tags
 
-The three axes, and the rule that `set_task_tags` **replaces the whole set**, live in SKILL.md → *Tags*. Read it before tagging.
+The three axes, and the rule that `set_task_tags` **replaces the whole set**, live in `references/board.md` → *Tags*. Read it before tagging.
 
 📌 On a recurring task, tags live on the **series**. Every occurrence carries them.

@@ -20,15 +20,31 @@ Run them all, report only the ones that fire, each with its fix row.
 | # | Check | How |
 |---|---|---|
 | 1 | **Untriaged pile** | `get_inbox_board` → Untriaged count. Over ~15 is a triage backlog, not a hygiene problem |
-| 2 | **Long-parked tasks** | `list_tasks(projectColumnId: null)` — in a project, in no column. Cross-check age via `list_events(taskId)` |
+| 2 | **Untriaged parked cards** | `list_tasks(projectColumnId: null)` — in a project, in no column. Age via `list_events(taskId)`. Fires on a **workflow** project for any card older than a day (the daily sweep missed it), and on any type for a card older than ~30 days with no field answered. Fix row per project: run triage's **Leaving the inbox** for them (`references/triage.md`), or, on a deliverable project, keep them parked as ideas with Leo's yes |
 | 3 | **Stale overdue** | `get_week_board` → Due column. Anything overdue by more than a month is a decision, not a date |
 | 4 | **Stand By rot** | `get_execution_board` → Stand By. Nothing should sit there indefinitely. **Exempt:** cards carrying a `sprint/*` tag and sprint cards (`references/dev.md` → Sprint card): they wait there for Leo's test |
 | 5 | **Dead dependencies** | `get_task` on anything with `blockedBy` — links pointing at completed tasks |
 | 6 | **Orphan tags** | `list_tags` → `taskCount: 0`. **Exempt:** `sprint/*` (a closed sprint's tag is its record; `list_sprints` lists them) |
-| 7 | **Off-vocabulary tags** | `list_tags` → anything outside the vocabulary (SKILL.md → Tags: three axes, dev tags, sprint tags). **Exempt:** `sprint/*` |
+| 7 | **Off-vocabulary tags** | `list_tags` → anything outside the vocabulary (`references/board.md` → Tags: three axes, dev tags, sprint tags). **Exempt:** `sprint/*` |
 | 8 | **Untouched projects** | `list_projects`, then `list_events` per project. No activity in ~60 days → archive candidate |
 | 9 | **Unreadable rules** | `get_repeat_rule` → `rule: null` on a recurring task. Fix row: `update_repeat_rule` with the rule read from its occurrence history (`list_occurrences`), shown in full and marked **unchecked**. History too thin to read → the row asks for the schedule instead. Never rewritten without that row's yes |
 | 10 | **Effort/complexity blanks** | Only worth flagging on tasks in Next or Doing |
+
+### 🧱 Board structure — every project
+
+Columns and lanes are two axes of one view (columns: the process or groups of work; lanes: a second
+grouping across them). A board that piles its needs into columns still works, and this check says
+how to do better. Read the project's columns and lanes (`list_projects`, `get_lane_template`), the
+household members (`list_household_members`) and the project's members (`list_project_members`).
+
+| # | Check | Fires when | Fix row (recommended first) |
+|---|---|---|---|
+| G1 | **A column named like a person** | A column's name matches a member's name or display name, or reads as one ("Kid", "Mom", a first name) | Make it a **lane** for that person: a tag for them, the tag on the column's cards, a lane on that tag, each card moved to the real column of its work, then the empty column deleted (confirm). Option two: keep it, with the reason |
+| G2 | **Too many columns** | More than ~8 columns | Group them: name the two or three axes the columns mix, move one axis into lanes or tags, merge columns that hold the same stage. The row lists which columns go where |
+| G3 | **A column that groups by a tag's job** | A column named for a priority, a person, a status (Waiting, Urgent, Someday) or a kind of work that a lane or tag already carries | Replace it with that tag or a lane on it, cards re-filed by their process column |
+
+Each row is a design proposal: it opens the design conversation at the same approval, and nothing
+runs until Leo settles it (**🚫 Outside audit**). Structure fixes run with raw tools after that yes.
 
 ### 🛠️ Dev-card checks — `dev: true` only, current board only
 
@@ -119,6 +135,6 @@ The `Backlog` column at position 0 refuses rename and delete with `PROTECTED_COL
 
 ## 🚫 Outside audit
 
-Creating projects, renaming columns, configuring lanes — **a design conversation, every time** (except the three procedures in SKILL.md → Outside this skill: load, onboard, dev board shape with its PM column). When a board's shape is causing the mess, audit still brings the fix: a row with the concrete change it recommends (which column, which name, which move) and why. That row opens the design conversation at the same approval; nothing runs until Leo settles it.
+Creating projects, renaming columns, configuring lanes — **a design conversation, every time** (except the three procedures in `references/board.md` → Outside this skill: load, onboard, dev board shape with its PM column). When a board's shape is causing the mess, audit still brings the fix: a row with the concrete change it recommends (which column, which name, which move) and why. That row opens the design conversation at the same approval; nothing runs until Leo settles it.
 
 `archive_project` is the single exception, and it lives here because audit is what discovers the need for it.

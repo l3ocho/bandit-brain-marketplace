@@ -97,7 +97,7 @@ adding a Spec to a card with none are never refused.
 
 ## 🏷️ Tag merging on dev cards
 
-`set_task_tags` replaces the whole set (SKILL.md → Tags), so every dev tag write is: `get_task` →
+`set_task_tags` replaces the whole set (`references/board.md` → Tags), so every dev tag write is: `get_task` →
 merge → write the full set.
 
 - **Stage change:** replace any `stage/*` tag with the new one, or **add** it when the card has
@@ -116,7 +116,7 @@ Every dev card is written **complete**, in one `create_task`, then read back (`g
 | Field | Value |
 |---|---|
 | `projectColumnId` | The **area column**: the module or page the change touches. `App` only when the change is shell-wide. Spans two, or no column fits → ask Leo. Never create a column for it (columns come from `load`, the design conversation, or the PM step of **🏗️ Dev board shape**). **Project-management cards** (sprint planning, a sprint card, umbrella cards, planning checklists, process work) go in the `PM` column instead |
-| `tagIds` | `lane/*` + `stage/spec` (none on Incident) + one Handler tag + one Energy tag (SKILL.md → Tags), ids resolved live |
+| `tagIds` | `lane/*` + `stage/spec` (none on Incident) + one Handler tag + one Energy tag (`references/board.md` → Tags), ids resolved live |
 | `priority` | Always set: urgency only |
 | `complexity` | Always set |
 | `effort` | Always set. Claude.ai's is a first estimate; `plan-tech` confirms it. Max L (B7, `references/dev-workflow.md`) |
@@ -124,8 +124,8 @@ Every dev card is written **complete**, in one `create_task`, then read back (`g
 | `dueDate` | Empty. Only `pick-ready` and a sprint plan date cards; **only the sprint plan sets a sprint batch's due date** (bandit-dev:sprint). Incident: today |
 | Execution state | Left as created. The midnight run moves it when due; `pick-ready` sets Assigned for a card picked for today; a sprint plan may seed its whole batch to Assigned. Incident: `assigned` straight away |
 | `dependencies` | `blockedBy` / `blocks` for every known link, in the same call |
-| `subtasks` | Claude Code only: the build steps, when it writes the card or at `plan-tech`. Claude.ai writes none. Order as SKILL.md → Sub-tasks |
-| `description` | **🃏 Card sections**, written per SKILL.md → Card descriptions |
+| `subtasks` | Claude Code only: the build steps, when it writes the card or at `plan-tech`. Claude.ai writes none. Order as `references/board.md` → Sub-tasks |
+| `description` | **🃏 Card sections**, written per `references/board.md` → Card descriptions |
 | Brief | One `brief` note per card through bandit:notes, `board-task` = the card's short id. Its body is bandit:notes' rule |
 
 ---
@@ -140,7 +140,7 @@ what the board sees.
 |---|---|
 | Column | `PM` (**🧾 Card fields** column rule) |
 | Tags | No `lane/*`, no `stage/*`: it isn't a lane card. Exempt from audit V1, V3 and V6 |
-| Description | No Spec. Written per SKILL.md → Card descriptions |
+| Description | No Spec. Written per `references/board.md` → Card descriptions |
 | Batch | Every card in the sprint is a **blocker** of the sprint card (`add_dependency`, card → sprint card). The live blockers are the source of truth |
 | Sprint tag | `sprint/{name}` on each batch card, never on the sprint card. `list_sprints` lists every sprint tag with open, completed and total counts; `list_tasks(tagName: "sprint/{name}")` gives its cards |
 | Effort | Its own size as the umbrella; B7 applies to the batch cards, not to it |

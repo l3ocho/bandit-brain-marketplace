@@ -37,7 +37,7 @@ What load reads from it:
 
 ## 🗺️ Scope
 
-Read the `board:` line as usual (SKILL.md → *Scope*). Load's own behaviour per value:
+Read the `board:` line as usual (`references/scope.md`). Load's own behaviour per value:
 
 | `board:` | Load does |
 |---|---|

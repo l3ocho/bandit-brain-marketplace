@@ -33,15 +33,54 @@ Never collapse them. Asking "which project and which column" about twenty untria
 
 ## ⚙️ Procedure
 
-1. **Resolve scope.** `list_projects` once. Names → IDs, plus every project's columns and type
+1. **Resolve scope.** `list_projects` once. Names → IDs, plus every project's columns and **type**
 2. **Read the board.** `get_inbox_board`
 3. **Report counts first.** Untriaged count, then parked count per project. Do not start proposing until the size is stated
 4. **Right-size** — see below. Propose only
-5. **Propose destinations** as a list the user can correct in one message
-6. **On confirmation**, write with `bulk_move_tasks` — batches of ≤100
-7. **Report per-task results.** Refusals by task name with the reason
+5. **Stage 1 — propose projects** for the untriaged items, as a list the user can correct in one message
+6. **Stage 2 — leave the inbox** (below) for the parked items the project's exit style lets out now
+7. **On confirmation**, write: fields with `update_task`, placement with `bulk_move_tasks` (batches of ≤100), the due date **last**
+8. **Report per-task results.** Refusals by task name with the reason
 
 ---
+
+## 🚪 Leaving the inbox
+
+Capture asks for nothing; **every field is answered on the way out**. A card leaves the inbox only
+with these answered, in this order, in one proposal row per card (the user corrects a row in one line):
+
+| # | Field | How |
+|---|---|---|
+| 1 | Description | The high-level what and how, block-tag HTML (`references/board.md` → Card descriptions). Detail lives in notes |
+| 2 | Priority | Urgency only |
+| 3 | Effort | Too large → propose the split first (right-sizing below) |
+| 4 | Complexity | High is fine now; it is driven down before execution |
+| 5 | Assignee | `list_project_members` (or household members on a shared project), resolved live |
+| 6 | Column | The project's real column (Stage 2 above) |
+| 7 | **Due date, last** | It commits the card: a parked card that gets a date moves to the first column on its own (rule 2 in SKILL.md). Never asked before the others |
+
+A field the user leaves open keeps the card **parked** (its date stays empty), and the row says which
+field is missing. Never invent a value to get a card out.
+
+### Exit style, by project type
+
+`list_projects` gives each project's type. It decides **how** cards leave, not whether the fields
+above are answered:
+
+| Type | The project inbox is | Cards leave |
+|---|---|---|
+| 🔁 **Workflow** | A place for the unforeseen things a process must handle | **Daily sweep:** every parked card leaves today, all fields answered. Nothing waits for a better time |
+| 🎯 **Deliverable** | The **evaluation gate**, and the **idea list** | One question per card: does it make sense now? **Yes** → a chat about it, then `spec` on a dev project (below) or the fields above · **Not yet** → stays parked, untouched (the board is the idea list: never a separate notes list) · **No** → archive the card (confirm) |
+| 🔀 **Hybrid** | Both, separated by lanes | By the card's lane: a process lane sweeps daily, a deliverable lane goes through the gate. Unknown lane → ask which |
+
+### 🛠️ Dev projects: clarify or spec
+
+On a `dev: true` project a parked item that passes the gate becomes a card through `spec`, never by
+filling fields here. Per item, offer one of:
+
+- **Fuzzy** (the outcome can't be stated in a sentence) → `/bandit:clarify` first; its Clarified
+  Specification is `spec`'s input (`references/dev-workflow.md` → spec, Source: clarify)
+- **Clear** → `/bandit:tasks spec` now, which places it in its area column and writes its Spec
 
 ## 🔀 Placement rules — memorise these
 

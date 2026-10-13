@@ -1,12 +1,12 @@
 # ▶️ The execute cycle
 
-Part of `bandit-sprint`. Read before running `/bandit-sprint execute {sprint card} wave N`. Execution columns, gates and the five-item cap are owned by bandit-tasks (`references/execution.md`); card stages and sections by `references/dev.md`; vault writes by bandit-notes. This file only says how a wave runs and how the cards move.
+Part of `bandit-dev:sprint`. Read before running `/bandit-dev:sprint execute {sprint card} wave N`. Execution columns, gates and the five-item cap are owned by bandit:tasks (`references/execution.md`); card stages and sections by `references/dev.md`; vault writes by bandit:notes. This file only says how a wave runs and how the cards move.
 
 Contents: Command · Rules · Start · The wave · Board moves · Finishing a wave · Resume · Never
 
 ## Command
 
-`/bandit-sprint execute {sprint card} wave N` (for example `execute BB-67 wave 2`). **The wave is the unit; the sprint card says which sprint it belongs to.** Rules, checked before anything moves:
+`/bandit-dev:sprint execute {sprint card} wave N` (for example `execute BB-67 wave 2`). **The wave is the unit; the sprint card says which sprint it belongs to.** Rules, checked before anything moves:
 
 1. **Only a sprint card is accepted**: a card carrying wave sub-tasks (`Wave n: ...`). A batch card (for example `BB-66`) is refused with: "That is a card inside {sprint}. Point me at {sprint card} and a wave number." Nothing is run for a single card.
 2. **Wave N is named or chosen, and said out loud.** `wave N` runs that wave. No number: run the first wave not ticked, and state the choice in the opening line ("Running Wave 2: BB-53, BB-35") before any move.
@@ -63,10 +63,10 @@ Read `get_execution_board` before every batch of moves; the board, not memory, i
 1. All of the wave's cards in `standby`, or Blocked with the reason on the card and in the ledger.
 2. Tick the wave's sub-task on the sprint card only when every card in it is delivered and verified. A wave with a blocked card is not ticked.
 3. **Last wave only:** when every other wave's sub-task is ticked and this wave's last card has reached `standby`, move the sprint card to `standby` (`set_task_execution_state`), then read the board and show it. Any earlier wave: the sprint card is not touched. Otherwise move the next wave's cards to `next` if the gates and cap allow. The next wave's cards stay in `next` at wave end and move to `doing` at the start of their own wave (Decision BB-94, one wave per chat); do not move them earlier. A card whose blocker is a card of the wave just finished is refused `doing` until BB-94 is deployed: see Set the board.
-4. Ledger: At a glance (next wave, next action), milestone log, report section. Then run `python3 ~/.claude/skills/bandit-sprint/scripts/check_sprint.py`; the wave is not finished until it prints OK.
+4. Ledger: At a glance (next wave, next action), milestone log, report section. Then run `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py`; the wave is not finished until it prints OK.
 5. Sprint card section 1 Status line: `Wave {n} of {total} delivered, awaiting the user's test; next: Wave {n+1}` (read the card first, change only that line). Ledger Status per card: `Delivered, awaiting the user's test`.
 6. Comment on the sprint card: `Wave {n} done: {cards}, {verified how}. Next: Wave {n+1} in a new chat.`
-7. Final message, ten lines at most: what Leo can test, what moved, what needs him, and the exact paste for the next wave with its number (`/bandit-sprint execute {sprint card} wave {n+1}`), or after the last wave the paste for `debug`.
+7. Final message, ten lines at most: what Leo can test, what moved, what needs him, and the exact paste for the next wave with its number (`/bandit-dev:sprint execute {sprint card} wave {n+1}`), or after the last wave the paste for `debug`.
 
 ## Resume
 

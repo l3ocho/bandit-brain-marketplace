@@ -1,6 +1,6 @@
 # ⚠️ Gotchas, full list
 
-Part of `bandit-sprint`. Read once at the start of a run. Each line: what went wrong → what to do instead. Every one happened in a real planning chat.
+Part of `bandit-dev:sprint`. Read once at the start of a run. Each line: what went wrong → what to do instead. Every one happened in a real planning chat.
 
 Contents: Interview and pace · Scope · Cards and Specs · Agents and checks · Notes and vault · Repo and hooks · Process · Execute, debug, close · Owner changes proposed
 
@@ -73,7 +73,7 @@ Written before the first real run; correct them with what happens.
 - Every wave got the same paste (`execute BB-67`) and it read like a per-card trigger → the command names the sprint card and the wave (`execute BB-67 wave N`); a batch card id is refused.
 - "I want this today" was taken as approval to commit → urgency is not approval; ask one yes or no.
 - The execution prompt carried its own debug procedure beside `debug.md` → the prompt only points to the references.
-- Waves were split without the WBS Leo asked for → step 6 runs wbs-generator first.
+- Waves were split without the WBS Leo asked for → step 6 runs `/bandit:plan wbs` first.
 
 - Nested agents are documented (three layers by default), so a wave subagent should run code-reviewer and ui-verifier itself; `GATES NEEDED` is only a fallback. Not yet seen in a real run: record what the first `run` shows.
 - An unattended paced run needs the terminal open, the computer awake and "Continue automatically at usage limit" on in `/config`; the model cannot read plan usage, so pacing is by time.

@@ -1,6 +1,6 @@
 # 🔍 The debug cycle
 
-Part of `bandit-sprint`. Read before running `/bandit-sprint debug {sprint card}`. Run in a fresh chat after the last wave is ticked. Leo tests the delivered sprint and brings the adjustments; this chat turns them into verified fixes with the sprint's own documents and diff as context.
+Part of `bandit-dev:sprint`. Read before running `/bandit-dev:sprint debug {sprint card}`. Run in a fresh chat after the last wave is ticked. Leo tests the delivered sprint and brings the adjustments; this chat turns them into verified fixes with the sprint's own documents and diff as context.
 
 Contents: Rules · Read first · Intake · Fix loop · Board · Finishing · Never
 
@@ -48,7 +48,7 @@ Every row fixed, parked or declined with Leo's word. Ledger Status per card move
 
 ## Never
 
-- Rewrite a locked Spec (show old and new, get a yes, use the bandit-tasks Spec lock rules).
+- Rewrite a locked Spec (show old and new, get a yes, use the bandit:tasks Spec lock rules).
 - Edit the plan after approval; live changes go in the ledger.
 - Fix something nobody approved because it looked wrong. Raise it as a row.
 - Complete cards, merge into `main`, deploy, force-push.

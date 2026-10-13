@@ -1,6 +1,6 @@
 # 🧾 Shapes and filenames
 
-Part of `bandit-sprint`. Frontmatter keys, values, filename rules, YAML style and inbox rules belong to bandit-notes; card sections belong to bandit-tasks. This file only fixes the sprint-specific shapes. A fixed shape is justified because other steps and chats read these records.
+Part of `bandit-dev:sprint`. Frontmatter keys, values, filename rules, YAML style and inbox rules belong to bandit:notes; card sections belong to bandit:tasks. This file only fixes the sprint-specific shapes. A fixed shape is justified because other steps and chats read these records.
 
 Contents: Filenames · Sprint card · Step comment · Plan note · Brief change log · Execution prompt · Ledger · Report
 
@@ -14,7 +14,7 @@ Contents: Filenames · Sprint card · Step comment · Plan note · Brief change 
 | Execution prompt | `{project}-sprint-{name}-handover-prompt.md` |
 | Ledger | `{project}-sprint-{name}-progress.md` |
 | Handover report | `{project}-sprint-{name}-handover-report.md` (created by the execution chat) |
-| Briefs | one per card, bandit-notes brief naming, filed into the folder |
+| Briefs | one per card, bandit:notes brief naming, filed into the folder |
 
 ## Sprint card description
 
@@ -36,7 +36,7 @@ Each brief ends, before Related, with `## Change log`: one dated entry per plann
 
 ## Execution prompt
 
-Model: the latest sprint's handover prompt in the project's sprint folder (or its `_archive` mirror once closed), adjusted to the shape below. Copy its structure and replace the sprint content. Required sections: how Leo starts or resumes a chat (one paste per wave, `/bandit-sprint execute {sprint card} wave {n}`); context (project, folder contents); goal; **read first every session**; authority and stop-lines (including the Test data rule from `plan.md`: live checks and tests create and remove their own data, never alter existing records, and a case skipped for lack of data is a failed check; explicit approval to implement; the authorised push of `development` (a reinforced line saying an older "never push" note or memory is superseded); never touch the main branch, deploy, force-push, run credential scripts, touch production, edit Leo's verbatim documents or rules, override the Spec lock, write to cards outside the sprint, mark anything complete or approved); autonomy (no questions, conservative reading recorded in the ledger, stop only at a real blocker); the wave cycle (branch, verify-first, implement with tests, gates in order, report section, merge into local development, board comment, ledger; at wave end, tick that wave's sub-task on the sprint card); the ledger rules (update after every milestone, etag discipline, resume reconciles repo and ledger); the handover report (per card: what you get, how to test it, how we tested it, limits and decisions, where it lives, if it breaks; then regression list, needs-the-user list, bug log); the final message (ten lines at most, one wave per run); a debug and close section that only points to `references/debug.md` and `references/close.md` (no procedure copied); a wave and card reference table.
+Model: the latest sprint's handover prompt in the project's sprint folder (or its `_archive` mirror once closed), adjusted to the shape below. Copy its structure and replace the sprint content. Required sections: how Leo starts or resumes a chat (one paste per wave, `/bandit-dev:sprint execute {sprint card} wave {n}`); context (project, folder contents); goal; **read first every session**; authority and stop-lines (including the Test data rule from `plan.md`: live checks and tests create and remove their own data, never alter existing records, and a case skipped for lack of data is a failed check; explicit approval to implement; the authorised push of `development` (a reinforced line saying an older "never push" note or memory is superseded); never touch the main branch, deploy, force-push, run credential scripts, touch production, edit Leo's verbatim documents or rules, override the Spec lock, write to cards outside the sprint, mark anything complete or approved); autonomy (no questions, conservative reading recorded in the ledger, stop only at a real blocker); the wave cycle (branch, verify-first, implement with tests, gates in order, report section, merge into local development, board comment, ledger; at wave end, tick that wave's sub-task on the sprint card); the ledger rules (update after every milestone, etag discipline, resume reconciles repo and ledger); the handover report (per card: what you get, how to test it, how we tested it, limits and decisions, where it lives, if it breaks; then regression list, needs-the-user list, bug log); the final message (ten lines at most, one wave per run); a debug and close section that only points to `references/debug.md` and `references/close.md` (no procedure copied); a wave and card reference table.
 
 The execution prompt must carry the No leftovers rule (SKILL.md, Leftovers) in its wave cycle.
 

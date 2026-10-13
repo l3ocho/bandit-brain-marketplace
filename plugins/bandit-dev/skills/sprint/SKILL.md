@@ -1,6 +1,6 @@
 ---
-name: "bandit-sprint"
-description: "Plans, executes, debugs and closes a sprint on a dev project's BanditBrains board. Invoked as /bandit-sprint plan [cards], /bandit-sprint execute {sprint card} wave N (one wave per chat, cards moved across the Execution board), /bandit-sprint run {sprint card} [more sprint cards] (every wave of one or more sprints, one subagent per wave, in sequence), /bandit-sprint debug {sprint card} and /bandit-sprint close {sprint card}. Plan: with no list it takes every open High-priority card on the board; with a list (BB-12 BB-15 …) it takes exactly those. Creates the sprint card in the PM column (cards as blockers, 11 gate sub-tasks), checks every Spec, runs one interview, sizes and splits, sequences waves, splits waves with the WBS, writes the shared plan with risks and rollback, readies, tags, assigns and dates the cards, and writes the execution prompt and ledger. Proactive: investigates before asking. Use when Leo says plan a sprint, sprint planning, group these cards, take all high priority cards or put these cards in a sprint. Claude Code only. Do NOT use to write one card's Spec or plan (bandit-tasks spec, plan-tech), to pick cards for the week (bandit-tasks plan, sprint) or to file notes (bandit-notes)."
+name: "sprint"
+description: "Plans, executes, debugs and closes a sprint on a dev project's BanditBrains board. Invoked as /bandit-dev:sprint plan [cards], /bandit-dev:sprint execute {sprint card} wave N (one wave per chat, cards moved across the Execution board), /bandit-dev:sprint run {sprint card} [more sprint cards] (every wave of one or more sprints, one subagent per wave, in sequence), /bandit-dev:sprint debug {sprint card} and /bandit-dev:sprint close {sprint card}. Plan: with no list it takes every open High-priority card on the board; with a list (BB-12 BB-15 …) it takes exactly those. Creates the sprint card in the PM column (cards as blockers, 11 gate sub-tasks), checks every Spec, runs one interview, sizes and splits, sequences waves, splits waves with the WBS, writes the shared plan with risks and rollback, readies, tags, assigns and dates the cards, and writes the execution prompt and ledger. Proactive: investigates before asking. Use when Leo says plan a sprint, sprint planning, group these cards, take all high priority cards or put these cards in a sprint. Claude Code only. Do NOT use to write one card's Spec or plan (bandit:tasks spec, plan-tech), to pick cards for the week (bandit:tasks plan, sprint) or to file notes (bandit:notes)."
 ---
 
 # 🏃 Bandit Sprint
@@ -9,13 +9,13 @@ Turns a set of existing cards into one planned, approved sprint that a fresh cha
 
 > **The standard.** Every gate leaves evidence on the sprint card and in the sprint folder. If this chat vanished, the next one could continue from those two places.
 
-> **The checker is the proof.** `python3 ~/.claude/skills/bandit-sprint/scripts/check_sprint.py` enforces the vault rules as code (SP1 records present, SP2 briefs inside their sprint folder, SP3 no duplicate filenames, SP4 valid frontmatter, SP5 nothing but the hub note, the sprint folders and `planning/` at a sprint project's root, SP6 one brief per card outside the archive). Plan step 11, every wave end, `run` and `close` run it and paste its output; a step with a failing check is not done and is not ticked. A Stop hook runs it too, so a session that touched the vault cannot end with a failure. A new kind of mistake becomes a new checker rule, not a new sentence here.
+> **The checker is the proof.** `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py` enforces the vault rules as code (SP1 records present, SP2 briefs inside their sprint folder, SP3 no duplicate filenames, SP4 valid frontmatter, SP5 nothing but the hub note, the sprint folders and `planning/` at a sprint project's root, SP6 one brief per card outside the archive). Plan step 11, every wave end, `run` and `close` run it and paste its output; a step with a failing check is not done and is not ticked. A Stop hook runs it too, so a session that touched the vault cannot end with a failure. A new kind of mistake becomes a new checker rule, not a new sentence here.
 
 ---
 
 ## 🧭 Command
 
-`/bandit-sprint plan [cards]`, `/bandit-sprint execute {sprint card} wave N`, `/bandit-sprint run {sprint card} […]`, `/bandit-sprint debug {sprint card}`, `/bandit-sprint close {sprint card}`. With no command, offer the plan table below and the three commands, and ask which.
+`/bandit-dev:sprint plan [cards]`, `/bandit-dev:sprint execute {sprint card} wave N`, `/bandit-dev:sprint run {sprint card} […]`, `/bandit-dev:sprint debug {sprint card}`, `/bandit-dev:sprint close {sprint card}`. With no command, offer the plan table below and the three commands, and ask which.
 
 | Mode | Input | Selects |
 |---|---|---|
@@ -37,8 +37,8 @@ Read the reference for the command you run before acting. For `plan`, read `refe
 
 ## 🗺️ Gate 0: before step 1
 
-1. **Surface.** Claude Code only: `stage … planned`, plan notes and Spec edits belong to it (bandit-tasks `references/dev.md`, Surface). On Claude.ai say so and stop.
-2. **Project Context.** Read `## 🧭 Project Context` from the repo `CLAUDE.md` (owner: project-settings). Need `dev: true`, a `board:` project and `prefix`. Missing or not dev: say which and stop. Resolve the project, its columns and members **live** with `list_projects` and `list_project_members`.
+1. **Surface.** Claude Code only: `stage … planned`, plan notes and Spec edits belong to it (bandit:tasks `references/dev.md`, Surface). On Claude.ai say so and stop.
+2. **Project Context.** Read `## 🧭 Project Context` from the repo `CLAUDE.md` (owner: bandit:project). Need `dev: true`, a `board:` project and `prefix`. Missing or not dev: say which and stop. Resolve the project, its columns and members **live** with `list_projects` and `list_project_members`.
 3. **PM column.** The sprint card lives in the project's `PM` column. Missing: one fix row (add the column right after Backlog, two calls), asked once with the opening line. Never create it silently.
 4. **Repo state.** `git branch --show-current` and `git status --short`. Planning writes docs only; if work sits on `main`, say so and keep every commit for `development`.
 5. **Tools.** Board server, BanditCloud server, and which browser tool exists. A missing server stops the run before step 1.
@@ -94,11 +94,11 @@ The sprint card carries the steps as its sub-tasks, in this order, followed at t
 | Plan, briefs, execution prompt, ledger, handover report | The sprint folder; filenames in `references/templates.md` |
 | Sprint tag | `sprint/{name}` on the batch cards |
 
-The sprint folder and its record types are owned by bandit-notes (conventions §1, Sprint folders, and §4 filenames). This skill follows them and restates none of them; `references/templates.md` mirrors the filenames only for convenience.
+The sprint folder and its record types are owned by bandit:notes (conventions §1, Sprint folders, and §4 filenames). This skill follows them and restates none of them; `references/templates.md` mirrors the filenames only for convenience.
 
-**Leftovers.** A document used only to make another one (an inbox brief or spec draft once its card and filed brief exist, a WBS draft once the WBS is filed, a feedback note once applied, a brief whose card was deleted) is archived to `_archive/` with the bandit-notes stamps, or deleted on Leo's word, in the same step that consumed it. Nothing consumed stays in `_inbox/` or at a project root. **Only on proof**: the successor exists and was read (the filed brief, the filed WBS, the applied change). A note is never archived because it looks done or because its card is missing; if unsure, it stays.
+**Leftovers.** A document used only to make another one (an inbox brief or spec draft once its card and filed brief exist, a WBS draft once the WBS is filed, a feedback note once applied, a brief whose card was deleted) is archived to `_archive/` with the bandit:notes stamps, or deleted on Leo's word, in the same step that consumed it. Nothing consumed stays in `_inbox/` or at a project root. **Only on proof**: the successor exists and was read (the filed brief, the filed WBS, the applied change). A note is never archived because it looks done or because its card is missing; if unsure, it stays.
 
-**Writes.** New notes fail closed; edits read first and carry the etag; never force. A card description is read with `get_task` immediately before it is written, and a Spec change is shown old and new and applied only on Leo's yes (bandit-tasks `references/dev.md`, Spec lock). Tags are read and merged before `set_task_tags`. Board writes touch only the batch cards and the sprint card. Nothing is stored inside this skill's folder.
+**Writes.** New notes fail closed; edits read first and carry the etag; never force. A card description is read with `get_task` immediately before it is written, and a Spec change is shown old and new and applied only on Leo's yes (bandit:tasks `references/dev.md`, Spec lock). Tags are read and merged before `set_task_tags`. Board writes touch only the batch cards and the sprint card. Nothing is stored inside this skill's folder.
 
 ---
 
@@ -106,10 +106,10 @@ The sprint folder and its record types are owned by bandit-notes (conventions §
 
 | Need | Read it in |
 |---|---|
-| Lanes, stages, card sections, Spec lock, boundaries, `stage`, `spec` | bandit-tasks `references/dev.md` |
-| Tags, handler and energy tags, five hard rules | bandit-tasks `SKILL.md` |
-| Vault folders, filenames, frontmatter, etag writes, inbox rules | bandit-notes `SKILL.md` and `references/conventions.md` |
-| Project Context keys | project-settings |
+| Lanes, stages, card sections, Spec lock, boundaries, `stage`, `spec` | bandit:tasks `references/dev.md` |
+| Tags, handler and energy tags, five hard rules | bandit:tasks `SKILL.md` |
+| Vault folders, filenames, frontmatter, etag writes, inbox rules | bandit:notes `SKILL.md` and `references/conventions.md` |
+| Project Context keys | bandit:project |
 
 ---
 
@@ -142,7 +142,7 @@ Ten of the most costly. The full list is `references/gotchas.md`.
 - Run two wave agents at once, or two waves in one chat, run a single card, run a wave out of order without Leo's say-so, or move a card to Done by anything but `close`.
 - Treat an urgency remark as approval of the plan.
 - Edit Leo's verbatim documents or any rule in `CLAUDE.md` without permission.
-- Copy a rule from bandit-tasks or bandit-notes into this skill; name the owner.
+- Copy a rule from bandit:tasks or bandit:notes into this skill; name the owner.
 - Store IDs, or write inside the skill folder.
 - Tick a step without its evidence on the card.
 

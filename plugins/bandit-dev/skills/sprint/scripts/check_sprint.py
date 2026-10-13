@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Checks bandit-sprint records in a MyNotes domain vault. Exit 1 on any error.
+"""Checks bandit-dev:sprint records in a MyNotes domain vault. Exit 1 on any error.
 
 Rules (each one a failure, not a warning):
   SP1  every sprint folder has its plan, handover prompt and ledger, named {project}-sprint-{name}-{record}.md
@@ -144,7 +144,7 @@ def session_touched_vault(payload: dict) -> bool:
         return False
     with open(transcript, encoding="utf-8", errors="replace") as fh:
         text = fh.read()
-    return "MyNotes/" in text or "bandit-sprint" in text
+    return "MyNotes/" in text or "bandit-dev:sprint" in text
 
 
 def main() -> int:
@@ -173,7 +173,7 @@ def main() -> int:
             print(f"OK: {domain} passes SP1-SP6 ({len(sprint_folders(domain))} sprint folders)")
         return 0
     out = sys.stderr if args.hook else sys.stdout
-    print(f"bandit-sprint check FAILED in {domain} ({len(errors)}). Fix these before finishing:", file=out)
+    print(f"bandit-dev:sprint check FAILED in {domain} ({len(errors)}). Fix these before finishing:", file=out)
     for line in errors:
         print(f"- {line}", file=out)
     return 2 if args.hook else 1

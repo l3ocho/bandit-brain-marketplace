@@ -1,6 +1,6 @@
 # 📋 The plan cycle, step by step
 
-Part of `bandit-sprint`. Read before running `/bandit-sprint plan`. Card sections, lanes, stages and the Spec lock are owned by bandit-tasks (`references/dev.md`); vault paths and write rules by bandit-notes. This file only says how the steps run.
+Part of `bandit-dev:sprint`. Read before running `/bandit-dev:sprint plan`. Card sections, lanes, stages and the Spec lock are owned by bandit:tasks (`references/dev.md`); vault paths and write rules by bandit:notes. This file only says how the steps run.
 
 Contents: Conventions · Steps 1 to 11 · Investigator brief · Handover
 
@@ -23,7 +23,7 @@ Contents: Conventions · Steps 1 to 11 · Investigator brief · Handover
 
 ## 2 · Spec completeness check
 
-For each card: `get_task`; find its brief (bandit-notes lookup by filename from the Spec's `Brief:` line); compare card and brief; check Outcome, Scope in and out, Acceptance, Decisions and Open questions exist; check referenced cards, files and idea ids resolve; note sub-tasks, tags, effort, complexity, lane and stage.
+For each card: `get_task`; find its brief (bandit:notes lookup by filename from the Spec's `Brief:` line); compare card and brief; check Outcome, Scope in and out, Acceptance, Decisions and Open questions exist; check referenced cards, files and idea ids resolve; note sub-tasks, tags, effort, complexity, lane and stage.
 
 **Fix rows for:** missing sections, card and brief disagreement, an unresolved reference, a `Brief:` line carrying a folder (filename only).
 
@@ -40,7 +40,7 @@ For each card: `get_task`; find its brief (bandit-notes lookup by filename from 
 
 ## 4 · Size and classify
 
-Effort and complexity per card; lane per card. Check the card boundaries in bandit-tasks `dev.md`: one lane, one branch, one landing, up to L; **XL splits into two or more cards** now. A split card keeps its Spec's intent, gets its own brief and Spec, blocks or is blocked by its sibling, and **joins the sprint** and the sprint card's blockers. Record old and new sizes in one comment.
+Effort and complexity per card; lane per card. Check the card boundaries in bandit:tasks `dev.md`: one lane, one branch, one landing, up to L; **XL splits into two or more cards** now. A split card keeps its Spec's intent, gets its own brief and Spec, blocks or is blocked by its sibling, and **joins the sprint** and the sprint card's blockers. Record old and new sizes in one comment.
 
 ## 5 · Cross-card analysis
 
@@ -48,7 +48,7 @@ From the investigations and a quick code check: migrations (one at a time, numbe
 
 ## 6 · Sequence
 
-**Split with the WBS.** Before drawing the waves, run wbs-generator for the batch in sprint mode (input: the batch cards and their briefs; skip its reconcile phase, which would edit the briefs; no size estimates). The WBS is its own note, `{project}-wbs.md` in `Projects/{slug}/planning/` (bandit-notes owns the path and the Card links rows; wbs-generator owns the format), and the plan note links it. Use each card's lowest-level tasks to see what truly depends on what; sizes stay with step 4. The WBS decides the wave split: a wave is a set of cards (or card pieces) that can be built and verified together. No wave split without it.
+**Split with the WBS.** Before drawing the waves, run `/bandit:plan wbs` for the batch in sprint mode (input: the batch cards and their briefs; skip its reconcile phase, which would edit the briefs; no size estimates). The WBS is its own note, `{project}-wbs.md` in `Projects/{slug}/planning/` (bandit:notes owns the path and the Card links rows; bandit:plan owns the format), and the plan note links it. Use each card's lowest-level tasks to see what truly depends on what; sizes stay with step 4. The WBS decides the wave split: a wave is a set of cards (or card pieces) that can be built and verified together. No wave split without it.
 
 Waves with a reason each. Parallel only where cards touch different files and no migration is shared; merges, migrations and shared board components are sequential. Record the order on the sprint card (Order column).
 
@@ -67,7 +67,7 @@ Ready means: Spec clear with no open questions, acceptance testable, dependencie
 1. Check each card strictly and report who passes and who fails, with fix rows.
 2. **Reconcile each Spec once**: answered questions into Decisions, open questions cleared, wrong lines fixed, acceptance lines brought in line with decisions. Show old and new per card in one table; on Leo's yes write with the Spec-lock override, after `get_task`.
 3. Update each brief: requirements, decisions with reasons, verified facts with where each was checked, no open questions, a dated **Change log** of what changed and why, and no card state (column, lane, stage) in the body.
-4. Move passing cards to `stage/planned`, then `stage/ready` on Leo's approval (step 10), through the stage procedure in bandit-tasks.
+4. Move passing cards to `stage/planned`, then `stage/ready` on Leo's approval (step 10), through the stage procedure in bandit:tasks.
 
 ## 10 · Approval gate
 
@@ -75,7 +75,7 @@ Present the state in a short summary (cards, waves, plan, risks, what needs Leo)
 
 ## 11 · Commit the sprint
 
-Per batch card: tag `sprint/{name}` (create the tag once; merge with the card's current tags), assign to Leo (live lookup), due date = the sprint date, `stage/ready`. Sprint card: assignee, due date, size (umbrella, usually XL and Complex), header filled (dates, owner, capacity = total effort), decisions log, readiness line. Write the execution prompt and the ledger (templates). **Add the wave sub-tasks last**: one per wave, at the very end of the sprint card after the 11 step sub-tasks, named `Wave {n}: {card ids}` (for example `Wave 2: BB-53, BB-35`), added one at a time, then **always** put the whole list in order with `reorder_subtasks` (11 steps first, then the waves) and read the card back to confirm. They stay unticked until the execution delivers and verifies that wave. Move every batch brief into the sprint folder (`Projects/{slug}/sprint-{name}/`) and archive every source the planning consumed (inbox drafts, spec notes, a superseded WBS draft; see Leftovers in SKILL.md), then run `python3 ~/.claude/skills/bandit-sprint/scripts/check_sprint.py` and paste its output into the step comment; step 11 is not ticked until it prints OK. Seed the Execution board: every batch card to `assigned` with `bulk_set_execution_state` (so Leo sees the whole sprint before work starts). Verify the board with `list_sprints`, `get_execution_board` and a read of the sprint card.
+Per batch card: tag `sprint/{name}` (create the tag once; merge with the card's current tags), assign to Leo (live lookup), due date = the sprint date, `stage/ready`. Sprint card: assignee, due date, size (umbrella, usually XL and Complex), header filled (dates, owner, capacity = total effort), decisions log, readiness line. Write the execution prompt and the ledger (templates). **Add the wave sub-tasks last**: one per wave, at the very end of the sprint card after the 11 step sub-tasks, named `Wave {n}: {card ids}` (for example `Wave 2: BB-53, BB-35`), added one at a time, then **always** put the whole list in order with `reorder_subtasks` (11 steps first, then the waves) and read the card back to confirm. They stay unticked until the execution delivers and verifies that wave. Move every batch brief into the sprint folder (`Projects/{slug}/sprint-{name}/`) and archive every source the planning consumed (inbox drafts, spec notes, a superseded WBS draft; see Leftovers in SKILL.md), then run `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py` and paste its output into the step comment; step 11 is not ticked until it prints OK. Seed the Execution board: every batch card to `assigned` with `bulk_set_execution_state` (so Leo sees the whole sprint before work starts). Verify the board with `list_sprints`, `get_execution_board` and a read of the sprint card.
 
 ## Investigator brief
 
@@ -95,7 +95,7 @@ A live-browser investigator **at planning time** is told which controls write (s
 
 ## Plan final message
 
-End of step 11: ten lines at most, and one exact paste per wave, each naming the sprint card and the wave: `/bandit-sprint execute {sprint card} wave 1`, `... wave 2`, and so on, then `/bandit-sprint debug {sprint card}` and `/bandit-sprint close {sprint card}`. Never one generic paste for every wave.
+End of step 11: ten lines at most, and one exact paste per wave, each naming the sprint card and the wave: `/bandit-dev:sprint execute {sprint card} wave 1`, `... wave 2`, and so on, then `/bandit-dev:sprint debug {sprint card}` and `/bandit-dev:sprint close {sprint card}`. Never one generic paste for every wave.
 
 ## Handover
 

@@ -217,6 +217,109 @@ def check_guard_pin():
            else f"s12.hook_sha12 {m.group(1) if m else 'missing'} ≠ workdir.py sha12 {actual}")
 
 
+# ── L1 · description ≤ 300 characters, at most one "not for" clause ──────────────────────
+DESC_MAX = 300
+CORE_DESC_TOTAL = 2400
+
+
+def frontmatter(skill):
+    import yaml
+    text = (skill / "SKILL.md").read_text(encoding="utf-8")
+    parts = text.split("---", 2)
+    return (yaml.safe_load(parts[1]) or {}) if len(parts) > 2 else {}, text
+
+
+def check_l1():
+    bad, core = [], 0
+    for s in all_skills():
+        desc = str(frontmatter(s)[0].get("description") or "").strip()
+        nots = len(re.findall(r"\b(do not|not for)\b", desc, re.I))
+        if len(desc) > DESC_MAX:
+            bad.append(f"{s.name} {len(desc)} chars")
+        if nots > 1:
+            bad.append(f"{s.name} {nots} not-for clauses")
+        if s.parent.parent.name == "bandit":
+            core += len(desc)
+    if core > CORE_DESC_TOTAL:
+        bad.append(f"core total {core} > {CORE_DESC_TOTAL}")
+    report("L1", not bad, "; ".join(bad) or f"every description ≤ {DESC_MAX}; core total {core} ≤ {CORE_DESC_TOTAL}")
+
+
+# ── L2 · SKILL.md ≤ 150 lines, with a router table pointing at references/ ───────────────
+SKILL_MAX_LINES = 150
+
+
+def check_l2():
+    bad = []
+    for s in all_skills():
+        text = (s / "SKILL.md").read_text(encoding="utf-8")
+        lines = text.count("\n") + (0 if text.endswith("\n") else 1)
+        if lines > SKILL_MAX_LINES:
+            bad.append(f"{s.name} {lines} lines")
+        known = {p.name for k in all_skills() for p in (k / "references").glob("*.md")}
+        for ref in set(re.findall(r"`references/([\w.-]+\.md)`", text)):
+            if ref not in known:  # a pointer may name another skill's reference file
+                bad.append(f"{s.name} points to missing references/{ref}")
+        if not re.search(r"^\|.*`references/[\w.-]+\.md`.*\|", text, re.M):
+            bad.append(f"{s.name} has no router row pointing to references/")
+    report("L2", not bad, "; ".join(bad) or f"every SKILL.md ≤ {SKILL_MAX_LINES} lines with a router")
+
+
+# ── L4 · no project details in skills: project names, stack tools, card ids, UUIDs ───────
+L4_TERMS = re.compile(
+    r"\b(BanditLabs|Summitt|cs-notes|CS Notes|bandit-labs|banditbrain|BanditBrains|drizzle|npm|npx)\b"
+    r"|\b(?!WBS-|UTF-|SHA-)[A-Z]{2,4}-\d+\b"
+    r"|\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b")
+# Leo's house standards are data he approves, not skill procedure: their examples stay.
+L4_EXEMPT = {"structure-rulebook.md", "structure-rules.yaml", "rulebook.md"}
+
+
+def check_l4():
+    hits = []
+    for s in all_skills():
+        for f in sorted(s.rglob("*")):
+            if not f.is_file() or f.suffix not in TEXT_SUFFIXES or f.name in L4_EXEMPT or "__pycache__" in f.parts:
+                continue
+            for n, line in enumerate(f.read_text(encoding="utf-8", errors="ignore").splitlines(), 1):
+                m = L4_TERMS.search(line)
+                if m:
+                    hits.append(f"{f.relative_to(PLUGINS)}:{n} `{m.group(0)}`")
+    report("L4", not hits, f"project details: {'; '.join(hits[:8])}{' …' if len(hits) > 8 else ''} ({len(hits)})"
+           if hits else "no project names, stack tools, card ids or UUIDs in any skill")
+
+
+# ── H1 · house lint passes on every skill (the rulebook's code gate) ──────────────────────
+def check_house_lint():
+    lint = house_lint()
+    bad = []
+    for s in all_skills():
+        for rule, level, msg in lint.lint(s):
+            if level == "fail":
+                bad.append(f"{s.name} {rule}: {msg}")
+    report("H1", not bad, "; ".join(bad) or f"house lint OK on {len(all_skills())} skills")
+
+
+# ── A1 · the shipped audit rules pass the scorer's own contract (rules ↔ rulebook in step) ─
+def check_audit_contract():
+    import importlib.util
+    base = PLUGINS / "bandit" / "skills" / "audit"
+    script = base / "scripts" / "check_structure.py"
+    if not script.exists():
+        return report("A1", True, "skipped (no audit scorer)")
+    spec = importlib.util.spec_from_file_location("check_structure", script)
+    mod = importlib.util.module_from_spec(spec)
+    sys.dont_write_bytecode = True
+    spec.loader.exec_module(mod)
+    try:
+        rules, sha = mod.load_rules(base / "references" / "structure-rules.yaml",
+                                    base / "references" / "structure-rulebook.md")
+    except Exception as e:  # ContractError or a YAML error: either way the scorer would refuse
+        return report("A1", False, f"audit rules refused by check_structure.py: {e}")
+    ok = bool(rules.get("paths", {}).get("stamps"))
+    report("A1", ok, f"audit rules load (sha {sha}, rulebook {rules['rulebook_updated']}), paths.stamps set"
+           if ok else "audit rules: paths.stamps missing")
+
+
 def main(argv):
     use_cli = "--no-cli" not in argv
     check_manifests()
@@ -227,6 +330,11 @@ def main(argv):
     check_denylist()
     check_r15()
     check_guard_pin()
+    check_l1()
+    check_l2()
+    check_l4()
+    check_house_lint()
+    check_audit_contract()
     for rule, ok, msg in results:
         print(f"{'✅' if ok else '❌'} {rule} {msg}")
     failed = [r for r, ok, _ in results if not ok]

@@ -37,6 +37,7 @@ After the spec, offer one line. **The destination follows the subject:**
 | The spec is about | Offer |
 |---|---|
 | Changing one or more **skills** | **"Save as a Marketplace card plus brief?"** — one card in the **Marketplace** column of the bandit-brain-marketplace project's board, with one brief naming every skill touched. See *Marketplace card plus brief* below |
+| Work for a **dev project** (`dev: true` in the Project Context) | **"Turn this into a card with `/bandit:tasks spec`?"** — `spec` takes this Clarified Specification as its input (`Source: clarify`), places the card in its area column and writes its brief. No separate note: the brief is the note |
 | Anything else | **Both, by default:** "Save this as a note in the {Domain} `_inbox` **and** a card on the board, linked? Say *note only* or *card only* to drop one." See *Note + card* below |
 
 **Note + card** (only after Leo says yes; a plain "yes" means both):

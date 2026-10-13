@@ -32,7 +32,7 @@ Specification that `/bandit:tasks spec` or `/bandit:plan` can build from.
 3. **Check references first:** an attachment, link or "this" that isn't there is named as an assumption
 4. **Verify before delivering:** a guess is never presented as a constraint
 5. **The destination follows the subject** (`references/deliver.md`): skill changes → a Marketplace
-   card plus brief; anything else → a note **and** a card, linked, by default
+   card plus brief; dev-project work → `/bandit:tasks spec`; anything else → a note **and** a card, linked
 6. **Writes go through their owners:** cards through bandit:tasks, notes through bandit:notes
 
 ## ⚠️ Gotchas

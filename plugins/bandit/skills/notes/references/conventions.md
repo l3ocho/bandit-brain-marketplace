@@ -47,6 +47,7 @@ sprint's name, the same word as its `sprint/{name}` tag on the board (`sprint/de
 | Execution prompt (instructions for the execution chat) | `{project}-sprint-{name}-handover-prompt.md` | `reference` | the sprint card |
 | Ledger (live progress) | `{project}-sprint-{name}-progress.md` | `reference` | the sprint card |
 | Report (handover test report) | `{project}-sprint-{name}-handover-report.md` | `reference` | the sprint card |
+| Review (the independent plan review, sprint plan step 11) | `{project}-review-sprint-{name}-YYYY-MM-DD.md` | `log` | the sprint card |
 | Briefs of the sprint's cards | §4 brief pattern | `brief` | that card |
 
 **Written straight in**, like the planning documents (`references/other-skills.md`): these records are
@@ -61,7 +62,7 @@ project that isn't a sprint's record (a brief or plan note whose card is in no s
 instance). It moves into the sprint folder when its card joins one. `file` and `file-to` use
 `planning/` as the project destination on such a project.
 
-**Archiving a sprint.** At close, the plan, execution prompt, ledger and report take `status:
+**Archiving a sprint.** At close, the plan, execution prompt, ledger, review record and report take `status:
 done`; then the whole folder moves in one proposal: `Projects/{slug}/sprint-{name}/` →
 `_archive/Projects/{slug}/sprint-{name}/`, every note stamped (§7), the missing mirror folders
 listed as rows.
@@ -135,7 +136,7 @@ Lowercase kebab-case, `.md`, no spaces, no dates in the middle.
 | **Attachment** | `{note-slug}-{what}.{ext}`, in `_attachments/` | `department-minutes-2026-09-17-seating.png` |
 | **Brief** | `{project}-{lane}-{slug}-YYYY-MM-DD.md` | `home-reno-feature-export-button-2026-09-23.md` |
 | **Plan** (dev projects, §13) | `{project}-{lane}-{slug}-plan.md`, `{lane}` the bare value (`feature`, not `lane/feature`) | `home-reno-feature-export-button-plan.md` |
-| **Sprint records** (dev projects, §1 Sprint folders) | `{project}-sprint-{name}-{record}.md`, `{record}` = `plan` · `handover-prompt` · `progress` · `handover-report` | `home-reno-sprint-debut-plan.md` |
+| **Sprint records** (dev projects, §1 Sprint folders) | `{project}-sprint-{name}-{record}.md`, `{record}` = `plan` · `handover-prompt` · `progress` · `handover-report`; the review record is dated: `{project}-review-sprint-{name}-YYYY-MM-DD.md` | `home-reno-sprint-debut-plan.md` |
 | **Settings** (`Claude/ai-*`) | `{prefix}-{type}-v{N}.md` | `sw-instructions-v1.md` |
 
 Dated by type: `minutes`, `request`, `brief`, `log`. Evergreen: `note`, `reference`, `plan`.

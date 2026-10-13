@@ -1,6 +1,6 @@
 # ⛔ Refusal codes
 
-Read when a BanditBrains call comes back `{ ok: false, code, reason, relatedId? }`. Act on `code`,
+Read when a Bandit Brain call comes back `{ ok: false, code, reason, relatedId? }`. Act on `code`,
 show `reason`, and resolve `relatedId` (the task responsible) to a title before reporting. Never
 retry a variant of the same call to get past a refusal. Codes are from the tools' own schemas unless
 a row says otherwise.
@@ -11,7 +11,7 @@ a row says otherwise.
 |---|---|---|---|
 | `NOT_FOUND` | The id names nothing. Also what `get_task` returns for an unknown uuid or short id (checked 2026-10-09) | Any call that takes an id | Re-resolve the name live (`list_tasks`, `list_projects`); never guess the nearest match |
 | `INVALID_ARGUMENTS` | A malformed call: a partial or gapped list in `reorder_subtasks` / `reorder_project_columns`, a filter value out of range | Reorders, `list_tasks` | Fix the call: reorders need **every** item, positions 0..n-1 once |
-| `BLOCKED_BY_INCOMPLETE_TASK` | A blocker isn't complete. **Stand By is not complete** | `set_task_execution_state` → `doing`, and its bulk form (seen 2026-10-08, BB-94). The code on `next` and on `complete_task`: **unchecked** | Name the blocker and stop (`references/execution.md` → gates) |
+| `BLOCKED_BY_INCOMPLETE_TASK` | A blocker isn't complete. **Stand By is not complete** | `set_task_execution_state` → `doing`, and its bulk form (seen 2026-10-08). The code on `next` and on `complete_task`: **unchecked** | Name the blocker and stop (`references/execution.md` → gates) |
 | `TAG_RULE_VIOLATION` | Two `stage/*` tags, or `lane/incident` with a `stage/*` | `create_task`, `set_task_tags`, `bulk_set_task_tags` (per task) | Merge the tags right (`references/dev.md` → Tag merging) |
 | `SPEC_LOCKED` | The write changes a Spec that holds text | `update_task` | Comment `Spec change needed:`, or override only on Leo's yes (`references/dev.md` → Spec lock) |
 | `PROTECTED_COLUMN` | Backlog at position 0: no rename, no delete, never moved off 0 | `rename_project_column`, `delete_project_column`, `reorder_project_columns` | Correct. Report it; no workaround |

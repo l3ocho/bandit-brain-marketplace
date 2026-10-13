@@ -37,8 +37,8 @@ sprint plan may seed its whole batch to Assigned in one `bulk_set_execution_stat
 
 ⛔ When a gate refuses: **name the blocking task**, do not retry, do not route around it. `relatedId` in the refusal is the blocker — resolve it to a title before reporting. Codes: `references/errors.md`.
 
-📌 **Known gap, BB-94:** Doing would accept a blocker in Stand By (a chained card worked while its
-blocker waits for Leo's test). Not built: until BB-94 ships, the gate above holds.
+📌 **Known gap (app):** Doing would accept a blocker in Stand By (a chained card worked while its
+blocker waits for Leo's test). Not built: until the app ships that change, the gate above holds.
 
 ---
 

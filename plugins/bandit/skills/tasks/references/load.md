@@ -56,7 +56,7 @@ After a load that created a project, say: *set `board: project "{name}"` through
 
 ## 🧩 Mapping
 
-| WBS | BanditBrains |
+| WBS | Bandit Brain |
 |---|---|
 | WBS-0 | Project, `type: deliverable`, named after the WBS |
 | L2 deliverable | A column, named `X.Y {deliverable}`, in WBS order after the protected Backlog |

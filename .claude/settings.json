@@ -1,0 +1,54 @@
+{
+  "enabledPlugins": {
+    "bandit@bandit-brain": false,
+    "bandit-dev@bandit-brain": false
+  },
+  "permissions": {
+    "deny": [
+      "Skill(anthropic-skills:bandit-tasks)",
+      "Skill(anthropic-skills:bandit-notes)",
+      "Skill(anthropic-skills:bandit-audit)",
+      "Skill(anthropic-skills:project-settings)",
+      "Skill(anthropic-skills:clarify)",
+      "Skill(anthropic-skills:text-rewriter)",
+      "Skill(anthropic-skills:project-planner)",
+      "Skill(anthropic-skills:wbs-generator)",
+      "Skill(anthropic-skills:meeting-minutes)",
+      "Skill(anthropic-skills:myskill-creator)",
+      "Skill(bandit-sprint)",
+      "Skill(bandit:tasks)",
+      "Skill(bandit:notes)",
+      "Skill(bandit:project)",
+      "Skill(bandit:audit)",
+      "Skill(bandit:clarify)",
+      "Skill(bandit:rewrite)",
+      "Skill(bandit:plan)",
+      "Skill(bandit:minutes)",
+      "Skill(bandit-dev:sprint)"
+    ]
+  },
+  "skillOverrides": {
+    "anthropic-skills:bandit-tasks": "off",
+    "anthropic-skills:bandit-notes": "off",
+    "anthropic-skills:bandit-audit": "off",
+    "anthropic-skills:project-settings": "off",
+    "anthropic-skills:clarify": "off",
+    "anthropic-skills:text-rewriter": "off",
+    "anthropic-skills:project-planner": "off",
+    "anthropic-skills:wbs-generator": "off",
+    "anthropic-skills:meeting-minutes": "off",
+    "anthropic-skills:myskill-creator": "off"
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if command -v python3 >/dev/null 2>&1; then exec python3 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/mirror-check.py\"; else exec python \"${CLAUDE_PROJECT_DIR}/.claude/hooks/mirror-check.py\"; fi"
+          }
+        ]
+      }
+    ]
+  }
+}

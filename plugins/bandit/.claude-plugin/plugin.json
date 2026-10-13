@@ -1,0 +1,10 @@
+{
+  "name": "bandit",
+  "version": "0.1.0",
+  "description": "Core Bandit Brain skills: tasks, notes, project, audit, clarify, rewrite, plan and minutes.",
+  "author": {
+    "name": "l3ocho"
+  },
+  "repository": "https://github.com/l3ocho/bandit-brain-marketplace",
+  "license": "MIT"
+}

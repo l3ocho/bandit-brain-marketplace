@@ -1,0 +1,3 @@
+#!/bin/sh
+# Rules are code: the commit is refused while the repo checker fails.
+exec python3 "$(git rev-parse --show-toplevel)/scripts/check_repo.py"

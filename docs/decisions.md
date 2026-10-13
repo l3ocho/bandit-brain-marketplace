@@ -142,7 +142,7 @@ The tables marked for the checker (`denylist:off`) are the only place the old sk
 | D15 | wbs-generator standalone, two modes | **Superseded**: merged into `plan`; sprint mode kept as `plan wbs` sprint mode |
 | D16 | project-planner and `tasks load` stay | **Superseded** in part: planner merged into `plan`; `tasks load` kept |
 | D17 | text-rewriter and meeting-minutes in the plugin | Kept (as `rewrite`, `minutes`) |
-| D18 | `mktpl-claude-datasaas` and projman retired, never cited | Kept (checker denylist) |
+| D18 | `mktpl-claude-datasaas` and projman retired, never cited; the nine stub skills pointing to them are removed from `~/.claude/skills/` (adr, data, design, doc, labels, project, projman, rfc, sprint) | Kept (checker denylist) |
 | D19 | Rules are code, never prose alone | Kept |
 | D20 | Step 0 = package with no behaviour change | **Superseded** by brief §7 (rebrand and lighten) |
 | D21 | Every marketplace skill may be edited here; outside skills and other projects' notes untouched | Kept |

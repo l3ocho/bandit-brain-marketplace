@@ -63,8 +63,10 @@ def sprint_folders(domain: Path) -> list[tuple[str, Path]]:
 def check(domain: Path) -> list[str]:
     errors: list[str] = []
     md_files = [p for p in domain.rglob("*.md") if not any(part.startswith(".") for part in p.relative_to(domain).parts)]
-    # Settings mirrors (Claude/, its archive) and templates (Templater syntax) are not notes.
-    md_files = [p for p in md_files if not (set(p.relative_to(domain).parts[:2]) & {"Claude", "_templates"})]
+    # Settings mirrors (Claude/, its archive), templates (Templater syntax) and the retired skill
+    # sources (_archive/skills/, every skill has a SKILL.md) are not notes.
+    md_files = [p for p in md_files if not (set(p.relative_to(domain).parts[:2]) & {"Claude", "_templates"})
+                and p.relative_to(domain).parts[:2] != ("_archive", "skills")]
 
     # SP3 duplicate filenames
     by_name = defaultdict(list)

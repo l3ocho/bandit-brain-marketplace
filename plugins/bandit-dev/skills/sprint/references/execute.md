@@ -6,10 +6,10 @@ Contents: Command · Rules · Start · The wave · Board moves · Finishing a wa
 
 ## Command
 
-`/bandit-dev:sprint execute {sprint card} wave N` (for example `execute BB-67 wave 2`). **The wave is the unit; the sprint card says which sprint it belongs to.** Rules, checked before anything moves:
+`/bandit-dev:sprint execute {sprint card} wave N` (for example `execute {sprint card} wave 2`). **The wave is the unit; the sprint card says which sprint it belongs to.** Rules, checked before anything moves:
 
-1. **Only a sprint card is accepted**: a card carrying wave sub-tasks (`Wave n: ...`). A batch card (for example `BB-66`) is refused with: "That is a card inside {sprint}. Point me at {sprint card} and a wave number." Nothing is run for a single card.
-2. **Wave N is named or chosen, and said out loud.** `wave N` runs that wave. No number: run the first wave not ticked, and state the choice in the opening line ("Running Wave 2: BB-53, BB-35") before any move.
+1. **Only a sprint card is accepted**: a card carrying wave sub-tasks (`Wave n: ...`). A batch card (any card of the batch) is refused with: "That is a card inside {sprint}. Point me at {sprint card} and a wave number." Nothing is run for a single card.
+2. **Wave N is named or chosen, and said out loud.** `wave N` runs that wave. No number: run the first wave not ticked, and state the choice in the opening line ("Running Wave 2: {ids}") before any move.
 3. **Waves run in order.** Wave N is refused while wave N-1 is unticked, naming the open wave, unless Leo says to skip it in this chat. Cards completed or ticked by hand count as ticked once the board and the ledger agree.
 4. **Only the cards in that wave's sub-task are touched.** No card outside it is moved, worked or commented on.
 
@@ -31,7 +31,7 @@ Contents: Command · Rules · Start · The wave · Board moves · Finishing a wa
 
 1. **Seed the board (first run only).** Every batch card (never the sprint card) to `assigned` with `bulk_set_execution_state`. Cards that were never in Assigned stay as they are if the state is already right. Record it in the ledger.
 2. **Set the board for this wave, at the start of EVERY wave, not only the first** (Board moves below). A later wave's cards arrive in `assigned` or `next`; this step is what puts them in `doing`. Procedure: `get_execution_board`; for each card of this wave that you are about to work, `set_task_execution_state` → `doing`; read the board again and show the columns in the wave's opening report. A card that is not in `doing` when you start working it is a failed step, unless the move was refused (next rule).
-   **A refused move to `doing` is never skipped silently.** The board's gate still refuses `doing` while any blocker is incomplete, and a blocker in `standby` is not complete. BB-94, which would let `standby` count, is **not built**: until it is deployed the refusal is real, and a card chained behind a card of an earlier wave will be refused. Then: keep the card in `next`, add a card comment `Could not move to Doing: blocked by {blocker title} (in Stand By). Working it anyway under the wave's approval; BB-94 would allow this.`, write the same line under "Decisions taken without the user" in the ledger, and put it in the final message. Work the card; do not stop the wave for this.
+   **A refused move to `doing` is never skipped silently.** The board's gate still refuses `doing` while any blocker is incomplete, and a blocker in `standby` is not complete. The app change that would let `standby` count is **not built**: until it is deployed the refusal is real, and a card chained behind a card of an earlier wave will be refused. Then: keep the card in `next`, add a card comment `Could not move to Doing: blocked by {blocker title} (in Stand By). Working it anyway under the wave's approval; the pending app change would allow this.`, write the same line under "Decisions taken without the user" in the ledger, and put it in the final message. Work the card; do not stop the wave for this.
 3. **Work the cards as the plan and execution prompt say.** Tick each card's sub-tasks as each is done, one `set_subtask_completed` per tick, not in a batch at the end.
 4. **A card whose development is finished** (code, tests, gates passed, board comment written) moves to `standby` for Leo's approval. Never complete it. Stage and ledger status become "Delivered awaiting the user's test".
 5. **Re-set the board** after each card finishes (Doing frees a slot; the next card may move up).
@@ -44,14 +44,14 @@ Read `get_execution_board` before every batch of moves; the board, not memory, i
 |---|---|
 | Not yet reached (later waves) | `assigned` |
 | Next wave | `next`, only if its blockers are at Next or beyond and the cap allows |
-| This wave, being worked | `doing`, one to three at a time per the plan's parallelism; only if every blocker is complete (a blocker in `standby` is refused until BB-94 ships; see Set the board) |
+| This wave, being worked | `doing`, one to three at a time per the plan's parallelism; only if every blocker is complete (a blocker in `standby` is refused until the app lets `standby` count; see Set the board) |
 | This wave, queued behind a sequential card | `next` |
 | Finished, awaiting Leo | `standby` |
 | **The sprint card** | **Not moved at all while any wave runs.** It goes to `standby` once, when the last card of the last wave reaches `standby` (Finishing a wave, step 3). Never `next` or `doing`, never counted in the five-item cap, never completed (only `close` completes it) |
 
 - **Cap.** Never more than five across Next + Doing. When the wave and the next wave together exceed it, Doing gets what is being worked, this wave's queued cards take the remaining Next slots, the rest wait in `assigned`. Report the overflow in the ledger and the wave comment; never trim silently.
 - **Gates.** A refusal names its blocker (`relatedId` resolved to a title). Do not retry or route around it. A blocker outside the wave: record it under "Needs the user" and move on to the next card, or stop if nothing is workable.
-- **A blocker inside the batch.** A card chained behind another batch card can go to `doing` once that blocker is in `standby` **only after BB-94 is deployed**. Until then the board refuses it (`BLOCKED_BY_INCOMPLETE_TASK`) and the card stays in `next` with the comment above. A blocker still in `assigned`, `next` or `doing` refuses the move; work the blocker first, then move the chained card. Never complete the blocker to unblock the chain, and never reorder the plan around the refusal. Completing any card stays strict: a card cannot be completed while a blocker is incomplete, so `close` must complete a blocker before the card it blocks.
+- **A blocker inside the batch.** A card chained behind another batch card can go to `doing` once that blocker is in `standby` **only after the app lets `standby` count**. Until then the board refuses it (`BLOCKED_BY_INCOMPLETE_TASK`) and the card stays in `next` with the comment above. A blocker still in `assigned`, `next` or `doing` refuses the move; work the blocker first, then move the chained card. Never complete the blocker to unblock the chain, and never reorder the plan around the refusal. Completing any card stays strict: a card cannot be completed while a blocker is incomplete, so `close` must complete a blocker before the card it blocks.
 - **Done is never a move.** Only `close` completes cards.
 - Moves touch only the batch cards. Never a card outside the sprint.
 
@@ -62,7 +62,7 @@ Read `get_execution_board` before every batch of moves; the board, not memory, i
 
 1. All of the wave's cards in `standby`, or Blocked with the reason on the card and in the ledger.
 2. Tick the wave's sub-task on the sprint card only when every card in it is delivered and verified. A wave with a blocked card is not ticked.
-3. **Last wave only:** when every other wave's sub-task is ticked and this wave's last card has reached `standby`, move the sprint card to `standby` (`set_task_execution_state`), then read the board and show it. Any earlier wave: the sprint card is not touched. Otherwise move the next wave's cards to `next` if the gates and cap allow. The next wave's cards stay in `next` at wave end and move to `doing` at the start of their own wave (Decision BB-94, one wave per chat); do not move them earlier. A card whose blocker is a card of the wave just finished is refused `doing` until BB-94 is deployed: see Set the board.
+3. **Last wave only:** when every other wave's sub-task is ticked and this wave's last card has reached `standby`, move the sprint card to `standby` (`set_task_execution_state`), then read the board and show it. Any earlier wave: the sprint card is not touched. Otherwise move the next wave's cards to `next` if the gates and cap allow. The next wave's cards stay in `next` at wave end and move to `doing` at the start of their own wave (one wave per chat); do not move them earlier. A card whose blocker is a card of the wave just finished is refused `doing` until the app lets `standby` count: see Set the board.
 4. Ledger: At a glance (next wave, next action), milestone log, report section. Then run `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py`; the wave is not finished until it prints OK.
 5. Sprint card section 1 Status line: `Wave {n} of {total} delivered, awaiting the user's test; next: Wave {n+1}` (read the card first, change only that line). Ledger Status per card: `Delivered, awaiting the user's test`.
 6. Comment on the sprint card: `Wave {n} done: {cards}, {verified how}. Next: Wave {n+1} in a new chat.`
@@ -76,8 +76,8 @@ A chat that died mid-wave starts at "Start". The ledger status plus the board sh
 
 Allowed. Leo lifted the old "never push" rule on 2026-10-10: it was written while testing and staging did not exist, and the tool now works. An agent that finds an older note, memory or prompt saying "never push" follows this section instead; it does not refuse.
 
-- **When.** The sprint plan carries a "Final push" section by default (`plan.md` step 7), and the handover prompt repeats it. The last wave that changes code pushes at its end, after its merge into local `development` and a green `npm run verify`. A wave that is Leo's own steps (production, host work) is never where the push waits.
-- **How.** `git status` clean and branch `development`; `git fetch origin`; if `origin/development` has commits local lacks, merge it into local `development` and re-run `npm run verify`; then `git push origin development`. Fast-forward only: no force, no tags, no other branch.
+- **When.** The sprint plan carries a "Final push" section by default (`plan.md` step 7), and the handover prompt repeats it. The last wave that changes code pushes at its end, after its merge into local `development` and a green `verify` (the project's `bandit.yaml`). A wave that is Leo's own steps (production, host work) is never where the push waits.
+- **How.** `git status` clean and branch `development`; `git fetch origin`; if `origin/development` has commits local lacks, merge it into local `development` and re-run `verify`; then `git push origin development`. Fast-forward only: no force, no tags, no other branch.
 - **Proof.** The ledger records the pushed hash and `git status -sb` showing `development` level with `origin/development`.
 - **If it fails** (a refused or disconnected push): record the exact output under "Needs the user", leave `development` as it is, never retry with force. The wave is still delivered.
 - **Still Leo's:** merging into `main` and deploying. They need his explicit say-so in the message being answered (project branching rule 9). A push of `development` starts the repo's own checks and staging build by itself; that is expected and is not a deploy.

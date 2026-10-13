@@ -36,7 +36,7 @@ Per approved row, in card order and wave order where they interact:
 
 ## Board
 
-- A card with an adjustment moves `standby` → `doing` while being fixed, back to `standby` when done. The cap and gates apply as in `execute.md`, including the in-batch blocker rule: a card whose blocker is in `standby` is refused `doing` by the board until BB-94 is deployed; record the refusal as in `execute.md` and fix it from `standby`.
+- A card with an adjustment moves `standby` → `doing` while being fixed, back to `standby` when done. The cap and gates apply as in `execute.md`, including the in-batch blocker rule: a card whose blocker is in `standby` is refused `doing` by the board until the app lets `standby` count; record the refusal as in `execute.md` and fix it from `standby`.
 - Nothing is completed here. Leo's approval and `close` do that.
 
 ## Finishing

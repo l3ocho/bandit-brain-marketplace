@@ -11,7 +11,8 @@ Rules (each one a failure, not a warning):
        everything into that one note, which waits in the inbox; its ledger row says "detached")
 
 Usage:
-  check_sprint.py [--vault ~/Documents/MyNotes] [--domain BanditLabs]
+  check_sprint.py [--vault DIR] [--domain NAME]   (defaults: $MYNOTES_DIR or ~/Documents/MyNotes;
+                                                the `domain:` of the repo CLAUDE.md Project Context)
   check_sprint.py --hook   (Stop hook: reads the hook JSON on stdin, checks only when the
                             session touched the vault, blocks the stop once with exit 2)
 """
@@ -147,10 +148,22 @@ def session_touched_vault(payload: dict) -> bool:
     return "MyNotes/" in text or "bandit-dev:sprint" in text
 
 
+def context_domain() -> str | None:
+    """The `domain:` of the Project Context in the repo's CLAUDE.md (the project owns its domain)."""
+    root = Path(os.environ.get("CLAUDE_PROJECT_DIR") or os.getcwd())
+    try:
+        text = (root / "CLAUDE.md").read_text(encoding="utf-8")
+    except OSError:
+        return None
+    block = text.split("## 🧭 Project Context", 1)
+    m = re.search(r"^domain:\s*(\S+)", block[1], re.M) if len(block) > 1 else None
+    return m.group(1) if m and m.group(1) != "none" else None
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--vault", default=os.path.expanduser("~/Documents/MyNotes"))
-    ap.add_argument("--domain", default="BanditLabs")
+    ap.add_argument("--vault", default=os.environ.get("MYNOTES_DIR") or os.path.expanduser("~/Documents/MyNotes"))
+    ap.add_argument("--domain", default=None)
     ap.add_argument("--hook", action="store_true")
     args = ap.parse_args()
 
@@ -162,7 +175,13 @@ def main() -> int:
         if payload.get("stop_hook_active") or not session_touched_vault(payload):
             return 0
 
-    domain = Path(args.vault) / args.domain
+    name = args.domain or context_domain()
+    if not name:
+        if args.hook:
+            return 0  # not a project with a vault domain: nothing to check
+        print("check_sprint: no --domain and no Project Context `domain:` in CLAUDE.md", file=sys.stderr)
+        return 1
+    domain = Path(args.vault).expanduser() / name
     if not domain.is_dir():
         print(f"check_sprint: no domain folder at {domain}", file=sys.stderr)
         return 0 if args.hook else 1

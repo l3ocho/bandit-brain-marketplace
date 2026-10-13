@@ -31,7 +31,7 @@ Contents: Interview and pace · Scope · Cards and Specs · Agents and checks ·
 ## Agents and checks
 
 - A live-check agent clicked a control that writes (a column sort) in the dev database → at planning, brief investigators: open and cancel, write nothing on existing data, report what could not be checked; name the known write controls. This is planning-only.
-- Sprint Privacy A wave 1: the execution prompt copied "live checks write nothing", so the ui-verifier skipped BB-71's key case (a folder with projects) because the dev database had none, and the report presented it as normal → execution prompts say the verifier creates and removes its own test data; a case not run for lack of data is a failed check.
+- Sprint Privacy A wave 1: the execution prompt copied "live checks write nothing", so the ui-verifier skipped a card's key case (a folder with projects) because the dev database had none, and the report presented it as normal → execution prompts say the verifier creates and removes its own test data; a case not run for lack of data is a failed check.
 - Investigator reports mixed verified facts and guesses → require "not verified" markers and spot-check the decisive facts before they enter a card.
 - The browser tool the brief named was not available to the sub-agent → state the tools that exist; accept an equivalent and note it.
 - One long sub-agent report per card flooded the chat → read the report, pass on only the merged list of findings and questions.
@@ -63,14 +63,14 @@ Written before the first real run; correct them with what happens.
 - Execute ran two waves in one chat and compressed the context → one wave per run; stop and give the paste for the next chat.
 - The cap of five across Next + Doing hit when the next wave was pulled forward → count Next + Doing from `get_execution_board` before each move; overflow waits in Assigned and is reported.
 - A card went to Next or Doing past a dependency gate → the refusal names the blocker; report it, do not retry or route around.
-- A chained card was refused `doing` (`BLOCKED_BY_INCOMPLETE_TASK`) because its blocker, a batch card, was parked in `standby` as the skill requires → BB-94 (Doing would accept a blocker in `standby`) is a backlog card and **not built**, so the refusal stands: leave the card in `next`, comment the refusal on the card, record it in the ledger, and never complete the blocker to get past it. A blocker in `assigned`, `next` or `doing` still refuses: work the blocker first.
+- A chained card was refused `doing` (`BLOCKED_BY_INCOMPLETE_TASK`) because its blocker, a batch card, was parked in `standby` as the skill requires → the app change (Doing would accept a blocker in `standby`) is a backlog card and **not built**, so the refusal stands: leave the card in `next`, comment the refusal on the card, record it in the ledger, and never complete the blocker to get past it. A blocker in `assigned`, `next` or `doing` still refuses: work the blocker first.
 - A finished card was completed instead of parked → delivery is `standby`; only `close` completes, on Leo's quoted approval.
 - Sub-tasks ticked in a batch at the end → tick each as it is done so the card shows live progress.
 - Debug fixed things nobody approved → every adjustment is a numbered row; apply only approved rows.
 - Close archived before the cards were complete → order is cards, sprint card, then folder; verify each.
 
 - Wave sub-tasks landed at the top of the card, reversed, even when added one at a time → always `reorder_subtasks` with the full order and read back.
-- Every wave got the same paste (`execute BB-67`) and it read like a per-card trigger → the command names the sprint card and the wave (`execute BB-67 wave N`); a batch card id is refused.
+- Every wave got the same paste (`execute {sprint card}`) and it read like a per-card trigger → the command names the sprint card and the wave (`execute {sprint card} wave N`); a batch card id is refused.
 - "I want this today" was taken as approval to commit → urgency is not approval; ask one yes or no.
 - The execution prompt carried its own debug procedure beside `debug.md` → the prompt only points to the references.
 - Waves were split without the WBS Leo asked for → step 6 runs `/bandit:plan wbs` first.
@@ -85,7 +85,7 @@ Written before the first real run; correct them with what happens.
 - Leftovers stayed behind after the work that used them; then two notes were archived on a guess → write No leftovers into every command, and archive only on proof that the successor exists.
 - Inbox drafts stayed behind after their brief was filed, a WBS draft after the WBS was filed, a brief after its card was deleted → archive what a step consumed in that same step; SP2, SP3 and SP5 catch the sprint cases.
 
-- In `run`, the second wave never moved its working cards to Doing: its cards were chained behind first-wave cards sitting in Stand By, the board still refuses Doing while a blocker is incomplete, and the skill said Stand By counted (BB-94, not built) → never write a rule the board does not enforce; setting the board happens at the start of every wave; a refused move is recorded on the card and in the ledger, never skipped silently.
+- In `run`, the second wave never moved its working cards to Doing: its cards were chained behind first-wave cards sitting in Stand By, the board still refuses Doing while a blocker is incomplete, and the skill said Stand By counted (an app change, not built) → never write a rule the board does not enforce; setting the board happens at the start of every wave; a refused move is recorded on the card and in the ledger, never skipped silently.
 
 - The sprint card moved along with its batch and sat in the way → it stays untouched until the last card of the last wave is in Stand By, then moves to Stand By once, and `close` completes it.
 
@@ -94,3 +94,4 @@ Written before the first real run; correct them with what happens.
 ## Owner changes proposed
 
 - A card was detached at close (production steps moved to the next sprint) while its brief stayed in the sprint folder that was about to be archived, and the checker still counted the card as part of the sprint → write "detached" on its ledger row, and merge everything about the card into one note in the inbox before archiving (`close.md` step 3a); SP2 skips detached cards and SP6 fails a second brief for a card.
+- Sent a second long question list after the first → one list per gate with recommendations; follow up only on what the answers raise.

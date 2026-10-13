@@ -6,7 +6,7 @@ Contents: Command · Rules · Before the first wave · The loop · Paced mode ·
 
 ## Command
 
-`/bandit-dev:sprint run BB-67` runs every unticked wave of that sprint, in order. `/bandit-dev:sprint run BB-67 BB-72` runs the sprints in the order given, all of the first before any of the second.
+`/bandit-dev:sprint run {sprint card}` runs every unticked wave of that sprint, in order. `/bandit-dev:sprint run {card A} {card B}` runs the sprints in the order given, all of the first before any of the second.
 
 1. **Only sprint cards are accepted** (cards carrying `Wave n:` sub-tasks). A batch card is refused, as in `execute`.
 2. **Each sprint must be committed**: its 11 step sub-tasks ticked. A sprint still in planning is named and skipped; the others still run.
@@ -40,7 +40,7 @@ For each wave, in order:
    - the sprint card's `Wave n` sub-task is ticked;
    - the sprint card has not moved while waves remain (never move it yourself before then), and after the last wave it is in `standby`;
    - the cards the wave worked are in `standby` now, and during the wave they were in `doing`: read the wave agent's report line "BOARD at start" (the columns it showed after setting the board). A card that was worked from `assigned` or `next` without a recorded refusal (`Could not move to Doing:` comment on the card) is a failed wave: stop. A recorded refusal is not a failure;
-   - the Execution board (`get_execution_board`) shows exactly what `execute.md` → Board moves requires: this wave's cards in `standby` (or Blocked with the reason on the card), the next wave's cards in `next` where the gates and the five-card cap allow (a card chained behind a batch card in `standby` is refused `doing` by the board until BB-94 ships, so it may legitimately still be in `next` with its recorded refusal comment), every later wave's cards in `assigned`. A card in the wrong column is moved to the right one by the orchestrator (the only board write it makes) and noted in the sprint card comment;
+   - the Execution board (`get_execution_board`) shows exactly what `execute.md` → Board moves requires: this wave's cards in `standby` (or Blocked with the reason on the card), the next wave's cards in `next` where the gates and the five-card cap allow (a card chained behind a batch card in `standby` is refused `doing` by the board until the app lets `standby` count, so it may legitimately still be in `next` with its recorded refusal comment), every later wave's cards in `assigned`. A card in the wrong column is moved to the right one by the orchestrator (the only board write it makes) and noted in the sprint card comment;
    - every card of the wave has its sub-tasks ticked;
    - the ledger's "At a glance" names the next wave;
    - `git status --short` is clean and `git branch --show-current` is `development`;
@@ -65,18 +65,18 @@ For unattended runs (Leo asleep). Started as `/loop /bandit-dev:sprint run {spri
 Nested agents are documented to work (a subagent can launch its own, up to three layers by default), so the wave agent normally runs code-reviewer and ui-verifier itself. This fallback is only for the case where it reports the Agent tool missing. When a wave agent reports `GATES NEEDED`:
 
 1. The orchestrator runs the `code-reviewer` agent on that branch's diff against `development`, then the `ui-verifier` agent if the wave changed anything visible, briefed with the cards' Acceptance and told to write only test data it creates and to remove it. It keeps only their verdicts and blocker lists, never the full reports.
-2. It sends the verdicts back to **the same wave agent** (SendMessage to that agent, not a new one), which fixes the blockers, re-runs `npm run verify`, merges, moves the cards and ticks the wave as `execute` says.
+2. It sends the verdicts back to **the same wave agent** (SendMessage to that agent, not a new one), which fixes the blockers, re-runs `verify` (`bandit.yaml`), merges, moves the cards and ticks the wave as `execute` says.
 3. Then it checks the wave (loop step 2) as usual.
 
 ## Stop and resume
 
-**Stop the whole run** on: a `BLOCKED` report, a wave that fails the check, a red `npm run verify` on `development`, or a gate the agent cannot pass after one fix round. The current wave stays as it is. Later waves and later sprints do not start. Report what stopped it and what only Leo can supply.
+**Stop the whole run** on: a `BLOCKED` report, a wave that fails the check, a red `verify` on `development`, or a gate the agent cannot pass after one fix round. The current wave stays as it is. Later waves and later sprints do not start. Report what stopped it and what only Leo can supply.
 
 **Resume** is the same command: `run` starts from the first unticked wave of each sprint and skips what is done.
 
 ## Notifications
 
-Use `PushNotification` (it reaches Leo's phone when Remote Control is connected), one line, under 200 characters, leading with what he would act on. Send one only when: a wave finishes in paced mode (`Sprint w41: wave 1 done, BB-66 BB-65 in Stand By. Next wave in 45 min.`), the run stops (`Sprint w41 stopped at wave 2: migration 0068 clash, needs you.`), or the run ends (`Sprint w41: all waves done, 3 cards await your test.`). Never for routine steps inside a wave.
+Use `PushNotification` (it reaches Leo's phone when Remote Control is connected), one line, under 200 characters, leading with what he would act on. Send one only when: a wave finishes in paced mode (`Sprint w41: wave 1 done, {ids} in Stand By. Next wave in 45 min.`), the run stops (`Sprint w41 stopped at wave 2: migration 0068 clash, needs you.`), or the run ends (`Sprint w41: all waves done, 3 cards await your test.`). Never for routine steps inside a wave.
 
 ## No leftovers
 

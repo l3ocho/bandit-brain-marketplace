@@ -546,12 +546,12 @@ class Domain:
             R.append(self.res("S9", "bad" if probs else "ok", "; ".join(probs) or f"`{mine}`: {what}",
                               f"board.projects[{mine}].lanes + tags"))
             if probs and is_dev:
-                rows.append(Row(f"Dev board shape on `{mine}`: {'; '.join(probs)}", f"BanditBrains project \"{mine}\"",
+                rows.append(Row(f"Dev board shape on `{mine}`: {'; '.join(probs)}", f"Bandit Brain project \"{mine}\"",
                                 self.rules["owners"]["dev_board_shape"], "S9"))
             elif probs:
                 fix = "remove them" if is_wf else "remove them, or set `dev: true`"
                 rows.append(Row(f"`{mine}` has dev lanes without `dev: true`: {fix}",
-                                f"BanditBrains project \"{mine}\"", self.rules["owners"]["decide"], "S9"))
+                                f"Bandit Brain project \"{mine}\"", self.rules["owners"]["decide"], "S9"))
 
         # ── surfaces: S8 (code-{slug}/ per kind), S10, S11 ──
         fslug = folder[3:] if folder.startswith("ai-") else folder
@@ -928,7 +928,7 @@ class Domain:
         return probs
 
     def rename_board(self, old, new, rule):
-        r = Row(f"Rename board `{old}` → `{new}`", f"BanditBrains project \"{old}\"",
+        r = Row(f"Rename board `{old}` → `{new}`", f"Bandit Brain project \"{old}\"",
                 self.rules["owners"]["board_rename"], rule)
         r.linked_old, r.linked_new = old, new
         return [r]
@@ -940,7 +940,7 @@ class Domain:
         D.insert(0, self.res("S1", "ok" if self.top else "bad",
                              f"Board folder `{self.name}`" + ("" if self.top else " missing"), "board.folders"))
         if not self.top:
-            self.rows.append(Row(f"Create or rename the board folder to `{self.name}`", "BanditBrains folders",
+            self.rows.append(Row(f"Create or rename the board folder to `{self.name}`", "Bandit Brain folders",
                                  self.rules["owners"]["board_folder_rename"], "S1"))
         wf = [b for b in self.boards if b["name"].endswith(suf)]
         wtype = [b for b in self.boards if b["type"] == self.rules["workflow"]["board_type"]]
@@ -951,7 +951,7 @@ class Domain:
         for b in wf:
             if b["type"] != "workflow":
                 probs.append(f"`{b['name']}` is type `{b['type']}`")
-                self.rows.append(Row(f"Retype board `{b['name']}` → workflow", f"BanditBrains project \"{b['name']}\"",
+                self.rows.append(Row(f"Retype board `{b['name']}` → workflow", f"Bandit Brain project \"{b['name']}\"",
                                      self.rules["owners"]["board_retype"], "S3"))
         for b in wtype:
             if not b["name"].endswith(suf):
@@ -979,7 +979,7 @@ class Domain:
                     D.append(self.res("S9", "bad", f"Board `{b['name']}` has dev lanes and no dev project",
                                       "board.projects"))
                     self.rows.append(Row(f"`{b['name']}` has dev lanes and no `dev: true` project: remove them, or onboard it",
-                                         f"BanditBrains project \"{b['name']}\"", self.rules["owners"]["decide"], "S9"))
+                                         f"Bandit Brain project \"{b['name']}\"", self.rules["owners"]["decide"], "S9"))
         # linked rows: every board rename → settings row for each board: line naming the old name
         final = []
         for r in self.rows:
@@ -1065,7 +1065,7 @@ def main():
         mine = [r for r in d.rows if p["path"] in r.target or p["surface_path"] in r.target
                 or getattr(r, "proj", None) == folder
                 or r.target == p["title"]
-                or (p["mine"] and r.target == f"BanditBrains project \"{p['mine']}\"")]
+                or (p["mine"] and r.target == f"Bandit Brain project \"{p['mine']}\"")]
         L = d.levels
         mo, mt = count(p["results"], "must", L)
         so, st = count(p["results"], "should", L)

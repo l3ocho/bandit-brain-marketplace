@@ -23,7 +23,7 @@
 
    ```
    | # | Action | Path | Effect | Why |
-   | 1 | stamp {domain}/{project} = 9.0.0 | MyNotes/BanditLabs/Projects/bandit-brain-marketplace/.audit/stamps.json | one ledger entry | S5 check for the domain audit |
+   | 1 | stamp {domain}/{project} = 9.0.0 | the stamp ledger (`paths.stamps`) | one ledger entry | S5 check for the domain audit |
    ```
 
 6. **Write the ledger.** Read it first and keep its etag. Missing → create it (omit `if_match`).
@@ -46,16 +46,16 @@
 
 ## 🗂️ Ledger format
 
-`MyNotes/BanditLabs/Projects/bandit-brain-marketplace/.audit/stamps.json`, pretty-printed, keys sorted:
+the stamp ledger (`paths.stamps` in `references/structure-rules.yaml`), pretty-printed, keys sorted:
 
 ```json
 {
   "projects": {
-    "BanditLabs/banditbrain": {
+    "Acme/home-reno": {
       "claude_name": "B - Bandit Brains",
       "version": "0.3.0",
       "prefix": "bb",
-      "folder": "MyNotes/BanditLabs/Claude/ai-banditbrain",
+      "folder": "MyNotes/Acme/Claude/ai-home-reno",
       "type": "product_service",
       "board": "project \"Bandit Brains\"",
       "checked": "2026-09-25"

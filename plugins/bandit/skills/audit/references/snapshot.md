@@ -33,10 +33,10 @@ unchecked too).
                   "visibility": "household", "system_owner": null,
                   "lanes": [{"name": "Feature", "position": 0,
                              "matcher": {"field": "tag", "values": ["lane/feature"]}}]}],
-    "sprint_cards": [{"id": "<uuid>", "short_id": "BB-26", "sprints": ["sprint/staging"]}]
+    "sprint_cards": [{"id": "<uuid>", "short_id": "{PFX}-26", "sprints": ["sprint/staging"]}]
   },
   "vault": {
-    "domains": ["BanditLabs", "Family", "Personal", "Summitt"],
+    "domains": ["Acme", "Home", "Work"],
     "settings": {
       "Personal": {
         "ai-career-manager": {
@@ -53,8 +53,8 @@ unchecked too).
       }
     },
     "surfaces": {
-      "Summitt": {
-        "code-cs-notes": {
+      "Acme": {
+        "code-home-reno": {
           "entries": [{"name": "CLAUDE.md", "dir": false, "modified": "2026-09-28"},
                       {"name": "claude", "dir": true, "modified": "2026-09-28"},
                       {"name": "claude/settings.json", "dir": false, "modified": "2026-09-28"}],
@@ -65,17 +65,17 @@ unchecked too).
       }
     },
     "projects": {
-      "BanditLabs": {
-        "banditbrain": {
-          "entries": [{"name": "banditbrain.md", "dir": false},
+      "Acme": {
+        "home-reno": {
+          "entries": [{"name": "home-reno.md", "dir": false},
                       {"name": "sprint-staging", "dir": true},
-                      {"name": "sprint-staging/banditbrain-sprint-staging-plan.md", "dir": false}],
-          "frontmatter": {"banditbrain.md": "<raw YAML between the --- lines>",
-                          "sprint-staging/banditbrain-sprint-staging-plan.md": "<raw>"}
+                      {"name": "sprint-staging/home-reno-sprint-staging-plan.md", "dir": false}],
+          "frontmatter": {"home-reno.md": "<raw YAML between the --- lines>",
+                          "sprint-staging/home-reno-sprint-staging-plan.md": "<raw>"}
         }
       }
     },
-    "inbox": {"BanditLabs": ["Untitled 3.md", "banditbrain-wbs.md"]}
+    "inbox": {"Acme": ["Untitled 3.md", "home-reno-wbs.md"]}
   },
   "stamps": { "Personal/career-manager": { "...": "the ledger entry, as-is" } }
 }
@@ -100,7 +100,7 @@ unchecked too).
 | `….files` | `nc_webdav_read_file` raw | `CLAUDE.md`, `claude/settings.json` and `claude/hooks/workdir.py`, when listed, verbatim. Nothing else |
 | `….repo` | nothing | Always `null`. S11 no longer dates the mirror (GitHub's last push lags the real remote); the key stays so older snapshots still load |
 | `….workdir` | `nc_webdav_read_file` raw of `MyNotes/{D}/Projects/{slug}/workdir-manifest.json` (`{slug}` = the folder name after `code-`), parsed | `code-*` of a project **without** `dev: true` only: the JSON object as-is. Missing file, `design-*`, or dev → `null`. Never rebuilt or tidied: S12 reads it field by field |
-| `stamps` | `nc_webdav_read_file("MyNotes/BanditLabs/Projects/bandit-brain-marketplace/.audit/stamps.json")` | Its `projects` object, as-is. Missing ledger → `{}` |
+| `stamps` | ``nc_webdav_read_file` of the stamp ledger (`paths.stamps` in `references/structure-rules.yaml`)` | Its `projects` object, as-is. Missing ledger → `{}` |
 | `board.sprint_cards` | `list_tasks(tagPrefix: "sprint/")`, open and completed (not archived) | One entry per card: `id`, `short_id` (`shortId`, or `null`), `sprints` = its tag **names** starting `sprint/`, as-is |
 | `vault.projects.{D}` | `nc_webdav_find_by_name(pattern="%", scope="MyNotes/{D}/Projects")` | One key per folder directly under `Projects/`. `entries`: every file and folder inside it, `name` relative to that folder (`sprint-x/note.md`), `dir` as listed. Results must equal `total_found`; fewer → stop (a partial listing) |
 | `….frontmatter` | `nc_webdav_read_file` raw of **every** `.md` in a project that has a `sprint-*` folder at its root; none for other projects (`{}`) | The text between the first two `---` lines, verbatim, without them. A file that doesn't start with `---` → `null`. The script refuses a sprint project with a note left unread |

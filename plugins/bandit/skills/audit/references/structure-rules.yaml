@@ -23,6 +23,10 @@ levels:            # must → ❌ on a break · should → ⚠️
   S15: should      # frontmatter parses
   S16: should      # sprint project root: hub, sprint-* folders and planning/ only
 
+paths:
+  # Installation paths the procedures read (2026-10-13): the one place a fixed vault path lives.
+  stamps: "MyNotes/BanditLabs/Projects/bandit-brain-marketplace/.audit/stamps.json"   # the self-check stamp ledger
+
 exempt:
   system_owner: true          # boards with a systemOwner are listed, never scored
 

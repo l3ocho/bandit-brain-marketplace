@@ -1,6 +1,6 @@
 # Part 3 — Commands
 
-Every procedure starts by resolving the domain (Part 1, SKILL.md) and reading Part 2
+Every procedure starts by resolving the domain (`references/model.md`) and reading Part 2
 (`references/conventions.md`).
 
 **Proposal format** used by every command that writes on confirmation:
@@ -78,7 +78,7 @@ its hub note `{slug}.md` and `Claude/ai-{slug}/` exist (propose creating whichev
 then run Stage C on
 `Projects/{slug}/` only. Domain-level findings (legacy folder names, other projects) come as
 fix rows marked `domain`, built with Stage B/C, after this project's rows. They run only when Leo
-approves them by number (Part 1 → scope exceptions).
+approves them by number (`references/model.md` → Scope).
 
 ---
 
@@ -121,7 +121,7 @@ procedure returns rows; bandit:project puts them in its one combined proposal.
    template and hub note as new files (`if_match` omitted), then the README by running `home`.
    A row whose parent folder row was declined is skipped. Report per row.
 5. If the README already existed and any row ran, run `home` afterwards to refresh it (an
-   auto-write, Part 1).
+   auto-write, `references/write-safety.md`).
 
 ---
 
@@ -214,7 +214,7 @@ it fast.
      note (named in its `related`, or its body's first line), add a separate **archive row** for
      that source note (Part 2 §7 stamps, `status: done`, to `_archive/_inbox/`). Proof first: the
      filed copy exists at its destination and was read in this run. No proof, or the source isn't
-     named → no row; the source stays (SKILL.md → *Other skills* → Leftovers). A source with the
+     named → no row; the source stays (`references/other-skills.md` → Leftovers). A source with the
      same filename as the filed copy gets one row with both options: **delete** (recommended: an
      archived twin breaks uniqueness, Part 2 §4) or archive under a more specific name
 3. Present the proposal. Order the rows by destination so similar items group. A note with an

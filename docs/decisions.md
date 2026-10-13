@@ -46,6 +46,7 @@ Stages 1–3 are core; stages 4–10 are `bandit-dev`. Dependencies point one wa
 
 ### §3 · Names
 
+<!-- denylist:off -->
 | Before | Skill | Call | Plugin |
 |---|---|---|---|
 | bandit-tasks | `tasks` | `/bandit:tasks triage` | bandit |
@@ -58,6 +59,7 @@ Stages 1–3 are core; stages 4–10 are `bandit-dev`. Dependencies point one wa
 | meeting-minutes | `minutes` | `/bandit:minutes` | bandit |
 | bandit-sprint | `sprint` | `/bandit-dev:sprint run` | bandit-dev |
 | myskill-creator | `skill` | `/bandit-maker:skill lint` | bandit-maker |
+<!-- denylist:on -->
 
 `tasks plan` (week planning) folds into `/bandit:tasks week`. The old names are gone: no aliases, no stubs; the checker fails on any of them.
 
@@ -81,6 +83,7 @@ Skills define the gate; the project provides the recipe in `bandit.yaml` at the 
 
 ### §7 · What the brief supersedes
 
+<!-- denylist:off -->
 | Old | Now |
 |---|---|
 | D4 two plugins | Three plugins (§2) |
@@ -95,6 +98,7 @@ Skills define the gate; the project provides the recipe in `bandit.yaml` at the 
 | Manual staging token | `bandit-staging` authenticates through `bb-staging-mcp-headers` |
 | Plan §7 layout | Brief §6 (see `CLAUDE.md`) |
 | S1 pipeline defined in three places | `docs/pipeline.md` here is canonical |
+<!-- denylist:on -->
 
 ---
 
@@ -116,6 +120,9 @@ Skills define the gate; the project provides the recipe in `bandit.yaml` at the 
 
 ## 📜 Original plan decisions D1–D24
 
+The tables marked for the checker (`denylist:off`) are the only place the old skill names may appear: they record what was renamed.
+
+<!-- denylist:off -->
 | # | Decision | Status |
 |---|---|---|
 | D1 | Order BB-147 → BB-133 → BB-111 | Kept (BB-147 and BB-133 share sprint marketplace-v1) |
@@ -142,3 +149,4 @@ Skills define the gate; the project provides the recipe in `bandit.yaml` at the 
 | D22 | One chat per sprint, one minor release per sprint; deploy only on Leo's word | Kept |
 | D23 | Never change a login credential; staging token is never production's | Kept |
 | D24 | Low density, brief, no re-asking, one list per gate with a recommendation, findings as fix rows | Kept |
+<!-- denylist:on -->

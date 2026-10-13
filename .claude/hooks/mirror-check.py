@@ -5,7 +5,7 @@ The script copies the files itself; Claude never moves them, so no model call an
 auto-mode check is involved. Nextcloud desktop sync uploads the copies to the vault.
 No change -> exit 0, silent. Change -> copy, stamp, one-line systemMessage.
 Vault root: $MYNOTES_DIR, else ~/Documents/MyNotes. Target folder must already exist
-(bandit-notes creates it at onboarding): MyNotes/{domain}/Claude/code-{project}/.
+(bandit:notes creates it at onboarding): MyNotes/{domain}/Claude/code-{project}/.
 """
 import hashlib
 import json
@@ -78,7 +78,7 @@ def main():
     target = vault / domain / "Claude" / f"code-{slug}"
     if not target.is_dir():
         return say(f"{target} doesn't exist (no synced vault here, or the folder isn't created); "
-                   "nothing mirrored. Set MYNOTES_DIR, or have bandit-notes create the folder.")
+                   "nothing mirrored. Set MYNOTES_DIR, or have bandit:notes create the folder.")
     done = []
     try:
         for rel in changed:

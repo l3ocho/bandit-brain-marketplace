@@ -136,6 +136,87 @@ def check_g6():
            else f"deny rules cover {count} skill(s) in {', '.join(G6_PLUGINS)}")
 
 
+# ── D1 · no old skill name or retired string anywhere we ship or document ─────────────────
+DENYLIST = ("bandit-tasks", "bandit-notes", "bandit-audit", "bandit-sprint", "project-settings",
+            "text-rewriter", "project-planner", "wbs-generator", "meeting-minutes", "myskill-creator",
+            "MyNotes/_skills", "Skill Manager", "mktpl-claude-datasaas", "projman")
+# The one place allowed to name them: the history tables of docs/decisions.md, fenced by markers.
+HISTORY_FILE = ROOT / "docs" / "decisions.md"
+HISTORY_OFF, HISTORY_ON = "<!-- denylist:off -->", "<!-- denylist:on -->"
+TEXT_SUFFIXES = (".md", ".py", ".json", ".yaml", ".yml", ".html", ".txt", ".sh")
+
+
+def shipped_files():
+    """plugins/, docs/, templates/, tests/ and the root files; never .work/, .git/ or scripts/."""
+    files = [p for p in ROOT.iterdir() if p.is_file() and not p.name.startswith(".")]
+    for sub in ("plugins", "docs", "templates", "tests"):
+        base = ROOT / sub
+        if base.is_dir():
+            files += [p for p in base.rglob("*") if p.is_file() and "__pycache__" not in p.parts]
+    return sorted(f for f in files if f.suffix in TEXT_SUFFIXES or f.name in ("LICENSE",))
+
+
+def strip_history(path, text):
+    if HISTORY_OFF not in text:
+        return text, None
+    if path != HISTORY_FILE:
+        return text, f"{path.relative_to(ROOT)}: denylist markers are allowed only in docs/decisions.md"
+    return re.sub(re.escape(HISTORY_OFF) + r".*?" + re.escape(HISTORY_ON), "", text, flags=re.S), None
+
+
+def check_denylist():
+    hits = []
+    for f in shipped_files():
+        text, err = strip_history(f, f.read_text(encoding="utf-8", errors="ignore"))
+        if err:
+            hits.append(err)
+        for n, line in enumerate(text.splitlines(), 1):
+            for word in DENYLIST:
+                if word in line:
+                    hits.append(f"{f.relative_to(ROOT)}:{n} `{word}`")
+    report("D1", not hits, f"old names: {'; '.join(hits[:8])}{' …' if len(hits) > 8 else ''} ({len(hits)})"
+           if hits else f"no old name in {len(shipped_files())} shipped files")
+
+
+# ── R15 · command words are unique across every skill (house_lint's rule, one source) ────
+def house_lint():
+    import importlib.util
+    path = PLUGINS / "bandit-maker" / "skills" / "skill" / "scripts" / "house_lint.py"
+    spec = importlib.util.spec_from_file_location("house_lint", path)
+    mod = importlib.util.module_from_spec(spec)
+    sys.dont_write_bytecode = True
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def all_skills():
+    return [s for p in plugin_dirs() for s in skill_dirs(p) if (s / "SKILL.md").exists()]
+
+
+def check_r15():
+    lint = house_lint()
+    bad = []
+    for s in all_skills():
+        for rule, level, msg in lint.check_r15(s):
+            if level == "fail":
+                bad.append(f"{s.name}: {msg}")
+    report("R15", not bad, "; ".join(bad) or f"command words unique across {len(all_skills())} skills")
+
+
+# ── X1 · the audit rules pin the exact working-folder guard the project skill hands out ───
+def check_guard_pin():
+    rules = PLUGINS / "bandit" / "skills" / "audit" / "references" / "structure-rules.yaml"
+    guard = PLUGINS / "bandit" / "skills" / "project" / "scripts" / "workdir.py"
+    if not rules.exists() or not guard.exists():
+        return report("X1", True, "skipped (audit rules or guard not present)")
+    import hashlib
+    m = re.search(r"hook_sha12:\s*([0-9a-f]{12})", rules.read_text(encoding="utf-8"))
+    actual = hashlib.sha256(guard.read_bytes()).hexdigest()[:12]
+    ok = bool(m) and m.group(1) == actual
+    report("X1", ok, f"s12.hook_sha12 = workdir.py sha12 ({actual})" if ok
+           else f"s12.hook_sha12 {m.group(1) if m else 'missing'} ≠ workdir.py sha12 {actual}")
+
+
 def main(argv):
     use_cli = "--no-cli" not in argv
     check_manifests()
@@ -143,6 +224,9 @@ def main(argv):
     check_no_bin()
     check_versions()
     check_g6()
+    check_denylist()
+    check_r15()
+    check_guard_pin()
     for rule, ok, msg in results:
         print(f"{'✅' if ok else '❌'} {rule} {msg}")
     failed = [r for r, ok, _ in results if not ok]

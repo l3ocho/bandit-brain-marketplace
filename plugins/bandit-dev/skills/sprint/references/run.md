@@ -9,7 +9,9 @@ Contents: Command · Rules · Before the first wave · The loop · Paced mode ·
 `/bandit-dev:sprint run {sprint card}` runs every unticked wave of that sprint, in order. `/bandit-dev:sprint run {card A} {card B}` runs the sprints in the order given, all of the first before any of the second.
 
 1. **Only sprint cards are accepted** (cards carrying `Wave n:` sub-tasks). A batch card is refused, as in `execute`.
-2. **Each sprint must be committed**: its 11 step sub-tasks ticked. A sprint still in planning is named and skipped; the others still run.
+2. **Each sprint must be committed**: its 12 step sub-tasks ticked. A sprint still in planning is named and skipped; the others still run.
+   - **Review gate.** Step 11 (Independent plan review) unticked → that sprint is refused, naming the step.
+   - **Order gate.** The sprint card is blocked by an incomplete sprint card (`get_task` → `blockedBy`) → refused, naming the blocking sprint. A blocking sprint named earlier in the same `run` command counts once its last wave is checked.
 3. **`--paced [minutes]`** turns on paced mode (below). Without it, waves run back to back.
 4. **Running `run` is the approval to execute every wave of the named sprints**, the same approval the execution prompt carries for one wave. It is not the approval to test, debug or close.
 
@@ -25,7 +27,7 @@ Contents: Command · Rules · Before the first wave · The loop · Paced mode ·
 
 1. Gate 0 from SKILL.md, once.
 2. For every sprint: `get_task` on the sprint card, read the ledger's "At a glance" and the wave sub-tasks. List the waves to run (unticked ones, in order).
-3. **Cross-sprint check (only with two or more sprints).** Read each plan's migration numbers and the files each sprint's cards edit. Each sprint was planned alone, so two can claim the same migration number or the same file. Record the clash in each later sprint's ledger under "Plan deviations": the later sprint takes the next free migration number at build time and builds on what the earlier one merged.
+3. **Cross-sprint check (only with two or more sprints).** Read each plan's migration numbers and the files each sprint's cards edit. Each sprint was planned alone, so two can claim the same migration number or the same file. Record the clash in each later sprint's ledger under "Plan deviations". The later sprint's waves stop at their migration-tail check until Leo approves a corrected Migration tail row in its ledger; nothing renumbers on its own.
 4. Opening line: the sprints and waves that will run, in order, and anything skipped with the reason. Then start; do not wait for an answer.
 
 ## The loop
@@ -42,7 +44,8 @@ For each wave, in order:
    - the cards the wave worked are in `standby` now, and during the wave they were in `doing`: read the wave agent's report line "BOARD at start" (the columns it showed after setting the board). A card that was worked from `assigned` or `next` without a recorded refusal (`Could not move to Doing:` comment on the card) is a failed wave: stop. A recorded refusal is not a failure;
    - the Execution board (`get_execution_board`) shows exactly what `execute.md` → Board moves requires: this wave's cards in `standby` (or Blocked with the reason on the card), the next wave's cards in `next` where the gates and the five-card cap allow (a card chained behind a batch card in `standby` is refused `doing` by the board until the app lets `standby` count, so it may legitimately still be in `next` with its recorded refusal comment), every later wave's cards in `assigned`. A card in the wrong column is moved to the right one by the orchestrator (the only board write it makes) and noted in the sprint card comment;
    - every card of the wave has its sub-tasks ticked;
-   - the ledger's "At a glance" names the next wave;
+   - the ledger's "At a glance" names the next wave, and the wave's migration-tail line (`execute.md` → The wave, step 3) shows the tail matched;
+   - the sprint card's section 1 Status line reads `Wave {n} of {total} delivered…` for this wave: a stale line fails the wave;
    - `git status --short` is clean and `git branch --show-current` is `development`;
    - if the wave carries the final push (`execute.md` → Pushing `development`): the ledger records the pushed hash and `git status -sb` shows `development` level with `origin/development`. A recorded push failure is a "Needs the user" item, not a failed wave.
    - `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py` prints OK.
@@ -80,7 +83,7 @@ Use `PushNotification` (it reaches Leo's phone when Remote Control is connected)
 
 ## No leftovers
 
-**No leftovers.** Before this step ends, anything it used to make something else and no longer needs (a draft, a scratch file, a superseded copy, a test fixture, a temporary branch) is archived or deleted, only on proof that its successor exists (SKILL.md, Leftovers). Each wave agent is told this in its prompt; the orchestrator checks it with the checker before the next wave.
+**No leftovers.** Before this step ends, anything it used to make something else and no longer needs (a draft, a scratch file, a superseded copy, a test fixture, a temporary branch) is archived or deleted, only on proof that its successor exists (`references/homes.md` → Leftovers). Each wave agent is told this in its prompt; the orchestrator checks it with the checker before the next wave.
 
 ## Final report
 

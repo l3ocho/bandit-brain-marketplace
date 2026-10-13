@@ -22,7 +22,8 @@ plan, a live ledger and a handover.
 | `execute` | Sprint card and wave (`execute {sprint card} wave 2`) | One wave, one chat, in order; refuses a batch card; moves cards on the Execution board | `references/execute.md` |
 | `run` | One or more sprint cards; `--paced [minutes]` under `/loop` | Every open wave, each in its own subagent, strictly in sequence; checks each wave on the board; stops on a blocker | `references/run.md` |
 | `debug` | Sprint card | Turns Leo's adjustments into verified fixes | `references/debug.md` |
-| `close` | Sprint card | Completes the approved cards and the sprint card, archives the sprint folder | `references/close.md` |
+| `release` | Sprint card, with Leo's deploy word | Preconditions (cards tested, debug done, deploy word, migration tail, backup), then the project's `bandit.yaml` recipe; plugin release for Marketplace cards | `references/release.md` |
+| `close` | Sprint card | Refuses without a release line (unless "close without release"); completes the approved cards and the sprint card, archives the sprint folder | `references/close.md` |
 
 | Read | When |
 |---|---|
@@ -46,11 +47,11 @@ plan, a live ledger and a handover.
 ## 🔄 The plan cycle
 
 The sprint card carries the steps as sub-tasks in this order, then one sub-task per wave (added at
-step 11). **Tick a step only when its evidence is on the card**, one comment per step.
+step 12). **Tick a step only when its evidence is on the card**, one comment per step.
 
 | # | Step | Done when |
 |---|---|---|
-| 1 | Select and freeze the batch | Sprint card in PM, the cards block it, none in another sprint, outside blockers noted |
+| 1 | Select and freeze the batch | Sprint card in PM, the cards block it, the previous open sprint card blocks it, none in another sprint |
 | 2 | Spec completeness, per card | Every card read against its brief; gaps as fix rows |
 | 3 | Close the open questions | One interview answered and recorded |
 | 4 | Size and classify | Every card at most L (XL split), lane and boundaries checked |
@@ -60,15 +61,20 @@ step 11). **Tick a step only when its evidence is on the card**, one comment per
 | 8 | Risk and rollback | Per card and for the sprint, in the plan |
 | 9 | Definition of ready, per card | Each Spec reconciled; stage moved on; fix rows for failures |
 | 10 | Approval gate | Leo's explicit approval, quoted on the card |
-| 11 | Commit the sprint | Tag, assignee, due date, size, execution prompt and ledger; one sub-task per wave |
+| 11 | Independent plan review | The `plan-reviewer` agent's record in the sprint folder; majors applied; no blocker open (the only stop) |
+| 12 | Commit the sprint | Tag, assignee, due date, size, execution prompt, ledger with `Committed:`; one sub-task per wave |
 
 ## 🔒 Hard rules
 
 1. **The checker is the proof.** `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py` enforces the
-   vault rules (SP1–SP6). Step 11, every wave end, `run` and `close` run it and paste its output; a
+   vault rules (SP1–SP7). Step 12, every wave end, `run` and `close` run it and paste its output; a
    step with a failing check is not done. The plugin's Stop hook runs it too
-2. **A new kind of mistake becomes a checker rule**, not a new sentence here
-3. **Rules have owners:** board rules are bandit:tasks', vault rules bandit:notes', the Project Context
+2. **Gates read the recipe, never guess it:** `scripts/recipe.py` reads the project's `bandit.yaml`; a
+   missing key refuses by name. `development` and `main` in the references mean `branches.trunk` and
+   `branches.deploy`
+3. **The sprint card's section 1 Status line is current** after every wave, debug, release and close
+4. **A new kind of mistake becomes a checker rule**, not a new sentence here
+5. **Rules have owners:** board rules are bandit:tasks', vault rules bandit:notes', the Project Context
    bandit:project's. Name the owner; never copy the rule (`references/homes.md`)
 
 ## ⚠️ Gotchas
@@ -82,7 +88,7 @@ The full list is `references/gotchas.md`: read it once at the start of any comma
 - Mark a card complete or call anything approved, except `close` completing cards Leo approved in that chat
 - Rewrite a locked Spec without showing old and new and getting a yes
 - Write to a card outside the batch and the sprint card; create columns, projects or tags other than `sprint/{name}`
-- Merge into the deploy branch, deploy, force-push, or push anything but the trunk (`references/execute.md` → Pushing)
+- Merge into the deploy branch or deploy outside `release`; force-push, or push anything but the trunk (`references/execute.md` → Pushing)
 - Run two wave agents at once, two waves in one chat, a single card, or a wave out of order without Leo's say-so
 - Move a card to Done by anything but `close`, or treat an urgency remark as approval
 - Edit Leo's verbatim documents or any rule in `CLAUDE.md` without permission

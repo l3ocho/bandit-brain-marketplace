@@ -9,6 +9,8 @@ Rules (each one a failure, not a warning):
   SP4  frontmatter parses as YAML (skipped for Leo's own inbox notes: no frontmatter or status inbox)
   SP6  one brief per card: a card has at most one brief outside _archive (a card detached from a closing sprint carries
        everything into that one note, which waits in the inbox; its ledger row says "detached")
+  SP7  a sprint whose ledger says it is committed (a `Committed:` line, written at plan step 12) has its independent
+       plan review record, {project}-review-sprint-{name}-YYYY-MM-DD.md, in the sprint folder
 
 Usage:
   check_sprint.py [--vault DIR] [--domain NAME]   (defaults: $MYNOTES_DIR or ~/Documents/MyNotes;
@@ -29,6 +31,7 @@ import yaml
 RECORDS = ("plan", "handover-prompt", "progress")
 CARD_ROW = re.compile(r"^\|\s*[^|]+\|\s*((?:[A-Z]+-\d+)(?:\s*,\s*[A-Z]+-\d+)*)\s*\|", re.M)
 CARD_ID = re.compile(r"[A-Z]+-\d+")
+COMMITTED = re.compile(r"^\W*Committed:", re.M)
 
 
 def frontmatter(path: Path) -> tuple[dict | None, str | None]:
@@ -85,7 +88,8 @@ def check(domain: Path) -> list[str]:
         if not data:
             continue
         card = data.get("board-task")
-        if card and data.get("type") == "brief" or (card and re.search(r"-\d{4}-\d{2}-\d{2}\.md$", p.name)):
+        dated = re.search(r"-\d{4}-\d{2}-\d{2}\.md$", p.name) and data.get("type") in (None, "brief")
+        if card and (data.get("type") == "brief" or dated):
             briefs_by_card[str(card)].append(rel)
 
     # SP6 one brief per card outside the archive
@@ -122,6 +126,11 @@ def check(domain: Path) -> list[str]:
         ledger = folder / f"{project}-sprint-{name}-progress.md"
         if not ledger.exists():
             continue
+        if COMMITTED.search(ledger.read_text(errors="replace")) and not any(
+                re.fullmatch(rf"{re.escape(project)}-review-sprint-{re.escape(name)}-\d{{4}}-\d{{2}}-\d{{2}}\.md", f.name)
+                for f in folder.iterdir()):
+            errors.append(f"SP7 {rel_folder}: the ledger says committed but there is no "
+                          f"{project}-review-sprint-{name}-YYYY-MM-DD.md (plan step 11, the independent review)")
         cards = set()
         detached = set()
         for match in CARD_ROW.finditer(ledger.read_text(errors="replace")):
@@ -189,7 +198,7 @@ def main() -> int:
     errors = check(domain)
     if not errors:
         if not args.hook:
-            print(f"OK: {domain} passes SP1-SP6 ({len(sprint_folders(domain))} sprint folders)")
+            print(f"OK: {domain} passes SP1-SP7 ({len(sprint_folders(domain))} sprint folders)")
         return 0
     out = sys.stderr if args.hook else sys.stdout
     print(f"bandit-dev:sprint check FAILED in {domain} ({len(errors)}). Fix these before finishing:", file=out)

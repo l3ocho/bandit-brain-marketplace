@@ -1,0 +1,6 @@
+# Test fixture: the same recipe without migrations.check. Every gate that needs the tail must refuse by name.
+verify: "true"
+branches: { trunk: development, deploy: main }
+release: ["echo release"]
+migrations: { dir: migrations }
+staging: { refresh: "echo staging refresh" }

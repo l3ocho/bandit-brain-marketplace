@@ -9,7 +9,7 @@ Contents: Rules · Read first · Intake · Fix loop · Board · Finishing · Nev
 - **Documents first, then code.** Read the sprint folder before the diff, so each fix is judged against what was promised.
 - **Every adjustment is a numbered row** (the house fix-row format): what Leo saw, the card it belongs to, the cause, the fix, the recommendation. A fix is applied only on Leo's say-so, or under his standing "go with the recommendations".
 - **Bug fixes for defects in delivered cards are not new scope.** New requirements are parked as a card outside the sprint, with one yes or no on whether they join.
-- **Same authority as `execute`:** local development branch only, never push, deploy or touch production.
+- **Same authority as `execute`:** work on the trunk; pushes follow `execute.md` → Pushing `development`. Never deploy or touch production: release is its own command.
 
 ## Read first
 
@@ -41,10 +41,10 @@ Per approved row, in card order and wave order where they interact:
 
 ## Finishing
 
-**No leftovers.** Before this step ends, anything it used to make something else and no longer needs (a draft, a scratch file, a superseded copy, a test fixture, a temporary branch) is archived or deleted, only on proof that its successor exists (SKILL.md, Leftovers). A fix branch is deleted once merged; test data is removed.
+**No leftovers.** Before this step ends, anything it used to make something else and no longer needs (a draft, a scratch file, a superseded copy, a test fixture, a temporary branch) is archived or deleted, only on proof that its successor exists (`references/homes.md` → Leftovers). A fix branch is deleted once merged; test data is removed.
 
 
-Every row fixed, parked or declined with Leo's word. Ledger Status per card moves to `Tested by the user` for every card Leo says he tested; sprint card section 1 Status line becomes `Debug done, ready to close`. Ledger "At a glance" says debug is done; sprint card comment `Debug done: {n} adjustments, {n} parked. Ready to close.`; final message of ten lines at most with the paste for `close`.
+Every row fixed, parked or declined with Leo's word. Ledger Status per card moves to `Tested by the user` for every card Leo says he tested; sprint card section 1 Status line becomes `Debug done, ready to release`. Ledger "At a glance" says debug is done; sprint card comment `Debug done: {n} adjustments, {n} parked. Ready to release.`; final message of ten lines at most with the paste for `release`.
 
 ## Never
 

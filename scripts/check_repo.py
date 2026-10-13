@@ -320,6 +320,41 @@ def check_audit_contract():
            if ok else "audit rules: paths.stamps missing")
 
 
+# ── SP7 · the sprint checker refuses a committed sprint without its plan review (fixtures) ─
+def run_script(script, *args, cwd=None):
+    r = subprocess.run([sys.executable, "-B", str(script), *args], capture_output=True, text=True, cwd=cwd)
+    return r.returncode, (r.stdout + r.stderr).strip()
+
+
+def check_sp7():
+    script = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts" / "check_sprint.py"
+    vault = ROOT / "tests" / "fixture-vault"
+    good = run_script(script, "--vault", str(vault), "--domain", "Good")
+    bad = run_script(script, "--vault", str(vault), "--domain", "Bad")
+    ok = good[0] == 0 and bad[0] == 1 and "SP7" in bad[1] and bad[1].count("\n- ") == 1
+    report("SP7", ok, "check_sprint passes the reviewed sprint and refuses the unreviewed one with SP7 only"
+           if ok else f"fixtures: good → {good[0]} {good[1][-120:]!r}; bad → {bad[0]} {bad[1][-160:]!r}")
+
+
+# ── Y1 · the recipe reader refuses a missing key and a wrong migration tail (fixtures) ────
+def check_recipe():
+    script = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts" / "recipe.py"
+    app = ROOT / "tests" / "fixture-app"
+    cases = [
+        (("require", "verify", "branches.trunk", "branches.deploy", "release", "migrations.dir",
+          "migrations.check", "staging.refresh"), 0, "present"),
+        (("check-tail", "0002"), 0, "matches"),
+        (("check-tail", "0003"), 4, "the plan names 0003"),
+        (("--file", "bandit.missing-key.yaml", "check-tail", "0002"), 3, "missing key `migrations.check`"),
+    ]
+    bad = []
+    for args, code, text in cases:
+        got, out = run_script(script, *args, cwd=app)
+        if got != code or text not in out:
+            bad.append(f"{' '.join(args)} → {got} {out[-100:]!r}")
+    report("Y1", not bad, "; ".join(bad) or f"recipe.py: {len(cases)} fixture cases (keys, tail, refusal by name)")
+
+
 def main(argv):
     use_cli = "--no-cli" not in argv
     check_manifests()
@@ -335,6 +370,8 @@ def main(argv):
     check_l4()
     check_house_lint()
     check_audit_contract()
+    check_sp7()
+    check_recipe()
     for rule, ok, msg in results:
         print(f"{'✅' if ok else '❌'} {rule} {msg}")
     failed = [r for r, ok, _ in results if not ok]

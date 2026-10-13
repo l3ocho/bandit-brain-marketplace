@@ -1,0 +1,15 @@
+# Test fixture: a complete recipe (contract: docs/bandit-yaml.md). The sprint gates run against it.
+verify: "true"
+branches: { trunk: development, deploy: main }
+release:
+  - "echo bump the version"
+  - "echo push the trunk"
+  - "echo fast-forward the deploy branch"
+migrations:
+  dir: migrations
+  check: "ls migrations | sort | tail -n 1 | cut -d_ -f1"
+staging:
+  up: "echo staging up"
+  refresh: "echo staging refresh"
+  down: "echo staging down"
+  where: test-host

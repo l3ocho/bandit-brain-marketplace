@@ -2,7 +2,7 @@
 
 Part of `bandit-dev:sprint`. Read before running `/bandit-dev:sprint plan`. Card sections, lanes, stages and the Spec lock are owned by bandit:tasks (`references/dev.md`); vault paths and write rules by bandit:notes. This file only says how the steps run.
 
-Contents: Conventions · Steps 1 to 11 · Investigator brief · Handover
+Contents: Conventions · Steps 1 to 12 · Investigator brief · Handover
 
 ## Conventions for every step
 
@@ -16,10 +16,15 @@ Contents: Conventions · Steps 1 to 11 · Investigator brief · Handover
 
 1. Resolve the selection (SKILL.md). Open cards only, not archived, not in a `sprint/*` tag (`list_sprints`, `list_tasks` with `tagPrefix`). Cards already in a sprint are excluded with a fix row.
 2. For every card read `blockedBy` and `blocks`. Report cards **outside** the batch that it blocks or is blocked by; none of them need links, but the sprint card records them under "Out of this sprint".
-3. Create the sprint card in the `PM` column: title `Sprint {Name}` (name given, else the ISO week, `2026-w42`); description from `references/templates.md`; the 11 step names as sub-tasks, added **one at a time**, then **always** set with `reorder_subtasks` using the full explicit order and read back (insertion order cannot be trusted: new sub-tasks have landed at the top, reversed); `dependencies.blockedBy` = the batch. Verify with `get_task`.
-4. Comment: selection rule, count, ids; list open Urgent cards as not selected.
+3. Create the sprint card in the `PM` column: title `Sprint {Name}` (name given, else the ISO week, `2026-w42`); description from `references/templates.md`; the 12 step names as sub-tasks, added **one at a time**, then **always** set with `reorder_subtasks` using the full explicit order and read back (insertion order cannot be trusted: new sub-tasks have landed at the top, reversed); `dependencies.blockedBy` = the batch. Verify with `get_task`.
+4. **Sprint order.** Find the previous open sprint: `list_sprints` for sprints with open cards, then
+   their sprint cards in the `PM` column (title `Sprint …`, not complete). One exists → `add_dependency`
+   so the new sprint card is **blocked by** it. `run` and `execute` refuse a sprint card that an
+   incomplete sprint card blocks, so sprints ship in order.
+5. Comment: selection rule, count, ids, the sprint it waits for; list open Urgent cards as not selected.
 
-**Done when** the card shows every batch card as a blocker and the 11 sub-tasks in order.
+**Done when** the card shows every batch card as a blocker, the previous open sprint card as a blocker
+when there is one, and the 12 sub-tasks in order.
 
 ## 2 · Spec completeness check
 
@@ -43,6 +48,11 @@ For each card: `get_task`; find its brief (bandit:notes lookup by filename from 
 Effort and complexity per card; lane per card. Check the card boundaries in bandit:tasks `dev.md`: one lane, one branch, one landing, up to L; **XL splits into two or more cards** now. A split card keeps its Spec's intent, gets its own brief and Spec, blocks or is blocked by its sibling, and **joins the sprint** and the sprint card's blockers. Record old and new sizes in one comment.
 
 ## 5 · Cross-card analysis
+
+**Migration tail.** Run `python3 ${CLAUDE_SKILL_DIR}/scripts/recipe.py tail` (the project's
+`bandit.yaml` `migrations.check`) and write the tail the sprint starts from into the plan, then a
+**Migration tail** table: one row per wave, the tail that wave must start from and the numbers it
+adds. A missing key refuses by name: the project adds it to `bandit.yaml` before planning goes on.
 
 From the investigations and a quick code check: migrations (one at a time, numbered in order), files several cards edit (state the order), hidden dependencies (what must land before another card's tests), generated artefacts that need regenerating after each card, tests that pin behaviour a card changes, docs each card must update. Output: one comment, and the "Cross-card" section of the plan.
 
@@ -73,9 +83,30 @@ Ready means: Spec clear with no open questions, acceptance testable, dependencie
 
 Present the state in a short summary (cards, waves, plan, risks, what needs Leo). Take Leo's explicit approval or return to the step it names. Quote the approval on the sprint card. If Leo's wording is ambiguous ("approved" mid-list), state the reading you applied in one line. **An urgency remark ("I want this today", "go fast") is not an approval of the plan**: put the summary in front of him and ask one yes or no. A date he gives is used as the sprint date; it does not commit the sprint.
 
-## 11 · Commit the sprint
+## 11 · Independent plan review
 
-Per batch card: tag `sprint/{name}` (create the tag once; merge with the card's current tags), assign to Leo (live lookup), due date = the sprint date, `stage/ready`. Sprint card: assignee, due date, size (umbrella, usually XL and Complex), header filled (dates, owner, capacity = total effort), decisions log, readiness line. Write the execution prompt and the ledger (templates). **Add the wave sub-tasks last**: one per wave, at the very end of the sprint card after the 11 step sub-tasks, named `Wave {n}: {card ids}` (for example `Wave 2: {id}, {id}`), added one at a time, then **always** put the whole list in order with `reorder_subtasks` (11 steps first, then the waves) and read the card back to confirm. They stay unticked until the execution delivers and verifies that wave. Move every batch brief into the sprint folder (`Projects/{slug}/sprint-{name}/`) and archive every source the planning consumed (inbox drafts, spec notes, a superseded WBS draft; see Leftovers in SKILL.md), then run `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py` and paste its output into the step comment; step 11 is not ticked until it prints OK. Seed the Execution board: every batch card to `assigned` with `bulk_set_execution_state` (so Leo sees the whole sprint before work starts). Verify the board with `list_sprints`, `get_execution_board` and a read of the sprint card.
+Automatic, after the approval and before the commit. It stops Leo only on a blocker.
+
+1. **Launch the `plan-reviewer` agent** (the Agent tool, `bandit-dev` agent `plan-reviewer`) and wait
+   for it. Its prompt carries: the sprint name and card, the plan note's full text, each batch card's
+   Spec and brief, the WBS, the Migration tail table, the repo path and the project's `bandit.yaml`.
+2. **Write the review record** into the sprint folder: `{project}-review-sprint-{name}-YYYY-MM-DD.md`,
+   `type: log`, `board-task` = the sprint card (bandit:notes conventions §1). Body: the agent's
+   verdict and findings table as returned, then the risk additions and questions.
+3. **Apply** every major finding, and each minor one that is cheap, to the plan (read, then the etag
+   edit) and fill the record's "Applied via" column (`plan §…`, `card {id} Technical plan`). Notes stay.
+4. **A blocker stops the step:** put the blockers to Leo in one list, each with its recommendation;
+   apply his answers, record them in the review, and re-run the review once if they change the plan's
+   approach. This is the only stop the review adds.
+5. Comment on the sprint card with the verdict, counts by severity and the record's filename.
+
+**Done when** the review record is in the sprint folder, every major finding is applied and no
+blocker is open. `run` and `execute` refuse a sprint whose step 11 sub-task is unticked; the checker
+(SP7) fails a committed sprint with no review record.
+
+## 12 · Commit the sprint
+
+Per batch card: tag `sprint/{name}` (create the tag once; merge with the card's current tags), assign to Leo (live lookup), due date = the sprint date, `stage/ready`. Sprint card: assignee, due date, size (umbrella, usually XL and Complex), header filled (dates, owner, capacity = total effort), decisions log, readiness line. Write the execution prompt and the ledger (templates). **Add the wave sub-tasks last**: one per wave, at the very end of the sprint card after the 12 step sub-tasks, named `Wave {n}: {card ids}` (for example `Wave 2: {id}, {id}`), added one at a time, then **always** put the whole list in order with `reorder_subtasks` (12 steps first, then the waves) and read the card back to confirm. They stay unticked until the execution delivers and verifies that wave. Move every batch brief into the sprint folder (`Projects/{slug}/sprint-{name}/`) and archive every source the planning consumed (inbox drafts, spec notes, a superseded WBS draft; `references/homes.md` → Leftovers), then run `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py` and paste its output into the step comment; step 12 is not ticked until it prints OK. Write `Committed: {date}` in the ledger's At a glance: the line the checker's SP7 reads. Seed the Execution board: every batch card to `assigned` with `bulk_set_execution_state` (so Leo sees the whole sprint before work starts). Verify the board with `list_sprints`, `get_execution_board` and a read of the sprint card.
 
 ## Investigator brief
 
@@ -95,8 +126,8 @@ A live-browser investigator **at planning time** is told which controls write (s
 
 ## Plan final message
 
-End of step 11: ten lines at most, and one exact paste per wave, each naming the sprint card and the wave: `/bandit-dev:sprint execute {sprint card} wave 1`, `... wave 2`, and so on, then `/bandit-dev:sprint debug {sprint card}` and `/bandit-dev:sprint close {sprint card}`. Never one generic paste for every wave.
+End of step 12: ten lines at most, and one exact paste per wave, each naming the sprint card and the wave: `/bandit-dev:sprint execute {sprint card} wave 1`, `... wave 2`, and so on, then `/bandit-dev:sprint debug {sprint card}` and `/bandit-dev:sprint close {sprint card}`. Never one generic paste for every wave.
 
 ## Handover
 
-At step 11 write `references/templates.md` → Execution prompt and Ledger into the sprint folder. The execution prompt runs one wave per run without questions, merges passing cards into the local development branch, pushes `development` once at the end of the last code wave (never `main`, never a deploy), keeps the ledger after every milestone and writes the handover test report. A new chat resumes from the ledger. The commands that run it are `execute`, `debug` and `close` (`references/execute.md`, `debug.md`, `close.md`). The prompt points to `execute.md` for board moves and the wave rules, to `debug.md` for bug reports and to `close.md` for closing; it carries no copy of their procedures. Its start paste names the wave.
+At step 12 write `references/templates.md` → Execution prompt and Ledger into the sprint folder. The execution prompt runs one wave per run without questions, merges passing cards into the local development branch, pushes `development` once at the end of the last code wave (never `main`, never a deploy), keeps the ledger after every milestone and writes the handover test report. A new chat resumes from the ledger. The commands that run it are `execute`, `debug` and `close` (`references/execute.md`, `debug.md`, `close.md`). The prompt points to `execute.md` for board moves and the wave rules, to `debug.md` for bug reports and to `close.md` for closing; it carries no copy of their procedures. Its start paste names the wave.

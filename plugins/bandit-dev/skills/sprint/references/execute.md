@@ -23,7 +23,7 @@ Contents: Command · Rules · Start · The wave · Board moves · Finishing a wa
 ## Start (every run)
 
 1. Gate 0 from SKILL.md (surface, Project Context, repo state, tools). Planning's PM-column check is not needed.
-2. Resolve the sprint card given in the command (`get_task`); its folder and ledger follow from it. It must have `sprint/{name}` batch cards, the 11 step sub-tasks ticked and the wave sub-tasks present. Not approved or not committed (step 10 or 11 open): say which and stop.
+2. Resolve the sprint card given in the command (`get_task`); its folder and ledger follow from it. It must have `sprint/{name}` batch cards, the 12 step sub-tasks ticked (step 11 is the independent review) and the wave sub-tasks present. Not approved, not reviewed or not committed (step 10, 11 or 12 open): say which and stop. **Order gate:** blocked by an incomplete sprint card → name it and stop.
 3. Read the ledger, the plan and the execution prompt from the sprint folder. Apply the command rules (wave given or first unticked, order, scope). All ticked: say so and offer `debug`.
 4. `git branch --show-current` and `git status --short`; reconcile with the ledger. Mismatch: stop and report.
 
@@ -32,9 +32,10 @@ Contents: Command · Rules · Start · The wave · Board moves · Finishing a wa
 1. **Seed the board (first run only).** Every batch card (never the sprint card) to `assigned` with `bulk_set_execution_state`. Cards that were never in Assigned stay as they are if the state is already right. Record it in the ledger.
 2. **Set the board for this wave, at the start of EVERY wave, not only the first** (Board moves below). A later wave's cards arrive in `assigned` or `next`; this step is what puts them in `doing`. Procedure: `get_execution_board`; for each card of this wave that you are about to work, `set_task_execution_state` → `doing`; read the board again and show the columns in the wave's opening report. A card that is not in `doing` when you start working it is a failed step, unless the move was refused (next rule).
    **A refused move to `doing` is never skipped silently.** The board's gate still refuses `doing` while any blocker is incomplete, and a blocker in `standby` is not complete. The app change that would let `standby` count is **not built**: until it is deployed the refusal is real, and a card chained behind a card of an earlier wave will be refused. Then: keep the card in `next`, add a card comment `Could not move to Doing: blocked by {blocker title} (in Stand By). Working it anyway under the wave's approval; the pending app change would allow this.`, write the same line under "Decisions taken without the user" in the ledger, and put it in the final message. Work the card; do not stop the wave for this.
-3. **Work the cards as the plan and execution prompt say.** Tick each card's sub-tasks as each is done, one `set_subtask_completed` per tick, not in a batch at the end.
-4. **A card whose development is finished** (code, tests, gates passed, board comment written) moves to `standby` for Leo's approval. Never complete it. Stage and ledger status become "Delivered awaiting the user's test".
-5. **Re-set the board** after each card finishes (Doing frees a slot; the next card may move up).
+3. **Migration tail, before any migration is written.** `python3 ${CLAUDE_SKILL_DIR}/scripts/recipe.py check-tail {tail}` with the tail the plan's Migration tail table names for this wave. Exit 4 (the tail differs) or 3 (a missing key): stop the wave, card Blocked with the output, the line under "Needs the user". A match: one ledger line `Migration tail {tail} matched`. Never pick the next free number.
+4. **Work the cards as the plan and execution prompt say.** Tick each card's sub-tasks as each is done, one `set_subtask_completed` per tick, not in a batch at the end.
+5. **A card whose development is finished** (code, tests, gates passed, board comment written) moves to `standby` for Leo's approval. Never complete it. Stage and ledger status become "Delivered awaiting the user's test".
+6. **Re-set the board** after each card finishes (Doing frees a slot; the next card may move up).
 
 ## Board moves
 
@@ -57,7 +58,7 @@ Read `get_execution_board` before every batch of moves; the board, not memory, i
 
 ## Finishing a wave
 
-**No leftovers.** Before this step ends, anything it used to make something else and no longer needs (a draft, a scratch file, a superseded copy, a test fixture, a temporary branch) is archived or deleted, only on proof that its successor exists (SKILL.md, Leftovers).
+**No leftovers.** Before this step ends, anything it used to make something else and no longer needs (a draft, a scratch file, a superseded copy, a test fixture, a temporary branch) is archived or deleted, only on proof that its successor exists (`references/homes.md` → Leftovers).
 
 
 1. All of the wave's cards in `standby`, or Blocked with the reason on the card and in the ledger.

@@ -14,13 +14,14 @@ Contents: Filenames · Sprint card · Step comment · Plan note · Brief change 
 | Execution prompt | `{project}-sprint-{name}-handover-prompt.md` |
 | Ledger | `{project}-sprint-{name}-progress.md` |
 | Handover report | `{project}-sprint-{name}-handover-report.md` (created by the execution chat) |
+| Review record | `{project}-review-sprint-{name}-YYYY-MM-DD.md` (`type: log`, written at step 11 from the `plan-reviewer` agent's report) |
 | Briefs | one per card, bandit:notes brief naming, filed into the folder |
 
 ## Sprint card description
 
 Twelve sections, each an `<h2>`: 1 Header (sprint, dates, owner, status) · 2 Goal · 3 Batch (selection rule, a table of card, title, lane, effort, complexity, order, blocked by; total effort; the sprint documents by filename) · 4 Out of this sprint · 5 Sequence and parallelism · 6 Cross-card notes · 7 Technical plan (a pointer to the plan note) · 8 Risks and rollback (headlines and a pointer) · 9 Readiness checklist · 10 Decisions log (dated) · 11 Open questions · 12 Approval and close-out (approval quoted, how to resume or debug, close-out left for the end). No `Spec` heading: the sprint card is not a work card.
 
-Sub-tasks, in order: 1. Select and freeze the batch · 2. Spec completeness check, per card · 3. Close the open questions · 4. Size and classify · 5. Cross-card analysis · 6. Sequence · 7. Write the one technical plan · 8. Risk and rollback · 9. Definition of ready, per card · 10. Approval gate · 11. Commit the sprint. Then, added last at step 11, one sub-task per wave: `Wave 1: {ids}`, `Wave 2: {ids}`, and so on, in wave order. The execution ticks each when the wave is delivered and verified.
+Sub-tasks, in order: 1. Select and freeze the batch · 2. Spec completeness check, per card · 3. Close the open questions · 4. Size and classify · 5. Cross-card analysis · 6. Sequence · 7. Write the one technical plan · 8. Risk and rollback · 9. Definition of ready, per card · 10. Approval gate · 11. Independent plan review · 12. Commit the sprint. Then, added last at step 12, one sub-task per wave: `Wave 1: {ids}`, `Wave 2: {ids}`, and so on, in wave order. The execution ticks each when the wave is delivered and verified.
 
 ## Step comment
 
@@ -28,7 +29,7 @@ Sub-tasks, in order: 1. Select and freeze the batch · 2. Spec completeness chec
 
 ## Plan note
 
-`type: plan`, `status: active`, `board-task` = the sprint card's short id, `related` = every brief. Body: H1 title; summary line; **Summary** (counts, wave table with reasons); **WBS** (a link to the batch's work breakdown in `planning/` and the wave split it supports); **How every card is executed** (branches, working loop, never-in-parallel, migrations, regenerated artefacts, credentials, live checks create and remove their own test data and never alter existing records (Test data in `plan.md`), hard rules, design rules); one section per card (Approach, Tests, Docs, Verify first, Verification table of acceptance against proof); **Cross-card items**; **Items to register**; **Risks and rollback**; **Related**. After approval the plan stays stable; changing facts go in the ledger.
+`type: plan`, `status: active`, `board-task` = the sprint card's short id, `related` = every brief. Body: H1 title; summary line; **Summary** (counts, wave table with reasons); **WBS** (a link to the batch's work breakdown in `planning/` and the wave split it supports); **How every card is executed** (branches, working loop, never-in-parallel, migrations, regenerated artefacts, credentials, live checks create and remove their own test data and never alter existing records (Test data in `plan.md`), hard rules, design rules); one section per card (Approach, Tests, Docs, Verify first, Verification table of acceptance against proof); **Migration tail** (the tail the sprint starts from, then one row per wave: the tail it must start from and the numbers it adds; `execute` checks it); **Cross-card items**; **Items to register**; **Risks and rollback**; **Related**. After approval the plan stays stable; changing facts go in the ledger.
 
 ## Brief change log
 
@@ -42,7 +43,7 @@ The execution prompt must carry the No leftovers rule (SKILL.md, Leftovers) in i
 
 ## Ledger
 
-Sections: At a glance (sprint, current wave, next action, last update, report, development verified); Waves and cards (wave, card, branch, status, last milestone, commit, review, verify, UI, merged, report section); Milestone log; Verify-first results; Decisions taken without the user; Plan deviations; Needs the user (backup before deploy, production audits, rule corrections awaiting approval, push and deploy decisions, unresolved references); Follow-ups noticed; Bug log. Status values: Not started, In progress (step), Blocked (reason), Delivered awaiting the user's test, Tested by the user.
+Sections: At a glance (sprint, current wave, next action, last update, report, trunk verified, `Committed: {date}` written at step 12, `Released: {version} · {date} · {commit}` written by `release`); Waves and cards (wave, card, branch, status, last milestone, commit, review, verify, UI, merged, report section); Milestone log; Verify-first results; Decisions taken without the user; Plan deviations; Needs the user (backup before deploy, production audits, rule corrections awaiting approval, push and deploy decisions, unresolved references); Follow-ups noticed; Bug log. Status values: Not started, In progress (step), Blocked (reason), Delivered awaiting the user's test, Tested by the user.
 
 ## Report
 

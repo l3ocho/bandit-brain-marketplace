@@ -79,8 +79,8 @@ Before the first write, call `nc_webdav_list_directory` on `webdav_folder`.
    The write result returns bare hex — store it exactly as returned.
 5. Update metadata: `storage_backend: "webdav"`, `webdav_folder`, both etags,
    `instructions_version: 0`, `prompt_ref_version: 0`, `last_sync`.
-6. Output the instruction set to paste, and write the reference doc to the project (SKILL.md,
-   **Project copy**).
+6. Output the instruction set to paste, and write the reference doc to the project (**Project copy**,
+   `references/output.md`).
 7. Confirm: "Files written to `{webdav_folder}`:
    - `{prefix}-instructions-v0.md`
    - `{prefix}-prompt-reference-v0.md`
@@ -112,8 +112,8 @@ in by hand, and trusting it blindly would aim the next write at a path that alre
 5. Capture each new `etag` (bare hex, as returned by the write) into metadata, replacing the
    previous value for that file.
 6. Update the version integers and `last_sync`.
-7. Output the instruction set to paste, and write the reference doc to the project (SKILL.md,
-   **Project copy**).
+7. Output the instruction set to paste, and write the reference doc to the project (**Project copy**,
+   `references/output.md`).
 8. Confirm: "Version bumped in `{webdav_folder}`:
    - `{prefix}-instructions-v{N}.md` (was v{N-1})
    - `{prefix}-prompt-reference-v{M}.md` (unchanged)
@@ -187,7 +187,7 @@ If the folder hasn't been moved yet, keep writing to the current `webdav_folder`
 
 **Project folder check (webdav, every project type).** If `domain` isn't `none` and
 `MyNotes/{domain}/Projects/{project}/` doesn't exist, flag it (workflow projects included)
-as ⚠️ **No shared project folder**. The fix is the vault rows of **🚀 Onboarding** in the same
+as ⚠️ **No shared project folder**. The fix is the vault rows of **🚀 Onboarding** (`references/onboard.md`) in the same
 proposal as the version bump. Never create it outside an approved row.
 
 Then:

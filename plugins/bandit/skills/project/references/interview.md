@@ -1,6 +1,6 @@
 # 🆕 New Project Mode — Interview Flow
 
-> Read when SKILL.md's Mode Detection picks **New Project**: no instructions yet, or only a
+> Read when Mode Detection (`references/audit.md`) picks **New Project**: no instructions yet, or only a
 > placeholder. Covers the four interview phases and the generation steps.
 
 The interview gathers information to populate the reference template sections. It follows a
@@ -27,7 +27,7 @@ Each phase may take 1–2 messages when mixing both question types — that's fi
    - **Claude Code surface** (whenever the project has no `dev: true`: every `workflow` project,
      and a `product_service` or `claude_marketplace` project that answered No to the dev question)
      — *"Will this project also run in Claude Code? 1. Yes 2. No"*. Yes → onboarding creates
-     `Claude/code-{slug}/` (bandit:notes) and this skill produces the Claude Code twin (SKILL.md, **Claude Code twin**). No → neither.
+     `Claude/code-{slug}/` (bandit:notes) and this skill produces the Claude Code twin (`references/project-context.md` → Claude Code twin). No → neither.
      No Project Context key: the answer goes to the onboarding hand-off only.
 2. **What is this project?** (open-ended) — Purpose, domain, who it's for. Ask them to describe
    it like they'd explain it to a colleague in 2–3 sentences.
@@ -36,7 +36,7 @@ Each phase may take 1–2 messages when mixing both question types — that's fi
 4. **Repository structure** (single select) — Options: "Single repo", "Monorepo with distinct areas",
    "Multiple repos", "Not a code project"
 5. **Task board scope** (single select via `ask_user_input`) — Does this project's work live on
-   a BanditBrains board?
+   a Bandit Brain board?
 
    Call `list_projects` first and present what exists. Options:
    - "One existing project" — pick from the live project list
@@ -47,7 +47,7 @@ Each phase may take 1–2 messages when mixing both question types — that's fi
    - "Not board-backed"
    - "Decide later"
 
-   The answer goes to bandit:tasks' board step (**🚀 Onboarding**, step 3). What each answer
+   The answer goes to bandit:tasks' board step (**🚀 Onboarding** (`references/onboard.md`), step 3). What each answer
    becomes, the `board:` line it returns and what it may create are bandit:tasks' rules
    (`references/onboard.md`), not this skill's. Write back the `board:` line it returns.
 
@@ -107,8 +107,7 @@ Quick resolution of optionals and output preference.
    - **External References** — "Project knowledge files or docs Claude should consult on-demand"
    - **Mission Statement** — "A north-star statement for tone and decision-making"
 
-   **Project Context** is not offered here — it is always included (see **Project Context
-   Section** in SKILL.md). Phase 1 question 5 fills its `board:` line, whatever the answer.
+   **Project Context** is not offered here — it is always included (see `references/project-context.md`). Phase 1 question 5 fills its `board:` line, whatever the answer.
 
 2. **Output target** (single select):
    - "Artifact only" (default)
@@ -127,8 +126,8 @@ Quick resolution of optionals and output preference.
      `.`. Add a last option, "Outside MyNotes (custom path)". Store the choice as the Project
      Context `domain:`.
    - **Project slug** (single select + free text) — the **project's own name** as a slug, not
-     the Claude.ai project's display name: "Summitt Notes Templates" in Claude.ai is the
-     `cs-notes` project. One slug names all of the project's folders in the vault, and the
+     the Claude.ai project's display name: "Acme Notes Templates" in Claude.ai is the
+     `home-reno` project. One slug names all of the project's folders in the vault, and the
      Claude Code settings reuse it, so both surfaces share the same docs. Offer the existing
      `Projects/` folders of the domain first (`nc_webdav_list_directory`), then a free-text
      option for a new one. Store it as the Project Context `project:`.
@@ -136,14 +135,14 @@ Quick resolution of optionals and output preference.
      Store it as the Project Context `prefix:`.
 
    Then show the derived paths and confirm, e.g. for a regular project:
-   - Settings (this skill writes here): `MyNotes/Summitt/Claude/ai-cs-notes`
-   - Shared project docs (read by Claude.ai and Claude Code): `MyNotes/Summitt/Projects/cs-notes`
-   - Claude Code settings (configured in the repo): `MyNotes/Summitt/Claude/code-cs-notes`
+   - Settings (this skill writes here): `MyNotes/Acme/Claude/ai-home-reno`
+   - Shared project docs (read by Claude.ai and Claude Code): `MyNotes/Acme/Projects/home-reno`
+   - Claude Code settings (configured in the repo): `MyNotes/Acme/Claude/code-home-reno`
 
    Every project type, **workflow included**, gets both folders (settings and shared project
    docs); which folders a project has is bandit:notes' rule, not this skill's. Show both paths.
    Store the settings path as `webdav_folder`. The `Projects/` and `Claude/` folders are **vault rows** from bandit:notes'
-   onboarding procedure (see **🚀 Onboarding**), never created outside the approved proposal.
+   onboarding procedure (see **🚀 Onboarding** (`references/onboard.md`)), never created outside the approved proposal.
 
    **"Outside MyNotes"** is the escape hatch for folders the vault conventions don't cover:
    ask for the full path (relative to the Nextcloud root, no leading slash), store it verbatim
@@ -155,7 +154,7 @@ Quick resolution of optionals and output preference.
    - Prompt reference: `{prefix}-prompt-reference-v{N}.md` (e.g., `bi-prompt-reference-v0.md`)
 
    Version numbers are integers appended without dots. Initial version is always `v0`. See
-   **Vault Folder (WebDAV)** in SKILL.md for the full rules.
+   **Vault Folder (WebDAV)** in `references/output.md` for the full rules.
 
 For each selected optional, ask its focused follow-up (same pattern as Phase 3).
 
@@ -171,9 +170,9 @@ After the interview completes:
    suggest what to offload to External References.
 6. **Add metadata block** — `<!-- bandit-project: {...} -->` as first line, in the shape the
    reference template defines. Always set `storage_backend`; with vault output, populate the
-   storage fields (see **Metadata Storage Fields** in SKILL.md).
+   storage fields (see **Metadata Storage Fields** in `references/output.md`).
 7. **Generate the Project Context** — always insert a `## 🧭 Project Context` section,
-   immediately after Project Overview. See **Project Context Section** in SKILL.md for the exact
+   immediately after Project Overview. See `references/project-context.md` for the exact
    format and how each key is filled.
 8. **Generate supporting document** — create a project reference doc alongside the instruction set.
    This is a separate file that contains:
@@ -187,6 +186,6 @@ After the interview completes:
    gives future audits a baseline to compare against. Format as markdown with ND-friendly
    formatting. Title: "Project Reference — {project name}". With vault output, the file name is
    the versioned one (e.g., `bi-prompt-reference-v0.md`).
-9. **Onboarding proposal** — with a vault target, run steps 2–7 of **🚀 Onboarding**: the vault
+9. **Onboarding proposal** — with a vault target, run steps 2–7 of **🚀 Onboarding** (`references/onboard.md`): the vault
    and board rows plus the two settings files, in one proposal. Artifact-only → just the board
-   rows (if any), then output the two files (see **Output Handling** in SKILL.md).
+   rows (if any), then output the two files (see **Output Handling** in `references/output.md`).

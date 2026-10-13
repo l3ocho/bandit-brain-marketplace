@@ -96,7 +96,7 @@ manifest lists them), and search `MyNotes/{Domain}/Projects/{project}/` for ever
 proposing the note edits.*
 
 All three vault files are rows of one proposal, with the twin version bump. The length gate
-(SKILL.md, **🚀 Onboarding** rules) runs first: the Environment line counts toward the budget.
+(`references/onboard.md` rules) runs first: the Environment line counts toward the budget.
 
 ## 🔁 Rollout to an existing twin
 

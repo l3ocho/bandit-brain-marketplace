@@ -115,7 +115,7 @@ State the project classification at the top of the overview. It shapes smart def
 ### 2c. Environment (Claude Code twins only)
 
 **Concern:** Context
-**Purpose:** The one section where a project's Claude.ai instructions and its Claude Code `CLAUDE.md` differ (**Claude Code twin** in SKILL.md). Each copy states its surface outright, so nothing is guessed at runtime.
+**Purpose:** The one section where a project's Claude.ai instructions and its Claude Code `CLAUDE.md` differ (`references/project-context.md` → Claude Code twin). Each copy states its surface outright, so nothing is guessed at runtime.
 
 **Heading:** exactly `## 🖥️ Environment`, directly after Project Context.
 
@@ -447,7 +447,7 @@ Every generated instruction set includes this HTML comment as the first line:
 - `last_sync` — ISO timestamp of the last vault write
 - Audit mode reads this to detect version drift between instructions and the current reference
 - **The project's identity is not in this block.** Domain, slug, type, board and prefix live in
-  the `## 🧭 Project Context` section (see **Project Context Section** in SKILL.md). Instructions
+  the `## 🧭 Project Context` section (see `references/project-context.md`). Instructions
   written before reference 1.3 carry them here as `vault_domain`, `vault_project`,
   `project_type`, `note_prefix` and `taskops_scope`; the audit migrates them (⚠️ Legacy context).
 - **Legacy fields.** Instructions written before 1.4 may carry `note_id`, `ref_doc_note_id`,

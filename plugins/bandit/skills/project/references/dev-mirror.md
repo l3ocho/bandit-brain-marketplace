@@ -174,7 +174,7 @@ there is one, and end a turn: the whole mirror is recopied.
 
 ## ⚠️ Gotchas
 
-- **2026-09-30 · Auto mode blocked the CS Notes mirror as data exfiltration.** The old script asked
+- **2026-09-30 · Auto mode blocked the Home Reno mirror as data exfiltration.** The old script asked
   Claude to read the repo files and write them through the BanditCloud connector; 39 of 43 files
   were refused. → The script copies into the synced folder itself (**How it works**).
 - **2026-09-30 · The script would have mirrored `.claude/worktrees/`.** Claude Code creates each

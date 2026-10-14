@@ -1,7 +1,7 @@
 ---
 type: reference
 summary: House standard for Leo's domains and projects across Claude.ai, the MyNotes vault and BanditBrains. bandit:audit scores against these 16 rules.
-updated: 2026-10-13
+updated: 2026-10-14
 ---
 
 # 🧱 Structure Rulebook
@@ -53,7 +53,7 @@ The `{L} - ` prefix exists only in Claude.ai, as a workaround until Claude.ai ca
 - Each domain has exactly one workflow project: one Claude.ai project, one board, one `ai-{slug}` folder.
 - The workflow board is named `{Name} - wkflw` **and** has type `workflow`. The two must agree.
 - The workflow board holds only tasks that belong to no project in the domain. Task placement is Leo's call and isn't audited.
-- The workflow project's `board:` names its own workflow board: `project "{Name} - wkflw"`. Its wider, limited scope across the domain folder comes from `type: workflow`; what it may do there is bandit:tasks' rule.
+- The workflow project's `board:` names its own workflow board: `project "{Name} - wkflw"`. Every project reads and writes across its domain folder; the workflow project also owns the Untriaged cards. What each may do there is bandit:tasks' rule (`references/scope.md`).
 - **Check:** exactly one board per domain folder ends in ` - wkflw`, its type is `workflow`, and no other board in the folder has type `workflow`. Exactly one project has `type: workflow`, and its `board:` names that board.
 
 ### S4 · Project Context
@@ -61,7 +61,8 @@ The `{L} - ` prefix exists only in Claude.ai, as a workaround until Claude.ai ca
 - The `## 🧭 Project Context` block (owned by `bandit:project`) has all 5 required keys: `domain`, `project`, `type`, `board`, `prefix`.
 - One optional key: `dev`. Valid value `true`, or the line is absent. Any other value is ❌. A project without the line is never flagged.
 - `domain` is the vault domain. `board` is `project "{name}"` naming an existing board, or `none`. `folder "…"`, `global` and `pending` don't pass.
-- **Check:** read from the production instructions file in the vault. Keys missing, `dev` invalid or `board` unresolved → ❌.
+- The `board` project is filed in the domain's board folder or one of its subfolders: `domain` and `board` together are the project's board scope (bandit:tasks `references/scope.md`). A home board outside its domain folder is ❌.
+- **Check:** read from the production instructions file in the vault. Keys missing, `dev` invalid, `board` unresolved or outside the domain folder → ❌.
 
 ### S5 · Production version
 

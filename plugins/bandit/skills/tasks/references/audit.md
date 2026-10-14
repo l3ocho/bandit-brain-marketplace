@@ -15,7 +15,9 @@
 
 ## 🔍 The checks
 
-Run them all, report only the ones that fire, each with its fix row.
+Run them all, report only the ones that fire, each with its fix row. **Over the domain only:**
+every read goes through `references/scope.md` → Filtering; check 1 runs from the workflow project
+only, and checks 6–7 read tag names, which are household-wide by nature.
 
 | # | Check | How |
 |---|---|---|

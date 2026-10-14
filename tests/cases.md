@@ -46,3 +46,18 @@ the `bandit-staging` board only. `read` cases are checked by reading the shipped
 | C23 | P11 + C templates | auto (L5) | `templates/instructions/*.md` | three templates, each ≤ one page, with Project Context, stage → command map and modes; shipped byte for byte in `project/assets/instructions/` |
 | C24 | P11 dev agent stops at spec | read | `templates/instructions/dev.md` → Role | "It stops at spec"; stages 4–10 are Claude Code |
 | C25 | P11 generation | read | `project/references/instructions.md` | instructions are generated from the template for the project's type, through one proposal |
+
+## 🗺️ Domain scope (debug D2, 2026-10-14)
+
+Run from `.work/test/` with a Project Context whose `domain:` names a staging board folder with a subfolder, and a second top-level folder outside it.
+
+| # | Item | Kind | Input | Expected |
+|---|---|---|---|---|
+| C26 | D2 today filter | cli | `today` from a project in domain A, with cards in Doing on a board of domain B | only domain A's cards; the home board first; counts and the five-item cap after the filter |
+| C27 | D2 linked card | cli | `today` where a domain A card is blocked by a domain B card | the B card shows as title, board and state, marked `outside the domain`; no other B card |
+| C28 | D2 sibling write | cli | from board A1, "add a card to A2" (same domain) | created on A2; the reply names A2; a comment `From {project}: …` on the card |
+| C29 | D2 outside write | cli | from board A1, "add a card to B1" (other domain) | refused, names the domain rule; nothing created |
+| C30 | D2 Untriaged | cli | `triage` from a non-workflow project, then from the domain's workflow project | first: Stage 1 skipped, no Untriaged count; second: Untriaged shown and filed into domain A only |
+| C31 | D2 capture | read | `tasks/references/capture.md` → Placement | no project named, from a non-workflow project → the home board's Inbox (parked) |
+| C32 | D2 retired values | read | `tasks/references/scope.md` → `board:` values | `folder "…"` and `global` stop and point to `/bandit:project update` |
+| C33 | D2 audit S4 | cli | `check_structure.py` on a snapshot whose project names a board in another top-level folder | S4 ❌ "board `…` is outside the `{domain}` folder", one fix row back to the domain board; the unchanged snapshot scores S4 ✅ (run 2026-10-14 on the 2026-09-29 Summitt snapshot, `.work/test/d2/`) |

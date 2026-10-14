@@ -41,11 +41,10 @@ Read the `board:` line as usual (`references/scope.md`). Load's own behaviour pe
 
 | `board:` | Load does |
 |---|---|
-| `pending` | Creates a **new** project, top level unless Leo names a folder |
-| `folder "X"` | Creates a new project inside folder X |
+| `pending` | Creates a **new** project inside the domain's folder (a subfolder of it when Leo names one) |
 | `project "X"` | Loads into existing project X. Its `type` must be `deliverable`; otherwise stop and ask |
-| `global` | Ask: new project in which folder, or load into which existing project |
 | `none` | Refuse. The project isn't board-backed |
+| `folder "…"` · `global` | Retired: stop as `references/scope.md` says |
 
 🛠️ **Dev projects are never loaded.** Project Context `dev: true` → stop and say cards are created
 one work package at a time through `/bandit:tasks spec` (`references/dev-workflow.md`, B4).

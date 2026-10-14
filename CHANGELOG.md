@@ -2,6 +2,10 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) share one version. A release bumps every `plugin.json`, adds an entry here and tags `v{version}` on `main`.
 
+## Unreleased (0.1.1) · debug of sprint marketplace-v1
+
+- **Board scope by domain (D2):** home board first, read and write across the domain's board folder and its subfolders, nothing outside it except cards linked to the domain. Today, Week, Inbox and audit filter to the domain; Untriaged is the workflow project's; `board: folder` and `board: global` retired; audit S4 fails a home board outside its domain folder (`tasks/references/scope.md`, `docs/decisions.md` DS1–DS5).
+
 ## 0.1.0 · first version: rebrand, lighten, pipeline behaviour
 
 Sprint marketplace-v1 (cards BB-147, BB-133), 2026-10-13. Pre-approval release candidate: tag on Leo's deploy word (`docs/install.md`).

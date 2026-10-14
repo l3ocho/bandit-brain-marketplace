@@ -38,6 +38,10 @@ A titled task in Untriaged is a success. An interrogation that ends with a perfe
 | `projectId`, no column, **with date** | The project's **first column** |
 | `projectId` + `projectColumnId` | That column |
 
+**No project named** → Untriaged from the domain's workflow project or a plain chat; from any other
+project, the home board's Inbox (parked), so the card stays in this project's sight
+(`references/scope.md`). A project named in the request must be in the domain.
+
 🚫 **Never set `origin`.** It is only for a task created on behalf of another system, all three fields are required together, and none can ever be changed afterwards. A person asking for a task is not an origin.
 
 ---

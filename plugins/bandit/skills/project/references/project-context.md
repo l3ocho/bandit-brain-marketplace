@@ -23,7 +23,7 @@ prefix: {prefix}
 {dev: true — this line only when the project opted in}
 
 Read by bandit:notes, bandit:minutes, bandit:tasks, bandit:plan.
-**Read anywhere. Write inside `board` only.**
+**Home board first. Read and write across the domain. Nothing outside it.**
 Names only: skills resolve IDs live via `list_projects`. No hardcoded IDs, ever.
 ```
 
@@ -32,20 +32,22 @@ Names only: skills resolve IDs live via `list_projects`. No hardcoded IDs, ever.
 | `domain` | MyNotes domain folder (e.g. `Acme`), or `none` | Phase 4 Domain question. `none` for a custom path and artifact-only |
 | `project` | The project's own slug (e.g. `home-reno`) | Phase 4 slug question. When it wasn't asked, suggest a kebab-case slug from the project name and confirm it |
 | `type` | `product_service` · `workflow` · `claude_marketplace` | Phase 1 question 1 |
-| `board` | `project "{name}"` · `folder "{name}"` · `global` · `none` · `pending` | Phase 1 question 5. Names exactly as `list_projects` returns them, quoted |
+| `board` | `project "{name}"` (the **home board**, filed inside the domain's board folder) · `none` · `pending` | Phase 1 question 5. Names exactly as `list_projects` returns them, quoted. `folder "…"` and `global` are retired (2026-10-14) |
 | `prefix` | 2–3 character filename prefix, or `none` | Phase 4 prefix. `none` when artifact-only |
 | `dev` *(optional)* | `true`, or the line is absent | Phase 1 dev question (`references/interview.md`). Only for technical development projects that use the dev card workflow (bandit:tasks, bandit:notes) and sprints (bandit-dev:sprint, Claude Code) |
 
 **Format rules** (other skills parse this, so it is fixed): the heading text is `Project
 Context`; one `key: value` per line; these five required keys, lower-case, plus the optional
 `dev: true` line right after `prefix` (written only when the project opted in; otherwise
-omit the line, never `dev: false`); nothing else inside the block except the two closing lines. `board` is asymmetric on purpose — planning needs
-cross-board reads, but work from this project must never land on another project's board.
+omit the line, never `dev: false`); nothing else inside the block except the closing lines. `domain`
+and `board` together set the board scope: the domain is the board's top-level folder of the same
+name, with its subfolders; the home board comes first, the rest of the domain is open to read and
+write, and nothing outside it is (bandit:tasks `references/scope.md` owns the rule).
 
 **How readers treat it:** a missing required key → ask; a missing `dev` line → not a dev project
 (never ask); a value that doesn't check out (the board name no
 longer resolves, the domain isn't in `MyNotes`) → stop and say so, never guess at the nearest
-match. `board: none` or `pending` → bandit:tasks reads anywhere and writes nothing (except
+match. `board: none` or `pending` → bandit:tasks reads the domain and writes nothing (except
 `/bandit:tasks load` on `pending`).
 
 ### Repo copy (Claude Code)

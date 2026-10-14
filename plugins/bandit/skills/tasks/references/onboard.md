@@ -17,9 +17,9 @@ proposal, then tells Leo the `board:` line to set through bandit:project.
 | Input | Example |
 |---|---|
 | Project name (as the board should show it) | `Bandit Labs` |
-| Board answer from the interview | existing project · existing folder · new project · global · none |
+| Board answer from the interview | existing project · new project · none · decide later |
 | Project type for a new board project | `deliverable` · `workflow` · `hybrid` |
-| Folder for a new board project (optional) | `Bandit Labs` |
+| Domain (the Project Context `domain:`) | `Acme` |
 | `dev: true` (optional) | only for a technical development project |
 
 ---
@@ -33,11 +33,11 @@ proposal, then tells Leo the `board:` line to set through bandit:project.
    | Board answer | Row | `board:` line |
    |---|---|---|
    | Existing project, found | none: nothing to create | `project "{name}"` |
-   | Existing folder, found | none | `folder "{name}"` |
-   | New project | `create board project` · name · type · folder (or top level) | `project "{name}"` |
-   | Global | none | `global` |
+   | New project | `create board project` · name · type · inside the domain's folder (a subfolder of it when Leo names one) | `project "{name}"` |
    | None | none | `none` |
+   | Decide later | none | `pending` |
    | A name that doesn't resolve | none: stop and report it; bandit:project asks again | — |
+   | An existing project outside the domain's folder | none: stop and report it (`references/scope.md`); offer a move row only when Leo asks | — |
 
    A new project whose name already exists on the board is not created twice: report it and
    offer to use the existing one.
@@ -45,8 +45,7 @@ proposal, then tells Leo the `board:` line to set through bandit:project.
    **`dev: true`:** add the rows of the **dev board shape** procedure (`references/dev.md`) for the
    project, new or existing, to the same list: missing `lane/*` / `stage/*` tags, then its lanes,
    then the `PM` column when the board has none.
-   It needs one project board: with a folder, `global` or `none` answer, report that and add no
-   dev rows.
+   It needs one project board: with a `none` or `pending` answer, report that and add no dev rows.
 
    **A new board's name follows the structure rulebook**, S2 and S3 in
    bandit:audit `references/structure-rulebook.md`: read it before proposing the row. A name that breaks
@@ -64,7 +63,7 @@ proposal, then tells Leo the `board:` line to set through bandit:project.
 - Add columns, lanes, tasks or tags. The board's shape comes later: `/bandit:tasks load` from a
   WBS, or the design conversation. **Exception:** the dev board shape rows (tags, lanes and the
   `PM` column) for a `dev: true` project
-- Create a folder on the board. If the folder Leo names doesn't exist, report it and offer top
-  level instead
+- Create a folder on the board. If the domain's folder doesn't exist, report it (structure rule
+  S1) and stop: a board project outside its domain falls outside every domain's sight
 - Store or show an ID in the `board:` line. Names only
 - Create anything that isn't an approved row

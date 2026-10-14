@@ -29,7 +29,7 @@ Natural language always works; a request that spans two surfaces reads both file
 
 | Also read | When |
 |---|---|
-| `references/scope.md` | Before every write: resolve the `board:` scope |
+| `references/scope.md` | Before every read or write: the home board, the domain, filtering the household-wide views |
 | `references/board.md` | Taxonomy, right-sizing, planning variables, tags, bulk writes, card descriptions, sub-tasks, safety, refusals, what lies outside this skill |
 | `references/errors.md` | A call comes back `{ ok: false, code, … }` |
 | `references/gotchas.md` | Once, at the start of a session that writes to the board |
@@ -48,8 +48,9 @@ isn't a dev project and stops. Surface roles: `references/dev-workflow.md` → S
 3. 🔀 **Move is triage-only.** `move_task` belongs to Inbox review. It is not a general verb
 4. 👻 **Projections aren't rows.** Week-board items may be recurring projections with no task record
 5. 🗣️ **Never say bare "backlog."** Say **project Backlog** or **Execution Backlog**
-6. 🗺️ **Read anywhere, write inside the declared `board:` only** (`references/scope.md`). Names
-   resolve live with `list_projects`; no stored ID, ever. A name that doesn't resolve → stop
+6. 🗺️ **Home board first. Read and write across the domain. Nothing outside it**
+   (`references/scope.md`): every household-wide view is filtered to the domain before it's shown.
+   Names resolve live with `list_projects`; no stored ID, ever. A name that doesn't resolve → stop
 7. 🏷️ **`set_task_tags` replaces the whole set:** `get_task`, merge, then write (`references/board.md` → Tags)
 8. 📝 **Descriptions are block-tag HTML, read back after every write** (`references/board.md` → Card descriptions)
 9. 🛡️ **Write freely, confirm destructive.** Every `delete_*` is confirmed; archive before delete

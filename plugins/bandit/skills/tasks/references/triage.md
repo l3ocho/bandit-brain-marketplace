@@ -33,9 +33,12 @@ Never collapse them. Asking "which project and which column" about twenty untria
 
 ## ⚙️ Procedure
 
-1. **Resolve scope.** `list_projects` once. Names → IDs, plus every project's columns and **type**
-2. **Read the board.** `get_inbox_board`
-3. **Report counts first.** Untriaged count, then parked count per project. Do not start proposing until the size is stated
+1. **Resolve scope.** `list_projects` once. Names → IDs, plus every project's columns and **type**;
+   the domain's projects (`references/scope.md`)
+2. **Read the board.** `get_inbox_board`, filtered to the domain (`references/scope.md` →
+   Filtering). **Untriaged is the workflow project's:** from any other project, Stage 1 is skipped
+   and only the domain's parked columns are triaged
+3. **Report counts first.** Untriaged count (workflow project only), then parked count per project of the domain. Do not start proposing until the size is stated
 4. **Right-size** — see below. Propose only
 5. **Stage 1 — propose projects** for the untriaged items, as a list the user can correct in one message
 6. **Stage 2 — leave the inbox** (below) for the parked items the project's exit style lets out now

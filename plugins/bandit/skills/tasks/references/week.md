@@ -49,7 +49,7 @@ Both are counts. **Neither knows how long anything takes.** Weight by `effort` i
 
 ### `/bandit:tasks week` — read, then date on request
 
-1. `get_week_board`
+1. `get_week_board`, filtered to the domain (`references/scope.md` → Filtering)
 2. Report: overdue first (if the Due column exists), then day by day
 3. Mark projections explicitly as recurring, not as tasks
 4. Flag the heaviest day and any empty stretch
@@ -61,7 +61,8 @@ Both are counts. **Neither knows how long anything takes.** Weight by `effort` i
 #### Dating the week — write, on request (folds the former week-planning verb)
 
 1. Read the week first. Always
-2. `list_tasks(completed: false, projectId: …)` for candidates — undated tasks in the relevant projects.
+2. `list_tasks(completed: false, projectId: …)` for candidates — undated tasks in the domain's
+   projects, the home board first (`[project]` narrows it to one of them).
    **`stage/ready` filter** (called by `/bandit:tasks pick-ready` on a dev project): add `tagId` = the
    `stage/ready` tag and `noTagWithPrefix: "sprint/"`, so only approved cards outside a sprint are
    candidates (a sprint's dates are its plan's, `references/dev.md` → Card fields). Nothing else changes
@@ -77,8 +78,8 @@ Both are counts. **Neither knows how long anything takes.** Weight by `effort` i
 
 ### `/bandit:tasks review` — read, then propose
 
-1. `get_week_board` for the week ending
-2. `list_events(start, end)` — every state change, with actor
+1. `get_week_board` for the week ending, filtered to the domain (`references/scope.md` → Filtering)
+2. `list_events(start, end)` — every state change, with actor; keep the domain's tasks only
 3. Separate by actor: `user` · `mcp` · `system` (the midnight job)
 4. Report: completed · still overdue · rescheduled more than once
 5. **Three or more reschedules on one task** → propose a resize or a drop. Once. Do not moralise

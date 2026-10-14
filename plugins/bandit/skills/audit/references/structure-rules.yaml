@@ -3,7 +3,7 @@
 # `rulebook_updated` equal to the rulebook's `updated:` frontmatter.
 # check_structure.py refuses to run when they differ.
 schema: 1
-rulebook_updated: 2026-10-13
+rulebook_updated: 2026-10-14
 
 levels:            # must → ❌ on a break · should → ⚠️
   S1: must
@@ -57,6 +57,8 @@ project_context:
   # S4: `project "…"` naming an existing board, or `none`.
   # `folder "…"`, `global` and `pending` do not pass (rulebook 2026-09-27).
   board_forms: [project, none]
+  # S4: the home board is filed in the domain's board folder or a subfolder of it (2026-10-14)
+  board_in_domain: true
   prefix_pattern: "^[a-z]{2,3}$"   # S8: short prefix, never a full name
 
 settings_files:

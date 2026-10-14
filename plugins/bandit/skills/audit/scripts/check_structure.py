@@ -399,6 +399,9 @@ class Domain:
                 problems.append(f"board form `{board_kind}` not allowed ({', '.join(pc['board_forms'])})")
             elif board_kind == "project" and board_name not in self.all_board_names:
                 problems.append(f"board `{board_name}` doesn't resolve")
+            elif board_kind == "project" and pc.get("board_in_domain") \
+                    and board_name not in {b["name"] for b in self.boards}:
+                problems.append(f"board `{board_name}` is outside the `{self.name}` folder")
             R.append(self.res("S4", "bad" if problems else "ok",
                               "; ".join(problems) or f"5 required keys (+ optional `dev`), board `{ctx['board']}` resolves",
                               f"{ev}.instructions[{chosen[0]}].context"))

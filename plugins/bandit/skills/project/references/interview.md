@@ -38,12 +38,11 @@ Each phase may take 1–2 messages when mixing both question types — that's fi
 5. **Task board scope** (single select via `ask_user_input`) — Does this project's work live on
    a Bandit Brain board?
 
-   Call `list_projects` first and present what exists. Options:
-   - "One existing project" — pick from the live project list
-   - "One existing folder" — pick from the live folder list
-   - "New project on the board" — ask its name, type (`deliverable` · `workflow` · `hybrid`) and
-     folder (from the live list, or top level)
-   - "Global" — the whole board, no scope restriction
+   Call `list_projects` first and present the projects in the domain's folder (the domain not
+   known yet → ask the Phase 4 Domain question now, once). Options:
+   - "One existing project" — pick from the domain's live project list
+   - "New project on the board" — ask its name, type (`deliverable` · `workflow` · `hybrid`) and,
+     optionally, a subfolder of the domain's folder
    - "Not board-backed"
    - "Decide later"
 

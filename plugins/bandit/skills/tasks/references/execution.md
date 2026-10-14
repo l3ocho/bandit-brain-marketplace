@@ -68,8 +68,9 @@ Report the breach. Propose what moves back to Assigned or Stand By. **Do not sil
 
 ### `/bandit:tasks today`
 
-1. `get_execution_board`
-2. Report **Doing** first, then **Next**, then Assigned
+1. `get_execution_board`, filtered to the domain (`references/scope.md` → Filtering)
+2. Report **Doing** first, then **Next**, then Assigned; inside each, the home board first, then
+   the rest of the domain by board
 3. Flag: cap breach · anything overdue · anything in Stand By older than a week, **except** a
    card carrying a `sprint/*` tag or a sprint card (`references/dev.md` → Sprint card): those wait
    in Stand By for Leo's test on purpose

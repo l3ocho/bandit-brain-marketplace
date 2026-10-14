@@ -91,7 +91,7 @@ updated: 2026-10-13
 ### ✅ bandit:tasks
 
 > [!abstract] Operates the BanditBrains task board
-> `plugin` · [[bandit:tasks/SKILL|open skill]] · writes only inside the Project Context `board:` (`none` or `pending` → read only, except `load` and `onboard`) · dev commands only with `dev: true`
+> `plugin` · [[bandit:tasks/SKILL|open skill]] · home board first, reads and writes across the domain (the `domain:` board folder and its subfolders), nothing outside it except linked cards; Untriaged from the workflow project only (`none` or `pending` → read only, except `load` and `onboard`) · dev commands only with `dev: true`
 
 | Command                                        | ⚙️ Modifiers                        | Does                                                                                                                                                                                                                                                                                                               |        | 📚 Reads             |
 |------------------------------------------------|-------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|----------------------|
@@ -182,7 +182,7 @@ updated: 2026-10-13
 > | Project type → `type:`     | `product_service` · `workflow` · `claude_marketplace`                                                                               |
 > | Dev workflow → `dev: true` | Yes · No. Asked only for `product_service` and `claude_marketplace`; No = no `dev` line                                             |
 > | Claude Code surface        | Yes · No. Asked for every project without `dev: true`. Yes → `Claude/code-{slug}/` + the Claude Code twin. No Project Context key   |
-> | Task board → `board:`      | existing `project "{name}"` · existing `folder "{name}"` · new project on the board (created empty) · `global` · `none` · `pending` |
+> | Task board → `board:`      | existing `project "{name}"` in the domain's folder · new project on the board (created empty, in the domain's folder) · `none` · `pending` |
 > | Output                     | Artifact · + vault folder · vault folder only                                                                                       |
 > | Folder backend             | Domain (or custom path → `domain: none`) · project slug · prefix                                                                    |
 

@@ -118,6 +118,16 @@ Skills define the gate; the project provides the recipe in `bandit.yaml` at the 
 
 ---
 
+## 🗺️ Board scope by domain (debug D2, 2026-10-14)
+
+| # | Decision | By |
+|---|---|---|
+| DS1 | **Home board first. Read and write across the domain. Nothing outside it.** The domain is the board's top-level folder named like `domain:`, with its subfolders (structure rule S1 already makes the names match); `board:` is the home board. One home: bandit:tasks `references/scope.md` | Leo, 2026-10-14 |
+| DS2 | Writing to another board of the domain needs no extra question; the reply names the board and the card gets a `From {project}:` comment (Q1 = A) | Leo |
+| DS3 | Untriaged cards are the domain workflow project's only; elsewhere a capture with no project lands parked on the home board (Q2 = A) | Leo |
+| DS4 | `board: folder "…"` and `board: global` are retired; audit rule S4 also fails a home board outside its domain folder (Q3 = A) | Leo |
+| DS5 | Outside the domain, only a card linked by a dependency to a domain card is shown: title, board and state, read-only | Leo |
+
 ## 📜 Original plan decisions D1–D24
 
 The tables marked for the checker (`denylist:off`) are the only place the old skill names may appear: they record what was renamed.

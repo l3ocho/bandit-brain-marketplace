@@ -17,7 +17,7 @@ prefix: {pf}
 dev: true
 
 Read by every `bandit` skill.
-**Read anywhere. Write inside `board` only.**
+**Home board first. Read and write across the domain. Nothing outside it.**
 Names only: skills resolve IDs live via `list_projects`. No hardcoded IDs, ever.
 
 ## 🎯 Role

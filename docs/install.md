@@ -1,56 +1,71 @@
-# 🚀 Install and deploy v0.1.0
+# 🚀 Install, update and set up
 
-> Leo's steps to deploy bandit-brain-marketplace v0.1.0 after approving the release candidate. Nothing here was run in sprint marketplace-v1: `development` is pushed and green, `main` is untouched, there is no tag.
+> How to install the `bandit-brain` marketplace on Claude.ai and Claude Code, keep it updated, set up a first project, and cut a release.
 
-## 1. Release the repo
+## 1. Before you start
 
-On Bandit Port, in `~/projects/banditlabs/bandit-brain-marketplace`:
+| You need | Why |
+|---|---|
+| A paid Claude plan (Pro, Max, Team or Enterprise) | Plugins on Claude.ai need one |
+| Claude.ai → Settings → Capabilities → **Code execution and file creation** on | Skills run in the code sandbox |
+| The **Bandit Brain** MCP server connected | The task board: `tasks`, `audit`, `project`, `sprint` |
+| A **Nextcloud** MCP server with WebDAV connected | The notes vault: `notes`, `minutes`, `plan`, `project`, `audit`, `sprint` |
+| Gmail connected (optional) | `/bandit:tasks email` |
 
-```
-git checkout development && git pull
-python3 scripts/check_repo.py                 # must print: check_repo: OK
-git checkout main && git merge --ff-only development
-git tag -a v0.1.0 -m "v0.1.0 · first version: rebrand, lighten, pipeline behaviour"
-git push origin main --follow-tags
-git checkout development
-```
+## 2. Claude.ai (web, desktop, mobile)
 
-## 2. Claude.ai
+1. Customize → Plugins → **Add marketplace** → `l3ocho/bandit-brain-marketplace`.
+2. Install **`bandit`**. (`bandit-dev` and `bandit-maker` are for Claude Code: their agents and hooks don't run in chat.)
+3. Turn on **Sync automatically**, or use **Re-sync** after each release.
+4. Check: type `/` in a chat on the web; the `bandit` skills are listed with the plugin name. The mobile apps don't list skills in the `/` menu, but a typed command (`/bandit:tasks today`) runs.
 
-1. Customize → Plugins → **Add marketplace** → `l3ocho/bandit-brain-marketplace`. Turn on **Sync automatically**, or use Re-sync after each release.
-2. Install **`bandit`**. (`bandit-dev` and `bandit-maker` are Claude Code only: their agents and hooks don't run in chat.)
-3. Customize → Skills: **remove the uploaded copies** of the ten old skills (the task board, notes, audit, project settings, clarify, text rewriter, project planner, WBS generator, meeting minutes and skill creator skills). **Keep** prompt-engineer and data-tools.
-4. Check: type `/` in a chat; the `bandit` skills are listed with the plugin name, and no old copy appears twice.
-
-## 3. Claude Code: laptop and Bandit Port
+## 3. Claude Code
 
 ```
 /plugin marketplace add l3ocho/bandit-brain-marketplace
 /plugin install bandit@bandit-brain
-/plugin install bandit-dev@bandit-brain          # developers: laptop and Bandit Port
-/plugin install bandit-maker@bandit-brain        # Bandit Port only
+/plugin install bandit-dev@bandit-brain          # developers
+/plugin install bandit-maker@bandit-brain        # maintainers
 ```
 
-`bandit-dev` declares `bandit` as a dependency: Claude Code disables it (its hooks and agent included) unless `bandit` is installed too (seen in the W7 tests).
+- `bandit-dev` declares `bandit` as a dependency: Claude Code disables it (its hook and agent included) unless `bandit` is installed too.
+- Turn **auto-update** on: `/plugin` → Marketplaces → `bandit-brain` (it is off by default for non-official marketplaces).
 
-Then `/plugin` → Marketplaces → `bandit-brain` → turn **auto-update on** (it is off by default for non-official marketplaces).
+## 4. Update
 
-## 4. Laptop cleanup
+| Surface | How |
+|---|---|
+| Claude.ai | Sync automatically, or Customize → Plugins → `bandit-brain` → **Re-sync** |
+| Claude Code | Auto-update, or `/plugin marketplace update bandit-brain` |
 
-- Remove from `~/.claude/skills/` the copy of the old sprint skill and the nine retired stub folders: their names are listed under D18 in `docs/decisions.md`.
-- Remove the old sprint checker's `Stop` hook from `~/.claude/settings.json`: `bandit-dev` ships its own (`hooks/hooks.json`). Both at once would run the checker twice.
-- In each dev repo that wired the old checker by hand in `.claude/settings.json`, remove that entry (the dev-mirror hook stays).
+What changed in each release: [CHANGELOG.md](../CHANGELOG.md). After a release that changes the Project Context or the instruction templates, run `/bandit:project audit` in each project to pick up the new version of its instructions.
 
-## 5. Project instructions (v5)
+## 5. First project
 
-In each Claude.ai project, run `/bandit:project instructions`: it builds the next version from the one-page template for the project's type (`templates/instructions/`). Paste it into the project's instructions, then run `/bandit:audit check` there. Start with BanditBrain (`dev.md` template: the Claude.ai agent stops at spec).
+1. In the project's Claude.ai chat: `/bandit:project onboard`. One proposal covers the vault folders, the board project and the instructions, with the **Project Context** block every skill reads. Answer all, a list, or none.
+2. Paste the instructions it hands over into the project, then run `/bandit:audit check` there.
+3. **Dev projects** (`dev: true`): put the same Project Context block in the repo's `CLAUDE.md`, add a [`bandit.yaml`](bandit-yaml.md) at the repo root, and run the **🪞 Dev repo alignment** prompt from the [cheat sheet](cheat-sheet.md) in Claude Code.
 
-The structure rules now pin the renamed working-folder guard (`s12.hook_sha12`): every existing Claude Code twin scores its `workdir.py` as outdated until `bandit:project` re-hands it (a comment-only change). Accept those rows at the next audit.
+## 6. Moving from the old standalone skills
 
-## 6. Archive the old skills project
+If you used the earlier uploaded skills (task board, notes, audit, project settings, clarify, text rewriter, project planner, WBS generator, meeting minutes, skill creator):
 
-Archive the `_Skills Manager` Claude.ai project. Its vault folder already moved to `MyNotes/BanditLabs/_archive/skills/_project/`.
+- Claude.ai → Customize → Skills: remove the uploaded copies, so no skill appears twice.
+- Claude Code: remove their folders from `~/.claude/skills/` (the retired names are listed under D18 in [decisions](decisions.md)), and remove any hand-wired sprint-checker `Stop` hook from `~/.claude/settings.json`; `bandit-dev` ships its own.
 
-## 7. Test
+## 7. Release (maintainers)
 
-Run `tests/cases.md` once on each surface you use, then say approved. Claude.ai can't reach staging (tailnet only): test there read-only, or in a sandbox project.
+Releases follow [Semantic Versioning](https://semver.org); all three plugins share one version.
+
+```
+git checkout development && git pull
+# bump "version" in plugins/*/.claude-plugin/plugin.json; date the CHANGELOG entry
+python3 scripts/check_repo.py                    # must print: check_repo: OK
+git commit -am "Release X.Y.Z" && git push origin development
+git checkout main && git merge --ff-only development
+git tag -a vX.Y.Z -m "vX.Y.Z: one line"
+git push origin main vX.Y.Z
+git checkout development
+```
+
+Then run [tests/cases.md](../tests/cases.md) on each surface you use.

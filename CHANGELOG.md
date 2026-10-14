@@ -5,6 +5,7 @@ All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace s
 ## Unreleased
 
 ### Fixed
+- **Update instructions:** README and the install guide give the update path that works (desktop app, Chat tab, Manage marketplaces, Check for updates) and name Anthropic's open issues (#86818, #93825); the wrong "Re-sync" and `/plugin marketplace update` steps are gone.
 - **CI on release tags:** the gate re-fetches the tags after checkout, so a tag-triggered run sees the annotated tag and V2 passes (actions/checkout turns the pushed tag into a lightweight one).
 
 ## 0.2.0 · 2026-10-14

@@ -14,12 +14,13 @@
 
 ## 2. Claude.ai (web, desktop, mobile)
 
-1. Customize → Plugins → **Add marketplace** → `l3ocho/bandit-brain-marketplace`.
+1. Customize → Plugins → **Add → Add marketplace** → `l3ocho/bandit-brain-marketplace`.
 2. Install **`bandit`**. (`bandit-dev` and `bandit-maker` are for Claude Code: their agents and hooks don't run in chat.)
-3. Turn on **Sync automatically**, or use **Re-sync** after each release.
-4. Check: type `/` in a chat on the web; the `bandit` skills are listed with the plugin name. The mobile apps don't list skills in the `/` menu, but a typed command (`/bandit:tasks today`) runs.
+3. Check: type `/` in a chat on the web; the `bandit` skills are listed with the plugin name. The mobile apps don't list skills in the `/` menu, but a typed command (`/bandit:tasks today`) runs.
 
 ## 3. Claude Code
+
+Plugins on your claude.ai account already reach Claude Code: they appear as `bandit@synced` and sync each time Claude Code starts. Install from the command line only on a machine that doesn't use that account:
 
 ```
 /plugin marketplace add l3ocho/bandit-brain-marketplace
@@ -29,14 +30,21 @@
 ```
 
 - `bandit-dev` declares `bandit` as a dependency: Claude Code disables it (its hook and agent included) unless `bandit` is installed too.
-- Turn **auto-update** on: `/plugin` → Marketplaces → `bandit-brain` (it is off by default for non-official marketplaces).
+- Turn **auto-update** on: `/plugin` → Marketplaces → `bandit-brain` → **Enable auto-update** (off by default for marketplaces outside Anthropic's).
 
 ## 4. Update
 
-| Surface | How |
+| Where the plugins come from | How to get a new release |
 |---|---|
-| Claude.ai | Sync automatically, or Customize → Plugins → `bandit-brain` → **Re-sync** |
-| Claude Code | Auto-update, or `/plugin marketplace update bandit-brain` |
+| Your claude.ai account (web, desktop, mobile, and Claude Code as `@synced`) | In the **Claude desktop app**, switch to the **Chat** tab → Customize → Plugins → **Manage marketplaces** → ⋮ on `bandit-brain-marketplace` → **Check for updates**. Claude Code picks the new version up at its next start (or run `/reload-plugins`) |
+| A marketplace added from the Claude Code command line | `/plugin` → Marketplaces → `bandit-brain` → **Update marketplace**, or `claude plugin update bandit@bandit-brain` per plugin |
+
+Known limits on Anthropic's side (as of 2026-10-14):
+
+- The claude.ai web app has no update control for a marketplace you added; use the desktop app.
+- In the desktop app, **Check for updates** works from the **Chat** tab only. From the Code tab it fails with "Couldn't check for updates. Try again." ([anthropics/claude-code#86818](https://github.com/anthropics/claude-code/issues/86818)).
+- **Sync automatically** on an account marketplace doesn't re-sync when a release is pushed, so every release needs the manual check ([anthropics/claude-code#93825](https://github.com/anthropics/claude-code/issues/93825)).
+- `/plugin marketplace update` only refreshes the marketplace's listing; it doesn't update installed plugins.
 
 What changed in each release: [CHANGELOG.md](../CHANGELOG.md). After a release that changes the Project Context or the instruction templates, run `/bandit:project audit` in each project to pick up the new version of its instructions.
 

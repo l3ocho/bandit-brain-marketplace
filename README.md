@@ -48,7 +48,7 @@ Plain words work too ("what's on my board today?"). On the mobile apps the `/` m
 
 ## 🚀 Install
 
-**Claude.ai** (web, desktop, mobile): Customize → Plugins → **Add marketplace** → `l3ocho/bandit-brain-marketplace` → install **`bandit`**. Turn on **Sync automatically**, or **Re-sync** after each release.
+**Claude.ai** (web, desktop, mobile): Customize → Plugins → **Add → Add marketplace** → `l3ocho/bandit-brain-marketplace` → install **`bandit`**. Plugins on your account also reach Claude Code (as `bandit@synced`).
 
 **Claude Code**:
 
@@ -59,7 +59,9 @@ Plain words work too ("what's on my board today?"). On the mobile apps the `/` m
 /plugin install bandit-maker@bandit-brain     # maintainers
 ```
 
-Then `/plugin` → Marketplaces → `bandit-brain` → **auto-update on** (off by default for non-official marketplaces), or update by hand with `/plugin marketplace update bandit-brain`.
+Then `/plugin` → Marketplaces → `bandit-brain` → **Enable auto-update** (off by default for marketplaces outside Anthropic's).
+
+**Updating:** on a claude.ai account, a new release arrives only through the **Claude desktop app**: **Chat** tab → Customize → Plugins → **Manage marketplaces** → ⋮ → **Check for updates**. The web app has no update control, the Code tab's check fails, and automatic sync doesn't fire on push (Anthropic issues [#86818](https://github.com/anthropics/claude-code/issues/86818), [#93825](https://github.com/anthropics/claude-code/issues/93825)). Details: [install, section 4](docs/install.md#4-update).
 
 ### Requirements
 
@@ -106,7 +108,7 @@ Every stage has an owner command, a record and a gate that fails when it's skipp
 
 ## 🏷️ Versioning
 
-The three plugins and the marketplace share one version and follow [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for new commands or behaviour, **patch** for fixes. `scripts/release.py X.Y.Z` cuts a release: it dates the [changelog](CHANGELOG.md) entry, bumps every version and tags `vX.Y.Z` on `main`, and each tag is published as a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases). The gate refuses a released version without its tag. Installed copies follow `main`: Claude Code through auto-update or `/plugin marketplace update bandit-brain`, Claude.ai through Sync automatically or Re-sync.
+The three plugins and the marketplace share one version and follow [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for new commands or behaviour, **patch** for fixes. `scripts/release.py X.Y.Z` cuts a release: it dates the [changelog](CHANGELOG.md) entry, bumps every version and tags `vX.Y.Z` on `main`, and each tag is published as a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases). The gate refuses a released version without its tag. Installed copies don't update on their own yet: see **Updating** under [Install](#-install).
 
 ## 🔧 Develop
 

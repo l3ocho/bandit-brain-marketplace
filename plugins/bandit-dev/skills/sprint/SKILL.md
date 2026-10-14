@@ -21,8 +21,8 @@ plan, a live ledger and a handover.
 | `plan` | Nothing (every open High card not in a sprint) or a list of card ids | The plan cycle below; no list means go straight: state the selection, list open Urgent cards as "not selected", start | `references/plan.md` |
 | `execute` | Sprint card and wave (`execute {sprint card} wave 2`) | One wave, one chat, in order; refuses a batch card; moves cards on the Execution board | `references/execute.md` |
 | `run` | One or more sprint cards; `--paced [minutes]` under `/loop` | Every open wave, each in its own subagent, strictly in sequence; checks each wave on the board; stops on a blocker | `references/run.md` |
-| `debug` | Sprint card | Turns Leo's adjustments into verified fixes | `references/debug.md` |
-| `release` | Sprint card, with Leo's deploy word | Preconditions (cards tested, debug done, deploy word, migration tail, backup), then the project's `bandit.yaml` recipe; plugin release for Marketplace cards | `references/release.md` |
+| `debug` | Sprint card | Turns the user's adjustments into verified fixes | `references/debug.md` |
+| `release` | Sprint card, with the user's deploy word | Preconditions (cards tested, debug done, deploy word, migration tail, backup), then the project's `bandit.yaml` recipe; plugin release for Marketplace cards | `references/release.md` |
 | `close` | Sprint card | Refuses without a release line (unless "close without release"); completes the approved cards and the sprint card, archives the sprint folder | `references/close.md` |
 
 | Read | When |
@@ -60,7 +60,7 @@ step 12). **Tick a step only when its evidence is on the card**, one comment per
 | 7 | Write the one technical plan | Plan note filed; every card's Technical plan filled |
 | 8 | Risk and rollback | Per card and for the sprint, in the plan |
 | 9 | Definition of ready, per card | Each Spec reconciled; stage moved on; fix rows for failures |
-| 10 | Approval gate | Leo's explicit approval, quoted on the card |
+| 10 | Approval gate | The user's explicit approval, quoted on the card |
 | 11 | Independent plan review | The `plan-reviewer` agent's record in the sprint folder; majors applied; no blocker open (the only stop) |
 | 12 | Commit the sprint | Tag, assignee, due date, size, execution prompt, ledger with `Committed:`; one sub-task per wave |
 
@@ -85,12 +85,12 @@ The full list is `references/gotchas.md`: read it once at the start of any comma
 
 - Run any command on a project without `dev: true`, or from Claude.ai
 - Ask which cards when no list was given
-- Mark a card complete or call anything approved, except `close` completing cards Leo approved in that chat
+- Mark a card complete or call anything approved, except `close` completing cards the user approved in that chat
 - Rewrite a locked Spec without showing old and new and getting a yes
 - Write to a card outside the batch and the sprint card; create columns, projects or tags other than `sprint/{name}`
 - Merge into the deploy branch or deploy outside `release`; force-push, or push anything but the trunk (`references/execute.md` → Pushing)
-- Run two wave agents at once, two waves in one chat, a single card, or a wave out of order without Leo's say-so
+- Run two wave agents at once, two waves in one chat, a single card, or a wave out of order without the user's say-so
 - Move a card to Done by anything but `close`, or treat an urgency remark as approval
-- Edit Leo's verbatim documents or any rule in `CLAUDE.md` without permission
+- Edit the user's verbatim documents or any rule in `CLAUDE.md` without permission
 - Store IDs, write inside the skill folder, or tick a step without its evidence on the card
 - Write one card's Spec or plan (`/bandit:tasks spec`, `plan-tech`) or file notes (bandit:notes)

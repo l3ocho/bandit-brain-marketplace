@@ -13,12 +13,12 @@ a row says otherwise.
 | `INVALID_ARGUMENTS` | A malformed call: a partial or gapped list in `reorder_subtasks` / `reorder_project_columns`, a filter value out of range | Reorders, `list_tasks` | Fix the call: reorders need **every** item, positions 0..n-1 once |
 | `BLOCKED_BY_INCOMPLETE_TASK` | A blocker isn't complete. **Stand By is not complete** | `set_task_execution_state` → `doing`, and its bulk form (seen 2026-10-08). The code on `next` and on `complete_task`: **unchecked** | Name the blocker and stop (`references/execution.md` → gates) |
 | `TAG_RULE_VIOLATION` | Two `stage/*` tags, or `lane/incident` with a `stage/*` | `create_task`, `set_task_tags`, `bulk_set_task_tags` (per task) | Merge the tags right (`references/dev.md` → Tag merging) |
-| `SPEC_LOCKED` | The write changes a Spec that holds text | `update_task` | Comment `Spec change needed:`, or override only on Leo's yes (`references/dev.md` → Spec lock) |
+| `SPEC_LOCKED` | The write changes a Spec that holds text | `update_task` | Comment `Spec change needed:`, or override only on the user's yes (`references/dev.md` → Spec lock) |
 | `PROTECTED_COLUMN` | Backlog at position 0: no rename, no delete, never moved off 0 | `rename_project_column`, `delete_project_column`, `reorder_project_columns` | Correct. Report it; no workaround |
 | `ORIGIN_TASK_READ_ONLY` | Another module created the task: its title, description, due date, priority and removal are that module's | `update_task`, `set_task_due_date`, `move_task`, `delete_task`, repeat-rule tools | You can still complete, move on Execution, tag, comment, set effort and complexity |
-| `SYSTEM_OWNED_PROJECT` | The project is kept in step with another module (`systemOwner`) | `create_task`, `add_project_column` (other project tools: **unchecked**) | Tell Leo to change it there |
+| `SYSTEM_OWNED_PROJECT` | The project is kept in step with another module (`systemOwner`) | `create_task`, `add_project_column` (other project tools: **unchecked**) | Tell the user to change it there |
 | `ROLE_CANNOT` | The household role doesn't allow it on this board | Any write | Stop: it is the role, not the arguments |
-| `ASSIGNEE_NOT_ELIGIBLE` | The assignee can't take work in a restricted project | `create_task`, `update_task`, `update_repeat_rule` | Ask Leo who |
+| `ASSIGNEE_NOT_ELIGIBLE` | The assignee can't take work in a restricted project | `create_task`, `update_task`, `update_repeat_rule` | Ask the user who |
 | `TASK_HAS_NO_PROJECT` | Assigning someone to a task with no project | `create_task`, `update_task` | File it into a project first |
 | `REMINDER_NEEDS_DATE_AND_TIME` | A reminder without both a due date and a time | `create_task`, `update_task` | Set both, or no reminder |
 | `NOT_RECURRING` | The task doesn't repeat. (`rule: null` is different: a rule this app can't author) | `get_repeat_rule` | `references/capture.md` → lifecycle |

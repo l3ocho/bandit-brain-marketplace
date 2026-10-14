@@ -37,7 +37,7 @@ For each card: `get_task`; find its brief (bandit:notes lookup by filename from 
 1. Collect every open question across the batch, plus questions the checks raised.
 2. **Investigate first, read-only, in parallel**: one investigator per card (brief below). One live-browser check at a time, only for what code cannot answer (touch behaviour, what the UI shows).
 3. **Spot-check** the decisive facts in code before they go into a card.
-4. Present **one list**, grouped by card, each with the finding and a recommendation. Decisions that need Leo only; defaults go in a separate "applied unless you object" block.
+4. Present **one list**, grouped by card, each with the finding and a recommendation. Decisions that need the user only; defaults go in a separate "applied unless you object" block.
 5. Record the answers (comment per card). Ask follow-ups only for what the answers raise.
 6. A large new requirement that surfaces: record the rule, create a parked card **outside** the sprint, ask one yes or no whether it joins.
 
@@ -64,7 +64,7 @@ Waves with a reason each. Parallel only where cards touch different files and no
 
 ## 7 · Write the one technical plan
 
-One plan note in the sprint folder (template). Per card: approach, tests, docs, "Verify first", acceptance-to-proof table. Then fill each card's `Technical plan` section (outside the locked Spec, so no override): plan filename, branch, size, short bullets. Branch names follow the project's branching document; round numbers are taken at execution. The plan also carries a **Final push** section (the push of `development` to origin at the end of the last wave that changes code; the rules are `execute.md` → Pushing `development`), unless Leo removes it at approval.
+One plan note in the sprint folder (template). Per card: approach, tests, docs, "Verify first", acceptance-to-proof table. Then fill each card's `Technical plan` section (outside the locked Spec, so no override): plan filename, branch, size, short bullets. Branch names follow the project's branching document; round numbers are taken at execution. The plan also carries a **Final push** section (the push of `development` to origin at the end of the last wave that changes code; the rules are `execute.md` → Pushing `development`), unless the user removes it at approval.
 
 ## 8 · Risk and rollback
 
@@ -75,17 +75,17 @@ In the plan: how rollback works for every card (code, schema, backups, deploy sh
 Ready means: Spec clear with no open questions, acceptance testable, dependencies resolved or sequenced, Technical plan written with filename, branch and size, effort at most L, plan note filed.
 
 1. Check each card strictly and report who passes and who fails, with fix rows.
-2. **Reconcile each Spec once**: answered questions into Decisions, open questions cleared, wrong lines fixed, acceptance lines brought in line with decisions. Show old and new per card in one table; on Leo's yes write with the Spec-lock override, after `get_task`.
+2. **Reconcile each Spec once**: answered questions into Decisions, open questions cleared, wrong lines fixed, acceptance lines brought in line with decisions. Show old and new per card in one table; on the user's yes write with the Spec-lock override, after `get_task`.
 3. Update each brief: requirements, decisions with reasons, verified facts with where each was checked, no open questions, a dated **Change log** of what changed and why, and no card state (column, lane, stage) in the body.
-4. Move passing cards to `stage/planned`, then `stage/ready` on Leo's approval (step 10), through the stage procedure in bandit:tasks.
+4. Move passing cards to `stage/planned`, then `stage/ready` on the user's approval (step 10), through the stage procedure in bandit:tasks.
 
 ## 10 · Approval gate
 
-Present the state in a short summary (cards, waves, plan, risks, what needs Leo). Take Leo's explicit approval or return to the step it names. Quote the approval on the sprint card. If Leo's wording is ambiguous ("approved" mid-list), state the reading you applied in one line. **An urgency remark ("I want this today", "go fast") is not an approval of the plan**: put the summary in front of him and ask one yes or no. A date he gives is used as the sprint date; it does not commit the sprint.
+Present the state in a short summary (cards, waves, plan, risks, what needs the user). Take the user's explicit approval or return to the step it names. Quote the approval on the sprint card. If the user's wording is ambiguous ("approved" mid-list), state the reading you applied in one line. **An urgency remark ("I want this today", "go fast") is not an approval of the plan**: put the summary in front of them and ask one yes or no. A date they give is used as the sprint date; it does not commit the sprint.
 
 ## 11 · Independent plan review
 
-Automatic, after the approval and before the commit. It stops Leo only on a blocker.
+Automatic, after the approval and before the commit. It stops the user only on a blocker.
 
 1. **Launch the `plan-reviewer` agent** (the Agent tool, `bandit-dev` agent `plan-reviewer`) and wait
    for it. Its prompt carries: the sprint name and card, the plan note's full text, each batch card's
@@ -95,8 +95,8 @@ Automatic, after the approval and before the commit. It stops Leo only on a bloc
    verdict and findings table as returned, then the risk additions and questions.
 3. **Apply** every major finding, and each minor one that is cheap, to the plan (read, then the etag
    edit) and fill the record's "Applied via" column (`plan §…`, `card {id} Technical plan`). Notes stay.
-4. **A blocker stops the step:** put the blockers to Leo in one list, each with its recommendation;
-   apply his answers, record them in the review, and re-run the review once if they change the plan's
+4. **A blocker stops the step:** put the blockers to the user in one list, each with its recommendation;
+   apply their answers, record them in the review, and re-run the review once if they change the plan's
    approach. This is the only stop the review adds.
 5. Comment on the sprint card with the verdict, counts by severity and the record's filename.
 
@@ -106,7 +106,7 @@ blocker is open. `run` and `execute` refuse a sprint whose step 11 sub-task is u
 
 ## 12 · Commit the sprint
 
-Per batch card: tag `sprint/{name}` (create the tag once; merge with the card's current tags), assign to Leo (live lookup), due date = the sprint date, `stage/ready`. Sprint card: assignee, due date, size (umbrella, usually XL and Complex), header filled (dates, owner, capacity = total effort), decisions log, readiness line. Write the execution prompt and the ledger (templates). **Add the wave sub-tasks last**: one per wave, at the very end of the sprint card after the 12 step sub-tasks, named `Wave {n}: {card ids}` (for example `Wave 2: {id}, {id}`), added one at a time, then **always** put the whole list in order with `reorder_subtasks` (12 steps first, then the waves) and read the card back to confirm. They stay unticked until the execution delivers and verifies that wave. Move every batch brief into the sprint folder (`Projects/{slug}/sprint-{name}/`) and archive every source the planning consumed (inbox drafts, spec notes, a superseded WBS draft; `references/homes.md` → Leftovers), then run `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py` and paste its output into the step comment; step 12 is not ticked until it prints OK. Write `Committed: {date}` in the ledger's At a glance: the line the checker's SP7 reads. Seed the Execution board: every batch card to `assigned` with `bulk_set_execution_state` (so Leo sees the whole sprint before work starts). Verify the board with `list_sprints`, `get_execution_board` and a read of the sprint card.
+Per batch card: tag `sprint/{name}` (create the tag once; merge with the card's current tags), assign to the user (the signed-in member, live lookup), due date = the sprint date, `stage/ready`. Sprint card: assignee, due date, size (umbrella, usually XL and Complex), header filled (dates, owner, capacity = total effort), decisions log, readiness line. Write the execution prompt and the ledger (templates). **Add the wave sub-tasks last**: one per wave, at the very end of the sprint card after the 12 step sub-tasks, named `Wave {n}: {card ids}` (for example `Wave 2: {id}, {id}`), added one at a time, then **always** put the whole list in order with `reorder_subtasks` (12 steps first, then the waves) and read the card back to confirm. They stay unticked until the execution delivers and verifies that wave. Move every batch brief into the sprint folder (`Projects/{slug}/sprint-{name}/`) and archive every source the planning consumed (inbox drafts, spec notes, a superseded WBS draft; `references/homes.md` → Leftovers), then run `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py` and paste its output into the step comment; step 12 is not ticked until it prints OK. Write `Committed: {date}` in the ledger's At a glance: the line the checker's SP7 reads. Seed the Execution board: every batch card to `assigned` with `bulk_set_execution_state` (so the user sees the whole sprint before work starts). Verify the board with `list_sprints`, `get_execution_board` and a read of the sprint card.
 
 ## Investigator brief
 
@@ -115,7 +115,7 @@ Read-only. Give each investigator: the card's Spec, the repo path, what to find,
 1. Current state: what exists today that the card touches, with `file:line`.
 2. The card's claims checked against the code; wrong ones named.
 3. Constraints that apply (project hard rules, boundaries, tests that pin behaviour).
-4. Risks, and the questions Leo must answer, **each with a recommendation**.
+4. Risks, and the questions the user must answer, **each with a recommendation**.
 5. Mark anything not verified. Do not edit, run migrations or touch credentials; do not propose scope or cards.
 
 A live-browser investigator **at planning time** is told which controls write (sorts, toggles) on existing data, to open and cancel, and to report what it could not check. That read-only rule belongs to planning only; it never goes into an execution prompt or plan section.

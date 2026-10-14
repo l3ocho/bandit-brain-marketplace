@@ -1,17 +1,17 @@
 ---
 type: reference
-summary: House standard for Leo's domains and projects across Claude.ai, the MyNotes vault and BanditBrains. bandit:audit scores against these 16 rules.
+summary: House standard for the user's domains and projects across Claude.ai, the MyNotes vault and BanditBrains. bandit:audit scores against these 16 rules.
 updated: 2026-10-14
 ---
 
 # 🧱 Structure Rulebook
 
-> House standard for Leo's domains and projects across Claude.ai, the MyNotes vault and BanditBrains. bandit:audit scores against these 16 rules.
+> House standard for the user's domains and projects across Claude.ai, the MyNotes vault and BanditBrains. bandit:audit scores against these 16 rules.
 
 ## 🗺️ Overview
 
 - **8 musts** (S1–S5, S9, S10, S12): a break is ❌ and gets a fix row.
-- **8 shoulds** (S6–S8, S11, S13–S16): a break is ⚠️, fixed when the project is touched anyway or when Leo asks.
+- **8 shoulds** (S6–S8, S11, S13–S16): a break is ⚠️, fixed when the project is touched anyway or when the user asks.
 - A rule that doesn't apply scores **—**. Anything the auditor couldn't read scores **unchecked**, never a guess.
 - **Score line:** `musts 8/8 · shoulds 7/8 · 2026-10-09`, one per project, plus one for the domain.
 - **Exempt:** boards with a `systemOwner` (e.g. Finance in Money). Listed as "system, not audited".
@@ -52,7 +52,7 @@ The `{L} - ` prefix exists only in Claude.ai, as a workaround until Claude.ai ca
 
 - Each domain has exactly one workflow project: one Claude.ai project, one board, one `ai-{slug}` folder.
 - The workflow board is named `{Name} - wkflw` **and** has type `workflow`. The two must agree.
-- The workflow board holds only tasks that belong to no project in the domain. Task placement is Leo's call and isn't audited.
+- The workflow board holds only tasks that belong to no project in the domain. Task placement is the user's call and isn't audited.
 - The workflow project's `board:` names its own workflow board: `project "{Name} - wkflw"`. Every project reads and writes across its domain folder; the workflow project also owns the Untriaged cards. What each may do there is bandit:tasks' rule (`references/scope.md`).
 - **Check:** exactly one board per domain folder ends in ` - wkflw`, its type is `workflow`, and no other board in the folder has type `workflow`. Exactly one project has `type: workflow`, and its `board:` names that board.
 
@@ -78,7 +78,7 @@ Checked top to bottom; the first case that matches wins.
 | 3 | Stamp matches a vault file, and a newer one exists | ⚠️ not pasted yet | Paste it into Claude.ai, run the self-check. Both files stay until then |
 | 4 | Stamp matches no file and is newer than every vault file | ❌ critical | Vault copy lost or rolled back: recover it before anything else |
 | 5 | Stamp matches no file and is older than the newest file's date | unchecked | Run the self-check in that project |
-| 6 | Anything else | ⚠️ drift | Say both versions; Leo decides |
+| 6 | Anything else | ⚠️ drift | Say both versions; the user decides |
 
 While a newer file waits to be pasted (case 3), findings that the newer file already fixes score ⚠️ "paste pending" and get no fix row of their own: the paste is the fix.
 
@@ -92,7 +92,7 @@ Numbered after the shoulds so old reports keep their numbers; it's a must.
 - **Without it:** the board has no lane matching any `lane/*` or `stage/*` tag. A board with no vault project follows the same rule.
 - Scores **—** on `board: none` and on system-owned boards.
 - Card tags (a stray `lane/*` tag on a non-dev card) aren't checked here: tags are account-wide, and card hygiene is `bandit:tasks audit`.
-- **Check:** lanes and tags from the snapshot (schema 2). A schema-1 snapshot has no lanes: S9 scores **unchecked**. Fix rows go to bandit:tasks' dev board shape procedure; dev lanes on a non-dev board are Leo's call.
+- **Check:** lanes and tags from the snapshot (schema 2). A schema-1 snapshot has no lanes: S9 scores **unchecked**. Fix rows go to bandit:tasks' dev board shape procedure; dev lanes on a non-dev board are the user's call.
 
 ### S10 · Claude Code twin
 
@@ -110,7 +110,7 @@ Numbered last so old reports keep their numbers; it's a must.
 - `work/`, `data/` and `_closed/` hold only task folders named `{prefix}-{task}`: `{task}` is the board task's title in kebab-case, never an ID. No loose files. Superseded work stays in its task folder (`work/{prefix}-{task}/superseded/`) and leaves with it at close.
 - `_backup/` holds settings rollback copies only, flat: `CLAUDE.md.{version}`, `settings.json.{version}`, `workdir.py.{version}` (`s12.backup_name_pattern`). No retention clock; deleted only by an approved row. Never work, never data.
 - Data files (`s12.data_extensions`) live only in `data/{prefix}-{task}/`. `data/` is purged when its task closes, never archived. The manifest never records a file name under `data/`; customer data in notes stays under each project's own rule.
-- Retention: `scratch/` files older than 7 days and `_closed/` folders older than 30 days get a delete row. Nothing is deleted without Leo's approval.
+- Retention: `scratch/` files older than 7 days and `_closed/` folders older than 30 days get a delete row. Nothing is deleted without the user's approval.
 - Enforced at write time by the twin's guard: `code-{slug}/claude/hooks/workdir.py`, hash `s12.hook_sha12`, run by a `PreToolUse` and a `SessionStart` hook in `claude/settings.json` (bandit:project, `references/workdir.md`). The guard's constants mirror `s12`: change both.
 - The `SessionStart` hook writes a manifest (paths, dates, counts; no contents), and Claude Code uploads it to `{Domain}/Projects/{slug}/workdir-manifest.json`. No manifest, or one older than 7 days → **unchecked**.
 - Fix rows: guard missing or outdated → bandit:project. Layout rows → the project's Claude Code session, targets written `{slug}:{path}`, relative to its working folder. Any move ends by searching `{Domain}/Projects/{slug}/` for the old paths and proposing the note edits.
@@ -173,7 +173,7 @@ audit scores them from the snapshot (schema 5) and never replaces that checker.
 ## 📄 Report lifecycle
 
 - One live report per domain, in the workflow project's own folder: `MyNotes/{Domain}/Projects/{workflow-project}/audit-{YYYY-MM-DD}.md`. Never in a settings folder.
-- Per project: the score line, then numbered fix rows `| # | Action | Path | Effect | Why |`. Leo approves rows; nothing runs otherwise.
+- Per project: the score line, then numbered fix rows `| # | Action | Path | Effect | Why |`. The user approves rows; nothing runs otherwise.
 - The snapshot the script scored sits next to the report: `audit-{YYYY-MM-DD}.snapshot.json`. The report is written exactly as the script printed it; its footer carries the rules, snapshot and script hashes.
 - **Replay:** `close` and the next audit re-run the script on the saved snapshot. A report that doesn't reproduce byte for byte is invalid.
 - **Superseded:** a report with no footer, or built with other rules or script hashes, can't replay. It's archived as-is by an approved row of the fresh audit that replaces it; its rows are never run.
@@ -183,14 +183,14 @@ audit scores them from the snapshot (schema 5) and never replaces that checker.
 
 ## 🔄 Changing this rulebook
 
-- Changes follow the usual proposal flow, and Leo approves them.
+- Changes follow the usual proposal flow, and the user approves them.
 - A rule gets added when the same finding turns up in **two or more domains**.
-- **Exception:** S9 was added as a preventive rule with Leo's explicit approval (2026-09-28), before the finding had appeared in two domains.
-- **Exception:** S10 and S11, and the `code-{slug}/` rows, were added as preventive rules with Leo's explicit approval (2026-09-28), before the finding had appeared in two domains.
-- **Exception:** S10 was widened from workflow projects to every project without `dev: true`, with the twin's optional `claude/settings.json`, with Leo's explicit approval (2026-09-29), before the finding had appeared in two domains.
-- **Exception:** S12 and the twin's `claude/hooks/workdir.py` were added as preventive rules with Leo's explicit approval (2026-09-29), before the finding had appeared in two domains.
-- **2026-09-30 · S12 amended** after the first Summitt rollout, with Leo's explicit approval: `_backup/` for settings rollback copies, superseded work kept in its task folder, moves update the project's notes, and the `data/` file-name rule scoped to the manifest.
-- **2026-09-30 · S11 freshness dropped**, with Leo's explicit approval: GitHub's `pushed_at` lagged the CS Notes repo by a month (2026-08-28 in the 2026-09-29 snapshot), so S11 would have passed a stale mirror. `s11.repos` removed from the YAML.
-- **Exception:** S13–S16 were added as preventive shoulds with Leo's explicit approval (2026-10-09), so bandit-dev:sprint's local checker cites one rulebook, before the findings had appeared in two domains.
+- **Exception:** S9 was added as a preventive rule with the user's explicit approval (2026-09-28), before the finding had appeared in two domains.
+- **Exception:** S10 and S11, and the `code-{slug}/` rows, were added as preventive rules with the user's explicit approval (2026-09-28), before the finding had appeared in two domains.
+- **Exception:** S10 was widened from workflow projects to every project without `dev: true`, with the twin's optional `claude/settings.json`, with the user's explicit approval (2026-09-29), before the finding had appeared in two domains.
+- **Exception:** S12 and the twin's `claude/hooks/workdir.py` were added as preventive rules with the user's explicit approval (2026-09-29), before the finding had appeared in two domains.
+- **2026-09-30 · S12 amended** after the first Summitt rollout, with the user's explicit approval: `_backup/` for settings rollback copies, superseded work kept in its task folder, moves update the project's notes, and the `data/` file-name rule scoped to the manifest.
+- **2026-09-30 · S11 freshness dropped**, with the user's explicit approval: GitHub's `pushed_at` lagged the CS Notes repo by a month (2026-08-28 in the 2026-09-29 snapshot), so S11 would have passed a stale mirror. `s11.repos` removed from the YAML.
+- **Exception:** S13–S16 were added as preventive shoulds with the user's explicit approval (2026-10-09), so bandit-dev:sprint's local checker cites one rulebook, before the findings had appeared in two domains.
 - **2026-10-13 · Moved into the bandit-brain-marketplace repo** with the skills (sprint marketplace-v1): this file and `structure-rules.yaml` now live in bandit:audit's `references/`, owner names follow the plugin names (`bandit:tasks`, `bandit:notes`, `bandit:project`), `s12.hook_sha12` follows the renamed guard script, and the YAML gains `paths.stamps`, the stamp ledger's home. No rule changed.
 - A rules or script change stops earlier reports from replaying (their footer hashes differ). Close live reports before installing one if their fixes are done; any left live become superseded (**📄 Report lifecycle**), and the next fresh audit archives them.

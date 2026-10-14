@@ -6,7 +6,7 @@ Rules (each one a failure, not a warning):
   SP2  a brief whose board-task is a card of a sprint (from the ledger's wave table) lives inside that sprint folder
   SP3  no two .md files in the domain share a filename (Obsidian links resolve by filename)
   SP5  a project with sprint folders keeps only its hub note {project}.md, its sprint-* folders and planning/ (WBS, project plan, architecture) at its root
-  SP4  frontmatter parses as YAML (skipped for Leo's own inbox notes: no frontmatter or status inbox)
+  SP4  frontmatter parses as YAML (skipped for the user's own inbox notes: no frontmatter or status inbox)
   SP6  one brief per card: a card has at most one brief outside _archive (a card detached from a closing sprint carries
        everything into that one note, which waits in the inbox; its ledger row says "detached")
   SP7  a sprint whose ledger says it is committed (a `Committed:` line, written at plan step 12) has its independent

@@ -4,7 +4,7 @@
 
 ## 🚀 Onboarding — one command for the whole project
 
-**This skill is the only way a project gets onboarded.** Leo runs it once; it does the
+**This skill is the only way a project gets onboarded.** The user runs it once; it does the
 instructions, the vault and the board together. bandit:notes and bandit:tasks keep owning their
 own rules: this skill loads them and runs their onboarding procedures, it never restates them.
 
@@ -46,8 +46,8 @@ a list, or none.*
 - **Step 3 is bandit:tasks' procedure, loaded and run.** Never swap it for a quick check of your
   own. Each board row cites the `list_projects` entry it came from.
 - **Approval covers the approved rows and nothing else.** Every finding has its own row, so one
-  "all" fixes everything; a row Leo didn't approve never runs. Nothing outside this project's own
-  folders is touched except by a `fix` row he approved.
+  "all" fixes everything; a row the user didn't approve never runs. Nothing outside this project's own
+  folders is touched except by a `fix` row they approved.
 - A row that depends on a declined row is skipped and reported (the hub note without its folder,
   the settings files without `Claude/ai-{slug}/`).
 - The Project Context written into the instructions reflects what was approved: `domain:` is the

@@ -74,6 +74,7 @@ Stages 1–3 are core; stages 4–10 are `bandit-dev`. Dependencies point one wa
 | L5 | Project instructions template ≤ 1 page: Project Context, stage → command map, modes | `check_repo.py` on `templates/` |
 | L6 | App repo `CLAUDE.md` ≤ 10 KB | App repo hook (BB-149) |
 | L7 | No top-level `bin/` in any plugin | `check_repo.py` |
+| L8 | No person in shipped files: skills speak of "the user" (they/them), never the owner's name or he/his/him, because every member of the household runs the same plugins (2026-10-14) | `check_repo.py` |
 
 Target: core descriptions ≤ 2,400 characters in total.
 

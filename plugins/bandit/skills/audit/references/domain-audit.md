@@ -1,7 +1,7 @@
 # 🔍 Domain audit (`audit {domain}` · `audit all`) and `close`
 
 > Scores domains against the structure rulebook with `scripts/check_structure.py` and writes one
-> report per domain, with its snapshot, on approval. Read-only until Leo approves the report row.
+> report per domain, with its snapshot, on approval. Read-only until the user approves the report row.
 
 ## 📥 Gather (read-only)
 
@@ -28,7 +28,7 @@ python {skill folder}/scripts/check_structure.py --rules rules.yaml --rulebook r
   fixed.**
 - **Extra fix rows.** A finding the rules don't cover yet goes **below** the report, never inside
   it, as an `Extra fix rows` table numbered after the script's rows: action, owner (**🔧 Who fixes
-  what** in `references/fix-rows.md`), exact target, why. Leo approves them with the script's rows in one answer.
+  what** in `references/fix-rows.md`), exact target, why. The user approves them with the script's rows in one answer.
   A finding with two valid fixes is one row with both options, the recommended one first.
 - Pure context that needs no fix (e.g. the denominator change below) is a one-line **Note**, never
   a finding.
@@ -84,7 +84,7 @@ python {skill folder}/scripts/check_structure.py --rules rules.yaml --rulebook r
    `MyNotes/{domain}/Projects/{workflow-project}/`. None → say so.
 2. **Replay** it. Superseded → stop and offer a fresh audit, which archives it. Invalid → stop
    and say why.
-3. Ask Leo whether its fix rows are done. Not done → stop; closing is his call.
+3. Ask the user whether its fix rows are done. Not done → stop; closing is their call.
 4. One row: move both files to `MyNotes/{domain}/_archive/Projects/{workflow-project}/` with
    `nc_webdav_move_resource`. A missing target folder is a separate row (`bandit:notes` creates it).
 5. Confirm by listing both folders.

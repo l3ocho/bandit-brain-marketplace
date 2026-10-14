@@ -53,7 +53,7 @@ Both are counts. **Neither knows how long anything takes.** Weight by `effort` i
 2. Report: overdue first (if the Due column exists), then day by day
 3. Mark projections explicitly as recurring, not as tasks
 4. Flag the heaviest day and any empty stretch
-5. **Stop.** No writes, unless Leo asks to plan or date the week: then run **Dating the week** below.
+5. **Stop.** No writes, unless the user asks to plan or date the week: then run **Dating the week** below.
 
 🪫 **If the board is empty**, check before concluding under-planning:
 `list_tasks(completed: false)` — zero incomplete tasks means the board is **unpopulated**, which is a capture problem, not a planning one. Say which.

@@ -59,7 +59,7 @@ Next checkpoint: <if stated>
 - Each summary covers context → what was discussed → **Decision:** / **Going forward:** in bold where one was made. Keep the numbers, dates, amounts and IDs exactly as spoken — system, user and document IDs, never customer account numbers (see below).
 - Leave out banter, jokes, personal chatter, profanity, private matters about individuals (e.g. someone's leave balance or personal life) and one-sided phone calls, except where the call produced an action.
 - Don't invent attendees, owners or deadlines. If no owner was stated, write "Owner not stated".
-- Fix obvious transcription errors only when the context makes them certain ("Leon Iyer" → "Leo and I", "Genesis" → "Genesys"). Otherwise mark them *(to confirm)*.
+- Fix obvious transcription errors only when the context makes them certain ("Leon Iyer" → "the user and I", "Genesis" → "Genesys"). Otherwise mark them *(to confirm)*.
 - Keep company and system names as used in the meeting.
 - **No customer data, ever** — even when it's spoken in the meeting: no customer names, account
   numbers or references, addresses, phone numbers or call contents. Describe the case instead

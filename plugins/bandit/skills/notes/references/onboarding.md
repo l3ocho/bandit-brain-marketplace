@@ -4,7 +4,7 @@
 
 ## 🚀 Onboarding — the vault step, run by bandit:project
 
-**Onboarding a project is one command, owned by bandit:project.** It interviews Leo, then loads
+**Onboarding a project is one command, owned by bandit:project.** It interviews the user, then loads
 this skill for the vault rows and bandit:tasks for the board rows, and shows **one** proposal.
 This skill only produces the vault rows and executes the approved ones; it never shows its own
 proposal or asks for its own approval when bandit:project runs it. Procedure: *Onboarding rows*

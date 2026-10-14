@@ -13,9 +13,9 @@
 
 The sprint folder and its record types are owned by bandit:notes (conventions §1, Sprint folders, and §4 filenames). This skill follows them and restates none of them; `references/templates.md` mirrors the filenames only for convenience.
 
-**Leftovers.** A document used only to make another one (an inbox brief or spec draft once its card and filed brief exist, a WBS draft once the WBS is filed, a feedback note once applied, a brief whose card was deleted) is archived to `_archive/` with the bandit:notes stamps, or deleted on Leo's word, in the same step that consumed it. Nothing consumed stays in `_inbox/` or at a project root. **Only on proof**: the successor exists and was read (the filed brief, the filed WBS, the applied change). A note is never archived because it looks done or because its card is missing; if unsure, it stays.
+**Leftovers.** A document used only to make another one (an inbox brief or spec draft once its card and filed brief exist, a WBS draft once the WBS is filed, a feedback note once applied, a brief whose card was deleted) is archived to `_archive/` with the bandit:notes stamps, or deleted on the user's word, in the same step that consumed it. Nothing consumed stays in `_inbox/` or at a project root. **Only on proof**: the successor exists and was read (the filed brief, the filed WBS, the applied change). A note is never archived because it looks done or because its card is missing; if unsure, it stays.
 
-**Writes.** New notes fail closed; edits read first and carry the etag; never force. A card description is read with `get_task` immediately before it is written, and a Spec change is shown old and new and applied only on Leo's yes (bandit:tasks `references/dev.md`, Spec lock). Tags are read and merged before `set_task_tags`. Board writes touch only the batch cards and the sprint card. Nothing is stored inside this skill's folder.
+**Writes.** New notes fail closed; edits read first and carry the etag; never force. A card description is read with `get_task` immediately before it is written, and a Spec change is shown old and new and applied only on the user's yes (bandit:tasks `references/dev.md`, Spec lock). Tags are read and merged before `set_task_tags`. Board writes touch only the batch cards and the sprint card. Nothing is stored inside this skill's folder.
 
 ---
 

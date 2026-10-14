@@ -1,17 +1,17 @@
 ---
 type: reference
-summary: House standard for Leo's own skills. Audits score against these 15 rules; Curate and Portfolio review apply them.
+summary: House standard for the user's own skills. Audits score against these 15 rules; Curate and Portfolio review apply them.
 updated: 2026-10-13
 
 ---
 # 📏 Skill Rulebook
 
-> House standard for Leo's own skills. Audits score against these 15 rules; Curate and Portfolio review apply them.
+> House standard for the user's own skills. Audits score against these 15 rules; Curate and Portfolio review apply them.
 
 ## 🗺️ Overview
 
 - **9 musts** (R1–R5, R12–R15): a break is ❌ and the skill gets a fix proposal.
-- **6 shoulds** (R6–R11): a break is ⚠️, fixed when the skill is touched anyway or when Leo asks.
+- **6 shoulds** (R6–R11): a break is ⚠️, fixed when the skill is touched anyway or when the user asks.
 - A rule that doesn't apply to a skill scores **—** (e.g. R5 for a skill that never writes, R12 for a skill that never audits or reviews).
 - **Score line:** `musts 9/9 · shoulds 4/6 · 2026-09-30`.
 - **Sources:** the skill-authoring article (Tahir), `bandit-maker:skill` (which builds these skills), and conventions the existing skills already share.
@@ -32,7 +32,7 @@ updated: 2026-10-13
 
 The description is what Claude scans to decide whether a skill applies. It isn't a summary for humans.
 
-- Says **when** to use it (the situations and the phrases Leo actually uses) as well as what it does.
+- Says **when** to use it (the situations and the phrases the user actually uses) as well as what it does.
 - Leans a little **pushy**: Claude tends to under-trigger skills (`bandit-maker:skill`).
 - Names **what it's not for**, and which skill handles that, whenever a neighbouring skill could steal the trigger (e.g. `clarify` ↔ `bandit:rewrite`).
 - **Check:** could Claude pick this skill from the description alone, and turn it down for the neighbour's job? A pure "does X" description fails.
@@ -64,7 +64,7 @@ A convention lives in exactly one skill. Other skills name that owner and never 
 Applies to any skill that writes outside the chat (BanditCloud, boards, mail).
 
 - **New files fail closed** (no overwrite). **Edits** carry the etag from the read. **Never force-overwrite.**
-- **Delete** only what Leo named or approved by exact path; never in an unattended run.
+- **Delete** only what the user named or approved by exact path; never in an unattended run.
 - **Resolve names live**; never store IDs.
 - **Check:** each write path in the skill states which of these it uses.
 
@@ -108,7 +108,7 @@ Applies to any skill that defines or installs a slash command (a repo command su
 
 ### R6 · Don't state the obvious
 
-Every section either moves Claude off a default or holds a Leo-specific fact (paths, tools, conventions, preferences).
+Every section either moves Claude off a default or holds a the user-specific fact (paths, tools, conventions, preferences).
 
 - **Check:** delete the section in your head. If Claude would behave the same without it, cut it.
 
@@ -163,7 +163,7 @@ These don't apply to Claude.ai skills. They apply only to a plugin skill used in
 
 ## 🔄 Changing this rulebook
 
-- Changes follow the usual proposal flow, and Leo approves them.
+- Changes follow the usual proposal flow, and the user approves them.
 - After a change, the next Portfolio review re-scores every skill against the new version.
 - A rule gets added when the same gotcha turns up in **two or more skills**. That's the signal it's a house rule, not a one-skill quirk.
 - A rule the lint checks changes in `house_lint.py` in the same proposal.

@@ -5,7 +5,7 @@
 ## 🎯 Targeted update from the vault
 
 Updates **another** project's instructions from its vault copy, because only a project can see
-its own instructions. bandit:audit runs this for its settings rows. Leo can run it too ("update
+its own instructions. bandit:audit runs this for its settings rows. The user can run it too ("update
 the Family instructions: board is now …").
 
 **Inputs:** the settings folder (`MyNotes/{domain}/Claude/ai-{project}`), the production file

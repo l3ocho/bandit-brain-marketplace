@@ -1,6 +1,6 @@
 # 🧭 The vault model, domain and scope
 
-> Read before any command: what a domain is, how this project's scope is resolved, and why the inbox is Leo's.
+> Read before any command: what a domain is, how this project's scope is resolved, and why the inbox is the user's.
 
 ## 🧭 Model in one screen
 
@@ -10,7 +10,7 @@ MyNotes/                         ← BanditCloud root of all domains
 ├── .templates/                  ← any dot folder: ignored
 └── {Domain}/                    ← one domain = one Obsidian vault (has its own .obsidian/)
     ├── README.md                ← generated home page; frontmatter = domain config
-    ├── _inbox/                  ← Leo's working space: no rules, no edits until he asks for review
+    ├── _inbox/                  ← the user's working space: no rules, no edits until they ask for review
     ├── _templates/              ← input structures
     ├── _archive/                ← done notes and old settings versions, original path mirrored
     ├── _attachments/            ← every image, PDF, audio file embedded by a note
@@ -73,7 +73,7 @@ metadata), resolved together with the domain:
 
 | Area | Read | Change (on approval) |
 |---|---|---|
-| `_inbox/` | All of it (Leo's inputs) | Create new notes; review (`file`) notes **only** into `Projects/{slug}/`, and only the ones Leo puts up for review |
+| `_inbox/` | All of it (the user's inputs) | Create new notes; review (`file`) notes **only** into `Projects/{slug}/`, and only the ones the user puts up for review |
 | `Projects/{slug}/` | ✓ | ✓ |
 | `Claude/ai-{slug}/`, `Claude/code-{slug}/` | ✓ | Create the folder only; the twin belongs to bandit:project, the mirror to the repo's Stop hook |
 | `_templates/` | ✓ | ✓ Edit templates directly, no need to switch to the workflow project |
@@ -83,44 +83,44 @@ metadata), resolved together with the domain:
 | Everything else | ✗ | ✗ |
 
 Anything outside the scope (another project's folder, a domain-level rename, `init`, `home`,
-`settings`) that Leo asks for: stop and say it's a domain-level action to run from the workflow
+`settings`) that the user asks for: stop and say it's a domain-level action to run from the workflow
 project. Never widen scope on your own. Two exceptions: onboarding's approved rows may create the
 domain's missing core structure (and `home` then builds the README), and a **`domain` fix row**
-(below) runs when Leo approves that row by number. His yes is the widening, for that row only.
+(below) runs when the user approves that row by number. Their yes is the widening, for that row only.
 
 ---
 
-## 📥 The inbox is Leo's
+## 📥 The inbox is the user's
 
-`_inbox/` is where Leo writes, pastes and thinks. **While a note is in `_inbox/`, no convention
+`_inbox/` is where the user writes, pastes and thinks. **While a note is in `_inbox/`, no convention
 applies to it** — any filename, any frontmatter or none, any structure, any date format. And **no
-skill or chat edits, renames, reformats or moves a note there** unless Leo puts that note up for
+skill or chat edits, renames, reformats or moves a note there** unless the user puts that note up for
 review in the current conversation. Not `lint`, not `onboard`, not another skill tidying up, not
-a chat that is using the note as input. Reading is always fine. Leo's yes to a row that archives
+a chat that is using the note as input. Reading is always fine. The user's yes to a row that archives
 or deletes a consumed draft by name (*Other skills* → Leftovers) is putting that note up.
 
-**Exception: a skill-written draft, changed on Leo's request.** A note in `_inbox/` with
+**Exception: a skill-written draft, changed on the user's request.** A note in `_inbox/` with
 `status: triaged` that was written by a skill **in the current conversation** may be edited in
-place when Leo explicitly asks for that change. Conditions: etag-guarded write, `updated` bumped,
-`status` and `file-to` unchanged, and the change summarised back to him. Leo's own notes (`inbox`
+place when the user explicitly asks for that change. Conditions: etag-guarded write, `updated` bumped,
+`status` and `file-to` unchanged, and the change summarised back to them. The user's own notes (`inbox`
 or no status) stay untouchable, and so does any skill-written note from an earlier conversation.
 
-**The rules apply at review.** Review is `/bandit:notes file`: Leo runs it (for the whole inbox or for
-named notes) when he wants a note processed. That is the only moment the conventions touch it,
+**The rules apply at review.** Review is `/bandit:notes file`: the user runs it (for the whole inbox or for
+named notes) when they want a note processed. That is the only moment the conventions touch it,
 and the note leaves the inbox in the same step. The status says which side of that line a note
 is on:
 
 | Status | Whose | Rules |
 |---|---|---|
-| `inbox` (or no status at all) | Leo's, in progress | None. Untouchable |
-| `triaged` + `file-to`, in `_inbox/` | Written by a skill, waiting for Leo's review | The skill wrote it compliant; not edited again until review, except on Leo's explicit request in the conversation that wrote it (the exception above) |
+| `inbox` (or no status at all) | The user's, in progress | None. Untouchable |
+| `triaged` + `file-to`, in `_inbox/` | Written by a skill, waiting for the user's review | The skill wrote it compliant; not edited again until review, except on the user's explicit request in the conversation that wrote it (the exception above) |
 | anything, outside `_inbox/` | Reviewed | All of Part 2 |
 
 **Review is all or nothing per note.** Every question a note needs answered (which project,
 which meeting type, what an ambiguous date means) is asked before its row is final. A row with
 an open question is not executed, and **a note is never left half-edited in the inbox**: it is
-either still exactly as Leo left it, or reviewed and in its home folder.
+either still exactly as the user left it, or reviewed and in its home folder.
 
-**Leo's words stay Leo's.** At review, the frontmatter is the skill's job. The body is not: any
+**The user's words stay the user's.** At review, the frontmatter is the skill's job. The body is not: any
 body change (removing a duplicated block, rewriting a date, fixing structure) is its own row
-showing before → after, and happens only if Leo approves that row.
+showing before → after, and happens only if the user approves that row.

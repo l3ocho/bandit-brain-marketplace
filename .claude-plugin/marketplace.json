@@ -20,7 +20,7 @@
     {
       "name": "bandit-maker",
       "source": "./plugins/bandit-maker",
-      "description": "Authoring and linting the marketplace's own skills. Claude Code, Bandit Port only."
+      "description": "Authoring and linting the marketplace's own skills. Claude Code, for maintainers."
     }
   ]
 }

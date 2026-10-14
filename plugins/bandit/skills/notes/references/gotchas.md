@@ -2,7 +2,7 @@
 
 One line per real failure: what went wrong → what to do instead. Read once before a session's first vault write.
 
-- **2026-09-24 · "create it" ran past the proposal.** Leo said "create it" to a 5-row proposal and
+- **2026-09-24 · "create it" ran past the proposal.** The user said "create it" to a 5-row proposal and
   the chat also created `_inbox/`, `_templates/`, `_archive/` and `_attachments/`, which were only
   listed as findings. → Execute only the approved rows. Every finding is a row of its own.
 - **2026-09-24 · Onboarding left the domain half-built.** Onboarding the Personal workflow project
@@ -13,7 +13,7 @@ One line per real failure: what went wrong → what to do instead. Read once bef
   folders, stray files and breaches as "findings" or "for the workflow project", and nothing
   fixed them without another run. → Findings come fixed: every one is a numbered fix row in the
   same proposal (`domain` when outside the scope), approved with the rest.
-- **2026-09-24 · A waiting proposal looked like a failure.** Leo ran the command, got a proposal,
+- **2026-09-24 · A waiting proposal looked like a failure.** The user ran the command, got a proposal,
   and saw nothing created. → End every proposal with the "nothing happens until you answer" line.
 - **2026-09-24 · Project onboarding was split across three skills.** `init` run from a project
   chat was silently swapped for a project onboard. → Onboarding runs from bandit:project, which
@@ -22,9 +22,9 @@ One line per real failure: what went wrong → what to do instead. Read once bef
 - **2026-09-24 · A `domain: none` stop gave no fix.** → Name the setting and the fix: a
   bandit:project targeted update in that project sets `domain:`. This skill never edits
   project instructions.
-- **2026-09-25 · Leo asked to amend a draft a skill had just written.** The rules had no path for
-  this, and the edit went ahead on his explicit ask. → A triaged, skill-written draft from this
-  conversation can be edited on Leo's explicit request (*The inbox is Leo's*).
+- **2026-09-25 · the user asked to amend a draft a skill had just written.** The rules had no path for
+  this, and the edit went ahead on their explicit ask. → A triaged, skill-written draft from this
+  conversation can be edited on the user's explicit request (*The inbox is the user's*).
 - **2026-09-25 · Workflow projects had no project folder.** The old rule gave `type: workflow`
   settings only, so a workflow project had nowhere to keep its own docs. → Every project, workflow
   included, gets both `Claude/ai-{slug}/` and `Projects/{slug}/` with its hub note.

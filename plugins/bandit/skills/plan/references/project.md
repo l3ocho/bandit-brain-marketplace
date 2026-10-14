@@ -30,7 +30,7 @@ This skill does NOT do these. It tells the user when to invoke them:
 | Note format | Frontmatter, keys and YAML style follow the **bandit:notes** conventions. Read that skill before the first write. `type: reference`, `project` links the hub note |
 
 Planning documents go straight into that folder, not through `_inbox/`: they are worked on
-across many sessions, and the inbox is Leo's. If the hub note `{project}.md` is
+across many sessions, and the inbox is the user's. If the hub note `{project}.md` is
 missing, say so and point to `/bandit:notes onboard`; don't create it here.
 
 ### 🧾 State comes from the files
@@ -56,7 +56,7 @@ When resuming, greet with the state:
 - **First save:** create the file with no `if_match`. The write fails if the file exists:
   stop and ask, never overwrite.
 - **Every later save:** read the file for its etag, write with `if_match` = that bare-hex
-  etag. A 412 means someone edited it (often Leo in Obsidian): re-read, say what changed, ask.
+  etag. A 412 means someone edited it (often the user in Obsidian): re-read, say what changed, ask.
 - Never pass `if_match: "*"`. Never delete. No version numbers or copies: the file is
   edited in place.
 - Save after every 2–3 confirmed sections.
@@ -117,7 +117,7 @@ with concrete options. Use `ask_user_input` for bounded choices. Confirm before 
 - Known constraints (must use X, can't use Y, limited to Z)
 - Existing systems this integrates with
 - Pre-populates architecture document stack decisions
-- Default to Leo's standard stack patterns unless specified otherwise
+- Default to the user's standard stack patterns unless specified otherwise
 
 #### § 9: Timeline & Milestones
 - Phase names and sequence (not hard dates unless the user wants them)
@@ -221,7 +221,7 @@ Save progress every 3-4 sections.
 - Docker Compose V2 example if Docker in stack (no version field)
 - Cloudflare Tunnels if VPS hosting
 - 3-branch git strategy (main ← staging ← development). **`dev: true`:** the repo's own branch
-  rules instead (ask Leo where they're written); never the default
+  rules instead (ask the user where they're written); never the default
 
 #### § 12: Maintenance & Scaling
 - Auto-draft based on stack: Python version, dependency lock, testing, scaling notes

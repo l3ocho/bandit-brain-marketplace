@@ -8,18 +8,18 @@
 1. **Read what's running.** From this project's own instructions (the system prompt), take:
    - the `**Version:**` line
    - the `## 🧭 Project Context` block: `domain`, `project`, `type`, `board`, `prefix`
-   - the Claude.ai project name, if the session shows it. Not shown → ask Leo for it (one line), or
+   - the Claude.ai project name, if the session shows it. Not shown → ask the user for it (one line), or
      record `null`.
    No `**Version:**` line or no Project Context → no stamp. Propose the fix row instead:
-   `bandit:project` audit of this project, which adds the missing line or block. Run it on Leo's yes.
+   `bandit:project` audit of this project, which adds the missing line or block. Run it on the user's yes.
 2. **Find the vault folder.** `domain` ≠ `none` → `MyNotes/{domain}/Claude/ai-{project}`.
-   `domain: none` → ask Leo for the path.
+   `domain: none` → ask the user for the path.
    List it with `nc_webdav_list_directory`.
 3. **Read the vault versions.** For each `{prefix}-instructions-v{N}.md`, read the file raw and take
    its `**Version:**` line. Stop reading once one matches.
 4. **Compare** and name the S5 case from the rulebook (its S5 table, first match wins).
 
-5. **Propose one row**, then write only on Leo's yes:
+5. **Propose one row**, then write only on the user's yes:
 
    ```
    | # | Action | Path | Effect | Why |
@@ -40,7 +40,7 @@
    ```
 
    Show its output as printed. Domain-wide rules (S1 folder, S3 one workflow) need the whole domain:
-   they're `audit {domain}`'s job. Its fix rows are shown with the stamp row and run on Leo's yes,
+   they're `audit {domain}`'s job. Its fix rows are shown with the stamp row and run on the user's yes,
    through their owners (`references/fix-rows.md` → **▶️ Executing approved rows**).
 8. **Report in one line:** the S5 result and what was stamped, then the script's table.
 

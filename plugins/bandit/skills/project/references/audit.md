@@ -12,7 +12,7 @@ Determine which mode to operate in based on the current project state.
 |-----------|------|--------|
 | No instructions, or only a project name / placeholder text | **New Project** | Run the interview flow |
 | Substantive instructions already present | **Existing Project** | Run the audit flow |
-| The change is for **another** project (bandit:audit runs a settings row, or Leo names a project that isn't this one) | **Vault update** | Run **🎯 Targeted update from the vault** (`references/update.md`). Never interview: this chat's own instructions aren't the target |
+| The change is for **another** project (bandit:audit runs a settings row, or the user names a project that isn't this one) | **Vault update** | Run **🎯 Targeted update from the vault** (`references/update.md`). Never interview: this chat's own instructions aren't the target |
 
 If ambiguous (e.g., a few lines that might be intentional or might be a stub), ask the user:
 > "I see some brief instructions already in this project. Should I treat this as a fresh start
@@ -139,7 +139,7 @@ Output the audit as a structured report:
 ### Step 5: Generate Updated Version
 
 Don't ask whether to fix. Build the updated version straight away and show it with the report;
-its version files are rows in the one proposal, so Leo's answer to the proposal is the approval.
+its version files are rows in the one proposal, so the user's answer to the proposal is the approval.
 
 1. Preserve all existing content that passes audit
 2. Fill gaps identified in the audit
@@ -150,4 +150,4 @@ its version files are rows in the one proposal, so Leo's answer to the proposal 
    together with the new version files, in one proposal (artifact-only → board rows only)
 
 If the existing instructions already have a vault destination (`webdav_folder`), default to a
-version bump using the existing naming convention; the new version files are rows, never written before Leo's yes.
+version bump using the existing naming convention; the new version files are rows, never written before the user's yes.

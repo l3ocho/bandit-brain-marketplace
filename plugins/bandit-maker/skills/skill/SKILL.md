@@ -49,7 +49,7 @@ Every skill built or edited here passes `references/rulebook.md`. In this market
 
 - Ran `quick_validate.py` inside the installed skill folder and left `__pycache__` there → run scripts from a copy (or `python3 -B`), and delete any stray cache.
 - Sent a skill-update card with a short summary as `description` → it replaced the full trigger description; always send the complete text.
-- Built a new skill with plain H2s, no Gotchas and no not-for line → apply the 🏠 House standard before the first draft goes to Leo.
+- Built a new skill with plain H2s, no Gotchas and no not-for line → apply the 🏠 House standard before the first draft goes to the user.
 
 ## 🚫 Never
 

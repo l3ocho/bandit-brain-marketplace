@@ -220,7 +220,7 @@ def manifest():
         stamp.write_text(today + "\n")
         print(f"Upload .claude/workdir-manifest.json, as-is, to MyNotes/{m['domain']}/Projects/{m['project']}/"
               f"workdir-manifest.json through BanditCloud (new file: omit if_match; existing: its bare-hex etag). "
-              f"It feeds /bandit:audit S12. One line to Leo when done, nothing else.")
+              f"It feeds /bandit:audit S12. One line to the user when done, nothing else.")
     return 0
 
 

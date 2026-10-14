@@ -10,10 +10,10 @@ Every procedure starts by resolving the domain (`references/model.md`) and readi
 |---|---|---|---|---|
 | 1 | move | _inbox/Untitled 3.md | Requests/billing-dispute-report-2026-09-23.md | request from CS Director |
 | 2 | frontmatter | Meetings/x.md | — | add type, status, domain |
-| 3 | delete | _inbox/Untitled 7.md | — | empty capture, Leo asked to remove |
+| 3 | delete | _inbox/Untitled 7.md | — | empty capture, the user asked to remove |
 ```
 
-Leo answers "all", a list ("1, 3"), or "none". Execute only the approved rows, in order, and
+The user answers "all", a list ("1, 3"), or "none". Execute only the approved rows, in order, and
 report per row: done / refused (with reason). A refused row doesn't undo the others.
 
 ---
@@ -45,7 +45,7 @@ are planned against it.
 - Anything in `Claude/` that isn't settings → its proper folder.
 
 After Stage A moves a settings folder, **the project instructions still point to the old path.**
-Say so and tell Leo to run bandit:project (targeted update) to set the Project Context
+Say so and tell the user to run bandit:project (targeted update) to set the Project Context
 `domain:` and `project:` and the derived `webdav_folder`. Don't edit instructions from here.
 
 **Stage B — Templates.** Read every file in `_templates/`. Propose the frontmatter
@@ -54,10 +54,10 @@ frontmatter; the body stays untouched. Also propose **creating any missing stand
 (Part 2 §10: `new-note.md` always, a meeting template when `meetings` is on, `request.md` when
 `requests` is on).
 
-**Stage C — Notes.** Walk every content folder. **Skip `_inbox/` entirely** — it's Leo's; review
+**Stage C — Notes.** Walk every content folder. **Skip `_inbox/` entirely** — it's the user's; review
 happens through `file`. For each
 `.md`: missing or legacy frontmatter keys (a missing `summary` gets a drafted sentence in the
-row, for Leo to approve or edit; a note moved in from another system gets `source: migrated`), YAML
+row, for the user to approve or edit; a note moved in from another system gets `source: migrated`), YAML
 style and key order (Part 2 §5), customer data in the
 body, wrong `status` for its location, filename breaches
 (including date-first names like `2026-09-23-csnotes-feature-x.md` → date-last). Renames outside
@@ -65,8 +65,8 @@ body, wrong `status` for its location, filename breaches
 link edits as rows). If Stage C would exceed ~40 rows, propose it folder by folder.
 
 **Stage D — Home and settings.** Run `home`. Record `mynotes-version: 2` and the modules in the
-README frontmatter. Then run the `settings` check and offer its proposal (applied only once Leo
-confirms Obsidian is closed everywhere); if he'd rather change them in the app, give him the
+README frontmatter. Then run the `settings` check and offer its proposal (applied only once the user
+confirms Obsidian is closed everywhere); if they'd rather change them in the app, give them the
 table instead.
 
 **Upgrading a v1 domain** is `onboard` again: Stage A adds `_attachments/` and hub notes, Stage B
@@ -77,7 +77,7 @@ Stage D bumps the version.
 its hub note `{slug}.md` and `Claude/ai-{slug}/` exist (propose creating whichever is missing),
 then run Stage C on
 `Projects/{slug}/` only. Domain-level findings (legacy folder names, other projects) come as
-fix rows marked `domain`, built with Stage B/C, after this project's rows. They run only when Leo
+fix rows marked `domain`, built with Stage B/C, after this project's rows. They run only when the user
 approves them by number (`references/model.md` → Scope).
 
 ---
@@ -136,7 +136,7 @@ For a new domain — a new job, a new business area.
    `_templates/new-note.md` (and `meeting-entry.md` / `request.md` when those modules are on),
    and the README.
 4. On confirmation, create them in that order, then run `home`.
-5. Obsidian creates `.obsidian/` the first time Leo opens the folder as a vault. Tell him to do
+5. Obsidian creates `.obsidian/` the first time the user opens the folder as a vault. Tell them to do
    that, close it again, and then run `/bandit:notes settings {Domain}` to apply Part 2 §11.
 
 ---
@@ -165,7 +165,7 @@ scheduled task, so it **never asks** and writes only the README.
    - Pending archive: notes with `status: done` found while reading (Requests, plus any file
      already read). Don't open every note in the vault for this — that's `lint`'s job
    - Conflict copies spotted in listings
-3. Write it: read → strip the etag to bare hex → `if_match`. A 412 means Leo edited it in the
+3. Write it: read → strip the etag to bare hex → `if_match`. A 412 means the user edited it in the
    meantime: re-read once, re-merge the `## Notes` section, write again. A second 412 → stop
    and report.
 4. **Links:** Obsidian can't link to a folder, so folders are shown as `` `path/` `` and notes as
@@ -179,8 +179,8 @@ changed (counts), or "no changes".
 
 ### `/bandit:notes file [Domain] [note…]`
 
-The review: takes inbox notes Leo puts up and moves them to their homes, compliant. With note
-names, reviews only those; without, the whole inbox. This is the command Leo uses most — keep
+The review: takes inbox notes the user puts up and moves them to their homes, compliant. With note
+names, reviews only those; without, the whole inbox. This is the command the user uses most — keep
 it fast.
 
 1. List `{Domain}/_inbox/`. **Read** each note in scope; for each non-markdown file plan a
@@ -199,14 +199,14 @@ it fast.
    - filename per Part 2 §4, checked for uniqueness
    - frontmatter: add the missing keys, remove `file-to` (its job is done), `status: triaged`
      (or `active` / `waiting` if the content says so), `updated: today`, a drafted `summary`
-     (shown in the row so Leo can edit it), `project: "[[{slug}]]"` when it's about a project,
+     (shown in the row so the user can edit it), `project: "[[{slug}]]"` when it's about a project,
      a picked body value copied into its key (Part 2 §10), YAML style and key order per
      Part 2 §5
    - attachments: embedded files not yet in `_attachments/` move there; pasted-image names get
      renamed per Part 2 §4 with the embed updated in the same row
    - **body:** untouched by default. Anything worth changing (a duplicated block, an ambiguous
      date like `09/10/2026`, customer data, broken structure) becomes a **separate body row**
-     showing before → after, which Leo approves or skips on its own
+     showing before → after, which the user approves or skips on its own
    - **open questions** (which project, which meeting type, what a date means): ask them now,
      all at once, before the proposal is final
    - If a note is too thin to classify, leave it in `_inbox` untouched and say why in one line
@@ -239,13 +239,13 @@ it fast.
 
 ### `/bandit:notes lint [Domain]`
 
-Read-only report whose rows are the fixes. Nothing is written until Leo answers.
+Read-only report whose rows are the fixes. Nothing is written until the user answers.
 
 Checks (each row: file, breach, proposed fix):
 
 | Check | Breach |
 |---|---|
-| Scope | **`_inbox/` is skipped entirely** — only its count and its filenames are read (for Uniqueness). Leo's notes aren't linted before review |
+| Scope | **`_inbox/` is skipped entirely** — only its count and its filenames are read (for Uniqueness). The user's notes aren't linted before review |
 | Location | A folder that's neither core nor an enabled module; non-settings content in `Claude/`; a skill folder inside a domain; a non-markdown file outside `_attachments/` (except `.canvas`/`.base`, §8) |
 | Claude subfolders | Name not `{ai\|code\|design}-{slug}` |
 | Project pairing | A settings folder whose slug has no `Projects/{slug}/` (every project type, workflow included); a project folder without its hub note `{slug}.md` |
@@ -254,8 +254,8 @@ Checks (each row: file, breach, proposed fix):
 | Frontmatter parses | The block doesn't parse as YAML. The row names the key on the failing line and proposes the quoted value (Part 2 §5 → YAML style) |
 | Sprint briefs | A `brief` whose `board-task` card carries a `sprint/{name}` tag (resolved live, read-only) and sits outside `Projects/{slug}/sprint-{name}/`. Fix: move it there (Part 2 §1) |
 | Sprint project root | A project with sprint folders holding anything at its root but the hub, `sprint-*` and `planning/`. Fix: move it into `planning/` (or its card's sprint folder) |
-| Orphaned triaged notes | A filed `triaged` note whose `board-task` card no longer exists (resolved live, read-only). A question row for Leo: keep, archive, or relink. Never acted on without his pick |
-| Frontmatter | Missing required keys (`summary` once filed); legacy keys; unknown keys (fix row: map to the known key it means, recommended; removing it only if Leo picks that); invalid enum value; `project` not a link; `request` missing `requester`/`received` |
+| Orphaned triaged notes | A filed `triaged` note whose `board-task` card no longer exists (resolved live, read-only). A question row for the user: keep, archive, or relink. Never acted on without their pick |
+| Frontmatter | Missing required keys (`summary` once filed); legacy keys; unknown keys (fix row: map to the known key it means, recommended; removing it only if the user picks that); invalid enum value; `project` not a link; `request` missing `requester`/`received` |
 | YAML style | Flow lists `[a, b]`; unquoted `[[links]]`; `#` in tags; keys out of order |
 | Templates | Values that should be pre-filled are empty (§10); a missing standard template for an enabled module |
 | Status vs place | `inbox` outside `_inbox`; `file-to` left on a reviewed note; `done` outside `_archive`; not `done` inside `_archive` (archived settings versions in `_archive/Claude/` are exempt: they have no status) |
@@ -269,7 +269,7 @@ Checks (each row: file, breach, proposed fix):
 | Plan notes (dev projects only) | Resolving each `board-task` id live, read-only: a `plan` note with no `board-task` · a plan note whose card is complete but the note isn't `done` (propose `done` + archive) · a plan note whose task id no longer resolves (card deleted). A renamed card still resolves: never report it as deleted |
 
 Group the report by check, counts first. **Every breach is a numbered fix row** (file, breach,
-fix), so the report is the proposal: Leo answers all, a list or none. A breach whose fix belongs
+fix), so the report is the proposal: the user answers all, a list or none. A breach whose fix belongs
 to another command (`settings`, `archive`) is still a row, run through that command's procedure.
 In project scope, lint only the project's own areas.
 
@@ -286,9 +286,9 @@ Aligns the vault's Obsidian settings with Part 2 §11. Domain scope only. Never 
    | # | File | Key | Now | New | Why |
    |---|---|---|---|---|---|
    | 1 | app.json | attachmentFolderPath | `"./"` | `"_attachments"` | §8 attachments folder |
-   | 2 | core-plugins.json | sync | `true` | `false` | Needs Leo's confirmation: no Obsidian Sync on this vault |
+   | 2 | core-plugins.json | sync | `true` | `false` | Needs the user's confirmation: no Obsidian Sync on this vault |
 
-   Rows that need a fact from Leo (Sync, Daily notes off vs. folder) say so in Why.
+   Rows that need a fact from the user (Sync, Daily notes off vs. folder) say so in Why.
 3. Ask for the approval **and** the closed-everywhere confirmation in the same message:
    "Approve all / a list / none — and confirm Obsidian is closed on every device."
 4. On approval: per file, in order — backup → read (etag) → merge approved keys → validate →
@@ -296,7 +296,7 @@ Aligns the vault's Obsidian settings with Part 2 §11. Domain scope only. Never 
 5. Finish with the after-run steps from §11 (wait for sync, open desktop first, check the UI).
 
 **Roll back:** `/bandit:notes settings {Domain} restore` lists the backups in
-`.obsidian/mynotes-backup/` newest first. Leo picks one per file; with Obsidian closed
+`.obsidian/mynotes-backup/` newest first. The user picks one per file; with Obsidian closed
 everywhere: back up the current live file first (so a restore can itself be undone), read its
 etag, then `nc_webdav_copy_resource(source=backup, destination=live, overwrite: true,
 if_destination_match: {bare-hex etag})` — the etag guard stops the copy if the file changed
@@ -313,9 +313,9 @@ since the read. Re-read and confirm it parses.
    anything that isn't junk.
 4. On approval: re-list, delete each approved path, report per row.
 
-Other commands can also add `delete` rows to their proposals (empty inbox notes Leo put up for
-review, losing conflict copies, duplicates), but only when Leo asked for cleanup, and each row
-still needs his approval.
+Other commands can also add `delete` rows to their proposals (empty inbox notes the user put up for
+review, losing conflict copies, duplicates), but only when the user asked for cleanup, and each row
+still needs their approval.
 
 ---
 
@@ -327,7 +327,7 @@ still needs his approval.
 3. On approval: stamp `archived-from` + `archived` (edit in place) → create missing mirror
    folders → move.
 
-**A sprint folder** (Part 2 §1 → Archiving a sprint), named by Leo or by bandit-dev:sprint's close:
+**A sprint folder** (Part 2 §1 → Archiving a sprint), named by the user or by bandit-dev:sprint's close:
 one row per note setting `status: done` on the plan, execution prompt, ledger and report, one row
 stamping every note in the folder, the mirror folders under `_archive/Projects/{slug}/` as rows,
 then one move row for the folder itself. Stamp all, then move once; a failed stamp stops the move.
@@ -338,7 +338,7 @@ Old `{prefix}-instructions-v{N}.md` and `{prefix}-prompt-reference-v{N}.md` file
 `Claude/ai-{slug}/` for `_archive/Claude/ai-{slug}/`. bandit:project owns the files but never
 moves them; this skill does the move.
 
-1. **Input:** the exact file paths, from an approved bandit:audit S7 row or named by Leo. This
+1. **Input:** the exact file paths, from an approved bandit:audit S7 row or named by the user. This
    skill doesn't decide which version is in production: that comes from the self-check stamp,
    which bandit:audit reads. No list given → ask for one; never pick "everything but the highest".
 2. **Refuse** a path that isn't a settings file in `Claude/ai-{slug}/`, and any file of a project

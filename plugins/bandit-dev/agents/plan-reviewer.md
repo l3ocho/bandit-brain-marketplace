@@ -28,7 +28,7 @@ If something you need is missing from the prompt, say so as a finding; do not gu
 **2 · Product manager.** Will the sprint deliver what the cards promise?
 - Every acceptance line has a proof in the plan's verification table
 - Scope matches the Specs: nothing promised is missing, nothing unasked is added
-- Waves deliver something testable, in an order Leo can test
+- Waves deliver something testable, in an order the user can test
 - Open questions, unverified facts and outside blockers are named, not buried
 
 ## 📤 Report shape (fixed: the sprint skill writes it into the review record)
@@ -39,11 +39,11 @@ If something you need is missing from the prompt, say so as a finding; do not gu
    | # | Severity | Card / section | Finding (with evidence) | Recommended change | Applied via |
    |---|---|---|---|---|---|
 
-   Severity: **blocker** (the sprint would fail or break a hard rule; Leo must decide), **major**
+   Severity: **blocker** (the sprint would fail or break a hard rule; the user must decide), **major**
    (must change before commit; the orchestrator applies it to the plan), **minor** (apply if cheap),
    **note** (no change). "Applied via" is left empty: the orchestrator fills it.
 3. **Risk additions:** risks the plan misses, one line each with a mitigation.
-4. **Questions for Leo:** only for blockers, each with one recommendation.
+4. **Questions for the user:** only for blockers, each with one recommendation.
 
 Twelve findings at most; merge duplicates. Every finding has evidence and a recommended change:
 never a bare observation.

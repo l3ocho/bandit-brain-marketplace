@@ -6,7 +6,7 @@ Contents: Interview and pace · Scope · Cards and Specs · Agents and checks ·
 
 ## Interview and pace
 
-- Asked for the sprint date after Leo had set every due date → scan the chat, cards and ledger before any question; use and record what is there.
+- Asked for the sprint date after the user had set every due date → scan the chat, cards and ledger before any question; use and record what is there.
 - Opened with eleven questions and then a second list → one consolidated list per gate, grouped by card, each with a recommendation; "go with the recommendations" applies to all; ask only follow-ups.
 - Buried a one-sentence rule (shared Finance account, equal rights, privacy even from the admin) under option questions → restate the rule in the user's words first, confirm it in one line, then check where the code differs.
 - Left a task as "still to do" that an earlier instruction already covered → close it from the instruction.
@@ -14,7 +14,7 @@ Contents: Interview and pace · Scope · Cards and Specs · Agents and checks ·
 
 ## Scope
 
-- Followed a side requirement (Finance sharing) into a large investigation and a new XL card inside the sprint → park the new requirement outside the sprint, record the rule, ask one yes or no; a card Leo requires in the sprint stays in.
+- Followed a side requirement (Finance sharing) into a large investigation and a new XL card inside the sprint → park the new requirement outside the sprint, record the rule, ask one yes or no; a card the user requires in the sprint stays in.
 - Offered a "recommended" answer that contradicted an earlier one without saying so → when a later finding changes a recommendation, say it changed and why.
 
 ## Cards and Specs
@@ -45,7 +45,7 @@ Contents: Interview and pace · Scope · Cards and Specs · Agents and checks ·
 ## Repo and hooks
 
 - A read-only search was blocked by a hook because the command named a credential script → never name credential scripts in commands; search with neutral terms.
-- Work sat on the main branch with uncommitted docs and the stop hook demanded a commit; Leo thought something had been merged into main → run `git branch --show-current` first, say plainly that nothing was merged or pushed, switch to `development`, commit docs there only.
+- Work sat on the main branch with uncommitted docs and the stop hook demanded a commit; the user thought something had been merged into main → run `git branch --show-current` first, say plainly that nothing was merged or pushed, switch to `development`, commit docs there only.
 - A large `list_tasks` result overflowed the context → filter by tag, date or priority and parse the saved result with a script.
 
 ## Process
@@ -53,7 +53,7 @@ Contents: Interview and pace · Scope · Cards and Specs · Agents and checks ·
 - Left out the wave sub-tasks, so the sprint card could not show wave progress → step 11 adds one sub-task per wave at the very end of the sprint card, and the execution prompt ticks each as its wave is delivered.
 - Ticked a step before its evidence was on the card → tick last.
 - Reported cards as ready while their Specs listed open questions → run the definition of ready strictly, report who passes, fix rows for the rest.
-- Edited a verbatim document of Leo's only after he asked → ask for permission once, with the exact row to change; after permission, edit it and note the old wording in the row.
+- Edited a verbatim document of the user's only after they asked → ask for permission once, with the exact row to change; after permission, edit it and note the old wording in the row.
 - Wrote a gate list, then found a gate (XL split) at the end → run the checklist in `plan.md` in order; do not skip ahead.
 
 ## Execute, debug, close
@@ -64,7 +64,7 @@ Written before the first real run; correct them with what happens.
 - The cap of five across Next + Doing hit when the next wave was pulled forward → count Next + Doing from `get_execution_board` before each move; overflow waits in Assigned and is reported.
 - A card went to Next or Doing past a dependency gate → the refusal names the blocker; report it, do not retry or route around.
 - A chained card was refused `doing` (`BLOCKED_BY_INCOMPLETE_TASK`) because its blocker, a batch card, was parked in `standby` as the skill requires → the app change (Doing would accept a blocker in `standby`) is a backlog card and **not built**, so the refusal stands: leave the card in `next`, comment the refusal on the card, record it in the ledger, and never complete the blocker to get past it. A blocker in `assigned`, `next` or `doing` still refuses: work the blocker first.
-- A finished card was completed instead of parked → delivery is `standby`; only `close` completes, on Leo's quoted approval.
+- A finished card was completed instead of parked → delivery is `standby`; only `close` completes, on the user's quoted approval.
 - Sub-tasks ticked in a batch at the end → tick each as it is done so the card shows live progress.
 - Debug fixed things nobody approved → every adjustment is a numbered row; apply only approved rows.
 - Close archived before the cards were complete → order is cards, sprint card, then folder; verify each.
@@ -73,7 +73,7 @@ Written before the first real run; correct them with what happens.
 - Every wave got the same paste (`execute {sprint card}`) and it read like a per-card trigger → the command names the sprint card and the wave (`execute {sprint card} wave N`); a batch card id is refused.
 - "I want this today" was taken as approval to commit → urgency is not approval; ask one yes or no.
 - The execution prompt carried its own debug procedure beside `debug.md` → the prompt only points to the references.
-- Waves were split without the WBS Leo asked for → step 6 runs `/bandit:plan wbs` first.
+- Waves were split without the WBS the user asked for → step 6 runs `/bandit:plan wbs` first.
 
 - Nested agents are documented (three layers by default), so a wave subagent should run code-reviewer and ui-verifier itself; `GATES NEEDED` is only a fallback. Not yet seen in a real run: record what the first `run` shows.
 - An unattended paced run needs the terminal open, the computer awake and "Continue automatically at usage limit" on in `/config`; the model cannot read plan usage, so pacing is by time.
@@ -89,7 +89,7 @@ Written before the first real run; correct them with what happens.
 
 - The sprint card moved along with its batch and sat in the way → it stays untouched until the last card of the last wave is in Stand By, then moves to Stand By once, and `close` completes it.
 
-- A planned push was refused or left undone because the skill, an older prompt or a memory said "never push" → Leo lifted that rule on 2026-10-10 (it dated from when testing and staging did not exist). `development` is pushed as `execute.md` → Pushing `development` says; `main` and deploy stay Leo's. Execution prompts restate this so an old note cannot block it.
+- A planned push was refused or left undone because the skill, an older prompt or a memory said "never push" → the user lifted that rule on 2026-10-10 (it dated from when testing and staging did not exist). `development` is pushed as `execute.md` → Pushing `development` says; `main` and deploy stay the user's. Execution prompts restate this so an old note cannot block it.
 
 ## Owner changes proposed
 

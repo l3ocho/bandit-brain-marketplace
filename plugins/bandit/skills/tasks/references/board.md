@@ -120,7 +120,7 @@ and check three things. **1** it opens with `<p`, `<h1-6`, `<ul`, `<ol` or `<blo
 with `</p>`, `</h1-6>`, `</ul>`, `</ol>` or `</blockquote>` · **2** no escaped markup
 (`&lt;` followed by `br`, `p`, `b`, `ul`, `ol`, `li` or `h1-6`) · **3** no `**`, and no line
 starting `- ` or `#`. Any fails → rewrite the same content in the tags above and `update_task`
-once more. Still wrong after that → tell Leo which card; never leave it.
+once more. Still wrong after that → tell the user which card; never leave it.
 
 ---
 

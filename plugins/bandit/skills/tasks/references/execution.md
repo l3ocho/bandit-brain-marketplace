@@ -38,7 +38,7 @@ sprint plan may seed its whole batch to Assigned in one `bulk_set_execution_stat
 ⛔ When a gate refuses: **name the blocking task**, do not retry, do not route around it. `relatedId` in the refusal is the blocker — resolve it to a title before reporting. Codes: `references/errors.md`.
 
 📌 **Known gap (app):** Doing would accept a blocker in Stand By (a chained card worked while its
-blocker waits for Leo's test). Not built: until the app ships that change, the gate above holds.
+blocker waits for the user's test). Not built: until the app ships that change, the gate above holds.
 
 ---
 
@@ -73,7 +73,7 @@ Report the breach. Propose what moves back to Assigned or Stand By. **Do not sil
    the rest of the domain by board
 3. Flag: cap breach · anything overdue · anything in Stand By older than a week, **except** a
    card carrying a `sprint/*` tag or a sprint card (`references/dev.md` → Sprint card): those wait
-   in Stand By for Leo's test on purpose
+   in Stand By for the user's test on purpose
 4. Stop. `/bandit:tasks today` is a read.
 
 ### `/bandit:tasks doing`

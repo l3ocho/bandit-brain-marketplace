@@ -40,7 +40,7 @@ restates them.
    `onboard`, loaded and run: never swapped for a quick check of your own
 4. **Instructions come from the templates** in `assets/instructions/` (`references/instructions.md`); the
    Claude.ai agent of a `dev: true` project stops at spec
-5. **Leo pastes.** Instructions are never written into Claude.ai by a tool; the repo `CLAUDE.md` is a
+5. **The user pastes.** Instructions are never written into Claude.ai by a tool; the repo `CLAUDE.md` is a
    hand-over to Claude Code, never written by this skill
 6. **No IDs, ever.** Names and paths only, resolved live
 7. **Vault writes follow bandit:notes write safety**; settings files are versioned, never overwritten,

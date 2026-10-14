@@ -32,7 +32,7 @@ before writing, show old and new before replacing) from its own steps instead of
 
 | | Claude.ai | Claude Code |
 |---|---|---|
-| Commands | `spec`, `stage … ready` (on Leo's approval), `pick-ready` | `spec`, `plan-tech`, `stage` (any), `pick-ready`, incident `spec` |
+| Commands | `spec`, `stage … ready` (on the user's approval), `pick-ready` | `spec`, `plan-tech`, `stage` (any), `pick-ready`, incident `spec` |
 | Writes on a card | `Spec` only | `Spec` on cards it creates; `Technical plan` on any card |
 | Refuses | `plan-tech`, plan notes, `stage … planned`, subtasks, branch / file / code detail on cards (effort only as a first estimate, `references/dev.md` → Card fields) | Rewriting the `Spec` of a card Claude.ai wrote |
 
@@ -43,7 +43,7 @@ can do it (*"`plan-tech` runs in Claude Code, from the repo"*).
   and move on. No branch names, file paths or code.
 - **A spec problem on a card with a Spec** (Claude Code on a Claude.ai card, or any locked Spec):
   add a **card comment** starting `Spec change needed:` (the app's intended path). The card stays
-  `stage/spec` until Leo resolves it, on either surface. Changing the Spec itself goes through the
+  `stage/spec` until the user resolves it, on either surface. Changing the Spec itself goes through the
   Spec lock (`references/dev.md`).
 
 ---
@@ -80,7 +80,7 @@ The card is the work record. Every other record a lane produces has its home in 
 | Release notes | Any release |
 
 A step that writes one of these reads its home from that table. No table, or the record isn't in
-it → stop and ask Leo; never pick a place.
+it → stop and ask the user; never pick a place.
 
 **Recurring runbook cards.** A recurring card (it belongs to a series) that follows an existing
 runbook needs no plan note: its `Technical plan` carries `Runbook: {repo path} §{section}` instead.
@@ -103,7 +103,7 @@ runbook needs no plan note: its `Technical plan` carries `Runbook: {repo path} �
    the doc).
 3. **Merge check (B6):** `list_tasks(projectColumnId, tagId: {lane tag id}, completed: false)`
    (filters combine with AND). An open card with the same outcome → propose adding a subtask to it
-   instead. Title match is a judgment call: show both, Leo decides.
+   instead. Title match is a judgment call: show both, the user decides.
 4. **Propose** the card: title, every Card fields value, and the description built from
    `get_lane_template` (`references/dev.md` → Card sections).
    Effort XL → propose the split into L-or-smaller cards before anything is created (B7).
@@ -111,7 +111,7 @@ runbook needs no plan note: its `Technical plan` carries `Runbook: {repo path} �
    dependencies included), then `get_task` and check it.
    **Updating an existing card** (a merge match, or a parked item triage just moved into its
    column): `get_task` → fill missing fields → write `Spec` only where it's empty; a Spec with text
-   is locked (`references/dev.md` → Spec lock): show old and new, override only on Leo's yes →
+   is locked (`references/dev.md` → Spec lock): show old and new, override only on the user's yes →
    `update_task`. Claude Code never rewrites a `Spec` whose `Source` is Claude.ai (it adds a
    `Spec change needed:` comment instead). Tags per `references/dev.md` → Tag merging.
 6. **Brief:** hand bandit:notes the card's brief (new, or updated when it exists), `board-task` =
@@ -131,7 +131,7 @@ the sprint card). bandit-dev:sprint calls it from its planning steps.
    outside `Spec` changes.
 3. **Show** each card's old and new `Spec` side by side, changed lines marked, all cards together.
 4. **One yes** (all, or a list of cards) applies them: `update_task` with the new description and
-   `overrideSpecLock: true`, then `get_task` and check it. A card Leo leaves out keeps its `Spec`.
+   `overrideSpecLock: true`, then `get_task` and check it. A card the user leaves out keeps its `Spec`.
 5. Add a comment on each changed card: `Spec reconciled {date}: {one line on what changed}`. The brief
    gets the same change and a Change log line through bandit:notes.
 
@@ -151,20 +151,20 @@ Steps 1 and 5 are the **card-write rules** bandit-dev:sprint calls for a sprint'
 2. **List** the `stage/spec` cards (`list_tasks(projectId, tagId: stage/spec, completed: false)`). Separately list the
    ones whose plan note is already filed (ask bandit:notes whether the filename in `Technical plan`
    exists in the project folder) and offer the `planned` flip for them.
-3. Leo picks a card → technical discussion.
+3. The user picks a card → technical discussion.
 4. **Plan note** through bandit:notes: a new `plan` note in `_inbox/` (type, filename and keys are
    bandit:notes' rules), `board-task` = this card's id.
 5. **Card:** `get_task` → read the current `Technical plan` first (rulebook R14). Write only the
    lines that are missing (plan-note filename, branch, size, summary). A line already there with a
-   different value (above all the branch, the merge commit or the PR URL) → show both and ask Leo;
+   different value (above all the branch, the merge commit or the PR URL) → show both and ask the user;
    never replace it silently. Every other line stays. → `update_task` with `effort` ≤ L (XL →
    propose the split, B7); a Claude.ai estimate that differs → show both and ask → the build steps
    as sub-tasks, ordered and read back (`references/board.md` → Sub-tasks).
-6. **The card stays `stage/spec`.** It moves only after Leo files the note (`/bandit:notes file`).
+6. **The card stays `stage/spec`.** It moves only after the user files the note (`/bandit:notes file`).
 
 ### `/bandit:tasks stage {card} {spec|planned|ready}` — the only stage writer
 
-1. **Role:** `ready` is set only on Leo's explicit approval, on either surface (or by Leo by hand).
+1. **Role:** `ready` is set only on the user's explicit approval, on either surface (or by the user by hand).
    Claude.ai sets nothing else. Claude Code sets `spec` and `planned` on its own judgement.
 2. `get_task` → refuse on a `lane/incident` card.
 3. **`planned`:** its plan note must be filed (bandit:notes lookup of the filename in `Technical
@@ -173,7 +173,7 @@ Steps 1 and 5 are the **card-write rules** bandit-dev:sprint calls for a sprint'
    of several cards of the same sprint. Each card still needs its own plan lines (branch, size,
    summary).
    Neither → say so and stop. **`ready`** expects a `planned` card; from `spec`, say so
-   and ask Leo to confirm.
+   and ask the user to confirm.
 4. **Write the tags** per `references/dev.md` → Tag merging (one `stage/*`, every other tag kept),
    `set_task_tags` with the full merged set.
 

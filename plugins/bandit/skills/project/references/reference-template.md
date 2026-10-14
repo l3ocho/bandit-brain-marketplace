@@ -46,7 +46,7 @@ These appear in every project instruction set, regardless of project size or com
 
 **Example — Good:**
 ```markdown
-## Leo Claude Marketplace — Project Instructions
+## the user Claude Marketplace — Project Instructions
 **Version:** 7.0.0
 **Last Updated:** 2026-02-11
 ```
@@ -185,7 +185,7 @@ This default can be customized (e.g., scoped to architecture-only decisions) but
 
 **Dev projects (`dev: true`) also get:**
 
-> **Always:** When a scope is agreed, propose the card and, on Leo's yes, write it through `/bandit:tasks spec`. `/bandit:tasks stage … ready` (on his approval) and `/bandit:tasks pick-ready` write the board the same way. These need no separate standing instruction.
+> **Always:** When a scope is agreed, propose the card and, on the user's yes, write it through `/bandit:tasks spec`. `/bandit:tasks stage … ready` (on their approval) and `/bandit:tasks pick-ready` write the board the same way. These need no separate standing instruction.
 
 Any other Hard Rule that forbids board writes is scoped to exclude them ("…except the dev commands `spec`, `stage … ready` and `pick-ready`").
 

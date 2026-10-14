@@ -77,7 +77,7 @@ simplify: reduce to the single most important question.
 
 ### Before Phase 4: Verify cheap assumptions
 
-If an assumption can be checked with one read-only call, or one low-impact call that Leo
+If an assumption can be checked with one read-only call, or one low-impact call that the user
 approves (a connector capability, whether a file or folder exists, a feature being available),
 check it before delivering the spec. Mark each assumption **verified (YYYY-MM-DD)** or
 **unverified**. Never present a guess as a constraint.

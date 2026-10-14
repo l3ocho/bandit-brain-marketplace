@@ -1,12 +1,12 @@
 ---
 type: reference
-summary: Every command, mode and trigger of Leo's 12 skills, grouped by skill, with modifiers and the reference files each one reads.
+summary: Every command, mode and trigger of the bandit-brain skills (and two companion skills), grouped by skill, with modifiers and the reference files each one reads.
 updated: 2026-10-13
 ---
 
 # 🧭 Skills Cheat Sheet
 
-> Every command, mode and trigger of Leo's 12 skills, grouped by skill, with modifiers and the reference files each one reads.
+> Every command, mode and trigger of the bandit-brain skills (and two companion skills), grouped by skill, with modifiers and the reference files each one reads.
 
 > [!info] How to read this
 >

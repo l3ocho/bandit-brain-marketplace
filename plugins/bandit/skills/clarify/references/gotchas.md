@@ -17,4 +17,4 @@ One line per real failure: what went wrong → what to do instead. Read once per
   follows the subject: skill changes go to a Marketplace card plus brief, everything else to the domain `_inbox`.
 - **2026-10-07 · Inbox note with no card.** The offer was note-only, so specs sat in `_inbox` with
   nothing on the board pointing at them, and got lost or binned. → Offer note **and** card by
-  default, linked via `board-task`; Leo drops one by saying so.
+  default, linked via `board-task`; the user drops one by saying so.

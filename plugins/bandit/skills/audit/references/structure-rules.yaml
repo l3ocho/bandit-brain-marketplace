@@ -113,7 +113,7 @@ s12:
   # Claude Code working folder (any project with a twin, no dev: true). The guard's
   # constants (bandit:project scripts/workdir.py) mirror this block: change both.
   hook_file: claude/hooks/workdir.py
-  hook_sha12: 3212f5f7c2fe          # sha256[:12] of bandit:project's scripts/workdir.py; a twin copy that differs is outdated
+  hook_sha12: 98e137245f12          # sha256[:12] of bandit:project's scripts/workdir.py; a twin copy that differs is outdated
   settings_file: claude/settings.json
   hook_events: [PreToolUse, SessionStart]   # each needs a command hook running hook_script
   hook_script: workdir.py
@@ -155,9 +155,9 @@ owners:
   vault_move: bandit:notes
   vault_folder_rename: bandit:notes
   context_update: bandit:project
-  claude_rename: Leo (by hand)
-  self_check: Leo (/bandit:audit check in the project)
-  decide: Leo
+  claude_rename: the user (by hand)
+  self_check: the user (/bandit:audit check in the project)
+  decide: the user
   twin_update: bandit:project       # S10
   dev_mirror: bandit:project        # S11: hook or script missing
   surface_folder: bandit:notes        # S11: code-{slug}/ missing
@@ -168,4 +168,4 @@ owners:
   frontmatter_fix: bandit:notes       # S15
   root_move: bandit:notes             # S16
 
-row_order: [bandit:notes, bandit:notes archive, bandit:project, bandit:tasks, Claude Code in the project, Leo (by hand), Leo (/bandit:audit check in the project), Leo]
+row_order: [bandit:notes, bandit:notes archive, bandit:project, bandit:tasks, Claude Code in the project, the user (by hand), the user (/bandit:audit check in the project), the user]

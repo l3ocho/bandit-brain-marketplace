@@ -265,12 +265,29 @@ def check_l2():
     report("L2", not bad, "; ".join(bad) or f"every SKILL.md ≤ {SKILL_MAX_LINES} lines with a router")
 
 
+# ── L8 · no person in shipped files: the plugins serve every member, so no owner's name and no he/his/him ──
+L8_TERMS = re.compile(r"\b(Leo|Rachel|Matteo)\b|\b(he|his|him|himself)\b", re.I)
+
+
+def check_l8():
+    hits = []
+    for f in sorted(PLUGINS.rglob("*")):
+        if not f.is_file() or f.suffix not in TEXT_SUFFIXES or "__pycache__" in f.parts:
+            continue
+        for n, line in enumerate(f.read_text(encoding="utf-8", errors="ignore").splitlines(), 1):
+            m = L8_TERMS.search(line)
+            if m:
+                hits.append(f"{f.relative_to(PLUGINS)}:{n} `{m.group(0)}`")
+    report("L8", not hits, f"a person in shipped files (say \"the user\", they/them): {'; '.join(hits[:8])}"
+           f"{' …' if len(hits) > 8 else ''} ({len(hits)})" if hits else "no person's name or he/his/him in any plugin file")
+
+
 # ── L4 · no project details in skills: project names, stack tools, card ids, UUIDs ───────
 L4_TERMS = re.compile(
     r"\b(BanditLabs|Summitt|cs-notes|CS Notes|bandit-labs|banditbrain|BanditBrains|drizzle|npm|npx)\b"
     r"|\b(?!WBS-|UTF-|SHA-)[A-Z]{2,4}-\d+\b"
     r"|\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b")
-# Leo's house standards are data he approves, not skill procedure: their examples stay.
+# The house standards are data the owner approves, not skill procedure: their examples stay.
 L4_EXEMPT = {"structure-rulebook.md", "structure-rules.yaml", "rulebook.md"}
 
 
@@ -396,6 +413,7 @@ def main(argv):
     check_l1()
     check_l2()
     check_l4()
+    check_l8()
     check_house_lint()
     check_audit_contract()
     check_sp7()

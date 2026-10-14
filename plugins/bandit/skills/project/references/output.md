@@ -86,7 +86,7 @@ the Claude.ai project with the Projects tool, instead of showing it in the chat:
 2. Read the doc list with `project_info`. The name is already there → stop and ask.
    `project_write` replaces an existing path silently, so it never gets one.
 3. `project_write` with that `path`, the full doc as `content`, `present_to_user: false`.
-4. Confirm in one line: the file name and what changed. Show the doc only if Leo asks.
+4. Confirm in one line: the file name and what changed. Show the doc only if the user asks.
 
 No Projects tool in the session → output the reference doc as an artifact, and say in one line
 that it wasn't saved to the project.

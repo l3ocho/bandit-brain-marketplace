@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Score Leo's domains against the structure rules (S1–S16).
+"""Score the user's domains against the structure rules (S1–S16).
 
 Usage:
   check_structure.py --rules structure-rules.yaml --rulebook structure-rulebook.md \
@@ -627,7 +627,7 @@ class Domain:
                 R.append(self.res("S10", "ok", f"Twin at {tv}, core `{tcore}` matches `{prod[0]}`", sev))
             elif tv == pv:
                 R.append(self.res("S10", "bad", f"Same version {tv}, core differs: twin `{tcore}` ≠ `{prod[0]}` `{pcore}`", sev))
-                rows.append(Row(f"Reconcile the twin cores at {tv}: Leo says which copy is right, then the other is rewritten",
+                rows.append(Row(f"Reconcile the twin cores at {tv}: the user says which copy is right, then the other is rewritten",
                                 cpath + "/" + s10r["file"], own["twin_update"], "S10"))
             elif pending and tv == newest[1]["tok"]:
                 R.append(self.res("S10", "warn", f"Twin at {tv} = `{newest[0]}`: paste pending (S5)", sev))
@@ -638,7 +638,7 @@ class Domain:
             else:
                 R.append(self.res("S10", "warn", f"Twin at {tv or 'no **Version:**'}, production {pv}: "
                                   "twin matches no vault version", sev))
-                rows.append(Row(f"Twin version {tv or 'missing'} vs production {pv}: Leo says which is right",
+                rows.append(Row(f"Twin version {tv or 'missing'} vs production {pv}: the user says which is right",
                                 cpath + "/" + s10r["file"], own["twin_update"], "S10"))
 
         # S11 · dev mirror

@@ -104,7 +104,7 @@ unchecked too).
 | `board.sprint_cards` | `list_tasks(tagPrefix: "sprint/")`, open and completed (not archived) | One entry per card: `id`, `short_id` (`shortId`, or `null`), `sprints` = its tag **names** starting `sprint/`, as-is |
 | `vault.projects.{D}` | `nc_webdav_find_by_name(pattern="%", scope="MyNotes/{D}/Projects")` | One key per folder directly under `Projects/`. `entries`: every file and folder inside it, `name` relative to that folder (`sprint-x/note.md`), `dir` as listed. Results must equal `total_found`; fewer → stop (a partial listing) |
 | `….frontmatter` | `nc_webdav_read_file` raw of **every** `.md` in a project that has a `sprint-*` folder at its root; none for other projects (`{}`) | The text between the first two `---` lines, verbatim, without them. A file that doesn't start with `---` → `null`. The script refuses a sprint project with a note left unread |
-| `vault.inbox.{D}` | `nc_webdav_list_directory("MyNotes/{D}/_inbox")` | Filenames only, as-is. Never read: the inbox is Leo's |
+| `vault.inbox.{D}` | `nc_webdav_list_directory("MyNotes/{D}/_inbox")` | Filenames only, as-is. Never read: the inbox is the user's |
 
 `audit {domain}` still snapshots every domain's board, but only reads settings, project files and
 the inbox for the domains it scores. `audit all` reads them all, once.

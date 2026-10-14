@@ -77,7 +77,7 @@ def package_skill(skill_path, output_dir=None):
         return None
     print(f"✅ {message}\n")
 
-    # House gate (Leo's rulebook): a must break or R7 blocks the package. No override.
+    # House gate (the house rulebook): a must break or R7 blocks the package. No override.
     print("🏠 House lint...")
     results = house_lint(skill_path)
     for rule, level, msg in results:

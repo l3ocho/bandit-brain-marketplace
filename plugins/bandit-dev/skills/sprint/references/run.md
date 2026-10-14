@@ -27,7 +27,7 @@ Contents: Command · Rules · Before the first wave · The loop · Paced mode ·
 
 1. Gate 0 from SKILL.md, once.
 2. For every sprint: `get_task` on the sprint card, read the ledger's "At a glance" and the wave sub-tasks. List the waves to run (unticked ones, in order).
-3. **Cross-sprint check (only with two or more sprints).** Read each plan's migration numbers and the files each sprint's cards edit. Each sprint was planned alone, so two can claim the same migration number or the same file. Record the clash in each later sprint's ledger under "Plan deviations". The later sprint's waves stop at their migration-tail check until Leo approves a corrected Migration tail row in its ledger; nothing renumbers on its own.
+3. **Cross-sprint check (only with two or more sprints).** Read each plan's migration numbers and the files each sprint's cards edit. Each sprint was planned alone, so two can claim the same migration number or the same file. Record the clash in each later sprint's ledger under "Plan deviations". The later sprint's waves stop at their migration-tail check until the user approves a corrected Migration tail row in its ledger; nothing renumbers on its own.
 4. Opening line: the sprints and waves that will run, in order, and anything skipped with the reason. Then start; do not wait for an answer.
 
 ## The loop
@@ -55,13 +55,13 @@ For each wave, in order:
 
 ## Paced mode
 
-For unattended runs (Leo asleep). Started as `/loop /bandit-dev:sprint run {sprint card} [more] --paced [minutes]`; the gap defaults to 45 minutes. It spreads the work over several plan usage windows instead of spending one in a burst.
+For unattended runs (the user asleep). Started as `/loop /bandit-dev:sprint run {sprint card} [more] --paced [minutes]`; the gap defaults to 45 minutes. It spreads the work over several plan usage windows instead of spending one in a burst.
 
 - **One wave per wake-up.** Each loop turn runs exactly one wave (the loop above, steps 1 to 3), then calls `ScheduleWakeup` with the gap in seconds (clamped to 60 to 3600) and this same `/loop` prompt, `noop: false`. The next turn re-reads the board and the ledger and runs the next open wave.
 - **Nothing left, or a stop condition:** call `ScheduleWakeup` with `stop: true`, send the final notification, write the final report.
-- **No usage reading.** Claude Code gives the model no way to read the plan's remaining usage (`/usage` is for Leo only), so pacing is by time, not by a token count. Keep each wave lean: run the UI check only when the wave changes something visible, and keep agent reports to their fixed shape.
-- **Before starting, tell Leo in the opening line** what must be true for an unattended night: the terminal and this session stay open, the computer does not sleep, and "Continue automatically at usage limit" is on in `/config` (otherwise a usage limit stops the run until he acts). Do not change his settings; say it and start.
-- **A usage limit mid-wave** is survivable: with auto-continue on, the session resumes when the window resets; without it, Leo re-runs the same command and `run` resumes from the ledger.
+- **No usage reading.** Claude Code gives the model no way to read the plan's remaining usage (`/usage` is for the user only), so pacing is by time, not by a token count. Keep each wave lean: run the UI check only when the wave changes something visible, and keep agent reports to their fixed shape.
+- **Before starting, tell the user in the opening line** what must be true for an unattended night: the terminal and this session stay open, the computer does not sleep, and "Continue automatically at usage limit" is on in `/config` (otherwise a usage limit stops the run until they act). Do not change their settings; say it and start.
+- **A usage limit mid-wave** is survivable: with auto-continue on, the session resumes when the window resets; without it, the user re-runs the same command and `run` resumes from the ledger.
 
 ## Gates the wave agent cannot run
 
@@ -73,13 +73,13 @@ Nested agents are documented to work (a subagent can launch its own, up to three
 
 ## Stop and resume
 
-**Stop the whole run** on: a `BLOCKED` report, a wave that fails the check, a red `verify` on `development`, or a gate the agent cannot pass after one fix round. The current wave stays as it is. Later waves and later sprints do not start. Report what stopped it and what only Leo can supply.
+**Stop the whole run** on: a `BLOCKED` report, a wave that fails the check, a red `verify` on `development`, or a gate the agent cannot pass after one fix round. The current wave stays as it is. Later waves and later sprints do not start. Report what stopped it and what only the user can supply.
 
 **Resume** is the same command: `run` starts from the first unticked wave of each sprint and skips what is done.
 
 ## Notifications
 
-Use `PushNotification` (it reaches Leo's phone when Remote Control is connected), one line, under 200 characters, leading with what he would act on. Send one only when: a wave finishes in paced mode (`Sprint w41: wave 1 done, {ids} in Stand By. Next wave in 45 min.`), the run stops (`Sprint w41 stopped at wave 2: migration 0068 clash, needs you.`), or the run ends (`Sprint w41: all waves done, 3 cards await your test.`). Never for routine steps inside a wave.
+Use `PushNotification` (it reaches the user's phone when Remote Control is connected), one line, under 200 characters, leading with what they would act on. Send one only when: a wave finishes in paced mode (`Sprint w41: wave 1 done, {ids} in Stand By. Next wave in 45 min.`), the run stops (`Sprint w41 stopped at wave 2: migration 0068 clash, needs you.`), or the run ends (`Sprint w41: all waves done, 3 cards await your test.`). Never for routine steps inside a wave.
 
 ## No leftovers
 
@@ -87,7 +87,7 @@ Use `PushNotification` (it reaches Leo's phone when Remote Control is connected)
 
 ## Final report
 
-Ten lines at most per sprint: waves run, cards now in Stand By awaiting Leo's test, decisions taken without him (pointing to the ledger), anything that needs him, and the paste for the next step: `/bandit-dev:sprint debug {card}` once he has tested. `run` never starts `debug` or `close`: both wait for Leo's own test.
+Ten lines at most per sprint: waves run, cards now in Stand By awaiting the user's test, decisions taken without them (pointing to the ledger), anything that needs them, and the paste for the next step: `/bandit-dev:sprint debug {card}` once they have tested. `run` never starts `debug` or `close`: both wait for the user's own test.
 
 ## Never
 

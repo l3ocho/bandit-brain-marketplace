@@ -31,7 +31,7 @@ One line per real failure: what went wrong → what to do instead. Read once at 
   reads a description as rich text only when it opens and closes with a block tag, so it showed
   every tag as text. The 10-05 rule allowed a top-level `<b>` and its read-back never tested the
   ends. → Every description opens and closes with a block tag; the read-back checks both ends.
-- **2026-10-08 · Wave 2 cards were refused Doing.** Their blockers sat in Stand By awaiting Leo's
+- **2026-10-08 · Wave 2 cards were refused Doing.** Their blockers sat in Stand By awaiting the user's
   test, and the skill said only "complete"; the board refused with `BLOCKED_BY_INCOMPLETE_TASK`. →
   Stand By is not complete: the Doing gate holds until the app lets Stand By count (`references/execution.md`).
 - **2026-10-06 · `spec` parked obvious questions and skipped the brief.** A card (per-user theme) left

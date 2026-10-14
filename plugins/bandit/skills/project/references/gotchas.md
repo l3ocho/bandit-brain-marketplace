@@ -2,7 +2,7 @@
 
 One line per real failure: what went wrong → what to do instead. Read once before onboarding or an audit.
 
-- **2026-09-24 · Onboarding was split across three skills.** Leo set up a project
+- **2026-09-24 · Onboarding was split across three skills.** The user set up a project
   here, got `domain: none`, and then bandit:notes refused to create anything and the board was
   never set. → Onboarding is one run of this skill: vault, board and settings rows in one
   proposal (**🚀 Onboarding** (`references/onboard.md`)). `domain:` is never `none` when a vault is used.

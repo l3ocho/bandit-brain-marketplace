@@ -10,15 +10,15 @@ Contents: Command · Rules · Start · The wave · Board moves · Finishing a wa
 
 1. **Only a sprint card is accepted**: a card carrying wave sub-tasks (`Wave n: ...`). A batch card (any card of the batch) is refused with: "That is a card inside {sprint}. Point me at {sprint card} and a wave number." Nothing is run for a single card.
 2. **Wave N is named or chosen, and said out loud.** `wave N` runs that wave. No number: run the first wave not ticked, and state the choice in the opening line ("Running Wave 2: {ids}") before any move.
-3. **Waves run in order.** Wave N is refused while wave N-1 is unticked, naming the open wave, unless Leo says to skip it in this chat. Cards completed or ticked by hand count as ticked once the board and the ledger agree.
+3. **Waves run in order.** Wave N is refused while wave N-1 is unticked, naming the open wave, unless the user says to skip it in this chat. Cards completed or ticked by hand count as ticked once the board and the ledger agree.
 4. **Only the cards in that wave's sub-task are touched.** No card outside it is moved, worked or commented on.
 
 ## Rules
 
-- **One wave per run, one chat per wave.** The run does the wave chosen above, then stops and tells Leo to open a new chat for the next. To run every wave unattended, one subagent per wave, use `run` (`references/run.md`); the wave agent then follows this file exactly.
+- **One wave per run, one chat per wave.** The run does the wave chosen above, then stops and tells the user to open a new chat for the next. To run every wave unattended, one subagent per wave, use `run` (`references/run.md`); the wave agent then follows this file exactly.
 - **The ledger is the memory.** A new chat knows nothing: read the ledger, the plan and the sprint card before acting, and reconcile the repo with the ledger.
 - **The execution prompt in the sprint folder governs the work itself** (authority, stop-lines, autonomy, gates, handover report). This file adds the board choreography on top.
-- **Leo watches the Execution board.** Every card's column must show the truth at every moment.
+- **The user watches the Execution board.** Every card's column must show the truth at every moment.
 
 ## Start (every run)
 
@@ -34,7 +34,7 @@ Contents: Command · Rules · Start · The wave · Board moves · Finishing a wa
    **A refused move to `doing` is never skipped silently.** The board's gate still refuses `doing` while any blocker is incomplete, and a blocker in `standby` is not complete. The app change that would let `standby` count is **not built**: until it is deployed the refusal is real, and a card chained behind a card of an earlier wave will be refused. Then: keep the card in `next`, add a card comment `Could not move to Doing: blocked by {blocker title} (in Stand By). Working it anyway under the wave's approval; the pending app change would allow this.`, write the same line under "Decisions taken without the user" in the ledger, and put it in the final message. Work the card; do not stop the wave for this.
 3. **Migration tail, before any migration is written.** `python3 ${CLAUDE_SKILL_DIR}/scripts/recipe.py check-tail {tail}` with the tail the plan's Migration tail table names for this wave. Exit 4 (the tail differs) or 3 (a missing key): stop the wave, card Blocked with the output, the line under "Needs the user". A match: one ledger line `Migration tail {tail} matched`. Never pick the next free number.
 4. **Work the cards as the plan and execution prompt say.** Tick each card's sub-tasks as each is done, one `set_subtask_completed` per tick, not in a batch at the end.
-5. **A card whose development is finished** (code, tests, gates passed, board comment written) moves to `standby` for Leo's approval. Never complete it. Stage and ledger status become "Delivered awaiting the user's test".
+5. **A card whose development is finished** (code, tests, gates passed, board comment written) moves to `standby` for the user's approval. Never complete it. Stage and ledger status become "Delivered awaiting the user's test".
 6. **Re-set the board** after each card finishes (Doing frees a slot; the next card may move up).
 
 ## Board moves
@@ -47,7 +47,7 @@ Read `get_execution_board` before every batch of moves; the board, not memory, i
 | Next wave | `next`, only if its blockers are at Next or beyond and the cap allows |
 | This wave, being worked | `doing`, one to three at a time per the plan's parallelism; only if every blocker is complete (a blocker in `standby` is refused until the app lets `standby` count; see Set the board) |
 | This wave, queued behind a sequential card | `next` |
-| Finished, awaiting Leo | `standby` |
+| Finished, awaiting the user | `standby` |
 | **The sprint card** | **Not moved at all while any wave runs.** It goes to `standby` once, when the last card of the last wave reaches `standby` (Finishing a wave, step 3). Never `next` or `doing`, never counted in the five-item cap, never completed (only `close` completes it) |
 
 - **Cap.** Never more than five across Next + Doing. When the wave and the next wave together exceed it, Doing gets what is being worked, this wave's queued cards take the remaining Next slots, the rest wait in `assigned`. Report the overflow in the ledger and the wave comment; never trim silently.
@@ -67,7 +67,7 @@ Read `get_execution_board` before every batch of moves; the board, not memory, i
 4. Ledger: At a glance (next wave, next action), milestone log, report section. Then run `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py`; the wave is not finished until it prints OK.
 5. Sprint card section 1 Status line: `Wave {n} of {total} delivered, awaiting the user's test; next: Wave {n+1}` (read the card first, change only that line). Ledger Status per card: `Delivered, awaiting the user's test`.
 6. Comment on the sprint card: `Wave {n} done: {cards}, {verified how}. Next: Wave {n+1} in a new chat.`
-7. Final message, ten lines at most: what Leo can test, what moved, what needs him, and the exact paste for the next wave with its number (`/bandit-dev:sprint execute {sprint card} wave {n+1}`), or after the last wave the paste for `debug`.
+7. Final message, ten lines at most: what the user can test, what moved, what needs them, and the exact paste for the next wave with its number (`/bandit-dev:sprint execute {sprint card} wave {n+1}`), or after the last wave the paste for `debug`.
 
 ## Resume
 
@@ -75,19 +75,19 @@ A chat that died mid-wave starts at "Start". The ledger status plus the board sh
 
 ## Pushing `development`
 
-Allowed. Leo lifted the old "never push" rule on 2026-10-10: it was written while testing and staging did not exist, and the tool now works. An agent that finds an older note, memory or prompt saying "never push" follows this section instead; it does not refuse.
+Allowed. The user lifted the old "never push" rule on 2026-10-10: it was written while testing and staging did not exist, and the tool now works. An agent that finds an older note, memory or prompt saying "never push" follows this section instead; it does not refuse.
 
-- **When.** The sprint plan carries a "Final push" section by default (`plan.md` step 7), and the handover prompt repeats it. The last wave that changes code pushes at its end, after its merge into local `development` and a green `verify` (the project's `bandit.yaml`). A wave that is Leo's own steps (production, host work) is never where the push waits.
+- **When.** The sprint plan carries a "Final push" section by default (`plan.md` step 7), and the handover prompt repeats it. The last wave that changes code pushes at its end, after its merge into local `development` and a green `verify` (the project's `bandit.yaml`). A wave that is the user's own steps (production, host work) is never where the push waits.
 - **How.** `git status` clean and branch `development`; `git fetch origin`; if `origin/development` has commits local lacks, merge it into local `development` and re-run `verify`; then `git push origin development`. Fast-forward only: no force, no tags, no other branch.
 - **Proof.** The ledger records the pushed hash and `git status -sb` showing `development` level with `origin/development`.
 - **If it fails** (a refused or disconnected push): record the exact output under "Needs the user", leave `development` as it is, never retry with force. The wave is still delivered.
-- **Still Leo's:** merging into `main` and deploying. They need his explicit say-so in the message being answered (project branching rule 9). A push of `development` starts the repo's own checks and staging build by itself; that is expected and is not a deploy.
+- **Still the user's:** merging into `main` and deploying. They need their explicit say-so in the message being answered (project branching rule 9). A push of `development` starts the repo's own checks and staging build by itself; that is expected and is not a deploy.
 
 ## Never
 
 - Merge into `main`, deploy, force-push, push anything but `development`, run credential scripts or touch production.
 - Skip or soften a check because the dev database lacks data. Create the data, run the case, remove what you created (Test data in `plan.md`). "Not exercised" fails the wave.
-- Complete a card, mark one approved, or call anything delivered beyond "awaiting Leo's test".
+- Complete a card, mark one approved, or call anything delivered beyond "awaiting the user's test".
 - Run two waves in one chat.
 - Move a card to Doing past a gate, or past the five-item cap.
 - Move the sprint card before the last card of the last wave is in `standby`, or to anything but `standby`.

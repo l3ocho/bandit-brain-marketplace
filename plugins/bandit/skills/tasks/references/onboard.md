@@ -8,7 +8,7 @@ them in **one** proposal. This file only produces rows and executes the approved
 shows its own proposal or asks for its own approval when bandit:project runs it.
 
 Run on its own (`/bandit:tasks onboard` typed directly), it produces the same rows as its own
-proposal, then tells Leo the `board:` line to set through bandit:project.
+proposal, then tells the user the `board:` line to set through bandit:project.
 
 ---
 
@@ -33,11 +33,11 @@ proposal, then tells Leo the `board:` line to set through bandit:project.
    | Board answer | Row | `board:` line |
    |---|---|---|
    | Existing project, found | none: nothing to create | `project "{name}"` |
-   | New project | `create board project` · name · type · inside the domain's folder (a subfolder of it when Leo names one) | `project "{name}"` |
+   | New project | `create board project` · name · type · inside the domain's folder (a subfolder of it when the user names one) | `project "{name}"` |
    | None | none | `none` |
    | Decide later | none | `pending` |
    | A name that doesn't resolve | none: stop and report it; bandit:project asks again | — |
-   | An existing project outside the domain's folder | none: stop and report it (`references/scope.md`); offer a move row only when Leo asks | — |
+   | An existing project outside the domain's folder | none: stop and report it (`references/scope.md`); offer a move row only when the user asks | — |
 
    A new project whose name already exists on the board is not created twice: report it and
    offer to use the existing one.

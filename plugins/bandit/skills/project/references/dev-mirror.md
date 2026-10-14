@@ -16,7 +16,7 @@
 - **The script copies, Claude doesn't.** No model call and no connector, so auto mode's check
   (which reads "repo files → outside service" as data exfiltration) never sees it, and it costs
   no tokens. Nextcloud desktop sync uploads the copies. This is the one exception to "vault writes
-  go through WebDAV", approved by Leo 2026-09-30.
+  go through WebDAV", approved by the user 2026-09-30.
 - **Vault root:** `$MYNOTES_DIR`, else `~/Documents/MyNotes`. Set `MYNOTES_DIR` in the user
   settings `env` block (`~/.claude/settings.json`) on a machine where the synced folder lives
   elsewhere. Never in the repo.
@@ -165,7 +165,7 @@ if __name__ == "__main__":
 **The sprint checker is not wired here.** It ships with the `bandit-dev` plugin as that plugin's
 own `Stop` hook (`hooks/hooks.json`, `${CLAUDE_PLUGIN_ROOT}`): installing `bandit-dev` turns it on in
 every repo, and a repo adds nothing. A machine that still registers the old checker by hand in the
-user settings (`~/.claude/settings.json`) runs it twice: remove that user-level entry (Leo, by hand).
+user settings (`~/.claude/settings.json`) runs it twice: remove that user-level entry (the user, by hand).
 
 **4. First run:** no stamp yet, so the first Stop copies every file into `code-{slug}/`
 (bandit:notes creates the folder at onboarding) and stamps. Upgrading from the old script (the one

@@ -27,9 +27,9 @@
      - `Supervisors` — supervisors and analysts, one per internal department
      - `Department` — the longer one with the manager and director
      - `Project` — a project meeting; then ask which project (list `Projects/` in the domain) unless the Project Context `project:` or the audio name makes it clear
-     These are the only three: they mirror the Source picker in Leo's meeting template, which is
+     These are the only three: they mirror the Source picker in the user's meeting template, which is
      the standard. **No Ad-hoc, no Outstanding, no "other" option — never add one.** If the
-     meeting doesn't clearly fit, ask Leo which of the three it is.
+     meeting doesn't clearly fit, ask the user which of the three it is.
    - If `AskUserQuestion` is unavailable or the user isn't there to answer, default to **both versions** in the **vault** when the domain is known (otherwise the **same folder as the audio**), infer the meeting type from the transcript, and say so at the top of the work.
    - If the audio isn't in BanditCloud at all, the `Same folder as the audio` option has nothing to resolve to: drop it.
 4. **Set up a task list** (transcribe → speakers, if used → write → save and verify).

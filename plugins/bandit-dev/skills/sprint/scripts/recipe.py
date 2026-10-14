@@ -27,7 +27,7 @@ KEYS = {
     "release": "release: the ordered release steps",
     "migrations.dir": "plan: where migrations live",
     "migrations.check": "execute, run, release: prints the current migration tail",
-    "staging.refresh": "release: the instruction Leo runs to test the release on staging",
+    "staging.refresh": "release: the instruction the user runs to test the release on staging",
 }
 
 

@@ -42,8 +42,8 @@ The gate always reads the **current** project's Project Context, never the board
 | Stage | Means | Set by |
 |---|---|---|
 | `stage/spec` | Scope agreed, `Spec` written | `spec` |
-| `stage/planned` | Plan note reviewed and filed by Leo | `stage … planned`, after `/bandit:notes file` |
-| `stage/ready` | Leo approved; a sprint candidate | `stage … ready`, or Leo by hand |
+| `stage/planned` | Plan note reviewed and filed by the user | `stage … planned`, after `/bandit:notes file` |
+| `stage/ready` | The user approved; a sprint candidate | `stage … ready`, or the user by hand |
 
 **Stage tags stay after a card is completed.** Completion clears nothing (38 completed BanditBrain
 cards still carried theirs, checked 2026-10-09). A done card's stage is its last stage, never a
@@ -89,7 +89,7 @@ Subtasks carry the plan's steps. Everything longer lives in the plan note.
 ## 🔒 Spec lock (the app's)
 
 Once `<h2>Spec</h2>` holds text, `update_task` refuses any change to it with `SPEC_LOCKED`. Pass
-`overrideSpecLock: true` only for a Spec change Leo approved in this session, after showing the old
+`overrideSpecLock: true` only for a Spec change the user approved in this session, after showing the old
 and new text (rulebook R14). Never to get past the refusal. Other sections (`Technical plan`) and
 adding a Spec to a card with none are never refused.
 
@@ -115,12 +115,12 @@ Every dev card is written **complete**, in one `create_task`, then read back (`g
 
 | Field | Value |
 |---|---|
-| `projectColumnId` | The **area column**: the module or page the change touches. `App` only when the change is shell-wide. Spans two, or no column fits → ask Leo. Never create a column for it (columns come from `load`, the design conversation, or the PM step of **🏗️ Dev board shape**). **Project-management cards** (sprint planning, a sprint card, umbrella cards, planning checklists, process work) go in the `PM` column instead |
+| `projectColumnId` | The **area column**: the module or page the change touches. `App` only when the change is shell-wide. Spans two, or no column fits → ask the user. Never create a column for it (columns come from `load`, the design conversation, or the PM step of **🏗️ Dev board shape**). **Project-management cards** (sprint planning, a sprint card, umbrella cards, planning checklists, process work) go in the `PM` column instead |
 | `tagIds` | `lane/*` + `stage/spec` (none on Incident) + one Handler tag + one Energy tag (`references/board.md` → Tags), ids resolved live |
 | `priority` | Always set: urgency only |
 | `complexity` | Always set |
 | `effort` | Always set. Claude.ai's is a first estimate; `plan-tech` confirms it. Max L (B7, `references/dev-workflow.md`) |
-| `assignedTo` | Leo, resolved live (`list_project_members`) |
+| `assignedTo` | The user: the signed-in member, resolved live (`list_household_members`), never a stored id |
 | `dueDate` | Empty. Only `pick-ready` and a sprint plan date cards; **only the sprint plan sets a sprint batch's due date** (bandit-dev:sprint). Incident: today |
 | Execution state | Left as created. The midnight run moves it when due; `pick-ready` sets Assigned for a card picked for today; a sprint plan may seed its whole batch to Assigned. Incident: `assigned` straight away |
 | `dependencies` | `blockedBy` / `blocks` for every known link, in the same call |

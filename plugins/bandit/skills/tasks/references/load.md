@@ -9,7 +9,7 @@
 
 **Build exactly what the WBS says. Nothing more.**
 
-The WBS is the design; load only transcribes it. No dates, no tags, no priorities, no extra columns, no lanes. Scheduling is `/bandit:tasks week`, sizing and tagging is triage. If Leo wants a shape the WBS doesn't describe, stop: that's the design conversation, not a load.
+The WBS is the design; load only transcribes it. No dates, no tags, no priorities, no extra columns, no lanes. Scheduling is `/bandit:tasks week`, sizing and tagging is triage. If the user wants a shape the WBS doesn't describe, stop: that's the design conversation, not a load.
 
 ---
 
@@ -41,7 +41,7 @@ Read the `board:` line as usual (`references/scope.md`). Load's own behaviour pe
 
 | `board:` | Load does |
 |---|---|
-| `pending` | Creates a **new** project inside the domain's folder (a subfolder of it when Leo names one) |
+| `pending` | Creates a **new** project inside the domain's folder (a subfolder of it when the user names one) |
 | `project "X"` | Loads into existing project X. Its `type` must be `deliverable`; otherwise stop and ask |
 | `none` | Refuse. The project isn't board-backed |
 | `folder "…"` · `global` | Retired: stop as `references/scope.md` says |
@@ -86,7 +86,7 @@ After a load that created a project, say: *set `board: project "{name}"` through
 ## 🚫 Never
 
 - Set due dates, tags, priority, effort or complexity. That's `/bandit:tasks week` and triage
-- Set `origin`. Leo asked for this load; it isn't another system
+- Set `origin`. The user asked for this load; it isn't another system
 - Add lanes, rename columns or touch the protected Backlog
 - Delete or rewrite anything that already exists — a mismatch is reported, not fixed
 - Store task or project ids outside the session

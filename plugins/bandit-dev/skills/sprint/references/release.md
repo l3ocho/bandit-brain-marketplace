@@ -11,16 +11,16 @@ Contents: Preconditions · Steps · Marketplace cards · Never
 
 Check all before anything runs. Each miss is refused by name, with what would satisfy it, and nothing runs:
 
-1. **Every card tested.** Each batch card's ledger status is `Tested by the user`, or Leo skips the
-   test for a named card in this chat (quote him). Name every card that is neither.
-2. **Debug done.** The ledger's At a glance says debug is done, or Leo says no debug was needed (quote him).
-3. **Leo's deploy word,** in the message being answered, quoted in the ledger: "deploy", "release" or
+1. **Every card tested.** Each batch card's ledger status is `Tested by the user`, or the user skips the
+   test for a named card in this chat (quote them). Name every card that is neither.
+2. **Debug done.** The ledger's At a glance says debug is done, or the user says no debug was needed (quote them).
+3. **The user's deploy word,** in the message being answered, quoted in the ledger: "deploy", "release" or
    "ship it" for this sprint. An earlier message, an urgency remark or a test result is not it.
 4. **Migration tail recorded.** `python3 ${CLAUDE_SKILL_DIR}/scripts/recipe.py tail`; write the tail in
    the ledger. It must equal the last row of the plan's Migration tail table plus the waves' additions
    (the ledger's migration lines); a difference is refused and shown.
-5. **Backup confirmed.** Leo confirms in this chat that the production backup the project's runbook
-   names has been taken (quote him), or the recipe's own backup step is the first `release` step.
+5. **Backup confirmed.** The user confirms in this chat that the production backup the project's runbook
+   names has been taken (quote them), or the recipe's own backup step is the first `release` step.
 6. **Recipe present.** `recipe.py require release branches.trunk branches.deploy migrations.check staging.refresh`.
    A missing key is refused by its name.
 7. **Clean trunk.** `git status --short` empty, branch `branches.trunk`, level with origin after a fetch.
@@ -35,7 +35,7 @@ Check all before anything runs. Each miss is refused by name, with what would sa
    `close` checks). Milestone log: one line with the deploy word quoted.
 4. **Status line.** Sprint card section 1: `Released {version} on {date}; ready to close` (read the
    card first, change only that line). Comment on the sprint card: version, commit, recipe steps run.
-5. **Staging.** Give Leo the `staging.refresh` instruction to put the release on staging; never run it.
+5. **Staging.** Give the user the `staging.refresh` instruction to put the release on staging; never run it.
 6. Final message, ten lines at most, with the paste for `close`.
 
 ## Marketplace cards

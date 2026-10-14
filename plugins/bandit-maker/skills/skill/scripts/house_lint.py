@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""House lint: check a skill folder against Leo's rulebook (references/rulebook.md).
+"""House lint: check a skill folder against the house rulebook (references/rulebook.md).
 
 Usage:
     python -m scripts.house_lint <skill-folder> [<skill-folder> ...] [--names FILE ...]

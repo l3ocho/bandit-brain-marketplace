@@ -30,7 +30,7 @@ repo; skill rules are never restated here.
 4. **Length gate:** count the words without the metadata line; the result stays within one page and
    the tier's budget (`references/reference-template.md`).
 5. **One proposal:** the new version file as a row (with a fix row for anything dropped from the old
-   version, recommended: move it to the reference doc). Nothing is written before Leo's answer.
+   version, recommended: move it to the reference doc). Nothing is written before the user's answer.
 6. **Hand over** the full text to paste into Claude.ai, then `/bandit:audit check` in that project.
    On a `dev: true` project, add the line: *the repo `CLAUDE.md` Project Context needs the same block.*
 

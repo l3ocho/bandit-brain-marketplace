@@ -8,7 +8,7 @@
 - **One consolidated list per gate**, grouped by card, each item with a recommendation. "Go with the recommendations" is a valid answer and applies to the whole list. Ask follow-ups only for what the answers raise.
 - **Never re-ask.** Before any question, check the chat, the cards and the ledger for the answer (a date, a decision, an approval). Use it and record it.
 - **Short reports.** After each step: what was found, what was done, what is next, in a few lines. No waiting between steps that need no input; stop only at steps 3, 9 and 10.
-- A decision that opens a **large new requirement** is parked as a card outside the sprint, with the rule recorded; ask one yes or no whether it joins. Leo's word that a card stays in the sprint is final.
+- A decision that opens a **large new requirement** is parked as a card outside the sprint, with the rule recorded; ask one yes or no whether it joins. The user's word that a card stays in the sprint is final.
 
 ---
 

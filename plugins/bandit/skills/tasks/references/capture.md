@@ -66,7 +66,7 @@ project, the home board's Inbox (parked), so the card stays in this project's si
 one at a time. After any sub-task write (`create_task` with `subtasks`, `add_subtask`,
 `promote_subtask`): `get_task` → `reorder_subtasks` with **every** sub-task of the parent and its
 intended position (0 = top; a partial list is refused) → `get_task` again and check the order. Still
-wrong → tell Leo which card.
+wrong → tell the user which card.
 
 - No dates, no priorities, no dependencies of their own
 - **Ticking them all does not complete the parent**
@@ -94,7 +94,7 @@ Read links with `get_task`: in `blockedBy` and `blocks`, `id` is the **link** (p
 
 🔴 **This is the whole thing.** Anything outside it is **refused, never rounded to the nearest thing that fits.** Report the refusal. Do not substitute an approximation.
 
-**The tool's `rule` schema is the source of truth.** Read it before telling Leo a rule can't be done. When the schema and this table disagree, the schema wins: use it, and report the drift so this file gets fixed.
+**The tool's `rule` schema is the source of truth.** Read it before telling the user a rule can't be done. When the schema and this table disagree, the schema wins: use it, and report the drift so this file gets fixed.
 
 | Field | Values | Notes |
 |---|---|---|

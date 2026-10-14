@@ -7,9 +7,9 @@
 Any note created by another skill or in a chat follows the same rules: it's created in
 `{Domain}/_inbox/` as a **new** file, carries the standard frontmatter (including `summary`) with
 `status: triaged`, follows the body shape in Part 2 §12, and may set `file-to:` so `/bandit:notes file`
-(or the writing skill itself, after Leo confirms) can move it to its home in one step. Skills
+(or the writing skill itself, after the user confirms) can move it to its home in one step. Skills
 create new notes in the inbox; they never edit an existing one there, except their own draft
-from this conversation on Leo's explicit request (`references/model.md` → *The inbox is Leo's*).
+from this conversation on the user's explicit request (`references/model.md` → *The inbox is the user's*).
 
 - **bandit:project** owns the files inside `Claude/ai-{slug}/`. Those files start with an
   HTML metadata comment on line 1, so they are **exempt from frontmatter**; never add YAML to
@@ -34,7 +34,7 @@ from this conversation on Leo's explicit request (`references/model.md` → *The
   style), create fail-closed and edit only with the etag. Drafts never go to `_inbox/`.
 - **Leftovers.** A note used only to produce another (an inbox draft filed elsewhere, a superseded
   draft, an applied feedback note) is archived with the usual stamps (Part 2 §7), or deleted on
-  Leo's word, **in the same step that consumed it**, and only on proof: the successor exists and was
+  the user's word, **in the same step that consumed it**, and only on proof: the successor exists and was
   read. Never because a note looks done or its card is missing; unsure → it stays.
 - **bandit:tasks** owns the task vocabulary. Frontmatter reuses it verbatim (`kind`, `handler`,
   `lane` as the bare value) and links tasks via `board-task`. This skill never writes to the board.

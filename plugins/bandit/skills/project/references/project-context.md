@@ -67,7 +67,7 @@ Git stays the source. Hand over the installed reference's script, never the vaul
 
 ### Claude Code twin (projects without `dev: true`)
 
-A project without `dev: true` (any `type:`) has a Claude Code surface when Leo answers yes to the
+A project without `dev: true` (any `type:`) has a Claude Code surface when the user answers yes to the
 Claude Code question (`references/interview.md`, Phase 1) or `Claude/code-{slug}/` already exists.
 It then runs as **twins**: the Claude.ai instructions and a Claude Code `CLAUDE.md`. The surface
 never changes scope: `type:` decides it (a `product_service` twin still writes only inside its own

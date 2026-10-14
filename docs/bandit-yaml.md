@@ -14,8 +14,8 @@ The reader is `plugins/bandit-dev/skills/sprint/scripts/recipe.py`; no skill par
 | `release` | list of commands | `release` | The ordered release steps, run one by one, stopping on the first failure |
 | `migrations.dir` | path | `plan` | Where migrations live (step 5, cross-card analysis) |
 | `migrations.check` | command | `execute`, `run`, `release` | Prints the current migration tail on its last line |
-| `staging.refresh` | command | `release` | The step Leo runs to put a release on staging; shown, never run by a skill |
-| `staging.up` · `staging.down` · `staging.where` | command · command · text | Leo, the runbook | Optional: documented for people, not read by a gate |
+| `staging.refresh` | command | `release` | The step the user runs to put a release on staging; shown, never run by a skill |
+| `staging.up` · `staging.down` · `staging.where` | command · command · text | People, the runbook | Optional: documented for people, not read by a gate |
 
 `development` and `main` in the sprint references mean `branches.trunk` and `branches.deploy`.
 

@@ -1,11 +1,11 @@
 # 🛡️ Write safety
 
-> The rules that protect Leo's files. This skill owns them: every other skill that writes to the vault follows this file and never restates it.
+> The rules that protect the user's files. This skill owns them: every other skill that writes to the vault follows this file and never restates it.
 
-## 🛡️ Write safety — the rules that protect Leo's files
+## 🛡️ Write safety — the rules that protect the user's files
 
-**Leo confirms every move, rename, archive, delete, folder creation and edit of an existing note.**
-Present a numbered proposal, let him approve all, some ("1, 3, 5") or none, and execute exactly
+**The user confirms every move, rename, archive, delete, folder creation and edit of an existing note.**
+Present a numbered proposal, let them approve all, some ("1, 3, 5") or none, and execute exactly
 what was approved. There are only two exceptions, both because they can't destroy anything:
 
 | Auto-write (no confirmation) | Why it's safe |
@@ -24,7 +24,7 @@ and the recommended fix. Nothing is ever just listed. A finding outside this pro
 still a row, marked `domain`. A finding with two valid fixes is one row with both, recommended
 first. One "all" fixes everything; only approved rows run.
 
-**Say plainly that nothing happens until he answers.** End every proposal with one line: *Nothing
+**Say plainly that nothing happens until they answer.** End every proposal with one line: *Nothing
 is created or changed until you answer all, a list, or none.*
 
 WebDAV mechanics (verified against the BanditCloud MCP):
@@ -42,11 +42,11 @@ WebDAV mechanics (verified against the BanditCloud MCP):
 - **Filing (review): move, then edit.** Move the inbox note to its new path and name first, then
   edit it there. If the move fails, the inbox note is untouched; if the edit fails, the note sits
   in its home folder unedited and the row is reported as half-done — never the other way round.
-- **Delete only on Leo's word.** `nc_webdav_delete_resource` runs only when Leo explicitly asked
+- **Delete only on the user's word.** `nc_webdav_delete_resource` runs only when the user explicitly asked
   to delete that item, or approved a `delete` row naming its exact path. Rules:
-  - One row per path, never a wildcard. A folder row lists what's inside it, so he sees what goes.
+  - One row per path, never a wildcard. A folder row lists what's inside it, so they see what goes.
   - Ambiguous wording ("get rid of it", "clean this up") isn't a delete: offer **archive** or
-    **delete** and let him pick.
+    **delete** and let them pick.
   - Never in `home` or any scheduled/unattended run: there's nobody to approve.
   - Re-list right before deleting; if the path changed or vanished since the proposal, skip the
     row and say so.

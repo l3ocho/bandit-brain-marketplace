@@ -40,7 +40,7 @@ After the spec, offer one line. **The destination follows the subject:**
 | Work for a **dev project** (`dev: true` in the Project Context) | **"Turn this into a card with `/bandit:tasks spec`?"** — `spec` takes this Clarified Specification as its input (`Source: clarify`), places the card in its area column and writes its brief. No separate note: the brief is the note |
 | Anything else | **Both, by default:** "Save this as a note in the {Domain} `_inbox` **and** a card on the board, linked? Say *note only* or *card only* to drop one." See *Note + card* below |
 
-**Note + card** (only after Leo says yes; a plain "yes" means both):
+**Note + card** (only after the user says yes; a plain "yes" means both):
 
 1. **Card first, through bandit:tasks `capture`.** Title = the spec's Summary; description names
    the note's filename. Scope comes from the `board:` line, exactly as bandit:tasks resolves it.
@@ -50,7 +50,7 @@ After the spec, offer one line. **The destination follows the subject:**
    `domain: none` or no Project Context → no note ("no domain here, card only?"); `board: none`
    or `pending` → no card ("no board here, note only?"). Both unavailable → no offer.
 
-**Marketplace card plus brief** (only after Leo says yes): the **Note + card** steps above, aimed at
+**Marketplace card plus brief** (only after the user says yes): the **Note + card** steps above, aimed at
 the bandit-brain-marketplace project instead of the current one. The card goes through bandit:tasks
 `capture` into that project's **Marketplace** column; the brief goes through bandit:notes into that
 project's domain `_inbox`, with `file-to:` that project's folder. The spec's Requirements name each

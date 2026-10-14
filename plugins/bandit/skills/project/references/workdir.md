@@ -26,7 +26,7 @@ The twin's working folder is the folder Claude Code runs from (`$CLAUDE_PROJECT_
 - **Data files** (`.csv .tsv .xls .xlsx .xlsm .parquet .feather .jsonl .ndjson .db .sqlite
   .sqlite3 .duckdb`) go only in `data/{prefix}-{task}/`. `.json` isn't one: config files are.
 - **Superseded work** stays in its task folder, `work/{prefix}-{task}/superseded/`, and leaves with
-  it at close. Never `_backup/`. A delete Leo asks for runs on his word.
+  it at close. Never `_backup/`. A delete the user asks for runs on their word.
 - Nothing else at the root. Files outside this folder (a host changelog, `~/.ssh/config`) aren't
   the guard's business: the project's own rules cover them.
 

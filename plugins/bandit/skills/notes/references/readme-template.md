@@ -32,14 +32,14 @@ generated: {YYYY-MM-DD}
    from another domain.
 4. **Cite** notes as `[[name]]` when you use them.
 5. **Writing:** new notes go to `_inbox/` only, as new files, following the `bandit:notes` skill.
-   Never edit an existing note in `_inbox/`: it's Leo's working space until he reviews it.
+   Never edit an existing note in `_inbox/`: it's the user's working space until they review it.
    `Claude/` holds settings, not content. `_archive/` holds finished notes.
 6. **Status** is the note's lifecycle, not the work state: the task board owns work, linked
    by `board-task`.
 
 ## 📥 Inbox
 
-**{n} notes** in Leo's inbox · oldest from {YYYY-MM-DD}. Reviewed with `/bandit:notes file` when he's ready.
+**{n} notes** in the user's inbox · oldest from {YYYY-MM-DD}. Reviewed with `/bandit:notes file` when they're ready.
 
 ## 📁 Projects
 
@@ -82,7 +82,7 @@ generated: {YYYY-MM-DD}
 
 | Folder | What goes here | Files |
 |---|---|---|
-| `_inbox/` | Leo's working space. No rules until review | {n} |
+| `_inbox/` | The user's working space. No rules until review | {n} |
 | `_templates/` | Input structures for new notes | {n} |
 | `_archive/` | Done notes, original path mirrored | {n} |
 | `_attachments/` | Images, PDFs and other files embedded by notes | {n} |
@@ -103,12 +103,12 @@ generated: {YYYY-MM-DD}
 - **Frontmatter:** `type`, `status`, `domain`, `summary`, `created`, `updated`, plus `project`,
   `source`, `board-task`, `related`, `file-to` when they apply. Lists in block style.
 - **Attachments** live in `_attachments/` and stay there when notes move.
-- **The inbox is Leo's.** Nothing there is edited until he reviews it with `/bandit:notes file`.
+- **The inbox is the user's.** Nothing there is edited until they review it with `/bandit:notes file`.
 - **Moves happen only after confirmation.** `Claude/` holds settings only; skills live in
   the bandit-brain-marketplace repo, never in the vault.
 - The full rules live in the `bandit:notes` skill. To change a convention, change the skill.
 
 ## 📝 Notes
 
-{Leo's hand-written section — carried over verbatim on every rebuild}
+{the user's hand-written section — carried over verbatim on every rebuild}
 ````

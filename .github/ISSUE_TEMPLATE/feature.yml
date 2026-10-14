@@ -1,0 +1,23 @@
+name: Feature
+description: A new command, mode or behaviour for a skill
+labels: [enhancement]
+body:
+  - type: input
+    id: skill
+    attributes:
+      label: Skill
+      description: e.g. bandit:tasks, bandit-dev:sprint, or "new skill"
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Outcome
+      description: What you want to be able to do, in one or two sentences
+    validations:
+      required: true
+  - type: textarea
+    id: example
+    attributes:
+      label: Example
+      description: The command you'd type and the result you'd expect

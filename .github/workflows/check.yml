@@ -1,0 +1,26 @@
+name: gate
+
+# The repo gate on every push and pull request: the same check as the pre-commit hook.
+on:
+  push:
+  pull_request:
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # V2 reads the tags
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Dependencies
+        run: |
+          pip install pyyaml
+          npm install -g @anthropic-ai/claude-code
+      - name: Gate
+        run: python3 scripts/check_repo.py

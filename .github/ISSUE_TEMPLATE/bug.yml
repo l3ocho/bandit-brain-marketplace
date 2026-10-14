@@ -1,0 +1,36 @@
+name: Bug
+description: A skill did the wrong thing, or refused when it shouldn't
+labels: [bug]
+body:
+  - type: input
+    id: command
+    attributes:
+      label: Command
+      description: What you ran, e.g. /bandit:tasks today
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Surface
+      options: [Claude.ai web, Claude.ai desktop, Claude.ai mobile, Claude Code]
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Plugin version
+      description: From the changelog or /plugin, e.g. 0.1.1
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened
+      description: Paste the reply or refusal. Leave out personal data.
+    validations:
+      required: true

@@ -28,6 +28,8 @@ The single source of the skills, agents and hooks Claude uses with Bandit Brain:
 .claude/settings.json               build-session guardrails (G2–G4) + dev-mirror Stop hook
 .claude/hooks/mirror-check.py       dev mirror script
 .githooks/pre-commit                runs the checker
+.github/                            CI gate, release publishing, issue and PR templates
+assets/                             the Bandit Brain logo
 .work/                              git-ignored working files: import/ (frozen skill snapshot), test/ (test folder)
 plugins/bandit/                     skills/{tasks,notes,project,audit,clarify,rewrite,plan,minutes}/
 plugins/bandit-dev/                 skills/sprint/ · agents/plan-reviewer.md · hooks/hooks.json
@@ -36,15 +38,16 @@ templates/instructions/             one-page project instructions per project ty
 tests/                              cases.md · fixture-app/
 docs/                               decisions.md · pipeline.md · bandit-yaml.md · install.md · cheat-sheet.md
 scripts/check_repo.py               the repo checker
+scripts/release.py                  cuts a release (SemVer, tags vX.Y.Z)
 ```
 
 ## 🔒 Rules
 
-**Context-light rules L1–L7** and **build-session guards G1–G9**: full text in `docs/decisions.md`.
+**Context-light rules L1–L8** and **build-session guards G1–G9**: full text in `docs/decisions.md`.
 
 | Rules | In one line |
 |---|---|
-| L1 description ≤ 300 chars · L2 `SKILL.md` ≤ 150 lines · L3 one home per rule · L4 no project details · L5 instructions template ≤ 1 page · L6 app `CLAUDE.md` ≤ 10 KB · L7 no plugin `bin/` | Every installed skill loads into every chat: keep it light |
+| L1 description ≤ 300 chars · L2 `SKILL.md` ≤ 150 lines · L3 one home per rule · L4 no project details · L5 instructions template ≤ 1 page · L6 app `CLAUDE.md` ≤ 10 KB · L7 no plugin `bin/` · L8 no person's name in plugins | Every installed skill loads into every chat: keep it light |
 | G1 inert tree · G2 installed plugins off · G3 old copies denied · G4 new names denied · G5 no production deletes · G6 deny coverage checked · G7 read, never invoke · G8 tests from `.work/test/` · G9 hub safety | The build session never uses what it builds |
 
 - **Never invoke your own skills**, old or new names. Read their source as documents and follow it (G7).

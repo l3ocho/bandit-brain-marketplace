@@ -5,7 +5,21 @@
   "author": {
     "name": "l3ocho"
   },
+  "homepage": "https://github.com/l3ocho/bandit-brain-marketplace#readme",
   "repository": "https://github.com/l3ocho/bandit-brain-marketplace",
   "license": "MIT",
-  "dependencies": ["bandit"]
+  "dependencies": [
+    "bandit"
+  ],
+  "keywords": [
+    "bandit-brain",
+    "claude-code",
+    "mcp",
+    "sprint",
+    "delivery-pipeline",
+    "release",
+    "code-review",
+    "agents",
+    "hooks"
+  ]
 }

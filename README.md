@@ -7,6 +7,7 @@
 **Claude skills, agents and hooks that run your task board, your notes vault and your delivery pipeline: from an idea in the inbox to a tagged release.**
 
 [![Release](https://img.shields.io/github/v/tag/l3ocho/bandit-brain-marketplace?label=release&sort=semver&color=1a1918)](CHANGELOG.md)
+[![Gate](https://github.com/l3ocho/bandit-brain-marketplace/actions/workflows/check.yml/badge.svg?branch=development)](https://github.com/l3ocho/bandit-brain-marketplace/actions/workflows/check.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-1a1918)](LICENSE)
 [![Claude.ai](https://img.shields.io/badge/Claude.ai-plugin-d97757)](#-install)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-d97757)](#-install)
@@ -96,24 +97,26 @@ Every stage has an owner command, a record and a gate that fails when it's skipp
 | [Pipeline](docs/pipeline.md) | The ten stages from idea to closed release: surface, command, record, gate |
 | [`bandit.yaml` contract](docs/bandit-yaml.md) | The recipe a dev project supplies to the sprint skills |
 | [Decisions](docs/decisions.md) | Why things are the way they are: architecture, rules, guards |
-| [Changelog](CHANGELOG.md) | What changed in each release |
+| [Changelog](CHANGELOG.md) · [Releases](https://github.com/l3ocho/bandit-brain-marketplace/releases) | What changed in each release |
 | [Instruction templates](templates/instructions/) | The one-page project instructions per project type |
 | [Test cases](tests/cases.md) | One case per behaviour, input → expected result |
+| [Contributing](CONTRIBUTING.md) | How to propose and make a change |
 | [Contributor guide](CLAUDE.md) | Layout, rules, the gate and branches for working on this repo |
+| [Security](SECURITY.md) | How to report a problem privately |
 
 ## 🏷️ Versioning
 
-The three plugins share one version and follow [Semantic Versioning](https://semver.org). Each release bumps every `plugin.json`, adds a dated entry to the [changelog](CHANGELOG.md) and is tagged `vX.Y.Z` on `main`. Installed copies follow `main`: Claude Code through auto-update or `/plugin marketplace update bandit-brain`, Claude.ai through Sync automatically or Re-sync.
+The three plugins and the marketplace share one version and follow [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for new commands or behaviour, **patch** for fixes. `scripts/release.py X.Y.Z` cuts a release: it dates the [changelog](CHANGELOG.md) entry, bumps every version and tags `vX.Y.Z` on `main`, and each tag is published as a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases). The gate refuses a released version without its tag. Installed copies follow `main`: Claude Code through auto-update or `/plugin marketplace update bandit-brain`, Claude.ai through Sync automatically or Re-sync.
 
 ## 🔧 Develop
 
 ```
-python3 scripts/check_repo.py                              # the gate (also the pre-commit hook)
+python3 scripts/check_repo.py                              # the gate (pre-commit hook and CI)
 claude plugin validate plugins/<plugin>                    # one plugin
 python3 plugins/bandit-maker/skills/skill/scripts/house_lint.py plugins/bandit/skills/*
 ```
 
-Work happens on `development`; `main` moves only at a release. Every skill stays light: a description of at most 300 characters and a `SKILL.md` of at most 150 lines, because every installed skill loads into every chat. A new kind of mistake becomes a checker rule, not a new sentence. The full rules are in the [contributor guide](CLAUDE.md) and [decisions](docs/decisions.md).
+Work happens on `development`; `main` moves only at a release. Every skill stays light: a description of at most 300 characters and a `SKILL.md` of at most 150 lines, because every installed skill loads into every chat. A new kind of mistake becomes a checker rule, not a new sentence. The full rules are in the [contributor guide](CLAUDE.md) and [decisions](docs/decisions.md); start with [CONTRIBUTING](CONTRIBUTING.md).
 
 ## 📄 License
 

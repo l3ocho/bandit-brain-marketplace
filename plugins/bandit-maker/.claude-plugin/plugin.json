@@ -5,6 +5,16 @@
   "author": {
     "name": "l3ocho"
   },
+  "homepage": "https://github.com/l3ocho/bandit-brain-marketplace#readme",
   "repository": "https://github.com/l3ocho/bandit-brain-marketplace",
-  "license": "MIT"
+  "license": "MIT",
+  "keywords": [
+    "bandit-brain",
+    "claude-code",
+    "mcp",
+    "skills",
+    "skill-authoring",
+    "lint",
+    "evals"
+  ]
 }

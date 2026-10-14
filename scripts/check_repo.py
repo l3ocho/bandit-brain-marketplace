@@ -112,11 +112,37 @@ def check_versions():
     for p in plugin_dirs():
         manifest, _ = load_json(p / ".claude-plugin" / "plugin.json")
         versions[p.name] = (manifest or {}).get("version")
+    market, _ = load_json(ROOT / ".claude-plugin" / "marketplace.json")
+    versions["marketplace"] = ((market or {}).get("metadata") or {}).get("version")
     if top == "Unreleased":
         same = len(set(versions.values())) == 1
-        return report("V1", same, f"top entry Unreleased; plugin versions {versions}")
+        return report("V1", same, f"top entry Unreleased; versions {versions}")
     bad = {k: v for k, v in versions.items() if v != top}
-    report("V1", not bad, f"versions ≠ CHANGELOG {top}: {bad}" if bad else f"all plugins at {top} = CHANGELOG")
+    report("V1", not bad, f"versions ≠ CHANGELOG {top}: {bad}" if bad else f"all plugins and the marketplace at {top} = CHANGELOG")
+
+
+# ── V2 · every released CHANGELOG entry has its annotated tag vX.Y.Z, and the tag carries that version
+def check_tags():
+    released = re.findall(r"^## (\d+\.\d+\.\d+) ", CHANGELOG.read_text(encoding="utf-8"), re.M)
+    if not shutil.which("git") or subprocess.run(["git", "rev-parse"], cwd=ROOT, capture_output=True).returncode:
+        return report("V2", True, "skipped (not a git checkout)")
+    tags = set(subprocess.run(["git", "tag", "-l", "v*"], cwd=ROOT, capture_output=True, text=True).stdout.split())
+    current = (load_json(PLUGINS / "bandit" / ".claude-plugin" / "plugin.json")[0] or {}).get("version")
+    bad = []
+    for v in released:
+        tag = f"v{v}"
+        if tag not in tags:
+            if v != current:  # the entry being released right now is tagged after this commit
+                bad.append(f"{tag} missing")
+            continue
+        kind = subprocess.run(["git", "cat-file", "-t", tag], cwd=ROOT, capture_output=True, text=True).stdout.strip()
+        shown = subprocess.run(["git", "show", f"{tag}:plugins/bandit/.claude-plugin/plugin.json"],
+                               cwd=ROOT, capture_output=True, text=True).stdout
+        if kind != "tag":
+            bad.append(f"{tag} is not annotated")
+        if f'"version": "{v}"' not in shown:
+            bad.append(f"{tag} does not carry version {v}")
+    report("V2", not bad, "; ".join(bad) or f"{len(released)} released versions, each with its annotated tag")
 
 
 # ── G6 · every skill in bandit and bandit-dev has a Skill() deny rule in .claude/settings.json
@@ -406,6 +432,7 @@ def main(argv):
     check_validate(use_cli)
     check_no_bin()
     check_versions()
+    check_tags()
     check_g6()
     check_denylist()
     check_r15()

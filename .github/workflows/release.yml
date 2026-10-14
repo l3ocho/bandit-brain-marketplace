@@ -1,0 +1,21 @@
+name: release
+
+# A pushed tag vX.Y.Z becomes a GitHub release whose notes are that version's CHANGELOG entry.
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Release notes from the CHANGELOG
+        run: python3 scripts/changelog_section.py "${GITHUB_REF_NAME#v}" > release-notes.md
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          body_path: release-notes.md

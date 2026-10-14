@@ -55,17 +55,13 @@ If you used the earlier uploaded skills (task board, notes, audit, project setti
 
 ## 7. Release (maintainers)
 
-Releases follow [Semantic Versioning](https://semver.org); all three plugins share one version.
+Releases follow [Semantic Versioning](https://semver.org); the three plugins and the marketplace share one version. The rules for major, minor and patch are at the top of the [changelog](../CHANGELOG.md).
 
 ```
 git checkout development && git pull
-# bump "version" in plugins/*/.claude-plugin/plugin.json; date the CHANGELOG entry
-python3 scripts/check_repo.py                    # must print: check_repo: OK
-git commit -am "Release X.Y.Z" && git push origin development
-git checkout main && git merge --ff-only development
-git tag -a vX.Y.Z -m "vX.Y.Z: one line"
-git push origin main vX.Y.Z
-git checkout development
+python3 scripts/release.py X.Y.Z             # dry run: shows what changes
+python3 scripts/release.py X.Y.Z --write     # versions, CHANGELOG date, gate, commit, main, tag
+python3 scripts/release.py X.Y.Z --push      # pushes development, main and the tag
 ```
 
-Then run [tests/cases.md](../tests/cases.md) on each surface you use.
+The pushed tag publishes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases) with that version's changelog entry. Then run [tests/cases.md](../tests/cases.md) on each surface you use.

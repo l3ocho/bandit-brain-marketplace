@@ -43,10 +43,12 @@ Check all before anything runs. Each miss is refused by name, with what would sa
 A sprint that carries cards from the **Marketplace** column (skill changes) also releases the
 marketplace repo, as its own version (decision D12), after the app's recipe:
 
-1. In the marketplace repo, on its trunk: bump `version` in all three `plugins/*/.claude-plugin/plugin.json`
-   to the next minor, and turn the CHANGELOG's `## Unreleased` into `## {version} · {date}`.
-2. `python3 scripts/check_repo.py` must print OK; commit, then merge to its deploy branch and tag
-   `v{version}`, on the same deploy word.
+1. **Pick the version** by Semantic Versioning, from what the CHANGELOG's `## Unreleased` entry
+   holds: **major** = a command, mode or skill removed or renamed, or the Project Context format
+   changed; **minor** = a new command, mode, skill or behaviour; **patch** = fixes and wording only.
+   The user may name another version: theirs wins, quoted in the ledger.
+2. In the marketplace repo, on its trunk: `python3 scripts/release.py {version}` (a dry run), then
+   `--write` (versions, CHANGELOG date, gate, commit, tag), then `--push`, on the same deploy word.
 3. Record the plugin version next to the app's in the `Released:` line.
 
 ## Never

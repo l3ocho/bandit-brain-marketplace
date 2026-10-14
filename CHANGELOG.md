@@ -1,6 +1,19 @@
 # Changelog
 
-All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) share one version. A release bumps every `plugin.json`, adds an entry here and tags `v{version}` on `main`.
+All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
+
+## Unreleased
+
+### Added
+- **README as the front door:** the Bandit Brain logo, badges, highlights, install and requirements, a pipeline diagram and an index of every doc. `docs/install.md` is now a standing guide (install, update, first project, migration, release).
+- **Versioning as code:** `scripts/release.py` (dry run, `--write`, `--push`); the marketplace carries `metadata.version`; checker rule **V2** requires an annotated tag for every released version; a GitHub Action publishes each tag as a release with its CHANGELOG section.
+- **CI:** a GitHub Action runs the repo gate on every push and pull request.
+- **Community files:** `CONTRIBUTING.md`, `SECURITY.md`, issue and pull request templates.
+
+### Changed
+- **Every member, not one owner:** the skills speak of "the user" (they/them), never the owner's name; the assignee is the signed-in member. Checker rule **L8** keeps a person's name and he/his/him out of every plugin file. `workdir.py`'s message changed, so existing Claude Code twins score their copy as outdated until `/bandit:project` re-hands it.
+- **Releasing a sprint's Marketplace cards** picks the version by Semantic Versioning instead of "next minor", through `scripts/release.py`.
+
 
 ## 0.1.1 · 2026-10-14 · debug of sprint marketplace-v1
 

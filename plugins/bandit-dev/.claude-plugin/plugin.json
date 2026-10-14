@@ -1,6 +1,6 @@
 {
   "name": "bandit-dev",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Bandit Brain developer pipeline: the sprint skill, the plan-reviewer agent and the sprint hooks. Claude Code only.",
   "author": {
     "name": "l3ocho"

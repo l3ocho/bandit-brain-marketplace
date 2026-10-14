@@ -1,0 +1,6 @@
+# The marketplace repo's own recipe (contract: docs/bandit-yaml.md). No migrations, no staging.
+verify: python3 scripts/check_repo.py
+branches: { trunk: development, deploy: main }
+release:
+  - python3 scripts/release.py {version} --write
+  - python3 scripts/release.py {version} --push

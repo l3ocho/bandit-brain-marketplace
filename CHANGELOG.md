@@ -4,7 +4,11 @@ All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace s
 
 ## Unreleased
 
+### Added
+- **Optional `migrations` and `staging` in `bandit.yaml`:** a repo without them leaves the section out; `recipe.py tail` prints `none`, the new `recipe.py opt` prints an optional key or `none`, and plan, execute and release skip those steps. Release steps may hold `{version}`. The marketplace repo has its own `bandit.yaml` (BB-162).
+
 ### Fixed
+- **Sprint Stop hook scope:** the hook blocks only on errors in a project the session worked in; problems elsewhere in the domain show as a warning instead of stopping every sprint (checker rule **SP8**, BB-162).
 - **Update instructions:** README and the install guide give the update path that works (desktop app, Chat tab, Manage marketplaces, Check for updates) and name Anthropic's open issues (#86818, #93825); the wrong "Re-sync" and `/plugin marketplace update` steps are gone.
 - **CI on release tags:** the gate re-fetches the tags after checkout, so a tag-triggered run sees the annotated tag and V2 passes (actions/checkout turns the pushed tag into a lightweight one).
 

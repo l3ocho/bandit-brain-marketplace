@@ -379,6 +379,25 @@ def check_sp7():
            if ok else f"fixtures: good → {good[0]} {good[1][-120:]!r}; bad → {bad[0]} {bad[1][-160:]!r}")
 
 
+# ── SP8 · the Stop hook blocks only on the session's own projects (fixtures) ─────────────
+def check_sp8():
+    import tempfile
+    script = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts" / "check_sprint.py"
+    vault = ROOT / "tests" / "fixture-vault"
+    got = {}
+    with tempfile.TemporaryDirectory() as d:
+        for name, body in (("own", "MyNotes/Bad/Projects/home-reno/sprint-one/x.md"),
+                           ("other", "MyNotes/Bad/Projects/other-app/sprint-a/x.md")):
+            t = Path(d) / f"{name}.jsonl"
+            t.write_text(body + " bandit-dev:sprint\n", encoding="utf-8")
+            r = subprocess.run([sys.executable, "-B", str(script), "--hook", "--vault", str(vault), "--domain", "Bad"],
+                               input=json.dumps({"transcript_path": str(t)}), capture_output=True, text=True)
+            got[name] = (r.returncode, r.stdout + r.stderr)
+    ok = got["own"][0] == 2 and got["other"][0] == 0 and "systemMessage" in got["other"][1]
+    report("SP8", ok, "hook blocks on the session's own project, warns (exit 0) on another's"
+           if ok else f"own → {got['own'][0]}, other → {got['other'][0]} {got['other'][1][-120:]!r}")
+
+
 # ── Y1 · the recipe reader refuses a missing key and a wrong migration tail (fixtures) ────
 def check_recipe():
     script = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts" / "recipe.py"
@@ -389,13 +408,17 @@ def check_recipe():
         (("check-tail", "0002"), 0, "matches"),
         (("check-tail", "0003"), 4, "the plan names 0003"),
         (("--file", "bandit.missing-key.yaml", "check-tail", "0002"), 3, "missing key `migrations.check`"),
+        (("--file", "bandit.no-migrations.yaml", "tail"), 0, "none"),
+        (("--file", "bandit.no-migrations.yaml", "check-tail", "none"), 0, "matches"),
+        (("--file", "bandit.no-migrations.yaml", "opt", "staging.refresh"), 0, "none"),
+        (("opt", "staging.refresh"), 0, "echo staging refresh"),
     ]
     bad = []
     for args, code, text in cases:
         got, out = run_script(script, *args, cwd=app)
         if got != code or text not in out:
             bad.append(f"{' '.join(args)} → {got} {out[-100:]!r}")
-    report("Y1", not bad, "; ".join(bad) or f"recipe.py: {len(cases)} fixture cases (keys, tail, refusal by name)")
+    report("Y1", not bad, "; ".join(bad) or f"recipe.py: {len(cases)} fixture cases (keys, tail, refusal by name, optional sections)")
 
 
 # ── L5 · project instructions templates are one page, and the project skill ships them as-is ─
@@ -444,6 +467,7 @@ def main(argv):
     check_house_lint()
     check_audit_contract()
     check_sp7()
+    check_sp8()
     check_recipe()
     check_l5()
     for rule, ok, msg in results:

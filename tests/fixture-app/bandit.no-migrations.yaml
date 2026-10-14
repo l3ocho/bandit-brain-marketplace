@@ -1,0 +1,5 @@
+# Test fixture: a repo with no migrations and no staging. Both sections are optional (docs/bandit-yaml.md).
+verify: "true"
+branches: { trunk: development, deploy: main }
+release:
+  - "echo release {version}"

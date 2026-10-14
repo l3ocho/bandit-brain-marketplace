@@ -15,6 +15,8 @@ the `bandit-staging` board only. `read` cases are checked by reading the shipped
 | C2 | bandit.yaml contract | auto (Y1) | `recipe.py --file bandit.missing-key.yaml check-tail 0002` | exit 3, refusal names ``missing key `migrations.check` `` |
 | C3 | P3 migration tail | auto (Y1) | `recipe.py check-tail 0003` on the fixture (tail is 0002) | exit 4, "migration tail is 0002, the plan names 0003: stop the wave" |
 | C4 | P3 migration tail | auto (Y1) | `recipe.py check-tail 0002` | exit 0, "matches the plan" |
+| C34 | Optional sections | auto (Y1) | `recipe.py --file bandit.no-migrations.yaml tail`, `check-tail none`, `opt staging.refresh` | exit 0; prints `none`; matches |
+| C35 | Hook scope | auto (SP8) | `check_sprint.py --hook` on the Bad vault, transcript naming `Projects/home-reno/` vs another project | exit 2 with SP7 vs exit 0 with a `systemMessage` warning |
 | C5 | P1 SP7 | auto (SP7) | `check_sprint.py --vault tests/fixture-vault --domain Bad` (committed, no review record) | exit 1, exactly one error, SP7 |
 | C6 | P1 SP7 | auto (SP7) | `check_sprint.py … --domain Good` (committed, review record present) | exit 0, "passes SP1-SP7" |
 | C7 | P1 review gate | cli | `run` on a staging sprint card whose step 11 sub-task is unticked | refused, names "Independent plan review" (step 11); no wave agent launched |

@@ -11,11 +11,13 @@ The reader is `plugins/bandit-dev/skills/sprint/scripts/recipe.py`; no skill par
 | `verify` | command | `execute`, `run`, `debug` | The check a wave, a fix and a push must pass |
 | `branches.trunk` | branch | `execute`, `run`, `debug` | Where waves merge and what a wave pushes |
 | `branches.deploy` | branch | `release` | What a release fast-forwards; never touched outside `release` |
-| `release` | list of commands | `release` | The ordered release steps, run one by one, stopping on the first failure |
+| `release` | list of commands | `release` | The ordered release steps, run one by one, stopping on the first failure. `{version}` in a step is replaced by the version picked at release |
 | `migrations.dir` | path | `plan` | Where migrations live (step 5, cross-card analysis) |
 | `migrations.check` | command | `execute`, `run`, `release` | Prints the current migration tail on its last line |
 | `staging.refresh` | command | `release` | The step the user runs to put a release on staging; shown, never run by a skill |
-| `staging.up` · `staging.down` · `staging.where` | command · command · text | People, the runbook | Optional: documented for people, not read by a gate |
+| `staging.up` · `staging.down` · `staging.where` | command · command · text | People, the runbook | Documented for people, not read by a gate |
+
+**Required:** `verify`, `branches`, `release`. **Optional sections:** `migrations` and `staging`. A repo without them leaves the whole section out: `recipe.py tail` prints `none` and the gates skip the tail; `recipe.py opt staging.refresh` prints `none` and `release` gives no staging step. A section that is present must be complete (`migrations` without `check` still refuses).
 
 `development` and `main` in the sprint references mean `branches.trunk` and `branches.deploy`.
 
@@ -26,6 +28,7 @@ The reader is `plugins/bandit-dev/skills/sprint/scripts/recipe.py`; no skill par
 | Any, no file | `bandit.yaml: no recipe file at {path}` | 3 |
 | `get` / `require` a missing or empty key | ``bandit.yaml: missing key `{key}` (used by …)`` | 3 |
 | `check-tail {n}` when the tail differs | `bandit.yaml: migration tail is {x}, the plan names {n}: stop the wave and report it` | 4 |
+| `opt` on a key outside `migrations` and `staging` | ``bandit.yaml: `{key}` is not optional: use get`` | 2 |
 | `tail` when `migrations.check` fails | ``bandit.yaml: `migrations.check` failed …`` | 5 |
 
 ## 📝 Example (the Bandit Brain app, checked 2026-10-13)
@@ -47,4 +50,4 @@ staging:
   where: bandit-port
 ```
 
-Sources: the app's `package.json` (verify), `docs/branching.md` rules 6, 8 and 9 (branches, migrations, release), `docs/staging-runbook.md` (staging). The app repo writes its own `bandit.yaml` (card "App repo: pipeline recipe and docs"); this file only defines the contract. Test fixture: `tests/fixture-app/bandit.yaml`, and `bandit.missing-key.yaml` for the refusal.
+Sources: the app's `package.json` (verify), `docs/branching.md` rules 6, 8 and 9 (branches, migrations, release), `docs/staging-runbook.md` (staging). The app repo writes its own `bandit.yaml` (card "App repo: pipeline recipe and docs"); this file only defines the contract. Test fixture: `tests/fixture-app/bandit.yaml`, `bandit.missing-key.yaml` for the refusal and `bandit.no-migrations.yaml` for a repo without migrations or staging. The marketplace repo's own recipe is `bandit.yaml` at its root.

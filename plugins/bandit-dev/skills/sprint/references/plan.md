@@ -53,6 +53,7 @@ Effort and complexity per card; lane per card. Check the card boundaries in band
 `bandit.yaml` `migrations.check`) and write the tail the sprint starts from into the plan, then a
 **Migration tail** table: one row per wave, the tail that wave must start from and the numbers it
 adds. A missing key refuses by name: the project adds it to `bandit.yaml` before planning goes on.
+A recipe with no `migrations` section prints `none`: write "No migrations" in the plan and skip the table.
 
 From the investigations and a quick code check: migrations (one at a time, numbered in order), files several cards edit (state the order), hidden dependencies (what must land before another card's tests), generated artefacts that need regenerating after each card, tests that pin behaviour a card changes, docs each card must update. Output: one comment, and the "Cross-card" section of the plan.
 

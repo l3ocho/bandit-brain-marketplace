@@ -16,7 +16,9 @@ Usage:
   check_sprint.py [--vault DIR] [--domain NAME]   (defaults: $MYNOTES_DIR or ~/Documents/MyNotes;
                                                 the `domain:` of the repo CLAUDE.md Project Context)
   check_sprint.py --hook   (Stop hook: reads the hook JSON on stdin, checks only when the
-                            session touched the vault, blocks the stop once with exit 2)
+                            session touched the vault; blocks the stop once with exit 2 only on
+                            errors in a project the session named (`Projects/{slug}/` in its
+                            transcript); errors elsewhere in the domain are a warning, exit 0)
 """
 import argparse
 import json
@@ -150,13 +152,25 @@ def check(domain: Path) -> list[str]:
     return errors
 
 
-def session_touched_vault(payload: dict) -> bool:
+def transcript_text(payload: dict) -> str:
     transcript = payload.get("transcript_path")
     if not transcript or not os.path.exists(transcript):
-        return False
+        return ""
     with open(transcript, encoding="utf-8", errors="replace") as fh:
-        text = fh.read()
+        return fh.read()
+
+
+def session_touched_vault(text: str) -> bool:
     return "MyNotes/" in text or "bandit-dev:sprint" in text
+
+
+def touched_projects(text: str) -> set[str]:
+    """Project folders the session named: `Projects/{slug}/` anywhere in its transcript."""
+    return set(re.findall(r"Projects/([^/\s\"'`\\]+)/", text))
+
+
+def own_error(line: str, projects: set[str]) -> bool:
+    return any(f"Projects/{slug}/" in line for slug in projects)
 
 
 def context_domain() -> str | None:
@@ -183,7 +197,8 @@ def main() -> int:
             payload = json.load(sys.stdin)
         except Exception:
             payload = {}
-        if payload.get("stop_hook_active") or not session_touched_vault(payload):
+        text = transcript_text(payload)
+        if payload.get("stop_hook_active") or not session_touched_vault(text):
             return 0
 
     name = args.domain or context_domain()
@@ -198,6 +213,14 @@ def main() -> int:
         return 0 if args.hook else 1
 
     errors = check(domain)
+    if args.hook and errors:
+        projects = touched_projects(text)
+        others = [e for e in errors if not own_error(e, projects)]
+        errors = [e for e in errors if own_error(e, projects)]
+        if others and not errors:
+            print(json.dumps({"systemMessage": f"bandit-dev:sprint check: {len(others)} problem(s) outside "
+                              "this session's projects (not blocking): " + " | ".join(others)}))
+            return 0
     if not errors:
         if not args.hook:
             print(f"OK: {domain} passes SP1-SP7 ({len(sprint_folders(domain))} sprint folders)")

@@ -8,7 +8,10 @@ Contents: Conventions · Steps 1 to 12 · Investigator brief · Handover
 
 - **Order and evidence.** Do the step, write its comment on the sprint card, tick its sub-task. The comment says what was found and done, in a few lines, with ids.
 - **Read before every write.** `get_task` right before any description or tag write. A card changed since the last read: use the new text.
-- **Fix rows.** A problem is a numbered row: action, target, owner, recommendation (two options in one row, recommended first). Applied only on approval.
+- **Decisions to the user: one table, one format.** Columns exactly `Issue | Recommendation | Different from what you requested? | If yes, how?`. Plain words in every cell; no row numbers, no references to other rows or earlier messages. Spec changes, open questions and fix rows all use it; never a second format.
+- **The user's original request is the baseline.** Compare against their own words (the card's original-request comment, the brief), never against an earlier summary of yours. Only rows that differ from the request need a decision; the rest are applied without asking.
+- **Add nothing the user did not ask for.** No "applied defaults" and no "applied unless you object" block. A rule the code forces goes in the table as a row that differs, saying why; it is never written into a plan or card before the user's yes.
+- **"What is missing"** is answered with that list only: each missing item and who owes it. No summaries, no housekeeping, no recap.
 - **Decisions** go on the card they concern as a comment starting `Planning decisions {date}`, and into the Spec at step 9.
 - **Date.** Today is in the session context. Convert "tomorrow" to an absolute date.
 
@@ -37,7 +40,7 @@ For each card: `get_task`; find its brief (bandit:notes lookup by filename from 
 1. Collect every open question across the batch, plus questions the checks raised.
 2. **Investigate first, read-only, in parallel**: one investigator per card (brief below). One live-browser check at a time, only for what code cannot answer (touch behaviour, what the UI shows).
 3. **Spot-check** the decisive facts in code before they go into a card.
-4. Present **one list**, grouped by card, each with the finding and a recommendation. Decisions that need the user only; defaults go in a separate "applied unless you object" block.
+4. Present **one decision table** (Conventions), grouped by card. Decisions that need the user only; nothing is applied as a default. "Go with your recommendations" approves exactly the rows shown, nothing else.
 5. Record the answers (comment per card). Ask follow-ups only for what the answers raise.
 6. A large new requirement that surfaces: record the rule, create a parked card **outside** the sprint, ask one yes or no whether it joins.
 
@@ -76,7 +79,7 @@ In the plan: how rollback works for every card (code, schema, backups, deploy sh
 Ready means: Spec clear with no open questions, acceptance testable, dependencies resolved or sequenced, Technical plan written with filename, branch and size, effort at most L, plan note filed.
 
 1. Check each card strictly and report who passes and who fails, with fix rows.
-2. **Reconcile each Spec once**: answered questions into Decisions, open questions cleared, wrong lines fixed, acceptance lines brought in line with decisions. Show old and new per card in one table; on the user's yes write with the Spec-lock override, after `get_task`.
+2. **Reconcile each Spec once**: answered questions into Decisions, open questions cleared, wrong lines fixed, acceptance lines brought in line with decisions. Put to the user only the lines that differ from their original request, in the decision table; on the user's yes write with the Spec-lock override, after `get_task`. A section outside the Spec (Technical plan) is written by copying the stored Spec text byte for byte from `get_task`, never retyped.
 3. Update each brief: requirements, decisions with reasons, verified facts with where each was checked, no open questions, a dated **Change log** of what changed and why, and no card state (column, lane, stage) in the body.
 4. Move passing cards to `stage/planned`, then `stage/ready` on the user's approval (step 10), through the stage procedure in bandit:tasks.
 

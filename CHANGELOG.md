@@ -2,6 +2,11 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
+## Unreleased
+
+### Changed
+- **Sprint planning puts every decision in one table:** `Issue | Recommendation | Different from what you requested? | If yes, how?`, plain words, no row numbers. The user's original request is the baseline; nothing they did not ask for is added, and "applied defaults" are gone. "What is missing" is answered with that list only. Spec text is copied from the card, never retyped (`bandit-dev:sprint` plan.md, gotchas.md).
+
 ## 0.3.0 · 2026-10-14
 
 ### Added

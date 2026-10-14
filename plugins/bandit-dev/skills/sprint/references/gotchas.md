@@ -14,6 +14,10 @@ Contents: Interview and pace · Scope · Cards and Specs · Agents and checks ·
 
 ## Scope
 
+- Slipped invented rules (a move-out guard, a child comment ban, a rule exception) into "applied defaults" the user never saw, then asked about them for an hour → add nothing not asked for; anything code forces is a table row that differs, before it is written anywhere.
+- Put decisions in three formats (old/new Spec lines, "calls", numbered fix rows) with cross-references → one decision table, `Issue | Recommendation | Different from what you requested? | If yes, how?`, plain words, no numbers.
+- Answered "what is missing" with sections, housekeeping and recaps → the missing list only.
+- Ran the same greps while two investigators were already on it → once delegated, wait for the reports.
 - Followed a side requirement (Finance sharing) into a large investigation and a new XL card inside the sprint → park the new requirement outside the sprint, record the rule, ask one yes or no; a card the user requires in the sprint stays in.
 - Offered a "recommended" answer that contradicted an earlier one without saying so → when a later finding changes a recommendation, say it changed and why.
 

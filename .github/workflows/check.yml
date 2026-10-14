@@ -12,6 +12,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0          # V2 reads the tags
+      - name: Restore annotated tags
+        # On a tag push, checkout points the tag straight at the commit, so V2 sees a lightweight
+        # tag (actions/checkout#882). Re-fetching the tags brings the annotated objects back.
+        run: git fetch --tags --force
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

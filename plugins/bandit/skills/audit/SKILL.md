@@ -6,8 +6,9 @@ description: "Audits domain and project structure across Claude.ai, the MyNotes 
 # 🧱 Audit
 
 Keeps every domain on one pattern. It checks, scores and **fixes**: every finding is a numbered fix
-row in the same report, and approved rows run through the skill that owns that thing. It never makes
-a change with its own calls.
+row in the same report, and every row runs through the skill that owns that thing. It never makes
+a change with its own calls. **One command does it all:** `check` and `audit` run every row in the
+same turn and report what they did. Nothing waits for a yes.
 
 ## 🧭 Router
 
@@ -16,14 +17,14 @@ works too: "is this project in sync" → `check`.
 
 | Command | Run from | Does | Reference |
 |---|---|---|---|
-| `check` | Inside the project being checked | Reads this project's running `**Version:**` and Project Context, compares with the vault, proposes one stamp row, scores this project | `references/self-check.md` |
-| `audit {domain}` · `audit all` | Anywhere | One snapshot, the script, its report unedited; report + snapshot written on approval | `references/domain-audit.md` · `references/snapshot.md` |
-| `close {domain}` | Anywhere | Replays the live report; valid and done → moves it and its snapshot to `_archive/` | `references/domain-audit.md` → Close |
+| `check` | Inside the project being checked | Reads this project's running `**Version:**` and Project Context, compares with the vault, writes the stamp, scores this project, runs its fix rows | `references/self-check.md` |
+| `audit {domain}` · `audit all` | Anywhere | One snapshot, the script, its report unedited, every fix row run, report + snapshot written | `references/domain-audit.md` · `references/snapshot.md` |
+| `close {domain}` | Anywhere | Replays the live report; valid → moves it and its snapshot to `_archive/` | `references/domain-audit.md` → Close |
 
 | Read | When |
 |---|---|
 | `references/structure-rulebook.md` · `references/structure-rules.yaml` | Every run, fresh: the standard (S1–S16) and the same rules as data, with `paths.stamps` (the stamp ledger) |
-| `references/fix-rows.md` | Building fix rows, and before running approved ones: owners, linked rows, order |
+| `references/fix-rows.md` | Building fix rows, and before running them: owners, linked rows, order |
 | `references/gotchas.md` | Once, before a `check` or an `audit` |
 
 ## 🗄️ Where things live
@@ -31,9 +32,9 @@ works too: "is this project in sync" → `check`.
 | Thing | Path | Written by |
 |---|---|---|
 | Rulebook, rules, scorer | `references/structure-rulebook.md`, `references/structure-rules.yaml`, `scripts/check_structure.py` | The bandit-brain-marketplace repo. Read-only here |
-| Stamp ledger | `paths.stamps` in `references/structure-rules.yaml` | `check`, on approval |
-| Domain report + snapshot | `MyNotes/{Domain}/Projects/{workflow-project}/audit-{YYYY-MM-DD}.md` and `.snapshot.json` | `audit`, on approval |
-| Archived report + snapshot | `MyNotes/{Domain}/_archive/Projects/{workflow-project}/` | `close`, on approval |
+| Stamp ledger | `paths.stamps` in `references/structure-rules.yaml` | `check` |
+| Domain report + snapshot | `MyNotes/{Domain}/Projects/{workflow-project}/audit-{YYYY-MM-DD}.md` and `.snapshot.json` | `audit` |
+| Archived report + snapshot | `MyNotes/{Domain}/_archive/Projects/{workflow-project}/` | `audit` (old report), `close` |
 
 `{workflow-project}` = the `project:` key of the domain's workflow project. A repo's `CLAUDE.md` +
 `.claude/` are scored through its mirror in `code-{slug}/`, never the lagging GitHub copy.
@@ -44,10 +45,12 @@ with `check`, and `audit` compares stamps with the vault. No stamp → **uncheck
 
 1. **Scoring is the script's.** Build the snapshot, run `scripts/check_structure.py`, show its output
    as printed. Never score, count or reword a result by hand. No script run → no report
-2. **Findings come fixed.** A problem left without a fix row is a failed audit; only a real either/or
-   goes back as a question, inside the same proposal, recommended first
-3. **Approved rows run through their owners** (`references/fix-rows.md`), never with this skill's
-   own calls. Its own writes are the report, the snapshot and the stamp ledger
+2. **Findings come fixed.** A problem left without a fix row is a failed audit; a real either/or runs
+   its recommended option and the report names the other one
+3. **No approvals.** Every row runs in the same turn, in order, through its owner
+   (`references/fix-rows.md`), never with this skill's own calls. The owner doesn't ask again: the
+   command is the go. Its own writes are the report, the snapshot and the stamp ledger. Left for the
+   user: only what no tool can do, the paste into Claude.ai
 4. **Writes follow bandit:notes write safety**: new files fail closed, edits carry the bare-hex etag (strip `W/`, `"` and `-gzip`), never `if_match: "*"`,
    names resolve live, nothing is deleted (`close` moves, never deletes)
 5. **Settings means settings:** a report never goes in a `Claude/ai-*` folder

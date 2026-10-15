@@ -1,6 +1,6 @@
 # 🔧 Fix rows: owners and execution
 
-> Read when building fix rows and before running approved ones: who owns each fix, and how linked rows run.
+> Read when building fix rows and before running them: who owns each fix, and how linked rows run.
 
 ## 🔧 Who fixes what
 
@@ -11,7 +11,7 @@ the exact target.
 |---|---|
 | Rename or retype a board, rename a board folder | `bandit:tasks` |
 | Missing dev lanes or `lane/*` / `stage/*` tags (S9) | `bandit:tasks` **dev board shape** procedure |
-| Dev lanes on a board without `dev: true` (S9) | One row, two options, recommended first: remove the lanes (`bandit:tasks`) or onboard the project as dev (`bandit:project`). The user picks at the same approval |
+| Dev lanes on a board without `dev: true` (S9) | One row, two options, recommended first: remove the lanes (`bandit:tasks`) or onboard the project as dev (`bandit:project`). The recommended one runs; the report names the other |
 | An invalid `dev:` value (S4) | `bandit:project` targeted update |
 | Move old settings versions into `_archive/Claude/ai-{slug}/` (S7) | `bandit:notes archive` |
 | Create a missing folder | `bandit:notes` |
@@ -33,9 +33,10 @@ audit time.
 
 ---
 
-## ▶️ Executing approved rows
+## ▶️ Running the rows
 
-The user approves rows; this skill runs them **through their owners**. It loads the owner skill and
+Every row runs in the same turn, no approval asked; this skill runs them **through their owners**,
+and the owner doesn't ask again. It loads the owner skill and
 follows that skill's own procedure for the row. It never renames, moves, retypes or writes
 instructions with its own calls. Its own writes are the report and the ledger, nothing else.
 
@@ -44,16 +45,16 @@ names the old name: readers stop when the name no longer resolves. So when build
 search every project's `board:` line for the old name. Each match gets a second row right after
 the rename: `bandit:project` targeted update of that project, `board:` → the new name.
 
-- A pair is approved together. The user approves one row of a pair and not the other → ask before
-  running either.
+- A pair runs together, or not at all.
 - **Order:** vault rows (`bandit:notes`) → settings rows (`bandit:project`) → board rows
   (`bandit:tasks`). The new instructions version exists before the old board name stops
   resolving.
 - A row whose owner refuses or fails → skip the rows that depend on it, and report both.
-- **S12 layout rows** live on the Claude Code machine, out of reach here. Hand the approved ones
-  over as one block for that project's Claude Code session, after the other rows; nothing is
-  deleted there without the approval they already carry. The block ends by searching
-  `Projects/{slug}/` for every path it moved and proposing the note edits.
+- **S12 layout rows** live on the Claude Code machine, out of reach here. Hand them over as one
+  block for that project's Claude Code session, after the other rows. The block says it runs as
+  written, deletes included, with no question; it re-lists each folder first and skips any path
+  that changed. It ends by searching `Projects/{slug}/` for every path it moved and making the
+  note edits.
 
 **Close the run** with one result line per row, then what the user still owes, per project:
 *paste `{prefix}-instructions-v{N}` into {Claude.ai name}, then run `/bandit:audit check` there.

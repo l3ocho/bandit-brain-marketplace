@@ -1,7 +1,7 @@
 ---
 type: reference
 summary: House standard for the user's domains and projects across Claude.ai, the MyNotes vault and BanditBrains. bandit:audit scores against these 16 rules.
-updated: 2026-10-14
+updated: 2026-10-15
 ---
 
 # 🧱 Structure Rulebook
@@ -108,9 +108,9 @@ Numbered last so old reports keep their numbers; it's a must.
 
 - For any project with a Claude Code twin (S10): the local folder Claude Code runs from keeps one layout. At the root: `CLAUDE.md`, `.claude/`, `repos/`, `work/`, `data/`, `scratch/`, `_closed/`, `_backup/`, and hosted projects (a folder with its own `CLAUDE.md`). Nothing else.
 - `work/`, `data/` and `_closed/` hold only task folders named `{prefix}-{task}`: `{task}` is the board task's title in kebab-case, never an ID. No loose files. Superseded work stays in its task folder (`work/{prefix}-{task}/superseded/`) and leaves with it at close.
-- `_backup/` holds settings rollback copies only, flat: `CLAUDE.md.{version}`, `settings.json.{version}`, `workdir.py.{version}` (`s12.backup_name_pattern`). No retention clock; deleted only by an approved row. Never work, never data.
+- `_backup/` holds settings rollback copies only, flat: `CLAUDE.md.{version}`, `settings.json.{version}`, `workdir.py.{version}` (`s12.backup_name_pattern`). No retention clock; deleted only by a fix row. Never work, never data.
 - Data files (`s12.data_extensions`) live only in `data/{prefix}-{task}/`. `data/` is purged when its task closes, never archived. The manifest never records a file name under `data/`; customer data in notes stays under each project's own rule.
-- Retention: `scratch/` files older than 7 days and `_closed/` folders older than 30 days get a delete row. Nothing is deleted without the user's approval.
+- Retention: `scratch/` files older than 7 days and `_closed/` folders older than 30 days get a delete row, run by the audit with the rest.
 - Enforced at write time by the twin's guard: `code-{slug}/claude/hooks/workdir.py`, hash `s12.hook_sha12`, run by a `PreToolUse` and a `SessionStart` hook in `claude/settings.json` (bandit:project, `references/workdir.md`). The guard's constants mirror `s12`: change both.
 - The `SessionStart` hook writes a manifest (paths, dates, counts; no contents), and Claude Code uploads it to `{Domain}/Projects/{slug}/workdir-manifest.json`. No manifest, or one older than 7 days → **unchecked**.
 - Fix rows: guard missing or outdated → bandit:project. Layout rows → the project's Claude Code session, targets written `{slug}:{path}`, relative to its working folder. Any move ends by searching `{Domain}/Projects/{slug}/` for the old paths and proposing the note edits.
@@ -173,11 +173,11 @@ audit scores them from the snapshot (schema 5) and never replaces that checker.
 ## 📄 Report lifecycle
 
 - One live report per domain, in the workflow project's own folder: `MyNotes/{Domain}/Projects/{workflow-project}/audit-{YYYY-MM-DD}.md`. Never in a settings folder.
-- Per project: the score line, then numbered fix rows `| # | Action | Path | Effect | Why |`. The user approves rows; nothing runs otherwise.
+- Per project: the score line, then numbered fix rows `| # | Action | Path | Effect | Why |`. The audit runs every row in the same turn; no approval is asked.
 - The snapshot the script scored sits next to the report: `audit-{YYYY-MM-DD}.snapshot.json`. The report is written exactly as the script printed it; its footer carries the rules, snapshot and script hashes.
 - **Replay:** `close` and the next audit re-run the script on the saved snapshot. A report that doesn't reproduce byte for byte is invalid.
-- **Superseded:** a report with no footer, or built with other rules or script hashes, can't replay. It's archived as-is by an approved row of the fresh audit that replaces it; its rows are never run.
-- When the approved fixes are done, the report and its snapshot move to `{Domain}/_archive/Projects/{workflow-project}/` (approved move).
+- **Superseded:** a report with no footer, or built with other rules or script hashes, can't replay. It's archived as-is by the fresh audit that replaces it; its rows are never run.
+- When the fixes are done, the report and its snapshot move to `{Domain}/_archive/Projects/{workflow-project}/`.
 
 ---
 

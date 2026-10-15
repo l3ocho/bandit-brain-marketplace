@@ -47,7 +47,8 @@ scope is Project.
    they put the note up for review (`references/model.md` → The inbox is the user's)
 3. **The user confirms every move, rename, archive, delete, folder creation and edit.** A numbered
    proposal, approved by all, a list or none; only approved rows run. Two auto-writes: a new note in
-   `_inbox/`, and the generated README (`references/write-safety.md`)
+   `_inbox/`, and the generated README (`references/write-safety.md`). A row bandit:audit runs is
+   already the go: no new proposal
 4. **Findings come fixed:** every problem is a numbered fix row in the same proposal, `domain` when
    outside the scope. End every proposal with: *Nothing is created or changed until you answer all, a
    list, or none.*

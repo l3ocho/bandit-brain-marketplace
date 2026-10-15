@@ -3,7 +3,7 @@
 # `rulebook_updated` equal to the rulebook's `updated:` frontmatter.
 # check_structure.py refuses to run when they differ.
 schema: 1
-rulebook_updated: 2026-10-14
+rulebook_updated: 2026-10-15
 
 levels:            # must → ❌ on a break · should → ⚠️
   S1: must
@@ -123,7 +123,7 @@ s12:
   task_dirs: [work, data, _closed]  # only {prefix}-{task} folders inside, no loose files
   task_folder_pattern: "^{prefix}-[a-z0-9]+(-[a-z0-9]+)*$"
   data_extensions: [.csv, .tsv, .xls, .xlsx, .xlsm, .parquet, .feather, .jsonl, .ndjson, .db, .sqlite, .sqlite3, .duckdb]
-  retention_days: {scratch: 7, _closed: 30}   # older → a delete row, run only on approval
+  retention_days: {scratch: 7, _closed: 30}   # older → a delete row, run with the audit
   backup_dir: _backup               # settings rollback copies only, flat, no retention clock; never work
   backup_name_pattern: "^(CLAUDE\\.md|settings\\.json|workdir\\.py)\\..+$"
 

@@ -8,10 +8,9 @@
 1. **Read what's running.** From this project's own instructions (the system prompt), take:
    - the `**Version:**` line
    - the `## 🧭 Project Context` block: `domain`, `project`, `type`, `board`, `prefix`
-   - the Claude.ai project name, if the session shows it. Not shown → ask the user for it (one line), or
-     record `null`.
-   No `**Version:**` line or no Project Context → no stamp. Propose the fix row instead:
-   `bandit:project` audit of this project, which adds the missing line or block. Run it on the user's yes.
+   - the Claude.ai project name, if the session shows it. Not shown → record `null`.
+   No `**Version:**` line or no Project Context → no stamp. Run the fix instead:
+   `bandit:project` audit of this project, which adds the missing line or block.
 2. **Find the vault folder.** `domain` ≠ `none` → `MyNotes/{domain}/Claude/ai-{project}`.
    `domain: none` → ask the user for the path.
    List it with `nc_webdav_list_directory`.
@@ -19,7 +18,7 @@
    its `**Version:**` line. Stop reading once one matches.
 4. **Compare** and name the S5 case from the rulebook (its S5 table, first match wins).
 
-5. **Propose one row**, then write only on the user's yes:
+5. **The stamp row**, written straight away, no question:
 
    ```
    | # | Action | Path | Effect | Why |
@@ -27,7 +26,7 @@
    ```
 
 6. **Write the ledger.** Read it first and keep its etag. Missing → create it (omit `if_match`).
-   The `.audit/` folder missing → that's its own row: ask before creating it.
+   The `.audit/` folder missing → create it (bandit:notes), then write.
    Replace only this project's entry; keep every other entry as read. Write with the bare-hex etag.
    On a 412, re-read once and re-merge; a second 412 → stop and report.
 7. **Score this project** (`domain` ≠ `none` only). Build a snapshot per `references/snapshot.md`
@@ -40,9 +39,10 @@
    ```
 
    Show its output as printed. Domain-wide rules (S1 folder, S3 one workflow) need the whole domain:
-   they're `audit {domain}`'s job. Its fix rows are shown with the stamp row and run on the user's yes,
-   through their owners (`references/fix-rows.md` → **▶️ Executing approved rows**).
-8. **Report in one line:** the S5 result and what was stamped, then the script's table.
+   they're `audit {domain}`'s job. Its fix rows run right away, no question, through their owners
+   (`references/fix-rows.md` → **▶️ Running the rows**).
+8. **Report in one line:** the S5 result and what was stamped, then the script's table and one
+   result line per row run.
 
 ## 🗂️ Ledger format
 

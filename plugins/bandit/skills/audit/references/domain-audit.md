@@ -1,7 +1,7 @@
 # 🔍 Domain audit (`audit {domain}` · `audit all`) and `close`
 
 > Scores domains against the structure rulebook with `scripts/check_structure.py` and writes one
-> report per domain, with its snapshot, on approval. Read-only until the user approves the report row.
+> report per domain, with its snapshot. Runs every fix row in the same turn: no approval asked.
 
 ## 📥 Gather (read-only)
 
@@ -28,15 +28,18 @@ python {skill folder}/scripts/check_structure.py --rules rules.yaml --rulebook r
   fixed.**
 - **Extra fix rows.** A finding the rules don't cover yet goes **below** the report, never inside
   it, as an `Extra fix rows` table numbered after the script's rows: action, owner (**🔧 Who fixes
-  what** in `references/fix-rows.md`), exact target, why. The user approves them with the script's rows in one answer.
-  A finding with two valid fixes is one row with both options, the recommended one first.
+  what** in `references/fix-rows.md`), exact target, why. They run with the script's rows.
+  A finding with two valid fixes is one row with both options: the recommended one runs, the report
+  names the other.
 - Pure context that needs no fix (e.g. the denominator change below) is a one-line **Note**, never
   a finding.
 
-## ▶️ Run the approved rows
+## ▶️ Run every row
 
-1. Execute in the order SKILL.md sets (vault → settings → board), each row through its owner's
-   procedure. Skip rows that depend on a declined or failed row.
+Right after the report is shown, no question:
+
+1. Execute in the order `references/fix-rows.md` sets (vault → settings → board), each row through
+   its owner's procedure. Skip rows that depend on a failed row.
 2. Settings rows: load `bandit:project` and run its targeted update **from the vault**, with the
    project's folder, its production file (the one matching the stamp) and the change. It writes
    the next version file and returns the text to paste.
@@ -44,7 +47,7 @@ python {skill folder}/scripts/check_structure.py --rules rules.yaml --rulebook r
 
 ## 📄 Report
 
-Two new files per domain, both written on one approved row (new files: omit `if_match`):
+Two new files per domain, written every run (new files: omit `if_match`):
 
 | File | Content |
 |---|---|
@@ -53,9 +56,9 @@ Two new files per domain, both written on one approved row (new files: omit `if_
 
 - Never into `Claude/ai-*`: that's the settings folder, for instructions and the reference doc only — never project logs, working notes, decision journals, discussion records, reports, briefs, plans or drafts.
 - The workflow project's `Projects/` folder missing → a separate row (`bandit:notes` creates it).
-- A live report already there → replay it first (see Close), then ask: close it, or replace it (an
-  edit with its etag, the snapshot too). A **superseded** one (see Replay) gets one more row in the
-  same proposal: archive it and its snapshot, as-is, before the new report is written.
+- A live report already there (valid or **superseded**, see Replay) → archive it and its snapshot,
+  as-is, to `_archive/Projects/{workflow-project}/` before the new report is written. An invalid
+  one is archived too; say it failed replay.
 
 ## 🔁 Replay
 
@@ -84,7 +87,6 @@ python {skill folder}/scripts/check_structure.py --rules rules.yaml --rulebook r
    `MyNotes/{domain}/Projects/{workflow-project}/`. None → say so.
 2. **Replay** it. Superseded → stop and offer a fresh audit, which archives it. Invalid → stop
    and say why.
-3. Ask the user whether its fix rows are done. Not done → stop; closing is their call.
-4. One row: move both files to `MyNotes/{domain}/_archive/Projects/{workflow-project}/` with
-   `nc_webdav_move_resource`. A missing target folder is a separate row (`bandit:notes` creates it).
-5. Confirm by listing both folders.
+3. Move both files to `MyNotes/{domain}/_archive/Projects/{workflow-project}/` with
+   `nc_webdav_move_resource`. A missing target folder → `bandit:notes` creates it first.
+4. Confirm by listing both folders.

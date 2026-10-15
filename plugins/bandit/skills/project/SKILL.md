@@ -35,7 +35,7 @@ restates them.
    interview, audit, update or write; over the tier's budget (never above 1,000) → the trim is row 1
 2. **One proposal, approved rows only.** Every finding is a fix row in it; a row that depends on a
    declined row is skipped and reported. End with: *Nothing is created or changed until you answer
-   all, a list, or none.*
+   all, a list, or none.* A row bandit:audit runs is already the go: no new proposal
 3. **Owners run their own steps.** Vault rows come from bandit:notes, board rows from bandit:tasks'
    `onboard`, loaded and run: never swapped for a quick check of your own
 4. **Instructions come from the templates** in `assets/instructions/` (`references/instructions.md`); the

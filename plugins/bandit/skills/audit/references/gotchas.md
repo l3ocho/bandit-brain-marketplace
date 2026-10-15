@@ -10,12 +10,15 @@ One line per real failure: what went wrong → what to do instead. Read once bef
 - **2026-09-27 · The Family audit left the project half-renamed.** The user approved the rows, and the
   chat renamed the board `Familyflow` → `Family - wkflw` and created the report folder with its
   own calls. The Project Context still said `board: Familyflow`, so bandit:tasks stopped in that
-  project, and the fix was left as "run `/bandit:project` later". → Approved rows run through
-  their owners, and a rename is linked to its `board:` update (**▶️ Executing approved rows**).
+  project, and the fix was left as "run `/bandit:project` later". → Rows run through
+  their owners, and a rename is linked to its `board:` update (**▶️ Running the rows**).
 - **2026-09-29 · Audits flagged problems and left them unfixed.** Anything the script didn't
   cover went into a Notes list with no fix, and S9 came back as "the user decides", so every audit
   needed another run. → Findings come fixed: every finding is a numbered fix row with its owner
-  and exact target, approved with the rest (`references/domain-audit.md` → Extra fix rows).
+  and exact target, run with the rest (`references/domain-audit.md` → Extra fix rows).
+- **2026-10-15 · An audit asked for a yes three times.** It asked which rows to run, then
+  ran `check`, found one more archive row and asked again, for moves anyone can undo. → `check` and
+  `audit` run every row in the same turn, no question; an either/or runs the recommended option.
 - **2026-09-29 · `check` said the rules were missing after they'd been written.** It reused the
   files it had read earlier in the chat and refused to score, twice. → Every run re-reads
   `rules.yaml`, `rulebook.md` (this skill's `references/`) and the snapshot inputs from the vault, never from earlier in the chat.

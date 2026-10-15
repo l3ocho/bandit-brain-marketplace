@@ -25,7 +25,7 @@ Natural language always works; a request that spans two surfaces reads both file
 | 📧 Email | `email` | `references/email.md` | Gmail → proposals only, zero writes |
 | 🏗️ Load | `load` | `references/load.md` | WBS → a new Deliverable project |
 | 🚀 Onboard | `onboard` | `references/onboard.md` | The board step of project onboarding, run by bandit:project |
-| 🛠️ Dev | `spec` `plan-tech` `stage` `pick-ready` | `references/dev.md` · `references/dev-workflow.md` | Dev projects only: lanes, stages, card sections · the card procedures |
+| 🛠️ Dev | `spec` `scope` `plan-tech` `stage` `pick-ready` | `references/dev.md` · `references/dev-workflow.md` | Dev projects only: lanes, stages, card sections · the card procedures |
 
 | Also read | When |
 |---|---|

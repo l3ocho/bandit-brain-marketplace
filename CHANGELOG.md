@@ -2,6 +2,17 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
+## Unreleased
+
+### Added
+- **`/bandit:tasks scope {card}`:** settles what's still open on one dev card. Everything already answered (the chat, the brief, the plan note, card comments) goes into the Spec, the brief and the plan note with no question; only what nobody wrote down is asked, in one decision table. A limit the brief's Change log shows the user removed never comes back.
+
+### Changed
+- **Locked Specs take settled changes without a yes:** the lock override writes in what is already decided and reports old and new afterwards; only an undecided change becomes a question or a `Spec change needed:` comment. `spec reconcile` applies directly.
+
+### Fixed
+- **Cheat sheet:** the bandit:audit rows describe 0.4.0's run-everything behaviour.
+
 ## 0.4.0 · 2026-10-15
 
 ### Changed

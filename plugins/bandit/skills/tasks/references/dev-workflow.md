@@ -1,6 +1,6 @@
 # 🛠️ Dev workflow — the card commands
 
-**Commands:** `/bandit:tasks spec` `/bandit:tasks spec reconcile` `/bandit:tasks plan-tech`
+**Commands:** `/bandit:tasks spec` `/bandit:tasks spec reconcile` `/bandit:tasks scope` `/bandit:tasks plan-tech`
 `/bandit:tasks stage` `/bandit:tasks pick-ready`
 **Owns:** surface roles · card boundaries · record homes · the dev card procedures
 **Board rules** (lanes, stages, lane template headings, Spec lock, tag merging, card fields, the
@@ -32,7 +32,7 @@ before writing, show old and new before replacing) from its own steps instead of
 
 | | Claude.ai | Claude Code |
 |---|---|---|
-| Commands | `spec`, `stage … ready` (on the user's approval), `pick-ready` | `spec`, `plan-tech`, `stage` (any), `pick-ready`, incident `spec` |
+| Commands | `spec`, `scope`, `stage … ready` (on the user's approval), `pick-ready` | `spec`, `scope`, `plan-tech`, `stage` (any), `pick-ready`, incident `spec` |
 | Writes on a card | `Spec` only | `Spec` on cards it creates; `Technical plan` on any card |
 | Refuses | `plan-tech`, plan notes, `stage … planned`, subtasks, branch / file / code detail on cards (effort only as a first estimate, `references/dev.md` → Card fields) | Rewriting the `Spec` of a card Claude.ai wrote |
 
@@ -42,9 +42,9 @@ can do it (*"`plan-tech` runs in Claude Code, from the repo"*).
 - **Claude.ai going technical:** write the point into `Spec` → *Open questions* as a plain item
   and move on. No branch names, file paths or code.
 - **A spec problem on a card with a Spec** (Claude Code on a Claude.ai card, or any locked Spec):
-  add a **card comment** starting `Spec change needed:` (the app's intended path). The card stays
-  `stage/spec` until the user resolves it, on either surface. Changing the Spec itself goes through the
-  Spec lock (`references/dev.md`).
+  settled somewhere already → fix it through the Spec lock (`references/dev.md`), no question. Not
+  settled anywhere → add a **card comment** starting `Spec change needed:` (the app's intended
+  path). The card stays `stage/spec` until the user resolves it, on either surface.
 
 ---
 
@@ -112,8 +112,8 @@ runbook needs no plan note: its `Technical plan` carries `Runbook: {repo path} �
    dependencies included), then `get_task` and check it.
    **Updating an existing card** (a merge match, or a parked item triage just moved into its
    column): `get_task` → fill missing fields → write `Spec` only where it's empty; a Spec with text
-   is locked (`references/dev.md` → Spec lock): show old and new, override only on the user's yes →
-   `update_task`. Claude Code never rewrites a `Spec` whose `Source` is Claude.ai (it adds a
+   is locked (`references/dev.md` → Spec lock): a settled change is written straight away and
+   reported old and new → `update_task`. Claude Code never rewrites a `Spec` whose `Source` is Claude.ai (it adds a
    `Spec change needed:` comment instead). Tags per `references/dev.md` → Tag merging.
 6. **Brief:** hand bandit:notes the card's brief (new, or updated when it exists), `board-task` =
    the card's short id; the Spec's `Brief:` line names its filename.
@@ -130,9 +130,9 @@ the sprint card). bandit-dev:sprint calls it from its planning steps.
 2. Build the new `Spec` from the same template headings: answered questions move into Decisions,
    Open questions keep only what is still open, acceptance lines match the decisions. Nothing
    outside `Spec` changes.
-3. **Show** each card's old and new `Spec` side by side, changed lines marked, all cards together.
-4. **One yes** (all, or a list of cards) applies them: `update_task` with the new description and
-   `overrideSpecLock: true`, then `get_task` and check it. A card the user leaves out keeps its `Spec`.
+3. **Apply**, no question: `update_task` with the new description and `overrideSpecLock: true`, then
+   `get_task` and check it. Only settled changes go in; anything still open stays in Open questions.
+4. **Report** each card's old and new `Spec` side by side, changed lines marked, all cards together.
 5. Add a comment on each changed card: `Spec reconciled {date}: {one line on what changed}`. The brief
    gets the same change and a Change log line through bandit:notes.
 
@@ -141,6 +141,19 @@ merge check, `dueDate` today, created in its area column, then `set_task_executi
 `assigned` straight away. A card due today reaches Assigned on its own only at the next midnight run,
 too late for an incident. The postmortem cites the card title and lives where the repo's Record homes
 table says (**🗂️ Record homes**).
+
+### `/bandit:tasks scope {card}` — settle what's still open on one card
+
+1. **Gate and role** (above). `get_task` → Spec, comments; the brief (its Change log first) and the
+   plan note through bandit:notes.
+2. **Sort every gap:** an Open question already answered (in this chat, the brief, the plan note or
+   a comment), an acceptance line the brief has and the card lacks, a decision not yet in Decisions.
+   Settled → it goes in. Never bring back a limit the brief's Change log shows the user removed.
+3. **Write** the settled ones straight away, as `spec reconcile` does, and make the same change in
+   the brief (with a Change log line) and the plan note through bandit:notes.
+4. **Ask only what is truly open**, one decision table: `Issue | Recommendation | Different from my
+   request? | How`. On the answer, write it the same way.
+5. **Report** in three lines: what changed, what is still open, the next stage step.
 
 ### `/bandit:tasks plan-tech` — Claude Code only
 

@@ -89,8 +89,10 @@ Subtasks carry the plan's steps. Everything longer lives in the plan note.
 ## 🔒 Spec lock (the app's)
 
 Once `<h2>Spec</h2>` holds text, `update_task` refuses any change to it with `SPEC_LOCKED`. Pass
-`overrideSpecLock: true` only for a Spec change the user approved in this session, after showing the old
-and new text (rulebook R14). Never to get past the refusal. Other sections (`Technical plan`) and
+`overrideSpecLock: true`, without asking, when the change only writes in what is already settled:
+the user's words in this chat, the brief, the plan note, or decisions in the card's comments. Read
+the current Spec first (rulebook R14), write, read back, and report old and new after. A change
+nobody wrote down is an open question for the user, never an override. Never to get past the refusal. Other sections (`Technical plan`) and
 adding a Spec to a card with none are never refused.
 
 ---

@@ -2,7 +2,7 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
-## Unreleased
+## 0.4.0 · 2026-10-15
 
 ### Changed
 - **Audit runs everything in one command:** `check` writes the stamp, scores the project and runs its fix rows; `audit` runs every fix row, archives the old report and writes the new one. No approval is asked; an either/or runs the recommended option and the report names the other. bandit:notes and bandit:project take a row from bandit:audit as the go, without a new proposal. The Claude Code handover runs as written, deletes included, after re-listing each folder.

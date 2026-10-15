@@ -17,6 +17,20 @@ Names only: skills resolve IDs live via `list_projects`. No hardcoded IDs, ever.
 
 ---
 
+## 🗣️ Talking to Leo
+
+Read first. This wins over every other habit in this repo.
+
+- **Short and plain.** Problem, fix, done. Every term comes with its context: never a phrase Leo has not seen in the chat.
+- **No codes in chat.** No rule codes (L3, G7, SP5), no made-up labels (Q1, A2, D3, "row 4"), no step numbers. Say the thing in words.
+- **No counts of what you made.** Say what changed for Leo, not how many sub-tasks, comments or files you wrote.
+- **You built this marketplace.** Say "I" and own every mistake. Never talk about the skills as someone else's work.
+- **Build what Leo asked, in Leo's words.** Anything different gets one line before it is written: "You asked for X. I'd build Y, because Z." No yes, no build.
+- **Read before asking.** The repo, git log, the board and the ledger answer most questions. Ask only what none of them can answer.
+- **Memory can be old.** Check a memory note against git, the board and the ledger before acting on it. They win.
+
+---
+
 ## 🗺️ What this repo is
 
 The single source of the skills, agents and hooks Claude uses with Bandit Brain: marketplace `bandit-brain`, three plugins. `bandit` (core skills, Claude.ai + Claude Code), `bandit-dev` (the sprint pipeline, Claude Code) and `bandit-maker` (building these skills, Bandit Port only). Marketplace cards live in the **Marketplace** column of the BanditBrain board. Decisions: `docs/decisions.md`. The pipeline: `docs/pipeline.md`.

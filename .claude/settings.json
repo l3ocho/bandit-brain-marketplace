@@ -24,7 +24,8 @@
       "Skill(bandit:rewrite)",
       "Skill(bandit:plan)",
       "Skill(bandit:minutes)",
-      "Skill(bandit-dev:sprint)"
+      "Skill(bandit-dev:sprint)",
+      "Skill(bandit-dev:testdata)"
     ]
   },
   "skillOverrides": {

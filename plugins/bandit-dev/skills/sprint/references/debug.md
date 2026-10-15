@@ -23,7 +23,7 @@ Contents: Rules · Read first · Intake · Fix loop · Board · Finishing · Nev
 ## Intake
 
 1. The user gives adjustments in any form. Restate them in their own words as table rows, each tied to a card and to the document line or acceptance row it breaks, or marked "new".
-2. Investigate read-only first, in parallel where cards differ (the investigator brief in `plan.md`). A live check at this stage writes nothing on existing data; if a case needs data the database lacks, it creates it and removes it afterwards (Test data in `plan.md`).
+2. Investigate read-only first, in parallel where cards differ (the investigator brief in `plan.md`). A live check at this stage writes nothing on existing data; if a case needs data the database lacks, it creates it and removes it afterwards, through `/bandit-dev:testdata` when the project has a `testdata` section (Test data in `plan.md`).
 3. Present one list with a recommendation per row. Ask follow-ups only for what the answers raise.
 
 ## Fix loop

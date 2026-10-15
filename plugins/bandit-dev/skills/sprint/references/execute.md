@@ -86,7 +86,7 @@ Allowed. The user lifted the old "never push" rule on 2026-10-10: it was written
 ## Never
 
 - Merge into `main`, deploy, force-push, push anything but `development`, run credential scripts or touch production.
-- Skip or soften a check because the dev database lacks data. Create the data, run the case, remove what you created (Test data in `plan.md`). "Not exercised" fails the wave.
+- Skip or soften a check because the dev database lacks data. Create the data (`/bandit-dev:testdata create` when the project has a `testdata` section), run the case, remove what you created (`clean`; Test data in `plan.md`). "Not exercised" fails the wave.
 - Complete a card, mark one approved, or call anything delivered beyond "awaiting the user's test".
 - Run two waves in one chat.
 - Move a card to Doing past a gate, or past the five-item cap.

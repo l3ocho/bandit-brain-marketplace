@@ -2,6 +2,13 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
+## Unreleased
+
+### Added
+- **`/bandit-dev:testdata`:** fills a dev project's development, test and staging databases with made-up data, and creates and removes the data each card's tests need. `map` reads the schema, the live database, the app's rules and what was built; `fill {db}` puts a lasting made-up set across the whole app; `make` works out each acceptance line's data; `create` writes it; `clean` removes exactly what a run created. Every database call goes through a guard that refuses production, a command holding an address or password, and staging writes without the user's yes. New optional `testdata` section in `bandit.yaml`.
+- **Sprint:** planning names each live check's data with `testdata make`; waves create it before the check and clean it after.
+- **Checker rule TD1:** the guard's refusals and its clean-only-what-was-created, on fixtures.
+
 ## 0.5.0 · 2026-10-15
 
 ### Added

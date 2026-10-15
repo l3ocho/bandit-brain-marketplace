@@ -1,0 +1,7 @@
+# Test fixture: a testdata section without `logic`. The section is optional, but a section present is complete.
+verify: "true"
+branches: { trunk: development, deploy: main }
+release: ["echo release"]
+testdata:
+  schema: [schema.sql]
+  databases: { development: 'python3 fake_db.py "$FIXTURE_DB_URL"' }

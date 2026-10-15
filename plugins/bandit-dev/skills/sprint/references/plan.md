@@ -126,7 +126,13 @@ A live-browser investigator **at planning time** is told which controls write (s
 
 ## Test data (plan and execution prompt)
 
-**Test data is never a reason to skip a test.** An execution-time check (ui-verifier, integration test, script) that needs data the dev database lacks (a folder, a second member, a private project, a card assigned to someone) creates that data itself, runs the check, and removes what it created. Reporting "could not exercise X because the dev database has no Y" is a failed check, not a limitation: the wave is not done until the case ran. The only limits are: never modify or delete a record the check did not create, never touch credentials, never run against production. Every plan section that lists a UI or live check must name the data the check needs and say the verifier builds it. At step 7, for each card with a live check, ask "what data does this case need, and does the dev database have it?"; if not, write the setup and cleanup into the plan section.
+**Test data is never a reason to skip a test.** An execution-time check (ui-verifier, integration test, script) that needs data the dev database lacks (a folder, a second member, a private project, a card assigned to someone) creates that data itself, runs the check, and removes what it created. Reporting "could not exercise X because the dev database has no Y" is a failed check, not a limitation: the wave is not done until the case ran. The only limits are: never modify or delete a record the check did not create, never touch credentials, never run against production.
+
+**The data comes from `bandit-dev:testdata`** when the project's `bandit.yaml` has a `testdata` section (`recipe.py opt testdata.databases` prints something other than `none`):
+
+- **Planning, step 7.** For each card with a live check, run `/bandit-dev:testdata make {card}` (read-only). The card's plan section names, per check, the data it needs in plain words, the label (the card id) and the line "created by `/bandit-dev:testdata create` before the check, removed by `clean` after it". No SQL in the plan: the wave makes it again on the code as built.
+- **Execution.** Before a card's live check: `make` then `create` on the database the check runs against; right after the check, pass or fail: `clean {db} card {card id}`. Staging writes ask the user's yes, so an unattended wave runs its checks on `development` or `test`.
+- **No `testdata` section.** The verifier builds and removes its own data as before, and the plan section says which data and how. Every plan section that lists a UI or live check names the data the check needs either way.
 
 ## Plan final message
 

@@ -42,6 +42,7 @@ updated: 2026-10-13
 | 💡  | [[#💡 prompt-engineer\|prompt-engineer]]    | 💬 "help me write the prompt" | Prompts for coding work                                                          |
 | 🧪  | [[#🧪 bandit-maker:skill\|bandit-maker:skill]]    | 💬 "make a skill for…"        | Build, test and tune skills                                                      |
 | 🧰  | [[#🧰 data-tools\|data-tools]]              | `/data-tools {command}`       | Databases, dbt, data audits, profiling, analysis, notebooks                      |
+| 🌱  | [[#🌱 bandit-dev:testdata\|bandit-dev:testdata]] | `/bandit-dev:testdata {command}` | Made-up data in development, test and staging; each card's test data          |
 
 > [!important] New project? Run **bandit:project** ("onboard this project"). It's the one onboarding command: it runs the vault step (bandit:notes) and the board step (bandit:tasks) and shows everything in one proposal.
 
@@ -370,6 +371,24 @@ updated: 2026-10-13
 
 📚 **References:** every command reads its file in `references/` first (column above). `assets/data-reviewer.md` is the agent template.
 🚫 Spreadsheet files → xlsx · charts in HTML artifacts → dataviz · vault notes → bandit:notes.
+
+### 🌱 bandit-dev:testdata
+
+> [!abstract] Made-up data for a dev project's development, test and staging databases, never the user's own
+> `plugin` · Claude Code only, from the app repo · needs the `testdata` section of the app's `bandit.yaml` (contract: `docs/bandit-yaml.md`)
+
+| Command                                     | ⚙️ Modifiers                      | Does                                                                                                                       |      | 📚 Reads    |
+|---------------------------------------------|-----------------------------------|----------------------------------------------------------------------------------------------------------------------------|------|-------------|
+| `/bandit-dev:testdata map`                  | `[cards or sprint card]`          | Reads the schema, the live database's structure, the app's rules and what was built; which tables and rules each card touches | 👀   | `map.md`    |
+| `/bandit-dev:testdata fill`                 | `{development, test or staging}`  | A lasting made-up set across the whole app, following its rules: a made-up user sees made-up data on every page           | ⚡ · staging ✋ | `fill.md`   |
+| `/bandit-dev:testdata make`                 | `{cards or sprint card}`          | The data each acceptance line needs, with the SQL; nothing written                                                         | 👀   | `make.md`   |
+| `/bandit-dev:testdata create`               | `{db}`                            | Writes what `make` prepared and records every id                                                                           | ⚡ · staging ✋ | `create.md` |
+| `/bandit-dev:testdata clean`                | `{db}` + record, `card {id}` or `fill` | Removes exactly the rows a record names, checks none is left                                                         | ⚡ · staging ✋ | `create.md` |
+
+> [!warning] The guard
+> Every database call goes through `scripts/dbguard.py`: only development, test and staging; no address or password in `bandit.yaml` (env var names, or `psql` inside the database container); INSERTs only, each recorded; `clean` deletes only recorded ids; staging writes need your yes on every run. Records live in the app's git-ignored `.testdata/`.
+
+🔗 **Works with:** bandit-dev:sprint (planning runs `make` per live check; waves run `create` before the check and `clean` after it).
 
 ---
 

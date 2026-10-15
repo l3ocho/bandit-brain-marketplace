@@ -34,7 +34,7 @@
 | Plugin | For | Contents | Runs on |
 |---|---|---|---|
 | **`bandit`** | Everyone | 8 skills: `tasks` · `notes` · `project` · `audit` · `clarify` · `rewrite` · `plan` · `minutes` | Claude.ai + Claude Code |
-| **`bandit-dev`** | Developers | Skill `sprint` · agent `plan-reviewer` · sprint-checker Stop hook. Needs `bandit` | Claude Code |
+| **`bandit-dev`** | Developers | Skills `sprint` and `testdata` · agent `plan-reviewer` · sprint-checker Stop hook. Needs `bandit` | Claude Code |
 | **`bandit-maker`** | Maintainers | Skill `skill`: create, evaluate and lint skills to the house standard | Claude Code |
 
 Every skill is called by plugin and area, with the verb as argument:

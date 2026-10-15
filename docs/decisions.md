@@ -119,6 +119,12 @@ Skills define the gate; the project provides the recipe in `bandit.yaml` at the 
 
 ---
 
+## 🧪 Test data (BB-165, Leo, 2026-10-15)
+
+| # | Decision |
+|---|---|
+| TD1 | A `bandit-dev` skill, `testdata`, reads the database, the app's rules and what was built, and writes made-up data straight into development, test and staging (never production): a lasting set (`fill`) and each card's test data (`make`, `create`, `clean`). Runs in the sprint and on demand. Made-up data only, never the user's own. The app builds nothing; no data files in the app repo; run records in its git-ignored `.testdata/`. Staging asks the user's yes on every run. `bandit.yaml` names one SQL command per database with env var names only; staging runs `psql` inside its container. The guard `dbguard.py` enforces it; `check_repo.py` rule TD1 tests the guard |
+
 ## 🗺️ Board scope by domain (debug D2, 2026-10-14)
 
 | # | Decision | By |

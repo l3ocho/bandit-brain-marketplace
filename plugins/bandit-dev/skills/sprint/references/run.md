@@ -67,7 +67,7 @@ For unattended runs (the user asleep). Started as `/loop /bandit-dev:sprint run 
 
 Nested agents are documented to work (a subagent can launch its own, up to three layers by default), so the wave agent normally runs code-reviewer and ui-verifier itself. This fallback is only for the case where it reports the Agent tool missing. When a wave agent reports `GATES NEEDED`:
 
-1. The orchestrator runs the `code-reviewer` agent on that branch's diff against `development`, then the `ui-verifier` agent if the wave changed anything visible, briefed with the cards' Acceptance and told to write only test data it creates and to remove it. It keeps only their verdicts and blocker lists, never the full reports.
+1. The orchestrator runs the `code-reviewer` agent on that branch's diff against `development`, then the `ui-verifier` agent if the wave changed anything visible, briefed with the cards' Acceptance and told to write only test data it creates and to remove it: through `/bandit-dev:testdata create` and `clean` when the project has a `testdata` section (Test data in `plan.md`). It keeps only their verdicts and blocker lists, never the full reports.
 2. It sends the verdicts back to **the same wave agent** (SendMessage to that agent, not a new one), which fixes the blockers, re-runs `verify` (`bandit.yaml`), merges, moves the cards and ticks the wave as `execute` says.
 3. Then it checks the wave (loop step 2) as usual.
 

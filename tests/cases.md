@@ -28,6 +28,20 @@ the `bandit-staging` board only. `read` cases are checked by reading the shipped
 | C13 | P7 status line | read | `references/run.md` loop step 2 | a stale sprint card Status line fails the wave |
 | C14 | P1 agent | read | `plugins/bandit-dev/agents/plan-reviewer.md` | read-only tools (Read, Glob, Grep); findings table with severity; blockers carry a recommendation |
 
+## 🧪 Test data (`bandit-dev:testdata`, BB-165)
+
+| # | Item | Kind | Input | Expected |
+|---|---|---|---|---|
+| C36 | Recipe section | auto (TD1) | `recipe.py opt testdata.databases` on the fixture; `opt testdata.logic` on `bandit.no-migrations.yaml`; `dbguard.py check` on `bandit.testdata-missing-key.yaml` | the three databases listed; `none`; exit 3 naming `testdata.logic` |
+| C37 | Only test databases | auto (TD1) | `dbguard.py check production`; `check test` on `bandit.testdata-unsafe.yaml` | exit 6, "not a test database"; exit 6, "lists production" |
+| C38 | No credentials | auto (TD1) | `check` on `bandit.testdata-secret.yaml`; `check development` with the env var unset; every case with the env var set | exit 6 without printing the command; exit 6 naming the variable only; the value never printed |
+| C39 | Create writes only new rows | auto (TD1) | `create` with an UPDATE; with an INSERT lacking `RETURNING 'testdata'`; `read` with a psql meta-command | exit 6 each, nothing run |
+| C40 | Staging asks every run | auto (TD1) | `create staging` without `--yes` | exit 6, "asks the user's yes" |
+| C41 | Clean removes only the record | auto (TD1) | `create development` (two rows), `clean development card c1 --dry-run`, `clean`, `records` | deletes name exactly the two recorded ids, children first; "none left"; no open record |
+| C42 | Real database | cli | `.work/test/testdata/`: a throwaway `postgres:18` container, the fixture schema, one existing row; `create` a made-up team, a rule-breaking insert, `clean` | rows created and recorded; the broken insert keeps nothing; after `clean` only the existing row is left (run 2026-10-15) |
+| C43 | Map, fill, make on the app | cli | Bandit Brain with a `testdata` section: `map`, `fill development`, `make` on a sprint's cards, `create`, `clean` | the map lists tables, rules with `file:line` and each card's tables; a made-up user sees made-up data on every page; each acceptance line has its data; `clean` leaves no row |
+| C44 | Sprint hook | read | `sprint/references/plan.md` → Test data; `execute.md` → Never | planning runs `make` per live check and names the data; the wave runs `create` before and `clean` after |
+
 ## 🗂️ Tasks (`bandit:tasks`)
 
 | # | Item | Kind | Input | Expected |

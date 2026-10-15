@@ -13,3 +13,10 @@ staging:
   refresh: "echo staging refresh"
   down: "echo staging down"
   where: test-host
+testdata:
+  schema: [schema.sql]
+  logic: [src/]
+  databases:
+    development: 'python3 fake_db.py "$FIXTURE_DB_URL"'
+    test: 'python3 fake_db.py "$FIXTURE_DB_URL"'
+    staging: "sh -c 'python3 fake_db.py'"

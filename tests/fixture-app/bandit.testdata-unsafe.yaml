@@ -1,0 +1,10 @@
+# Test fixture: a database outside the test ones. The guard refuses the whole section:
+# testdata never runs on production.
+verify: "true"
+branches: { trunk: development, deploy: main }
+release: ["echo release"]
+testdata:
+  schema: [schema.sql]
+  logic: [src/]
+  databases:
+    production: 'psql "$DATABASE_URL"'

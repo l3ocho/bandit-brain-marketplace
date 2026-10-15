@@ -4,7 +4,8 @@ project holds the recipe. A missing file or key refuses and names it (contract: 
 repo's docs/bandit-yaml.md).
 
 Usage:
-  recipe.py [--file PATH] get KEY            print one value (a list prints one item per line)
+  recipe.py [--file PATH] get KEY            print one value (a list prints one item per line,
+                                             a mapping one `key<TAB>value` line per entry)
   recipe.py [--file PATH] require KEY [KEY…] exit 0 only when every key is present
   recipe.py [--file PATH] opt KEY            print an optional key's value, or `none` when absent
   recipe.py [--file PATH] tail               run migrations.check, print the current tail
@@ -30,9 +31,12 @@ KEYS = {
     "migrations.dir": "plan: where migrations live",
     "migrations.check": "execute, run, release: prints the current migration tail",
     "staging.refresh": "release: the instruction the user runs to test the release on staging",
+    "testdata.schema": "testdata: where the tables are defined",
+    "testdata.logic": "testdata: where the app enforces its rules",
+    "testdata.databases": "testdata: one command per database that runs SQL from stdin",
 }
-# A repo without migrations or staging leaves the whole section out; a section present is complete.
-OPTIONAL = ("migrations", "staging")
+# A repo without migrations, staging or testdata leaves the whole section out; a section present is complete.
+OPTIONAL = ("migrations", "staging", "testdata")
 
 
 def refuse(code, msg):
@@ -61,6 +65,15 @@ def lookup(data, key):
     return node
 
 
+def show(value):
+    """A list prints one item per line, a mapping one `key<TAB>value` line per entry."""
+    if isinstance(value, list):
+        return "\n".join(map(str, value))
+    if isinstance(value, dict):
+        return "\n".join(f"{k}\t{v}" for k, v in value.items())
+    return str(value)
+
+
 def tail(data, root):
     if data.get("migrations") in (None, "", {}):
         return "none"
@@ -82,16 +95,14 @@ def main(argv):
     cmd, args = argv[0], argv[1:]
     data = load(path)
     if cmd == "get" and len(args) == 1:
-        value = lookup(data, args[0])
-        print("\n".join(map(str, value)) if isinstance(value, list) else value)
+        print(show(lookup(data, args[0])))
     elif cmd == "opt" and len(args) == 1:
         if args[0].split(".")[0] not in OPTIONAL:
             refuse(2, f"`{args[0]}` is not optional: use get")
         if data.get(args[0].split(".")[0]) in (None, "", {}):
             print("none")
         else:
-            value = lookup(data, args[0])
-            print("\n".join(map(str, value)) if isinstance(value, list) else value)
+            print(show(lookup(data, args[0])))
     elif cmd == "require" and args:
         for key in args:
             lookup(data, key)

@@ -438,6 +438,61 @@ def check_recipe():
     report("Y1", not bad, "; ".join(bad) or f"recipe.py: {len(cases)} fixture cases (keys, tail, refusal by name, optional sections)")
 
 
+# ── TD1 · the testdata guard refuses every unsafe database and removes only what it created (fixtures) ─
+def check_testdata():
+    import shutil as sh
+    import tempfile
+    recipe_py = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts" / "recipe.py"
+    guard = PLUGINS / "bandit-dev" / "skills" / "testdata" / "scripts" / "dbguard.py"
+    skill = PLUGINS / "bandit-dev" / "skills" / "testdata"
+    missing = [n for n in ("SKILL.md", "references/map.md", "references/fill.md", "references/make.md",
+                           "references/create.md", "references/safety.md") if not (skill / n).exists()]
+    if missing or not guard.exists():
+        return report("TD1", False, f"testdata skill files missing: {', '.join(missing) or 'scripts/dbguard.py'}")
+    bad = []
+    with tempfile.TemporaryDirectory() as d:
+        app = Path(d) / "app"
+        sh.copytree(ROOT / "tests" / "fixture-app", app)
+        subprocess.run(["git", "init", "-q", str(app)], check=True)
+        insert = ("INSERT INTO teams (name) VALUES ('Otter; made-up') RETURNING 'testdata', 'teams', 'id', id::text;\n"
+                  "INSERT INTO members (team_id, username, role) SELECT id, 'td-otter', 'owner' FROM teams "
+                  "RETURNING 'testdata', 'members', 'id', id::text;")
+        env = {k: v for k, v in __import__("os").environ.items() if k != "FIXTURE_DB_URL"}
+
+        def guarded(*args, stdin="", with_url=True):
+            e = dict(env, FIXTURE_DB_URL="sentinel-address-td1") if with_url else env
+            r = subprocess.run([sys.executable, "-B", str(guard), *args], input=stdin, capture_output=True,
+                               text=True, cwd=app, env=e)
+            return r.returncode, (r.stdout + r.stderr).strip()
+
+        cases = [
+            (lambda: run_script(recipe_py, "opt", "testdata.databases", cwd=app), 0, "staging\t"),
+            (lambda: run_script(recipe_py, "--file", "bandit.no-migrations.yaml", "opt", "testdata.logic", cwd=app), 0, "none"),
+            (lambda: guarded("--file", "bandit.testdata-missing-key.yaml", "check", "development"), 3, "missing key `testdata.logic`"),
+            (lambda: guarded("check", "production"), 6, "not a test database"),
+            (lambda: guarded("--file", "bandit.testdata-unsafe.yaml", "check", "test"), 6, "lists production"),
+            (lambda: guarded("--file", "bandit.testdata-secret.yaml", "check", "development"), 6, "holds an address or password"),
+            (lambda: guarded("check", "development", with_url=False), 6, "`FIXTURE_DB_URL` is not set"),
+            (lambda: guarded("create", "development", "--kind", "card", "--label", "c1", stdin="UPDATE teams SET name = 'x';"), 6, "INSERTs only"),
+            (lambda: guarded("create", "development", "--kind", "card", "--label", "c1", stdin="INSERT INTO teams (name) VALUES ('x');"), 6, "must end with RETURNING"),
+            (lambda: guarded("read", "development", stdin="\\! echo hi"), 6, "meta-commands"),
+            (lambda: guarded("create", "staging", "--kind", "card", "--label", "c1", stdin=insert), 6, "asks the user's yes"),
+            (lambda: guarded("create", "development", "--kind", "card", "--label", "c1", stdin=insert), 0, "created 2 rows"),
+            (lambda: guarded("clean", "development", "card", "c1", "--dry-run"), 0,
+             "DELETE FROM members WHERE id::text IN ('fake-2');\nDELETE FROM teams WHERE id::text IN ('fake-1');"),
+            (lambda: guarded("clean", "development", "card", "c1"), 0, "none left"),
+            (lambda: guarded("records"), 0, "no open record"),
+        ]
+        for n, (call, code, text) in enumerate(cases, 1):
+            got, out = call()
+            if "sentinel-address-td1" in out:
+                bad.append(f"case {n} printed the env var's value")
+            if got != code or text not in out:
+                bad.append(f"case {n} → {got} {out[-120:]!r}")
+    report("TD1", not bad, "; ".join(bad) or f"testdata: {len(cases)} fixture cases (recipe section, refusals, "
+           "INSERT-only create, staging yes, clean removes only the record's rows)")
+
+
 # ── L5 · project instructions templates are one page, and the project skill ships them as-is ─
 TEMPLATE_MAX_LINES, TEMPLATE_MAX_WORDS = 60, 450
 
@@ -487,6 +542,7 @@ def main(argv):
     check_sp7()
     check_sp8()
     check_recipe()
+    check_testdata()
     check_l5()
     for rule, ok, msg in results:
         print(f"{'✅' if ok else '❌'} {rule} {msg}")

@@ -98,6 +98,7 @@ runbook needs no plan note: its `Technical plan` carries `Runbook: {repo path} �
    Scope in/out, Requirements (Must/Should) → Acceptance, verified Assumptions → Decisions,
    unverified ones and Open Questions → Open questions. The Spec's `Source` names it:
    `Source: clarify, {date}`, and the brief keeps the full specification.
+   **Baseline.** The user's own words are the Spec. Read the repo, board and notes before asking; ask only what they cannot answer, in plain words, no codes. Add nothing the user did not ask for: anything that differs is shown as old and new before it is written.
 2. **Place it** by the column rule (`references/dev.md` → Card fields), never parked. Lane from the
    agreed scope. A WBS exists for the project → cite the matching `WBS-X.Y.Z` (bandit:notes finds
    the doc).

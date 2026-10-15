@@ -7,12 +7,14 @@ Contents: Rules · Read first · Intake · Fix loop · Board · Finishing · Nev
 ## Rules
 
 - **Documents first, then code.** Read the sprint folder before the diff, so each fix is judged against what was promised.
-- **Every adjustment is a numbered row** (the house fix-row format): what the user saw, the card it belongs to, the cause, the fix, the recommendation. A fix is applied only on the user's say-so, or under their standing "go with the recommendations".
+- **The user's words are the baseline.** Each adjustment is judged against what they asked for, never against the plan's summary of it.
+- **Every adjustment is a row in the one decision table** (`references/plan.md` → Conventions), plain words, no numbers or codes: what the user saw, the card, the cause, the fix, the recommendation. A fix is applied only on the user's say-so, or under their standing "go with the recommendations".
 - **Bug fixes for defects in delivered cards are not new scope.** New requirements are parked as a card outside the sprint, with one yes or no on whether they join.
 - **Same authority as `execute`:** work on the trunk; pushes follow `execute.md` → Pushing `development`. Never deploy or touch production: release is its own command.
 
 ## Read first
 
+0. **The ledger and the board win over memory.** A memory note that disagrees with them is stale: use the documents and say so in one line.
 1. The sprint card: Spec-adjacent sections, decisions log, comments per step and wave.
 2. In the sprint folder: plan, execution prompt, ledger (needs-the-user list, deviations, bug log, decisions taken without the user), the handover report and every brief with its change log.
 3. The code changes: every card's branch and commit from the ledger, then the combined diff against the sprint's starting commit. Read the diff per card, not as one block.
@@ -20,7 +22,7 @@ Contents: Rules · Read first · Intake · Fix loop · Board · Finishing · Nev
 
 ## Intake
 
-1. The user gives adjustments in any form. Restate them as numbered rows, each tied to a card and to the document line or acceptance row it breaks, or marked "new".
+1. The user gives adjustments in any form. Restate them in their own words as table rows, each tied to a card and to the document line or acceptance row it breaks, or marked "new".
 2. Investigate read-only first, in parallel where cards differ (the investigator brief in `plan.md`). A live check at this stage writes nothing on existing data; if a case needs data the database lacks, it creates it and removes it afterwards (Test data in `plan.md`).
 3. Present one list with a recommendation per row. Ask follow-ups only for what the answers raise.
 

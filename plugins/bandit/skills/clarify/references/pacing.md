@@ -23,7 +23,7 @@ for working memory gaps across long conversations.
 - Maximum 4 options per question
 - Always include "Other" escape hatch
 - Provide concrete examples, not abstract descriptions
-- Use numbered lists so the user can respond with just a number
+- Options in plain words the user can tap or copy; never invented codes (Q1, A2) to answer with
 
 ### Support Working Memory
 - Summarize after every 2–3 questions
@@ -66,7 +66,8 @@ dependencies, scope expansion):
 This skill is frequently used on mobile. Design every interaction for:
 
 - **Short sessions** — each exchange should feel like progress
-- **Minimal typing** — default to numbered options the user can tap or type a digit for
+- **Minimal typing** — short plain-word options the user can tap
+- **Read before asking** — never ask what a read-only look at the repo, board or notes answers
 - **Small screens** — keep summaries to 3–5 bullets, not paragraphs
 - **Interruptions** — if the conversation drops, the clarified-so-far state should be
   reconstructable from conversation history (micro-summaries handle this)

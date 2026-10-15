@@ -308,6 +308,23 @@ def check_l8():
            f"{' …' if len(hits) > 8 else ''} ({len(hits)})" if hits else "no person's name or he/his/him in any plugin file")
 
 
+# ── T1 · talking to the user: no numbered rows or option codes where skills ask and decide ──
+T1_FILES = ["bandit-dev/skills/sprint", "bandit/skills/clarify", "bandit/skills/tasks/references/dev-workflow.md"]
+T1_TERMS = re.compile(r"numbered (fix )?rows?\b|numbered options|numbered lists so", re.I)
+
+
+def check_t1():
+    hits = []
+    for root in T1_FILES:
+        p = PLUGINS / root
+        for f in sorted([p] if p.is_file() else p.rglob("*.md")):
+            for n, line in enumerate(f.read_text(encoding="utf-8").splitlines(), 1):
+                if T1_TERMS.search(line) and "no numbers" not in line and "numbered fix rows)" not in line:
+                    hits.append(f"{f.relative_to(PLUGINS)}:{n}")
+    report("T1", not hits, f"numbered rows where the user decides (use the decision table): {'; '.join(hits)}"
+           if hits else "sprint, clarify and spec ask in the plain decision table, no numbered rows")
+
+
 # ── L4 · no project details in skills: project names, stack tools, card ids, UUIDs ───────
 L4_TERMS = re.compile(
     r"\b(BanditLabs|Summitt|cs-notes|CS Notes|bandit-labs|banditbrain|BanditBrains|drizzle|npm|npx)\b"
@@ -464,6 +481,7 @@ def main(argv):
     check_l2()
     check_l4()
     check_l8()
+    check_t1()
     check_house_lint()
     check_audit_contract()
     check_sp7()

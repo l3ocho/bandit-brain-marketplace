@@ -12,6 +12,9 @@ Contents: Interview and pace · Scope · Cards and Specs · Agents and checks ·
 - Left a task as "still to do" that an earlier instruction already covered → close it from the instruction.
 - Took "approved" as a gate and moved cards to ready without saying so → state the reading in one line when a vague approval is taken to mean a gate.
 
+- Asked the user things the repo and the cards already answered, and labelled questions with invented codes (Q2, A3) → read first, ask only what nothing can answer, in plain words.
+- A new chat acted on an old memory note instead of the ledger → the ledger and the board win over memory; read them first.
+
 ## Scope
 
 - Slipped invented rules (a move-out guard, a child comment ban, a rule exception) into "applied defaults" the user never saw, then asked about them for an hour → add nothing not asked for; anything code forces is a table row that differs, before it is written anywhere.
@@ -70,7 +73,7 @@ Written before the first real run; correct them with what happens.
 - A chained card was refused `doing` (`BLOCKED_BY_INCOMPLETE_TASK`) because its blocker, a batch card, was parked in `standby` as the skill requires → the app change (Doing would accept a blocker in `standby`) is a backlog card and **not built**, so the refusal stands: leave the card in `next`, comment the refusal on the card, record it in the ledger, and never complete the blocker to get past it. A blocker in `assigned`, `next` or `doing` still refuses: work the blocker first.
 - A finished card was completed instead of parked → delivery is `standby`; only `close` completes, on the user's quoted approval.
 - Sub-tasks ticked in a batch at the end → tick each as it is done so the card shows live progress.
-- Debug fixed things nobody approved → every adjustment is a numbered row; apply only approved rows.
+- Debug fixed things nobody approved → every adjustment is a row in the decision table; apply only approved rows.
 - Close archived before the cards were complete → order is cards, sprint card, then folder; verify each.
 
 - Wave sub-tasks landed at the top of the card, reversed, even when added one at a time → always `reorder_subtasks` with the full order and read back.

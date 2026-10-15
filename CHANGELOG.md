@@ -2,6 +2,11 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
+## Unreleased
+
+### Fixed
+- **Talking to the user, across sprint, debug, spec and clarify:** the user's own words are the baseline and nothing they did not ask for is built; the repo, cards, briefs and ledger are read before any question, and only what they cannot answer is asked; decisions and debug adjustments go in the one plain decision table, never numbered rows or invented codes (Q1, A2); reports are three lines at most, no counts of what was created. In debug, the ledger and the board win over a memory note. Checker rule **T1** fails any return of numbered rows in these skills.
+
 ## 0.3.1 · 2026-10-14
 
 ### Changed

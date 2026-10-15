@@ -68,6 +68,7 @@ scripts/release.py                  cuts a release (SemVer, tags vX.Y.Z)
 - **Nothing outside the repo.** Working files go in `.work/`. The only writes outside are vault rows in this project's folders and the Bandit CTO change log.
 - **Never edit `.claude/settings*.json`** in a build session, except an approved hook change.
 - **Branches:** work on `development`, push it. `main` moves only on Leo's deploy word; tags only at release.
+- **The version number is Leo's.** Release only the number Leo gave, or the one I told him before building. Never pick a different one at release time, whatever the changelog rule says. No number agreed → ask in one line before the release.
 - **The app clone** (`~/projects/banditlabs/bandit_brain`) is read-only reference.
 - **Staging:** `bb-staging status`, `smoke`, `logs` are fine. Never `bb-staging up --refresh` during a freeze.
 

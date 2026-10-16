@@ -7,7 +7,7 @@
 
 ## 🗂️ The six columns
 
-`get_execution_board` returns them in fixed order. Empty columns are included.
+`get_execution_board` returns them in fixed order, but for **every card in the household with full descriptions**: on a busy household it overflows the tool output. Read one column at a time instead: `list_tasks({ executionState, projectId })` per board of the domain (add `tagName` for a sprint). Use `get_execution_board` only with an `assignee` filter on a small board.
 
 | # | Column | Settable via `set_task_execution_state`? |
 |---|---|---|
@@ -68,7 +68,7 @@ Report the breach. Propose what moves back to Assigned or Stand By. **Do not sil
 
 ### `/bandit:tasks today`
 
-1. `get_execution_board`, filtered to the domain (`references/scope.md` → Filtering)
+1. `list_tasks({ executionState, projectId })` for `doing`, `next`, `assigned` and `standby`, one call per board of the domain (`references/scope.md` → Filtering)
 2. Report **Doing** first, then **Next**, then Assigned; inside each, the home board first, then
    the rest of the domain by board
 3. Flag: cap breach · anything overdue · anything in Stand By older than a week, **except** a

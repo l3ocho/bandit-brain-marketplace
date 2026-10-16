@@ -24,7 +24,7 @@ only, and checks 6–7 read tag names, which are household-wide by nature.
 | 1 | **Untriaged pile** | `get_inbox_board` → Untriaged count. Over ~15 is a triage backlog, not a hygiene problem |
 | 2 | **Untriaged parked cards** | `list_tasks(projectColumnId: null)` — in a project, in no column. Age via `list_events(taskId)`. Fires on a **workflow** project for any card older than a day (the daily sweep missed it), and on any type for a card older than ~30 days with no field answered. Fix row per project: run triage's **Leaving the inbox** for them (`references/triage.md`), or, on a deliverable project, keep them parked as ideas with the user's yes |
 | 3 | **Stale overdue** | `get_week_board` → Due column. Anything overdue by more than a month is a decision, not a date |
-| 4 | **Stand By rot** | `get_execution_board` → Stand By. Nothing should sit there indefinitely. **Exempt:** cards carrying a `sprint/*` tag and sprint cards (`references/dev.md` → Sprint card): they wait there for the user's test |
+| 4 | **Stand By rot** | `list_tasks({ executionState: 'standby', projectId })` per board. Nothing should sit there indefinitely. **Exempt:** cards carrying a `sprint/*` tag and sprint cards (`references/dev.md` → Sprint card): they wait there for the user's test |
 | 5 | **Dead dependencies** | `get_task` on anything with `blockedBy` — links pointing at completed tasks |
 | 6 | **Orphan tags** | `list_tags` → `taskCount: 0`. **Exempt:** `sprint/*` (a closed sprint's tag is its record; `list_sprints` lists them) |
 | 7 | **Off-vocabulary tags** | `list_tags` → anything outside the vocabulary (`references/board.md` → Tags: three axes, dev tags, sprint tags). **Exempt:** `sprint/*` |

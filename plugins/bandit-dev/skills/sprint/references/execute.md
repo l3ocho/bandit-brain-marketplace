@@ -30,12 +30,12 @@ Contents: Command · Rules · Start · The wave · Board moves · Finishing a wa
 ## The wave
 
 1. **Seed the board (first run only).** Every batch card (never the sprint card) to `assigned` with `bulk_set_execution_state`. Cards that were never in Assigned stay as they are if the state is already right. Record it in the ledger.
-2. **Set the board for this wave, at the start of EVERY wave, not only the first** (Board moves below). A later wave's cards arrive in `assigned` or `next`; this step is what puts them in `doing`. Procedure: `get_execution_board`; for each card of this wave that you are about to work, `set_task_execution_state` → `doing`; read the board again and show the columns in the wave's opening report. A card that is not in `doing` when you start working it is a failed step, unless the move was refused (next rule).
-   **A refused move to `doing` is never skipped silently.** The board's gate still refuses `doing` while any blocker is incomplete, and a blocker in `standby` is not complete. The app change that would let `standby` count is **not built**: until it is deployed the refusal is real, and a card chained behind a card of an earlier wave will be refused. Then: keep the card in `next`, add a card comment `Could not move to Doing: blocked by {blocker title} (in Stand By). Working it anyway under the wave's approval; the pending app change would allow this.`, write the same line under "Decisions taken without the user" in the ledger, and put it in the final message. Work the card; do not stop the wave for this.
+2. **Set the board for this wave, at the start of EVERY wave, not only the first** (Board moves below). A later wave's cards arrive in `assigned` or `next`; this step is what puts them in `doing`. Procedure: `get_execution_board`; for each card of this wave that you are about to work, `set_task_execution_state` → `doing`; read the board again and show the columns in the wave's opening report. A card that is not in `doing` when you start working it is a failed step. The board never refuses a move to `next`, `doing` or `standby` because of a blocker; only completing a card waits for its blockers. A move that fails for any other reason: comment it on the card, write it under "Needs the user" in the ledger, and put it in the final message.
 3. **Migration tail, before any migration is written.** `python3 ${CLAUDE_SKILL_DIR}/scripts/recipe.py check-tail {tail}` with the tail the plan's Migration tail table names for this wave. Exit 4 (the tail differs) or 3 (a missing key): stop the wave, card Blocked with the output, the line under "Needs the user". A match: one ledger line `Migration tail {tail} matched`. Never pick the next free number. A plan that says "No migrations" checks `none`.
 4. **Work the cards as the plan and execution prompt say.** Tick each card's sub-tasks as each is done, one `set_subtask_completed` per tick, not in a batch at the end.
 5. **A card whose development is finished** (code, tests, gates passed, board comment written) moves to `standby` for the user's approval. Never complete it. Stage and ledger status become "Delivered awaiting the user's test".
 6. **Re-set the board** after each card finishes (Doing frees a slot; the next card may move up).
+7. **The moment this wave's last card reaches `standby`, move the next wave's cards to `next`** (cap permitting), before any wave-end checks, then `get_execution_board` and confirm every card is where Board moves says. The board is never left showing a finished wave with the next wave still in `assigned`.
 
 ## Board moves
 
@@ -44,15 +44,14 @@ Read `get_execution_board` before every batch of moves; the board, not memory, i
 | Card | Column |
 |---|---|
 | Not yet reached (later waves) | `assigned` |
-| Next wave | `next`, only if its blockers are at Next or beyond and the cap allows |
-| This wave, being worked | `doing`, one to three at a time per the plan's parallelism; only if every blocker is complete (a blocker in `standby` is refused until the app lets `standby` count; see Set the board) |
+| Next wave | `next` as soon as this wave's last card reaches `standby`, cap permitting |
+| This wave, being worked | `doing`, one to three at a time per the plan's parallelism |
 | This wave, queued behind a sequential card | `next` |
 | Finished, awaiting the user | `standby` |
 | **The sprint card** | **Not moved at all while any wave runs.** It goes to `standby` once, when the last card of the last wave reaches `standby` (Finishing a wave, step 3). Never `next` or `doing`, never counted in the five-item cap, never completed (only `close` completes it) |
 
 - **Cap.** Never more than five across Next + Doing. When the wave and the next wave together exceed it, Doing gets what is being worked, this wave's queued cards take the remaining Next slots, the rest wait in `assigned`. Report the overflow in the ledger and the wave comment; never trim silently.
-- **Gates.** A refusal names its blocker (`relatedId` resolved to a title). Do not retry or route around it. A blocker outside the wave: record it under "Needs the user" and move on to the next card, or stop if nothing is workable.
-- **A blocker inside the batch.** A card chained behind another batch card can go to `doing` once that blocker is in `standby` **only after the app lets `standby` count**. Until then the board refuses it (`BLOCKED_BY_INCOMPLETE_TASK`) and the card stays in `next` with the comment above. A blocker still in `assigned`, `next` or `doing` refuses the move; work the blocker first, then move the chained card. Never complete the blocker to unblock the chain, and never reorder the plan around the refusal. Completing any card stays strict: a card cannot be completed while a blocker is incomplete, so `close` must complete a blocker before the card it blocks.
+- **Blockers.** A blocker never stops a move between Execution columns. The plan's order still holds: a card chained behind another batch card is worked once that blocker is in `standby`. A blocker outside the batch that is not delivered: record it under "Needs the user" and move on to the next card, or stop if nothing is workable. Never complete a blocker to unblock a chain. Completing stays strict: a card cannot be completed while a blocker is incomplete, so `close` completes a blocker before the card it blocks.
 - **Done is never a move.** Only `close` completes cards.
 - Moves touch only the batch cards. Never a card outside the sprint.
 
@@ -63,7 +62,7 @@ Read `get_execution_board` before every batch of moves; the board, not memory, i
 
 1. All of the wave's cards in `standby`, or Blocked with the reason on the card and in the ledger.
 2. Tick the wave's sub-task on the sprint card only when every card in it is delivered and verified. A wave with a blocked card is not ticked.
-3. **Last wave only:** when every other wave's sub-task is ticked and this wave's last card has reached `standby`, move the sprint card to `standby` (`set_task_execution_state`), then read the board and show it. Any earlier wave: the sprint card is not touched. Otherwise move the next wave's cards to `next` if the gates and cap allow. The next wave's cards stay in `next` at wave end and move to `doing` at the start of their own wave (one wave per chat); do not move them earlier. A card whose blocker is a card of the wave just finished is refused `doing` until the app lets `standby` count: see Set the board.
+3. **Last wave only:** when every other wave's sub-task is ticked and this wave's last card has reached `standby`, move the sprint card to `standby` (`set_task_execution_state`), then read the board and show it. Any earlier wave: the sprint card is not touched; read the board and confirm the next wave's cards are in `next` (The wave, step 7). They move to `doing` at the start of their own wave (one wave per chat), not earlier.
 4. Ledger: At a glance (next wave, next action), milestone log, report section. Then run `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py`; the wave is not finished until it prints OK.
 5. Sprint card section 1 Status line: `Wave {n} of {total} delivered, awaiting the user's test; next: Wave {n+1}` (read the card first, change only that line). Ledger Status per card: `Delivered, awaiting the user's test`.
 6. Comment on the sprint card: `Wave {n} done: {cards}, {verified how}. Next: Wave {n+1} in a new chat.`

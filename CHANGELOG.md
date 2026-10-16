@@ -9,6 +9,9 @@ All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace s
 - **Sprint:** planning names each live check's data with `testdata make`; waves create it before the check and clean it after.
 - **Checker rule TD1:** the guard's refusals and its clean-only-what-was-created, on fixtures.
 
+### Fixed
+- **Sprint board between waves:** the next wave's cards go to Next the moment the current wave's last card reaches Stand By, not after the wave-end checks; `run` sets the board before checking anything, whatever the wave reported. The stale rule that the board refuses Doing while a blocker sits in Stand By is gone: the board allows it.
+
 ## 0.5.0 · 2026-10-15
 
 ### Added

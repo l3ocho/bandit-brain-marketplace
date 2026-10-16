@@ -69,8 +69,7 @@ Written before the first real run; correct them with what happens.
 
 - Execute ran two waves in one chat and compressed the context → one wave per run; stop and give the paste for the next chat.
 - The cap of five across Next + Doing hit when the next wave was pulled forward → count Next + Doing from `get_execution_board` before each move; overflow waits in Assigned and is reported.
-- A card went to Next or Doing past a dependency gate → the refusal names the blocker; report it, do not retry or route around.
-- A chained card was refused `doing` (`BLOCKED_BY_INCOMPLETE_TASK`) because its blocker, a batch card, was parked in `standby` as the skill requires → the app change (Doing would accept a blocker in `standby`) is a backlog card and **not built**, so the refusal stands: leave the card in `next`, comment the refusal on the card, record it in the ledger, and never complete the blocker to get past it. A blocker in `assigned`, `next` or `doing` still refuses: work the blocker first.
+- The skill said the board refuses Doing while a blocker is in Stand By, after the app had stopped doing so → a blocker never stops a move between Execution columns; only completing waits for blockers. Re-read the board tool's own description before writing a board rule.
 - A finished card was completed instead of parked → delivery is `standby`; only `close` completes, on the user's quoted approval.
 - Sub-tasks ticked in a batch at the end → tick each as it is done so the card shows live progress.
 - Debug fixed things nobody approved → every adjustment is a row in the decision table; apply only approved rows.
@@ -102,3 +101,4 @@ Written before the first real run; correct them with what happens.
 
 - A card was detached at close (production steps moved to the next sprint) while its brief stayed in the sprint folder that was about to be archived, and the checker still counted the card as part of the sprint → write "detached" on its ledger row, and merge everything about the card into one note in the inbox before archiving (`close.md` step 3a); SP2 skips detached cards and SP6 fails a second brief for a card.
 - Sent a second long question list after the first → one list per gate with recommendations; follow up only on what the answers raise.
+- Sprint shared-finance, wave 2: the next wave's cards stayed in Assigned after the wave's cards reached Stand By, because the move waited for the wave-end checks and the orchestrator waited for the report → the next wave goes to Next the moment the last card reaches Stand By (`execute.md` → The wave, step 7), and the orchestrator sets the board before checking anything, whatever the wave reported (`run.md` → The loop, step 2).

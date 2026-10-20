@@ -78,7 +78,7 @@ After a load that created a project, say: *set `board: project "{name}"` through
 6. **Create** on confirmation:
    - `manage_projects { action: "create", name, folderId, type: "deliverable" }` if new, then `manage_columns_lanes { action: "add", projectId, name }` per missing column, in WBS order.
    - Tasks in **dependency order** — blockers before the tasks they block: one `create_tasks { items: [...] }` call per dependency level (≤100 entries, split above), each level only after the one before it answered. Each entry carries `projectId`, `projectColumnId`, `description`, `subtasks` and `dependencies.blockedBy` (the task ids already created or matched, from earlier `results`). Keep the WBS-ID → task-id map in this session only; never write it anywhere.
-7. **A refused entry** leaves nothing behind for that task, and the other entries still go through (`references/board.md` → Bulk write). Record its reason and `field`, skip every task that depends on it, carry on with the rest.
+7. **A refused entry** leaves nothing behind for that task, and the other entries still go through (`references/board.md` → Many cards in one call). Record its reason and `field`, skip every task that depends on it, carry on with the rest.
 8. **Report:** created · reused · refused (task name + reason) · skipped because a blocker was refused. Then the `board:` reminder when it applies.
 
 ---

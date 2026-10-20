@@ -18,7 +18,7 @@ Natural language always works; a request that spans two surfaces reads both file
 | Surface | Commands | Reference | Owns |
 |---|---|---|---|
 | 📥 Triage | `triage` `inbox` | `references/triage.md` | Inbox board, leaving the inbox. **The only holder of moves** (an `update_tasks` entry with `projectId` / `projectColumnId`) |
-| ▶️ Execution | `today` `doing` `done` `bump` | `references/execution.md` | The six Execution columns, dependency gates, the five-item cap |
+| ▶️ Execution | `today` `doing` `done` `bump` | `references/execution.md` | The six Execution columns, the dependency gate, the five-item cap |
 | 📅 Week | `week` `review` | `references/week.md` | Week board, workload, projections, dating the week, `manage_recurrence { action: "skip" }` |
 | ✍️ Capture | `capture` | `references/capture.md` | Task creation, brain dumps, the whole repeat-rule lifecycle |
 | 🧹 Audit | `audit` | `references/audit.md` | Hygiene and structure checks, `manage_projects { action: "archive" }` |
@@ -30,7 +30,7 @@ Natural language always works; a request that spans two surfaces reads both file
 | Also read | When |
 |---|---|
 | `references/scope.md` | Before every read or write: the home board, the domain, filtering the household-wide views |
-| `references/board.md` | Taxonomy, right-sizing, planning variables, tags, bulk writes, card descriptions, sub-tasks, safety, refusals, what lies outside this skill |
+| `references/board.md` | Taxonomy, right-sizing, planning variables, tags, many-card writes, card descriptions, sub-tasks, safety, refusals, what lies outside this skill |
 | `references/errors.md` | A call, or an entry in its `results`, comes back `{ ok: false, code, … }` |
 | `references/gotchas.md` | Once, at the start of a session that writes to the board |
 

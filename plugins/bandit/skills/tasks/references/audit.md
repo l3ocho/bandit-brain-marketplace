@@ -111,7 +111,7 @@ Use it to answer *what changed and who changed it*. A task that "moved on its ow
 | `delete_tasks { items: [{ kind: "series", taskId }] }` | **Every occurrence, including completed history** |
 | `delete_tasks { items: [{ kind: "occurrence", taskId }] }` | That occurrence's subtasks and comments |
 
-Both delete calls answer per entry: read `results` and report refused entries (`references/board.md` → Bulk write).
+Both delete calls answer per entry: read `results` and report refused entries (`references/board.md` → Many cards in one call).
 
 **Archive before you delete.** Offer it every time.
 

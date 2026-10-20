@@ -111,7 +111,7 @@ Skills define the gate; the project provides the recipe in `bandit.yaml` at the 
 | G2 | Installed `bandit` and `bandit-dev` are off in this repo (`bandit-maker` stays on: it is the build tool) | `enabledPlugins` in `.claude/settings.json` |
 | G3 | The old Claude.ai copies can't be used | A `Skill(anthropic-skills:…)` deny per old skill, plus `skillOverrides: "off"` |
 | G4 | The new names can't be called either | A `Skill(bandit:…)` / `Skill(bandit-dev:…)` deny per skill |
-| G5 | Nothing is deleted in production | Deny rules on BanditBrain `delete_*` and the vault delete tool (`settings.local.json`) |
+| G5 | Nothing is deleted in production without the user's yes | The vault delete tool is denied (`settings.local.json`). The BanditBrain `delete_*` deny was removed on Leo's order on 2026-10-14 (host change log); board deletes (`delete_tasks`, `delete_board_items`) are confirmed per entry by the tasks skill's safety rule |
 | G6 | New skills are covered automatically | `check_repo.py` fails if a skill in `bandit` or `bandit-dev` has no deny rule |
 | G7 | Conventions are followed by reading, never invoking | Session rule |
 | G8 | Tests run from `.work/test/`, where the shared skill denies don't apply and `settings.local.json` still does | Folder layout |

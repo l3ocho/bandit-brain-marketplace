@@ -18,7 +18,7 @@ A titled task in Untriaged is a success. An interrogation that ends with a perfe
 ## ➕ Creating
 
 `create_tasks { items: [{ title, … }] }` — one entry per task; only `title` is required. Read
-`results`: one entry per task, a refusal on one doesn't undo the others (`references/board.md` → Bulk write).
+`results`: one entry per task, a refusal on one doesn't undo the others (`references/board.md` → Many cards in one call).
 
 | Field | Values |
 |---|---|
@@ -63,10 +63,11 @@ project, the home board's Inbox (parked), so the card stays in this project's si
 
 `manage_subtasks { action: "add", taskId, title }` — a plain checklist inside the task.
 
-🔁 **Order is set, never trusted.** New sub-tasks have landed at the top, reversed, even when added
-one at a time. After any sub-task write (`create_tasks` with `subtasks`, `manage_subtasks` add or
-promote): `get_task` → `manage_subtasks { action: "reorder", subtasks: [{ id, position }] }` with
-**every** sub-task of the parent and its intended position (0 = top; a partial list is refused) → `get_task` again and check the order. Still
+🔁 **Order.** A new task's checklist goes in its `create_tasks` entry as `subtasks`, top to bottom:
+it is stored in the order given. `manage_subtasks` add puts the new line **at the top**, so after
+adding lines that belong lower (or a promote): `get_task` → `manage_subtasks { action: "reorder",
+subtasks: [{ id, position }] }` with **every** sub-task of the parent and its intended position
+(0 = top; a partial list is refused). After any sub-task write, `get_task` and check the order. Still
 wrong → tell the user which card.
 
 - No dates, no priorities, no dependencies of their own

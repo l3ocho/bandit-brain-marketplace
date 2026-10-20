@@ -18,7 +18,7 @@ Check all, report any miss as a fix row, and stop:
 
 Read the live state first (`get_task` for every card and the sprint card, the ledger, the report). **Every step checks before it writes: a state already correct is left alone and reported as "already done".**
 
-1. **Complete the cards.** `update_tasks { items: [{ taskId, complete: true }, …] }` for the approved batch cards not yet complete. Chained batch cards complete blockers first: a card cannot be completed while a blocker is incomplete, so call it for the cards with no incomplete blocker, then again for the cards they unblocked, until none remain. Read `results` entry by entry: a refused entry does not undo the others. A refusal on a blocker outside the batch: name it and stop that card.
+1. **Complete the cards.** `update_tasks { items: [{ taskId, complete: true }, …] }` for the approved batch cards not yet complete. Chained batch cards complete blockers first: a card cannot be completed while a blocker is incomplete, and entries apply in list order, so list every blocker before the cards it blocks. Read `results` entry by entry: a refused entry does not undo the others. A refusal on a blocker outside the batch: name it and stop that card.
 2. **Reconcile the statuses (the checklist).** Each row is checked against its live value and written only if different. One `get_task` immediately before each card or note write.
 
    | Where | Field | Becomes |

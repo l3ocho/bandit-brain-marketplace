@@ -31,7 +31,7 @@ Contents: Interview and pace · Scope · Cards and Specs · Agents and checks ·
 - Rewrote descriptions from memory after someone edited the Spec (a parenthetical on the `Brief:` line) → `get_task` right before every write; on `SPEC_LOCKED` re-read, never override to get past it.
 - Wrote `Brief:` lines with a folder in brackets → filename only.
 - `tagIds` in `update_tasks` replaced the whole set → read, merge, write.
-- Sub-tasks added in parallel came out reversed → add one at a time or reorder, then read back.
+- Sub-tasks added in parallel came out reversed → an added line always lands at the top: create the checklist with the card (`create_tasks` `subtasks`), or reorder after adds, then read back.
 - A due date given as "tomorrow" → convert to an absolute date from the session date and write it once.
 - A card's `Scope out` stated a wrong fact (new Finance accounts "private by default") → spot-check any factual line a card makes against code.
 
@@ -75,7 +75,7 @@ Written before the first real run; correct them with what happens.
 - Debug fixed things nobody approved → every adjustment is a row in the decision table; apply only approved rows.
 - Close archived before the cards were complete → order is cards, sprint card, then folder; verify each.
 
-- Wave sub-tasks landed at the top of the card, reversed, even when added one at a time → always `manage_subtasks { action: "reorder", subtasks }` with the full order and read back.
+- Wave sub-tasks landed at the top of the card, reversed, even when added one at a time (an add always lands at the top) → always `manage_subtasks { action: "reorder", subtasks }` with the full order and read back.
 - Every wave got the same paste (`execute {sprint card}`) and it read like a per-card trigger → the command names the sprint card and the wave (`execute {sprint card} wave N`); a batch card id is refused.
 - "I want this today" was taken as approval to commit → urgency is not approval; ask one yes or no.
 - The execution prompt carried its own debug procedure beside `debug.md` → the prompt only points to the references.
@@ -91,7 +91,7 @@ Written before the first real run; correct them with what happens.
 - Leftovers stayed behind after the work that used them; then two notes were archived on a guess → write No leftovers into every command, and archive only on proof that the successor exists.
 - Inbox drafts stayed behind after their brief was filed, a WBS draft after the WBS was filed, a brief after its card was deleted → archive what a step consumed in that same step; SP2, SP3 and SP5 catch the sprint cases.
 
-- In `run`, the second wave never moved its working cards to Doing: its cards were chained behind first-wave cards sitting in Stand By, the board still refuses Doing while a blocker is incomplete, and the skill said Stand By counted (an app change, not built) → never write a rule the board does not enforce; setting the board happens at the start of every wave; a refused move is recorded on the card and in the ledger, never skipped silently.
+- In `run`, the second wave never moved its working cards to Doing: its cards were chained behind first-wave cards sitting in Stand By, the board then refused Doing while a blocker was incomplete (it no longer does: only completing waits for blockers), and the skill said Stand By counted → never write a rule the board does not enforce; setting the board happens at the start of every wave; a refused move is recorded on the card and in the ledger, never skipped silently.
 
 - The sprint card moved along with its batch and sat in the way → it stays untouched until the last card of the last wave is in Stand By, then moves to Stand By once, and `close` completes it.
 

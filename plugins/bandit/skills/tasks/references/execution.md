@@ -1,7 +1,7 @@
 # ▶️ Execution
 
 **Commands:** `/bandit:tasks today` `/bandit:tasks doing` `/bandit:tasks done` `/bandit:tasks bump`
-**Owns:** the six Execution columns · dependency gates · the five-item cap
+**Owns:** the six Execution columns · the dependency gate · the five-item cap
 
 ---
 
@@ -13,8 +13,8 @@
 |---|---|---|
 | 1 | **Backlog** | ✅ `backlog` |
 | 2 | **Assigned** | ✅ `assigned` |
-| 3 | **Next** | ✅ `next` — **gated** |
-| 4 | **Doing** | ✅ `doing` — **gated** |
+| 3 | **Next** | ✅ `next` |
+| 4 | **Doing** | ✅ `doing` |
 | 5 | **Stand By** | ✅ `standby` |
 | 6 | **Done** | 🔴 **Not settable.** A task reaches Done by being completed |
 
@@ -22,23 +22,17 @@
 
 ---
 
-## 🚧 The dependency gates
+## 🚧 The dependency gate
 
-| Target | Requires |
-|---|---|
-| **Next** | Every blocking task at **Next or beyond** |
-| **Doing** | Every blocking task **complete**. A blocker in **Stand By is not complete**: refused with `BLOCKED_BY_INCOMPLETE_TASK` |
-| Backlog · Assigned · Stand By | Nothing |
+**One gate: completing.** `complete: true` is refused with `BLOCKED_BY_INCOMPLETE_TASK` while any
+blocking task is incomplete; a blocker in **Stand By is not complete**. A blocking task never stops
+a move to Next, Doing or Stand By (checked on the app 2026-10-20): a chained card can be worked
+while its blocker waits for the user's test.
 
-**Any column but Done can be set explicitly**, from any column; only Next and Doing are gated. A
-sprint plan may seed its whole batch to Assigned in one `update_tasks` call, one entry per card.
+**Any column but Done can be set explicitly**, from any column. A sprint plan may seed its whole
+batch to Assigned in one `update_tasks` call, one entry per card.
 
-Completing (`complete: true`) is refused while any blocker is incomplete.
-
-⛔ When a gate refuses: **name the blocking task**, do not retry, do not route around it. `relatedId` in the refusal is the blocker — resolve it to a title before reporting. Codes: `references/errors.md`.
-
-📌 **Known gap (app):** Doing would accept a blocker in Stand By (a chained card worked while its
-blocker waits for the user's test). Not built: until the app ships that change, the gate above holds.
+⛔ When the gate refuses: **name the blocking task**, do not retry, do not route around it. `relatedId` in the refusal is the blocker — resolve it to a title before reporting. Codes: `references/errors.md`.
 
 ---
 
@@ -80,7 +74,8 @@ Report the breach. Propose what moves back to Assigned or Stand By. **Do not sil
 
 1. Resolve the named task — `list_tasks` or the board just read
 2. `update_tasks { items: [{ taskId, executionState: "doing" }] }`
-3. On a gate refusal, name the blocker and stop
+3. The card still has an incomplete blocker (`get_task` → `blockedBy`) → say so: it can be worked,
+   not completed, until the blocker is. A refusal → report its reason and stop
 
 ### `/bandit:tasks done`
 
@@ -105,15 +100,15 @@ Bumping is a **date** change, not a column change.
 
 ## 📦 Bulk
 
-`update_tasks` with `executionState` — same gates, applied per entry. Done is not a destination;
+`update_tasks` with `executionState` — applied per entry. Done is not a destination;
 `executionState` and `complete` never share an entry.
 
 `update_tasks` with `complete: true` or `dueDate` — cap 100, one result per entry
-(`references/board.md` → Bulk write).
+(`references/board.md` → Many cards in one call).
 
-**Completing blockers and their dependents:** blockers first, dependents in a **second** call.
-Whether one call completes them in list order is **unchecked**; a dependent sent with its blocker
-may be refused by name.
+**Completing blockers and their dependents:** entries apply in list order, so one call works with
+every blocker **listed before** its dependents (checked on the app 2026-10-20). A dependent listed
+before its blocker is refused with `BLOCKED_BY_INCOMPLETE_TASK`; the rest still apply.
 
 Over 100, or malformed → **whole call refused, nothing changed.**
 

@@ -70,7 +70,7 @@ Both are counts. **Neither knows how long anything takes.** Weight by `effort` i
    candidates (a sprint's dates are its plan's, `references/dev.md` → Card fields). Nothing else changes
 3. Propose dates as a list. One line per task
 4. On confirmation: `update_tasks { items: [{ taskId, dueDate }, …] }`, ≤100 per call
-5. Read `results` and report refused entries by name (`references/board.md` → Bulk write)
+5. Read `results` and report refused entries by name (`references/board.md` → Many cards in one call)
 
 ⚠️ Dating a **parked** task moves it into the project's first column. Say so before doing it in bulk — it changes where things live, not just when.
 

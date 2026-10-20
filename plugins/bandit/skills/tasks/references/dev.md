@@ -158,9 +158,10 @@ still a design conversation. **Never silently:** every step is an approved row.
 
 Read `get_context` once (tags, projects), then work by id.
 
-1. `get_context → tags` → every missing tag of `lane/incident · lane/issue · lane/feature · lane/maintenance
-   · lane/content · lane/tech-debt · stage/spec · stage/planned · stage/ready` is a
-   `manage_tags { action: "create", name }` row.
+1. `get_context → tags` → the tags `lane/incident · lane/issue · lane/feature · lane/maintenance
+   · lane/content · lane/tech-debt · stage/spec · stage/planned · stage/ready`, scope `system`. The
+   app provides them and refuses to create them (`TAG_NAME_RESERVED`): one missing → stop and
+   report it as an app problem, no row.
 2. `get_context → projects` → the board's current lanes. One row: `manage_columns_lanes { action: "set_lanes", projectId, lanes }` with the **complete**
    list, in the lane table's order, each matcher `{field: "tag", values: [that lane tag's id]}`,
    ids resolved live after step 1 runs. The call replaces every lane, so existing lanes not in the
@@ -169,4 +170,4 @@ Read `get_context` once (tags, projects), then work by id.
    `get_context → projects` → no `PM` column → one row with two calls: `manage_columns_lanes { action: "add", projectId, name: "PM" }`
    (it lands last), then `manage_columns_lanes { action: "reorder", columns }` with **every** column, Backlog at 0 and `PM` at
    1, the rest in their current order. A board that already has `PM` gets no row.
-4. Execute only approved rows, tags before lanes, lanes before the column. Report per row.
+4. Execute only approved rows, lanes before the column. Report per row.

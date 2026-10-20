@@ -77,7 +77,7 @@ shortcut, on purpose.
 
 ---
 
-## 📦 Bulk write
+## 📦 Many cards in one call
 
 Many tasks, one call: every card write takes an array of entries. Cap is **100** — above it the
 whole call is refused, so split it yourself.
@@ -89,7 +89,7 @@ whole call is refused, so split it yourself.
 undo the others**. Read `results` and report refusals by task name with the reason. Never report a
 partial batch as a failure — nineteen moved and one refused is a success.
 
-**One task, one entry.** Two entries for the same task are refused: merge them. An `update_tasks`
+**One task, one entry.** A second entry for the same task is refused (`INVALID_ARGUMENTS`) while the first still applies: merge them before the call. An `update_tasks`
 entry is all or nothing, applied in the order move, fields, tags, state, complete
 (`references/errors.md` → The answer shape).
 
@@ -129,8 +129,9 @@ once more. Still wrong after that → tell the user which card; never leave it.
 
 ## ☑️ Sub-tasks
 
-Order is set, never trusted: after any sub-task write, `manage_subtasks { action: "reorder" }` with the **full** order,
-then `get_task` to read it back (`references/capture.md` → Subtasks).
+Create a checklist with the task (`create_tasks` `subtasks`, kept in the order given). An added line
+lands at the top: reorder with the **full** order when it belongs lower, then `get_task` to read it
+back (`references/capture.md` → Subtasks).
 
 ---
 
@@ -158,7 +159,7 @@ The `Backlog` column at position 0 is protected. Delete and rename are refused w
 
 Act on `code`, show `reason`, name the related task when `relatedId` is present. Never retry a
 variant to get past one. **Every code, where it comes from and what to do: `references/errors.md`**
-(dependency gates, tag rules, the Spec lock, recurring occurrences, protected columns, roles).
+(the dependency gate, tag rules, the Spec lock, recurring occurrences, protected columns, roles).
 
 ⛔ **A rule outside the vocabulary is refused, never rounded to the nearest thing that fits.**
 Report it. Do not substitute an approximation.
@@ -178,7 +179,7 @@ interview answer produces a bad board.
 - **`/bandit:tasks onboard`:** creates one empty project (the protected Backlog column only) as an
   approved row of bandit:project' onboarding proposal. Columns and lanes come later, from a
   load or the design conversation (with `dev: true`, onboard adds the dev board shape rows).
-- **Dev board shape** (`references/dev.md`): creates the missing `lane/*` / `stage/*` tags, sets
+- **Dev board shape** (`references/dev.md`): checks the app's `lane/*` / `stage/*` tags, sets
   the six dev lanes and adds the `PM` column, as approved rows — from `onboard` with `dev: true`, a
   bandit:audit S9 fix row, or (the `PM` column only) a sprint plan. Nothing else.
 

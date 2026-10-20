@@ -8,7 +8,7 @@
 |---|---|
 | A paid Claude plan (Pro, Max, Team or Enterprise) | Plugins on Claude.ai need one |
 | Claude.ai → Settings → Capabilities → **Code execution and file creation** on | Skills run in the code sandbox |
-| The **Bandit Brain** MCP server connected | The task board: `tasks`, `audit`, `project`, `sprint` |
+| The **Bandit Brain** MCP server connected, on an app version whose tools include `get_context` | The task board: `tasks`, `audit`, `project`, `sprint`. After an app upgrade, reconnect the connector so it loads the new tool list |
 | A **Nextcloud** MCP server with WebDAV connected | The notes vault: `notes`, `minutes`, `plan`, `project`, `audit`, `sprint` |
 | Gmail connected (optional) | `/bandit:tasks email` |
 

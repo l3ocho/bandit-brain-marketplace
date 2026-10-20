@@ -67,7 +67,7 @@ Then `/plugin` → Marketplaces → `bandit-brain` → **Enable auto-update** (o
 
 | Connector | Used by | Needed |
 |---|---|---|
-| **Bandit Brain** MCP server (the task board) | `tasks`, `audit`, `project`, `sprint` | ✅ |
+| **Bandit Brain** MCP server (the task board), an app version whose tools include `get_context` | `tasks`, `audit`, `project`, `sprint` | ✅ |
 | **Nextcloud** MCP server with WebDAV (the notes vault) | `notes`, `minutes`, `plan`, `project`, `audit`, `sprint` | ✅ |
 | Gmail | `/bandit:tasks email` | Optional |
 | Code execution (Claude.ai: Settings → Capabilities) | Every skill on Claude.ai | ✅ |

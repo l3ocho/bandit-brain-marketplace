@@ -8,6 +8,13 @@ All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace s
 - **Bandit Brain's new assistant tools:** every skill works the board through the app's 18 current tools. Projects, tags, members, lanes and sprints come from one `get_context` call; whole boards from `list_tasks` with a `view`; card writes go through the array tools `create_tasks`, `update_tasks`, `reopen_tasks`, `delete_tasks` and `delete_board_items`, which answer each entry on its own; structure through `manage_subtasks`, `manage_recurrence`, `link_tasks`, `manage_projects`, `manage_columns_lanes`, `manage_tags`, `manage_folders` and `set_visibility`. Brain dumps, triage, dating the week, email proposals and sprint close now write in one call instead of one per card. Needs the app release that ships these tools; reconnect the Bandit Brain connector after it.
 - **Project instructions templates:** names resolve via `get_context`.
 
+### Fixed
+- **Execution gate:** only completing waits for blockers; a blocked card can move to Next or Doing (checked on the app). Blockers and their dependents complete in one call, blockers listed first; sprint close does the same.
+- **Sub-task order:** a new card's checklist goes in its create call and keeps its order; an added line lands at the top, so only adds are reordered. The sprint card's 12 steps are created in one call.
+- **Dev board shape:** the `lane/*` and `stage/*` tags are the app's own System tags; a missing one is reported, never created.
+- **Error codes:** every refusal code the board tools return, with where it comes from and what to do.
+- **Docs:** README and install guide name the app version the skills need and the connector reconnect; decisions G5 matches the current settings.
+
 ### Added
 - **Checker rule MT1:** fails on any of the 62 assistant tool names the app removed, in any shipped file.
 

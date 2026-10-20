@@ -25,8 +25,9 @@ One line per real failure: what went wrong → what to do instead. Read once at 
 - **2026-10-06 · A tag write dropped tags.** `update_tasks` `tagIds` replaces the whole set, so writing one
   tag wiped the rest. → `get_task` first and send the full merged set, every time (**🏷️ Tags**).
 - **2026-10-06 · Sub-tasks came out in reverse order.** They were added with parallel
-  `manage_subtasks { action: "add" }` calls, and later landed at the top, reversed, even one at a time. → After any
-  sub-task write, `manage_subtasks { action: "reorder" }` with the full order and read it back (**☑️ Sub-tasks**).
+  add calls, and later landed at the top, reversed, even one at a time: an added line always goes to
+  the top. → Give a new task its checklist in `create_tasks` `subtasks` (kept in order); after adds,
+  `manage_subtasks { action: "reorder" }` with the full order and read it back (**☑️ Sub-tasks**).
 - **2026-10-06 · Two cards still showed raw tags.** They opened with a bare `<b>`; the app
   reads a description as rich text only when it opens and closes with a block tag, so it showed
   every tag as text. The 10-05 rule allowed a top-level `<b>` and its read-back never tested the

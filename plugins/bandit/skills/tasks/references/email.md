@@ -54,7 +54,7 @@ in:inbox is:unread -in:draft newer_than:7d
 5. Present proposals as a numbered list
 6. Wait
 7. On confirmation: one `create_tasks { items: [{ title, … }, …] }` with every accepted item
-8. Read `results` (`references/board.md` → Bulk write): report what was created, where it landed, and any refused entry
+8. Read `results` (`references/board.md` → Many cards in one call): report what was created, where it landed, and any refused entry
 
 ---
 

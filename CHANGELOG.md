@@ -2,7 +2,7 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
-## Unreleased
+## 0.6.0 · 2026-10-20
 
 ### Changed
 - **Bandit Brain's new assistant tools:** every skill works the board through the app's 18 current tools. Projects, tags, members, lanes and sprints come from one `get_context` call; whole boards from `list_tasks` with a `view`; card writes go through the array tools `create_tasks`, `update_tasks`, `reopen_tasks`, `delete_tasks` and `delete_board_items`, which answer each entry on its own; structure through `manage_subtasks`, `manage_recurrence`, `link_tasks`, `manage_projects`, `manage_columns_lanes`, `manage_tags`, `manage_folders` and `set_visibility`. Brain dumps, triage, dating the week, email proposals and sprint close now write in one call instead of one per card. Needs the app release that ships these tools; reconnect the Bandit Brain connector after it.

@@ -46,7 +46,7 @@ These start outside, so no file here triggers them. Each has its own check.
 A place the done check lists as open, checked and found to need nothing for this release. One line
 each: the path as the map writes it, then why. `scripts/release.py --write` empties this list.
 
-- `docs/pipeline.md` — the sprint changes (one-call checklist, blockers listed first) don't touch a stage, command, record or gate
+- none yet
 
 ## ✅ Before saying done
 

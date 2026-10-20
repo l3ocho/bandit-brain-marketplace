@@ -9,6 +9,7 @@ Exit 0 = green · 1 = a rule failed. Each rule prints one line; the last line is
 Rule homes and reasons: docs/decisions.md.
 """
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -234,6 +235,113 @@ def check_removed_tools():
            f"removed tools: {'; '.join(hits[:8])}{' …' if len(hits) > 8 else ''} ({len(hits)})" if hits
            else f"no removed assistant tool in {len(shipped_files())} shipped files ({len(REMOVED_TOOLS)} names)")
 
+
+
+# ── AT1 · the tool lists above are the app's: the app clone's tools and its removed list ──
+# The 18 tools the app serves today. The project audit's list must match it (AT2).
+CURRENT_TOOLS = (
+    "get_context list_tasks get_task add_comment list_events create_tasks update_tasks reopen_tasks "
+    "delete_tasks manage_subtasks manage_recurrence link_tasks manage_projects manage_columns_lanes "
+    "manage_tags manage_folders set_visibility delete_board_items").split()
+# The app clone on this host (read-only) and the branch the skills are built against.
+APP_REPO = Path(os.environ.get("BANDIT_APP_REPO") or ROOT.parent / "bandit_brain")
+APP_REF = os.environ.get("BANDIT_APP_REF") or "origin/development"
+
+
+def app_file(path):
+    r = subprocess.run(["git", "-C", str(APP_REPO), "show", f"{APP_REF}:{path}"], capture_output=True, text=True)
+    return r.stdout if r.returncode == 0 else None
+
+
+def check_app_tools():
+    desc = app_file("src/domains/tasks/descriptors.ts") if (APP_REPO / ".git").exists() else None
+    if desc is None:
+        return report("AT1", True, f"skipped (no app clone at {APP_REPO} with {APP_REF})")
+    raw = desc.split("RAW_TASK_OPERATIONS", 1)[-1]
+    app_tools = set(re.findall(r"^\s{4}name: '([a-z_]+)'", raw, re.M))
+    removed_src = app_file("src/domains/tasks/removedTools.ts") or ""
+    app_removed = set(re.findall(r"^\s{2}([a-z_]+): \{ tool:", removed_src, re.M))
+    bad = []
+    if app_tools != set(CURRENT_TOOLS):
+        bad.append(f"app tools ≠ CURRENT_TOOLS: new {sorted(app_tools - set(CURRENT_TOOLS))}, "
+                   f"gone {sorted(set(CURRENT_TOOLS) - app_tools)}")
+    if removed_src and app_removed != set(REMOVED_TOOLS):
+        bad.append(f"app removed list ≠ REMOVED_TOOLS: {sorted(app_removed ^ set(REMOVED_TOOLS))}")
+    report("AT1", not bad, "; ".join(bad) + " — update the skills, then both lists (docs/dependencies.md)" if bad
+           else f"skills' tool lists = the app's at {APP_REF} ({len(app_tools)} tools, {len(app_removed)} removed)")
+
+
+# ── AT2 · copies that must match: the project audit's tool list, the Project Context lines ──
+SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
+CONTEXT_BLOCK = PLUGINS / "bandit" / "skills" / "project" / "references" / "project-context.md"
+PROJECT_AUDIT = PLUGINS / "bandit" / "skills" / "project" / "references" / "audit.md"
+
+
+def context_lines(text):
+    """The three lines under the Project Context keys: who reads it, the scope line, the names-only line."""
+    return [l for l in text.splitlines() if l.startswith(("Read by ", "**Home board first", "Names only:"))][:3]
+
+
+def check_copies():
+    bad = []
+    audit = PROJECT_AUDIT.read_text(encoding="utf-8")
+    sec = audit.split("**Legacy tool names**", 1)[-1].split("- **Legacy lifecycle**", 1)[0]
+    listed = re.findall(r"`([a-z_]+)`", sec.split("Any other", 1)[0])
+    if sorted(listed) != sorted(CURRENT_TOOLS):
+        bad.append(f"project audit's tool list ≠ CURRENT_TOOLS: {sorted(set(listed) ^ set(CURRENT_TOOLS))}")
+    canon = context_lines(CONTEXT_BLOCK.read_text(encoding="utf-8"))
+    if len(canon) != 3:
+        bad.append("project-context.md: the block's three lines not found")
+    for f in [ROOT / "CLAUDE.md", *sorted((ROOT / "templates" / "instructions").glob("*.md"))]:
+        if context_lines(f.read_text(encoding="utf-8")) != canon:
+            bad.append(f"{f.relative_to(ROOT)}: Project Context lines ≠ project-context.md")
+    report("AT2", not bad, "; ".join(bad) or "project audit lists the current tools; Project Context lines match "
+           "in CLAUDE.md and the templates")
+
+
+# ── CL1 · a plugin change since the last release has an Unreleased CHANGELOG entry ──────
+def last_tag():
+    r = subprocess.run(["git", "describe", "--tags", "--abbrev=0", "--match", "v*"], cwd=ROOT, capture_output=True, text=True)
+    return r.stdout.strip() if r.returncode == 0 else None
+
+
+def changed_since(tag):
+    """Files changed since the tag: commits, staged and working tree, plus new untracked files."""
+    out = subprocess.run(["git", "diff", "--name-only", tag], cwd=ROOT, capture_output=True, text=True).stdout.split()
+    out += subprocess.run(["git", "ls-files", "--others", "--exclude-standard"], cwd=ROOT,
+                          capture_output=True, text=True).stdout.split()
+    return sorted(set(out))
+
+
+def check_changelog_entry():
+    tag = last_tag()
+    if not tag:
+        return report("CL1", True, "skipped (no release tag)")
+    plug = [f for f in changed_since(tag) if f.startswith("plugins/") and "__pycache__" not in f]
+    if not plug:
+        return report("CL1", True, f"no plugin change since {tag}")
+    text = CHANGELOG.read_text(encoding="utf-8")
+    top = text.split("\n## ", 1)[-1] if "\n## " in text else ""
+    entry = top.split("\n## ", 1)[0]
+    head = (entry.split() or [""])[0]
+    # Unreleased with a line, or the entry release.py just dated for a version not yet tagged.
+    ok = (head == "Unreleased" or (SEMVER_RE.match(head) and f"v{head}" != tag)) and re.search(r"^- ", entry, re.M)
+    report("CL1", bool(ok), f"{len(plug)} plugin files changed since {tag}, CHANGELOG entry present" if ok
+           else f"{len(plug)} plugin files changed since {tag} but CHANGELOG has no `## Unreleased` entry with a line")
+
+
+# ── CS1 · every skill command is on the cheat sheet ──────────────────────────────────────
+def check_cheat_sheet():
+    sys.path.insert(0, str(PLUGINS / "bandit-maker" / "skills" / "skill" / "scripts"))
+    import house_lint
+    sheet = (ROOT / "docs" / "cheat-sheet.md").read_text(encoding="utf-8")
+    missing = []
+    for s in all_skills():
+        for word, skill in house_lint._commands(s)[0].items():
+            if f"/{skill} {word}" not in sheet:
+                missing.append(f"/{skill} {word}")
+    report("CS1", not missing, f"commands missing from docs/cheat-sheet.md: {', '.join(missing)}" if missing
+           else "every skill command is on the cheat sheet")
 
 # ── R15 · command words are unique across every skill (house_lint's rule, one source) ────
 def house_lint():
@@ -562,6 +670,10 @@ def main(argv):
     check_g6()
     check_denylist()
     check_removed_tools()
+    check_app_tools()
+    check_copies()
+    check_changelog_entry()
+    check_cheat_sheet()
     check_r15()
     check_guard_pin()
     check_l1()

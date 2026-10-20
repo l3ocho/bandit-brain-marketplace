@@ -131,6 +131,16 @@ Skills define the gate; the project provides the recipe in `bandit.yaml` at the 
 |---|---|
 | MT1 | The skills call only the app's current assistant tools: `get_context` for projects, tags, members, lanes and sprints; `list_tasks` (with `view` for a whole board); the array writes `create_tasks`, `update_tasks`, `reopen_tasks`, `delete_tasks`, `delete_board_items`; and `manage_*`, `link_tasks`, `set_visibility` for structure. `check_repo.py` rule MT1 fails on any of the 62 names the app removed, in any shipped file |
 
+## 🔗 Done means every dependency (BB-205, Leo, 2026-10-20)
+
+| # | Decision |
+|---|---|
+| DN1 | `docs/dependencies.md` is the one map of what changes together. A change is done only when every place its rows name is updated or checked; `scripts/done_check.py` lists them, done or open, and its output goes in the report |
+| AT1 | `CURRENT_TOOLS` and `REMOVED_TOOLS` in `check_repo.py` equal the app's tools and removed list, read from the app clone (`BANDIT_APP_REPO`, `BANDIT_APP_REF`, default `origin/development`); skipped where there is no clone |
+| AT2 | Copies that must match do: the project audit's tool list = `CURRENT_TOOLS`; the Project Context lines in `CLAUDE.md` and the templates = the block in `project-context.md` |
+| CL1 | A plugin file changed since the last release tag needs a CHANGELOG entry with a line (`Unreleased`, or the version being released) |
+| CS1 | Every skill command (`/plugin:skill word`) is on `docs/cheat-sheet.md` |
+
 ## 🗺️ Board scope by domain (debug D2, 2026-10-14)
 
 | # | Decision | By |

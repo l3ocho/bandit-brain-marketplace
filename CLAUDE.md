@@ -50,9 +50,10 @@ plugins/bandit-dev/                 skills/sprint/ · agents/plan-reviewer.md ·
 plugins/bandit-maker/               skills/skill/
 templates/instructions/             one-page project instructions per project type
 tests/                              cases.md · fixture-app/
-docs/                               decisions.md · pipeline.md · bandit-yaml.md · install.md · cheat-sheet.md
+docs/                               decisions.md · pipeline.md · bandit-yaml.md · install.md · cheat-sheet.md · dependencies.md
 scripts/check_repo.py               the repo checker
 scripts/release.py                  cuts a release (SemVer, tags vX.Y.Z)
+scripts/done_check.py               lists each place a change since the last release must reach
 ```
 
 ## 🔒 Rules
@@ -76,11 +77,12 @@ scripts/release.py                  cuts a release (SemVer, tags vX.Y.Z)
 
 ```
 python3 scripts/check_repo.py               # the gate; also the git pre-commit hook
+python3 scripts/done_check.py               # what changed since the last release, and what must change with it
 claude plugin validate plugins/<plugin>     # one plugin
 python3 plugins/bandit-maker/skills/skill/scripts/house_lint.py plugins/bandit/skills/*
 ```
 
-The checker must be green before every commit. A new kind of mistake becomes a new checker rule, not a new sentence.
+The checker must be green before every commit. **Done** = the checker green, `done_check.py` with nothing open (or each open row checked and named), and app behaviour run on staging; both outputs go in the report (`docs/dependencies.md`). A new kind of mistake becomes a new checker rule, not a new sentence.
 
 ## 🗂️ Vault
 

@@ -19,8 +19,9 @@ Thanks for helping. This marketplace is small and opinionated: every installed s
    ```
 
    It needs Python 3 with PyYAML, and the `claude` CLI for `claude plugin validate` (`--no-cli` skips that rule locally).
-5. Add a line under `## Unreleased` in the [changelog](CHANGELOG.md), in Added, Changed or Fixed.
-6. Open a pull request against `development`. CI runs the same gate.
+5. Add a line under `## Unreleased` in the [changelog](CHANGELOG.md), in Added, Changed or Fixed (the gate fails a plugin change without one).
+6. Run `python3 scripts/done_check.py`: it lists every place your change has to reach ([dependencies](docs/dependencies.md)). Update each open one, or say in the pull request why it needs nothing.
+7. Open a pull request against `development`. CI runs the same gate.
 
 ## A new kind of mistake
 

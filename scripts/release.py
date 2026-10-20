@@ -3,11 +3,11 @@
 
   release.py X.Y.Z            dry run: says what would change, changes nothing
   release.py X.Y.Z --write    bump every plugin.json and the marketplace, date the CHANGELOG's
-                              `## Unreleased` entry, run the gate, commit on the trunk, fast-forward
+                              `## Unreleased` entry, empty the done check's checked list, run the gate, commit on the trunk, fast-forward
                               the deploy branch, tag vX.Y.Z (all local)
   release.py X.Y.Z --push     push the trunk, the deploy branch and the tag (after --write)
 
-Refuses: not on the trunk, a dirty tree, a version that isn't X.Y.Z or isn't above the current one,
+Refuses: not on the trunk, a dirty tree, open rows in the done check, a version that isn't X.Y.Z or isn't above the current one,
 no `## Unreleased` entry, an existing tag, or a red gate.
 """
 import datetime
@@ -21,6 +21,7 @@ ROOT = Path(__file__).resolve().parent.parent
 TRUNK, DEPLOY = "development", "main"
 CHANGELOG = ROOT / "CHANGELOG.md"
 MARKETPLACE = ROOT / ".claude-plugin" / "marketplace.json"
+DEPS = ROOT / "docs" / "dependencies.md"
 SEMVER = re.compile(r"^(\d+)\.(\d+)\.(\d+)$")
 
 
@@ -74,6 +75,10 @@ def main(argv):
     old = current_version()
     if tuple(map(int, version.split("."))) <= tuple(map(int, old.split("."))):
         sys.exit(f"{version} is not above the current {old}")
+    done = subprocess.run([sys.executable, str(ROOT / "scripts" / "done_check.py")], cwd=ROOT,
+                          capture_output=True, text=True)
+    if done.returncode != 0:
+        sys.exit(done.stdout + "\nthe done check has open rows (docs/dependencies.md): update them or list them as checked")
     text = CHANGELOG.read_text()
     if not re.search(r"^## Unreleased\b.*$", text, re.M):
         sys.exit("CHANGELOG.md has no `## Unreleased` entry to release")
@@ -91,6 +96,11 @@ def main(argv):
     for p in manifests():
         set_version(p, ["version"], version)
     set_version(MARKETPLACE, ["metadata", "version"], version)
+    deps = DEPS.read_text()
+    head = "## ☑️ Checked, nothing to change"
+    before, rest = deps.split(head, 1)
+    intro, after = rest.split("\n- ", 1)[0], "\n## " + rest.split("\n## ", 1)[1]
+    DEPS.write_text(before + head + intro.rstrip("\n") + "\n\n- none yet\n" + after)
     CHANGELOG.write_text(re.sub(r"^## Unreleased(?: \([^)]*\))?", f"## {version} · {today}", text, count=1, flags=re.M))
     gate = subprocess.run([sys.executable, str(ROOT / "scripts" / "check_repo.py")], cwd=ROOT)
     if gate.returncode != 0:

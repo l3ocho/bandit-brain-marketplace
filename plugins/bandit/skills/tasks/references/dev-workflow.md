@@ -199,5 +199,3 @@ job moves them into Assigned when due. A card picked for today → its `update_t
 `executionState: "assigned"`, since the midnight run has already passed. Cards already in a sprint (`sprint/*` tag)
 keep the sprint plan's dates: they are not candidates.
 
-**`/bandit:tasks sprint`** is the old name, kept as an alias for one release: it runs `pick-ready`
-and says the new name. It never plans a sprint.

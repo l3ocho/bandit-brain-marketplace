@@ -22,7 +22,7 @@ board: {board}
 prefix: {prefix}
 {dev: true — this line only when the project opted in}
 
-Read by bandit:notes, bandit:minutes, bandit:tasks, bandit:plan.
+Read by every `bandit` skill.
 **Home board first. Read and write across the domain. Nothing outside it.**
 Names only: skills resolve IDs live via `get_context`. No hardcoded IDs, ever.
 ```

@@ -21,7 +21,7 @@ the `bandit-staging` board only. `read` cases are checked by reading the shipped
 | C6 | P1 SP7 | auto (SP7) | `check_sprint.py … --domain Good` (committed, review record present) | exit 0, "passes SP1-SP7" |
 | C7 | P1 review gate | cli | `run` on a staging sprint card whose step 11 sub-task is unticked | refused, names "Independent plan review" (step 11); no wave agent launched |
 | C8 | P3 order gate | cli | `run` on a staging sprint card blocked by an open sprint card | refused, names the blocking sprint card; no wave agent launched |
-| C9 | P3 order at plan | read | `references/plan.md` step 1 | the new sprint card is blocked by the previous open sprint card (`link_tasks { blockerTaskId, blockedTaskId }`) |
+| C9 | P3 order at plan | read | `references/plan.md` step 4 (Sprint order) | the new sprint card is blocked by the previous open sprint card (`link_tasks { blockerTaskId, blockedTaskId }`) |
 | C10 | P2 release preconditions | cli | `release` on a staging sprint card with an untested card and no deploy word | refused; names the untested card and the missing deploy word; no recipe step runs |
 | C11 | P2 close precondition | read | `references/close.md` precondition 4 | refuses without a `Released:` line unless "close without release" is quoted |
 | C12 | P2 debug push | read | `references/debug.md` Rules | pushes follow `execute.md` → Pushing; no "never push" |
@@ -62,6 +62,20 @@ the `bandit-staging` board only. `read` cases are checked by reading the shipped
 | C23 | P11 + C templates | auto (L5) | `templates/instructions/*.md` | three templates, each ≤ one page, with Project Context, stage → command map and modes; shipped byte for byte in `project/assets/instructions/` |
 | C24 | P11 dev agent stops at spec | read | `templates/instructions/dev.md` → Role | "It stops at spec"; stages 4–10 are Claude Code |
 | C25 | P11 generation | read | `project/references/instructions.md` | instructions are generated from the template for the project's type, through one proposal |
+
+## 🔧 Assistant tools and dependencies (BB-204, BB-205)
+
+| # | Item | Kind | Input | Expected |
+|---|---|---|---|---|
+| C45 | No removed tool | auto (MT1) | any shipped file naming one of the app's 62 removed tools | gate fails naming file, line and tool |
+| C46 | Tool lists = the app's | auto (AT1) | `BANDIT_APP_REF=origin/main python3 scripts/check_repo.py` (the old app) | AT1 fails listing the tools that differ; `origin/development` passes |
+| C47 | Copies match | auto (AT2) | a template's names-only line, or the project audit's tool list, edited | AT2 fails naming the file |
+| C48 | CHANGELOG line | auto (CL1) | a plugin change since the last tag with no `## Unreleased` line | CL1 fails; a dated entry for an untagged version passes |
+| C49 | Commands on the cheat sheet | auto (CS1) | a skill command missing from `docs/cheat-sheet.md` | CS1 fails naming `/plugin:skill word` |
+| C50 | Blocked card to Doing | cli | `/bandit:tasks doing` on a staging card whose blocker is open | moved to Doing; the reply says it can be worked, not completed, until the blocker is |
+| C51 | Blockers complete first | cli | `/bandit-dev:sprint close` on a staging sprint whose cards are chained | one `update_tasks` call, blockers listed first, every entry applied |
+| C52 | Sprint card checklist | read | `references/plan.md` step 3 | one `create_tasks` entry with the 12 steps as `subtasks` in order and `dependencies.blockedBy` |
+| C53 | Done check | auto | `python3 scripts/done_check.py` | lists every map row a change since the last tag triggers, each place ✅ or ⚠️ |
 
 ## 🗺️ Domain scope (debug D2, 2026-10-14)
 

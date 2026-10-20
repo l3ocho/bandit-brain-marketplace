@@ -1,7 +1,7 @@
 ---
 type: reference
 summary: Every command, mode and trigger of the bandit-brain skills (and two companion skills), grouped by skill, with modifiers and the reference files each one reads.
-updated: 2026-10-13
+updated: 2026-10-20
 ---
 
 # 🧭 Skills Cheat Sheet
@@ -19,10 +19,10 @@ updated: 2026-10-13
 > | 📚                          | Reference file the skill reads, and when                   |
 > | ✋ / ⚡ / 👀                  | Writes after you confirm · writes on its own · read only   |
 >
-> Kept in the bandit-brain-marketplace repo (`docs/cheat-sheet.md`). Copied on 2026-10-13 from the retired vault folder with every skill and command renamed to the plugin calls (`/bandit:tasks`, `/bandit-dev:sprint` …); detail may lag the v0.1.0 skills, whose routers are the source of truth. Regenerating it from the skills is a later card.
+> Kept in the bandit-brain-marketplace repo (`docs/cheat-sheet.md`) and changed in the same commit as the skills. Each skill's `SKILL.md` router is the source of truth; the repo gate fails when a skill command is missing from this page.
 
 > [!important] Findings come fixed
-> Every audit and review (bandit:audit, `/bandit:notes lint` and `onboard`, `/bandit:tasks audit`, bandit:project audits, `/data-tools review`) returns each finding as a numbered **fix row** in the same proposal, fix already built, recommended option first. Answer all, a list or none: one "all" fixes everything. Nothing runs without your yes, except bandit:audit, which runs every row on its own.
+> Every audit and review (bandit:audit, `/bandit:notes lint` and `onboard`, `/bandit:tasks audit`, `/bandit:project audit`, `/bandit-maker:skill lint`, `/data-tools review`) returns each finding as a numbered **fix row** in the same proposal, fix already built, recommended option first. Answer all, a list or none: one "all" fixes everything. Nothing runs without your yes, except bandit:audit, which runs every row on its own.
 
 ---
 
@@ -31,20 +31,20 @@ updated: 2026-10-13
 |     | Skill                                        | Start it with                 | Use it for                                                                       |
 |-----|----------------------------------------------|-------------------------------|----------------------------------------------------------------------------------|
 | 🗃️ | [[#🗃️ bandit:notes\|bandit:notes]]         | `/bandit:notes {command}`     | Vault rules, filing the inbox, domain home pages                                 |
-| ✅   | [[#✅ bandit:tasks\|bandit:tasks]]           | `/bandit:tasks {command}`     | The BanditBrains task board, plus the dev card workflow on `dev: true` projects  |
-| 🎙️ | [[#🎙️ bandit:minutes\|bandit:minutes]]   | 💬 attach audio + "minutes"   | Meeting recording → minutes in the vault                                         |
-| 🛠️ | [[#🛠️ bandit:project\|bandit:project]] | 💬 "onboard this project"     | Onboarding (instructions + vault + board, one approval) and project instructions |
+| ✅   | [[#✅ bandit:tasks\|bandit:tasks]]           | `/bandit:tasks {command}`     | The Bandit Brain task board, plus the dev card workflow on `dev: true` projects  |
+| 🎙️ | [[#🎙️ bandit:minutes\|bandit:minutes]]   | `/bandit:minutes` + the audio | Meeting recording → minutes in the vault                                         |
+| 🛠️ | [[#🛠️ bandit:project\|bandit:project]] | `/bandit:project {command}`   | Onboarding (instructions + vault + board, one approval) and project instructions |
 | 📐  | [[#📐 bandit:audit\|bandit:audit]]          | `/bandit:audit {command}`     | Domain and project structure: Claude.ai ↔ vault ↔ board                          |
-| 🧭  | [[#🧭 bandit:plan\|bandit:plan]]    | 💬 "start a new project"      | Project plan → architecture doc                                                  |
-| 🏗️ | [[#🏗️ bandit:plan\|bandit:plan]]       | 💬 "create a WBS"             | Docs → work breakdown structure                                                  |
-| 🔍  | [[#🔍 clarify\|clarify]]                    | 💬 "clarify"                  | A thought, no text yet → questions → clear spec                                  |
-| ✨   | [[#✨ bandit:rewrite\|bandit:rewrite]]         | 💬 "clean this up"            | Text you already have → readable markdown, no questions                          |
+| 🧭  | [[#🧭 bandit:plan\|bandit:plan]]            | `/bandit:plan {mode}`         | `project`: plan → architecture doc · `wbs`: docs or cards → work breakdown       |
+| 🔍  | [[#🔍 bandit:clarify\|bandit:clarify]]      | `/bandit:clarify [idea]`      | A thought, no text yet → questions → clear spec                                  |
+| ✨   | [[#✨ bandit:rewrite\|bandit:rewrite]]         | `/bandit:rewrite` + the text  | Text you already have → readable markdown, no questions                          |
 | 💡  | [[#💡 prompt-engineer\|prompt-engineer]]    | 💬 "help me write the prompt" | Prompts for coding work                                                          |
-| 🧪  | [[#🧪 bandit-maker:skill\|bandit-maker:skill]]    | 💬 "make a skill for…"        | Build, test and tune skills                                                      |
+| 🧪  | [[#🧪 bandit-maker:skill\|bandit-maker:skill]]    | `/bandit-maker:skill {command}` | Build, test, tune and lint skills                                              |
 | 🧰  | [[#🧰 data-tools\|data-tools]]              | `/data-tools {command}`       | Databases, dbt, data audits, profiling, analysis, notebooks                      |
+| 🏃  | [[#🏃 bandit-dev:sprint\|bandit-dev:sprint]] | `/bandit-dev:sprint {command}` | A dev project's sprint: plan, run its waves, debug, release, close             |
 | 🌱  | [[#🌱 bandit-dev:testdata\|bandit-dev:testdata]] | `/bandit-dev:testdata {command}` | Made-up data in development, test and staging; each card's test data          |
 
-> [!important] New project? Run **bandit:project** ("onboard this project"). It's the one onboarding command: it runs the vault step (bandit:notes) and the board step (bandit:tasks) and shows everything in one proposal.
+> [!important] New project? Run **`/bandit:project onboard`** ("onboard this project"). It's the one onboarding command: it runs the vault step (bandit:notes) and the board step (bandit:tasks) and shows everything in one proposal.
 
 ---
 
@@ -58,7 +58,7 @@ updated: 2026-10-13
 | Command                  | ⚙️ Modifiers           | Does                                                                                                                                                                                                                       |        |
 |--------------------------|------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|
 | `/bandit:notes`          | —                      | Lists the commands and asks which one                                                                                                                                                                                      | 👀     |
-| `/bandit:notes onboard`  | `[Domain]`             | Audits a domain against the conventions, proposes the migration in stages A→D. New project → use bandit:project                                                                                                          | ✋      |
+| `/bandit:notes onboard`  | `[Domain]`             | Audits a domain against the conventions, proposes the migration in stages A→D. New project → use `/bandit:project onboard`                                                                                                          | ✋      |
 | `/bandit:notes init`     | `{Domain}`             | Scaffolds a new domain: core folders, modules, templates, README                                                                                                                                                           | ✋      |
 | `/bandit:notes home`     | `[Domain]`             | Rebuilds the domain README home page. Safe to schedule                                                                                                                                                                     | ⚡      |
 | `/bandit:notes file`     | `[Domain]` `[note…]`   | Reviews inbox notes you put up: destination, filename, frontmatter. Body edits only as separate rows. A plan note → `active`, linked from the hub's `## Docs`, and the report prompts `/bandit:tasks stage {card} planned`. A consumed inbox draft gets an archive row, on proof the filed copy exists | ✋      |
@@ -81,17 +81,22 @@ updated: 2026-10-13
 
 📚 **References:**
 
-- `references/conventions.md`: before any write into the vault
+- `references/model.md`: before any command (the vault model, resolving the domain, the project's scope, the inbox)
+- `references/write-safety.md`: before any write into the vault, by this skill or any other
+- `references/conventions.md`: before any write (folders, filenames, frontmatter, status, archive: conventions §1–§13)
 - `references/commands.md`: the procedure of the command being run, including *Onboarding rows* (run by bandit:project; it adds `Claude/code-{slug}/` for `dev: true` projects and for any other project that runs in Claude Code, and returns domain findings as `domain` fix rows)
+- `references/onboarding.md`: when bandit:project runs the vault step of onboarding
+- `references/other-skills.md`: when another skill or a chat writes a note
 - `references/readme-template.md`: for `home` and `init`
+- `references/gotchas.md`: once, before a session's first vault write
 
-🔗 **Works with:** bandit:project (runs its onboarding rows) · bandit:minutes · bandit:tasks · bandit:plan (write planning docs straight into `Projects/{slug}/`, or its `planning/` on a sprint project) · bandit:audit (runs its vault fix rows)
+🔗 **Works with:** bandit:project (runs its onboarding rows) · bandit:minutes · bandit:tasks · bandit:clarify (saves its spec as a note) · bandit:plan (writes planning docs straight into `Projects/{slug}/`, or its `planning/` on a sprint project) · bandit:audit (runs its vault fix rows) · bandit-dev:sprint (sprint folders, archived at close)
 
 ---
 
 ### ✅ bandit:tasks
 
-> [!abstract] Operates the BanditBrains task board
+> [!abstract] Operates the Bandit Brain task board
 > `plugin` · [[bandit:tasks/SKILL|open skill]] · home board first, reads and writes across the domain (the `domain:` board folder and its subfolders), nothing outside it except linked cards; Untriaged from the workflow project only (`none` or `pending` → read only, except `load` and `onboard`) · dev commands only with `dev: true`
 
 | Command                                        | ⚙️ Modifiers                        | Does                                                                                                                                                                                                                                                                                                               |        | 📚 Reads             |
@@ -115,7 +120,7 @@ updated: 2026-10-13
 | `/bandit:tasks scope`                          | `{card}`                            | 🛠️ Dev: settles what's open on one card. Writes everything already answered (chat, brief, plan note, comments) into the Spec, brief and plan note, no question; asks only what nobody wrote down, in one decision table | ⚡ → ✋ | `dev-workflow.md`    |
 | `/bandit:tasks plan-tech`                      | —                                   | 🛠️ Dev, Claude Code only: drift check, lists `stage/spec` cards, writes the plan note (inbox) and the card's `Technical plan`                                                                                                                                                                                     | ✋      | `dev-workflow.md`    |
 | `/bandit:tasks stage`                          | `{card}` `{spec · planned · ready}` | 🛠️ Dev: the only stage writer. `planned` needs the plan note filed (a shared sprint plan counts); `ready` only on your explicit approval, either surface | ✋      | `dev-workflow.md`    |
-| `/bandit:tasks pick-ready`                     | —                                   | 🛠️ Dev: `plan` over `stage/ready` cards outside a sprint. Picks and dates work; sprint planning is `bandit-dev:sprint`'s. `sprint` still runs it for one release | ✋      | `dev-workflow.md` · `week.md` |
+| `/bandit:tasks pick-ready`                     | —                                   | 🛠️ Dev: the week's dating (`/bandit:tasks week`) over `stage/ready` cards outside a sprint. Picks and dates work, never plans a sprint: that's `/bandit-dev:sprint plan` | ✋      | `dev-workflow.md` · `week.md` |
 
 > [!example]- ⚙️ Repeat rules (`/bandit:tasks capture`): the whole vocabulary
 >
@@ -134,28 +139,37 @@ updated: 2026-10-13
 > Dev boards: **Lane** `lane/incident` `lane/issue` `lane/feature` `lane/maintenance` `lane/content` `lane/tech-debt` · **Stage** `stage/spec` → `stage/planned` → `stage/ready` (kept after completion) · **Sprint** `sprint/{name}` (`list_tasks { view: "sprint" }`)
 
 > [!note]- 🛠️ Dev surfaces
-> Claude.ai = high-level: `spec`, `stage … ready`, `pick-ready`. Claude Code (Project Context from the repo `CLAUDE.md`) = everything, plus `plan-tech` and all stages. Cards stay thin: `Spec` + `Technical plan`, up to L; XL splits. Every field filled (`dev.md` → 🧾 Card fields). A written Spec is locked: changes go in a `Spec change needed:` comment. Project-management cards go in the `PM` column.
-> **Sprint card:** PM column (the dev board shape adds it when missing), no lane, stage or Spec; the batch cards are its blockers and carry `sprint/{name}`; its sections and sub-tasks are bandit-dev:sprint's, and only its sprint plan dates the batch. An XL card splits and the new card stays in the sprint. A blocker in Stand By still blocks Doing (BB-94 not built).
+> Claude.ai = high-level: `spec`, `scope`, `stage … ready` (on your approval), `pick-ready`. Claude Code (Project Context from the repo `CLAUDE.md`) = the same plus `plan-tech`, every stage and incident `spec`. Cards stay thin: `Spec` + `Technical plan`, up to L; XL splits. Every field filled (`dev.md` → 🧾 Card fields). A written Spec is locked: changes go in a `Spec change needed:` comment. Project-management cards go in the `PM` column.
+> **Sprint card:** PM column (the dev board shape adds it when missing), no lane, stage or Spec; the batch cards are its blockers and carry `sprint/{name}`; its sections and sub-tasks are bandit-dev:sprint's, and only its sprint plan dates the batch. An XL card splits and the new card stays in the sprint.
 >
-> 📚 `dev.md` = board rules (lanes, stages, card sections and fields, Spec lock, tag merging, dev board shape) · `dev-workflow.md` = the dev commands, surfaces, B1–B7, record homes · `errors.md` = every refusal code, read when a call is refused.
+> 📚 `dev.md` = board rules (lanes, stages, card sections and fields, Spec lock, tag merging, sprint card, dev board shape) · `dev-workflow.md` = the dev commands, surfaces, card boundaries, record homes.
 
-🔗 **Works with:** bandit:project (runs `onboard`, writes `board:` and `dev:`) · bandit:notes (shares Kind and Handler; plan notes and the plan-note lookup) · bandit:plan (`load` input; card links on dev projects) · bandit:audit (runs its board fix rows, including S9's dev board shape)
+> [!note] 🚧 The dependency gate
+> Only **completing** waits for blockers: `done` is refused while a blocker is incomplete (a blocker in Stand By is not complete). A blocked card can still move to Next, Doing or Stand By and be worked. Blockers and their dependents complete in one call when the blockers are listed first.
+
+> [!note]- 🔧 The board tools
+> Every command works the board through the app's 18 assistant tools: `get_context` (projects, columns, lanes, tags, members, sprints, in one call) · `list_tasks` (a `view`: `inbox`, `execution`, `week`, `workload`, `sprint`; or filters) · `get_task` · `create_tasks` · `update_tasks` (moves, fields, completing) · `reopen_tasks` · `delete_tasks` · `manage_subtasks` · `manage_recurrence` · `link_tasks` · `manage_projects` · `manage_columns_lanes` · `manage_tags` · `manage_folders` · `set_visibility` · `delete_board_items` · `add_comment` · `list_events`. The write tools take a list and answer each entry on its own.
+
+📚 **Also reads:** `scope.md` before every read or write (home board, domain, filtering household-wide views) · `board.md` (taxonomy, sizing, tags, card descriptions, sub-tasks, safety) · `errors.md` when a call or one of its entries is refused · `gotchas.md` once at the start of a session that writes.
+
+🔗 **Works with:** bandit:project (runs `onboard`, writes `board:` and `dev:`) · bandit:notes (shares Kind and Handler; plan notes and the plan-note lookup) · bandit:plan (`load` input; card links on dev projects) · bandit:clarify (its spec becomes a card through `capture` or `spec`) · bandit:audit (runs its board fix rows, including S9's dev board shape) · bandit-dev:sprint (plans and runs sprints over `stage/ready` cards)
 
 ---
 
 ### 🎙️ bandit:minutes
 
 > [!abstract] Meeting recording → professional minutes, saved to the vault
-> `plugin` · [[bandit:minutes/SKILL|open skill]] · 💬 attach the audio and ask for minutes
+> `plugin` · [[bandit:minutes/SKILL|open skill]] · `/bandit:minutes` with the recording attached, or 💬 attach the audio and ask for minutes
 
 | Asks up front | ⚙️ Options                                                       | Default             |
 |---------------|------------------------------------------------------------------|---------------------|
 | Version       | `Both` · `Full only` · `Short only`                              | Both                |
-| Location      | `{Domain} vault` · `Same folder as the audio` · `Another folder` | The vault           |
-| Meeting       | `Supervisors` · `Department` · `Project`                         | From the transcript |
+| Location      | `{Domain} vault` · `Same folder as the audio` · `Another BanditCloud folder` | The vault |
+| Meeting       | `Supervisors` · `Department` · `Project` (vault only)            | From the transcript |
 | Speakers      | Separate voices, only if you ask                                 | Off                 |
 | Model         | `small` · `medium` for poor audio (≈3× slower)                   | small               |
 
+📚 **References:** `references/workflow.md` (setup, transcription, verify and save) · `references/scripts.md` (the scripts) · `references/formats.md` (the full and short formats) · `references/vault.md` (saving and filing).
 📚 **Scripts:** `scripts/transcribe.py` · `scripts/diarize.py` · `scripts/merge.py`, copied to the working directory before running.
 🔗 **Works with:** bandit:notes (its conventions; files to `_inbox/` with `file-to: Meetings/`)
 
@@ -168,14 +182,17 @@ updated: 2026-10-13
 > [!abstract] The one onboarding command, plus Claude.ai project instructions and the Project Context block
 > `plugin` · [[bandit:project/SKILL|open skill]] · 💬 "onboard this project", "project settings", "audit these instructions"
 
-| Mode                   | Starts when                                                                         | ⚙️ Options                                                                                                                                                                                                                                                             |
-|------------------------|-------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 🚀 **Onboard**         | New project, or an existing one missing pieces                                      | Interview or audit → one proposal: vault rows (bandit:notes) + board rows (bandit:tasks) + settings files + a fix row for every finding. Only approved rows run                                                                                                        |
-| 🆕 **New project**     | The project has no instructions                                                     | Interview in 4 phases → instructions + reference doc, then the onboarding proposal                                                                                                                                                                                     |
-| 🔎 **Full audit**      | Instructions exist                                                                  | Scores every section, flags old Project Context lines and board tool names that aren't current, finds duplicates, builds the fixed version straight away (no "want me to generate?") and adds whatever the vault or board is missing, all as rows in one proposal. Naming, board and footprint → `/bandit:audit check` (skip for `domain: none`) |
-| 🎯 **Targeted update** | Instructions exist, you know the change                                             | Skips the audit, writes the next version                                                                                                                                                                                                                               |
-| 🔄 **Vault update**    | Another project needs the change (you name it, or bandit:audit runs a settings row) | Only the requested change → next version in that project's vault folder; anything else noticed comes back as an extra fix row. You paste it there, then `/bandit:audit check` (skip for `domain: none`)                                                                |
-| ☁️ **Just sync**       | Instructions exist                                                                  | Saves the current version to the vault folder                                                                                                                                                                                                                          |
+| Command                            | ⚙️ Modifiers | Does                                                                                                                                                                                                                                  |        | 📚 Reads                                   |
+|------------------------------------|--------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|--------------------------------------------|
+| `/bandit:project`                  | —            | No command: picks the mode from the project's state (no instructions → new project, instructions → audit, another project named → vault update)                                                                                       | —      | `audit.md` → Mode Detection                |
+| `/bandit:project onboard`          | —            | New or existing project: interview or audit, then **one proposal** of vault rows (bandit:notes), board rows (`/bandit:tasks onboard`) and settings files, plus a fix row for every finding. Only approved rows run; you get the instructions to paste | ✋      | `onboard.md` · `interview.md` (new)        |
+| `/bandit:project audit`            | —            | Scores every section of this project's instructions against the template, flags old Project Context lines and board tool names that aren't current (on Claude.ai, the hand-over adds a line to check the Claude Code `CLAUDE.md` too), finds duplicates, builds the fixed version straight away and adds whatever the vault or board is missing, all as rows in one proposal. Naming, board and footprint → `/bandit:audit check` (skip for `domain: none`) | 👀 → ✋ | `audit.md`                                 |
+| `/bandit:project update`           | `{project}`  | Targeted change to **another** project's instructions from its vault copy (bandit:audit settings rows use it): only that change → the next version in that project's vault folder; anything else noticed comes back as an extra fix row. You paste it there, then `/bandit:audit check` (skip for `domain: none`) | ✋      | `update.md`                                |
+| `/bandit:project instructions`     | —            | Generates the instructions from the one-page template for the project's type (`workflow`, `product_service`, or `dev` for any `dev: true` project), as one proposal row                                                              | ✋      | `instructions.md`                          |
+| `/bandit:project sync`             | —            | Saves the current instructions and reference doc to the vault settings folder                                                                                                                                                        | ✋      | `output.md` · `vault-storage.md`           |
+
+> [!note]- 🔀 What `audit` asks first
+> Before auditing it asks what changed and what you want: **Full audit** (above), **Targeted update** (you know the change: skips the audit, writes the next version) or **Just sync** (the same as `sync`).
 
 > [!example]- ⚙️ Answers it records
 >
@@ -194,14 +211,17 @@ updated: 2026-10-13
 
 > [!tip] Claude Code surfaces live in `Claude/code-{slug}/`, settings only. Any project without `dev: true` that also runs in Claude Code gets a **twin** `CLAUDE.md` (same core and version; only `## 🖥️ Environment` differs), plus an optional `claude/settings.json` for the agent's permission rules. The twin keeps its type's scope. A `dev: true` repo gets a **dev mirror**: a `Stop` hook has Claude copy `CLAUDE.md` + `.claude/` (stored as `claude/`) into the vault.
 
-📚 **References:**
+📚 **References** (besides each command's file in the table):
 
-- `references/reference-template.md`: before any interview or audit (the section standard, v1.4)
-- `references/interview.md`: the new-project interview, 4 phases
+- `references/reference-template.md`: before anything else (the section standard, v1.4: every section, its audit criteria, the metadata block, the token budget)
+- `references/project-context.md`: the Project Context block (keys, format, repo copy, dev mirror, Claude Code twin)
 - `references/vault-storage.md`: before any write to, or audit of, the settings folder
-- `references/dev-mirror.md`: onboarding or auditing a `dev: true` project (the Stop hook and mirror script, plus the optional sprint-checker hook)
+- `references/dev-mirror.md`: onboarding or auditing a `dev: true` project (the Stop hook and mirror script; the sprint checker is `bandit-dev`'s own hook, not wired here)
+- `references/workdir.md`: a Claude Code twin (onboarding, a twin version change, an S12 row)
+- `references/gotchas.md`: once, before onboarding or an audit
+- `assets/instructions/`: the one-page templates (`workflow.md` · `product_service.md` · `dev.md`)
 
-🔗 **Works with:** bandit:notes and bandit:tasks (it runs their onboarding steps) · bandit:minutes · bandit:plan · bandit:plan (all read its Project Context) · bandit:audit (runs its settings rows)
+🔗 **Works with:** bandit:notes and bandit:tasks (it runs their onboarding steps) · every `bandit` skill (reads its Project Context) · bandit:audit (runs its settings rows through `update`)
 
 ---
 
@@ -221,6 +241,7 @@ updated: 2026-10-13
 > Every finding is a fix row, never a bare note; S9 (dev lanes without `dev: true`) is one row with both options; the recommended one runs. It never changes anything with its own calls: every row runs through its owner, no question, in order: vault (bandit:notes) → settings (bandit:project) → board (bandit:tasks). A board rename always comes paired with its `board:` update.
 
 📚 **Rules:** `structure-rulebook.md` + `structure-rules.yaml` (read-only): 16 rules. S9 = dev board shape (`dev: true` boards have the six dev lanes, others have none) · S10 = Claude Code twin of any project without `dev: true` · S11 = dev mirror (`code-{slug}/` has the Stop hook and script) · S12 = Claude Code working folder · S13–S16 = sprint projects' vault content (briefs in their sprint folder, no filename twice in `Projects/` and `_inbox/`, frontmatter parses, root holds only hub + `sprint-*` + `planning/`; bandit-dev:sprint's local checker enforces the same at write time). **Script:** `scripts/check_structure.py`, snapshot schema 5 (lanes + tags + surfaces + working-folder manifests + project files and frontmatter + sprint cards). **Ledger:** `paths.stamps` in the rules. Reports go to `{Domain}/Projects/{workflow-project}/`, never a settings folder.
+📚 **Also reads:** `references/fix-rows.md` (building and running fix rows: owners, linked rows, order) · `references/gotchas.md` (once, before a `check` or an `audit`).
 🔗 **Works with:** bandit:notes · bandit:tasks · bandit:project (they carry out its fix rows)
 🚫 Auditing a skill → `/bandit-maker:skill lint` · board hygiene → `/bandit:tasks audit` · note lint → `/bandit:notes lint`.
 
@@ -228,65 +249,70 @@ updated: 2026-10-13
 
 ### 🧭 bandit:plan
 
-> [!abstract] Solo project lifecycle: idea → project plan → architecture document
-> `plugin` · [[bandit:plan/SKILL|open skill]] · saves to the vault: `MyNotes/{domain}/Projects/{project}/` (`planning/` on a sprint project)
+> [!abstract] Plans a project in two modes: `project` (idea → project plan → architecture document) and `wbs` (docs or a batch of cards → a numbered, gap-checked work breakdown structure)
+> `plugin` · [[bandit:plan/SKILL|open skill]] · 💬 "plan a project", "architecture document", "create a WBS", "break down this project" · saves to the vault: `MyNotes/{domain}/Projects/{project}/` (`planning/` on a sprint project)
 
-| 💬 Say                                              | Mode             | Output                                                 |
-|-----------------------------------------------------|------------------|--------------------------------------------------------|
-| "start a new project" · "plan a project"            | Phase 1 · New    | `{project}-project-plan.md`                            |
-| "continue planning" · "where are we on the project" | Phase 1 · Resume | Picks up at the first `_Pending_` section              |
-| "move to architecture" · "architecture document"    | Phase 2          | `{project}-architecture.md`                            |
-| (planning finished)                                 | Done             | Points you to bandit:plan, which offers the board step |
+| Command               | ⚙️ Modifiers | Does                                                                                                                  |    | 📚 Reads     |
+|-----------------------|--------------|-----------------------------------------------------------------------------------------------------------------------|----|--------------|
+| `/bandit:plan`        | —            | Lists the two modes and asks which one                                                                                | 👀 | —            |
+| `/bandit:plan project` | —           | Idea → Project Plan (Phase 1) → Architecture Document (Phase 2). The phase is read from the files, below             | ✋  | `project.md` |
+| `/bandit:plan wbs`    | —            | Project docs → gap analysis → numbered WBS, in the fixed format `/bandit:tasks load` reads. Sprint and migration modes below | ✋ | `wbs.md`     |
 
-📚 **References:** none. The phase is read from each document's `status` (`active` / `triaged`); nothing is stored in the project instructions.
-🔗 **Works with:** bandit:plan · bandit:tasks · bandit:project
+The order is `project` → `wbs` → the board (`/bandit:tasks load`, or the dev route on `dev: true`).
 
----
+> [!example]- 🧭 `project` mode: state comes from the files
+>
+> | 💬 Say                                              | Phase            | Output                                                 |
+> |-----------------------------------------------------|------------------|--------------------------------------------------------|
+> | "start a new project" · "plan a project"            | Phase 1 · New    | `{project}-project-plan.md`                            |
+> | "continue planning" · "where are we on the project" | Phase 1 · Resume | Picks up at the first `_Pending_` section              |
+> | "move to architecture" · "architecture document"    | Phase 2          | `{project}-architecture.md`                            |
+> | (planning finished)                                 | Done             | Points you to `/bandit:plan wbs`, which offers the board step |
+>
+> The phase is read from each document's `status` (`active` / `triaged`); nothing is stored in the project instructions. Planning docs go straight into the project folder, not `_inbox/`.
 
-### 🏗️ bandit:plan
+> [!example]- 🏗️ `wbs` mode: five phases
+>
+> | Phase         | Does                                                                                                          |
+> |---------------|---------------------------------------------------------------------------------------------------------------|
+> | 1 · Ingest    | Reads your docs, or the plan + architecture from the project's vault folder                                   |
+> | 2 · Analyze   | Gap analysis against a completeness checklist                                                                 |
+> | 3 · Resolve   | Asks about the gaps: options + a recommendation                                                               |
+> | 4 · Generate  | The WBS as ND-friendly markdown, in the fixed format `/bandit:tasks load` reads                               |
+> | 5 · Reconcile | Backports findings into the source doc (the vault plan is edited in place), offers to save `{project}-wbs.md` |
 
-> [!abstract] Project docs → a numbered work breakdown structure
-> `plugin` · [[bandit:plan/SKILL|open skill]] · 💬 "create a WBS", "break down this project", "what needs to happen to deliver this?"
-
-| Phase         | Does                                                                                                          |
-|---------------|---------------------------------------------------------------------------------------------------------------|
-| 1 · Ingest    | Reads your docs, or the plan + architecture from the project's vault folder                                   |
-| 2 · Analyze   | Gap analysis against a completeness checklist                                                                 |
-| 3 · Resolve   | Asks about the gaps: options + a recommendation                                                               |
-| 4 · Generate  | The WBS as ND-friendly markdown, in the fixed format `/bandit:tasks load` reads                               |
-| 5 · Reconcile | Backports findings into the source doc (the vault plan is edited in place), offers to save `{project}-wbs.md` |
-
-⚙️ **Migration mode:** give it an existing WBS (e.g. a Gitea wiki page) → rewritten into this format, gaps listed · `dev: true`**:** level glossary in the header, an empty `## 🔗 Card links` section, and it points to `/bandit:tasks spec` per work package, then `/bandit-dev:sprint plan`, instead of `load` · **Sprint mode** (run by bandit-dev:sprint): a WBS over existing cards and their briefs, no Phase 5, no sizes, card links rows for those cards. Saved to the folder bandit:notes names (`planning/` on a sprint project); drafts never go to `_inbox`.
-📚 **References:** none.
-🔗 **Works with:** bandit:plan (input) · `/bandit:tasks load` (output) · `/bandit:tasks spec` (dev projects, one card per work package)
+⚙️ **Migration mode** (`wbs`): give it an existing WBS (e.g. a Gitea wiki page) → rewritten into this format, gaps listed, no Phase 5 · **Sprint mode** (`wbs`, run by `/bandit-dev:sprint plan`): a WBS over existing cards and their briefs, no Phase 5, no sizes, card links rows for those cards · `dev: true`**:** level glossary in the header, an empty `## 🔗 Card links` section, and it points to `/bandit:tasks spec` per work package, then `/bandit-dev:sprint plan`, instead of `load`. The WBS is saved only as the final file, in the folder bandit:notes names; drafts never go to `_inbox`.
+📚 **References:** `references/project.md` (`project` mode) · `references/wbs.md` (`wbs` mode).
+🔗 **Works with:** bandit:clarify and bandit:rewrite (before planning) · bandit:project (its Project Context) · bandit:notes (note format and folders) · `/bandit:tasks load` (output) · `/bandit:tasks spec` (dev projects, one card per work package) · bandit-dev:sprint (runs sprint mode)
 
 ---
 
 ## ✍️ Thinking & writing
 
-> [!tip] Got text yet? No, just a thought → **clarify** asks you questions. Yes → **bandit:rewrite** rewrites it.
+> [!tip] Got text yet? No, just a thought → **bandit:clarify** asks you questions. Yes → **bandit:rewrite** rewrites it.
 
-### 🔍 clarify
+### 🔍 bandit:clarify
 
 > [!abstract] A thought you can't put into words yet → questions → a clear, actionable spec, with the 4-D method
-> `plugin` · [[clarify/SKILL|open skill]] · 💬 "clarify" (that word alone is enough), "help me think through this", "what do I need to decide"
+> `plugin` · [[bandit:clarify/SKILL|open skill]] · `/bandit:clarify [idea]`, or 💬 "clarify" (that word alone is enough), "help me think through this", "what do I need to decide"
 
 | Phase                  | Does                                                                                 |
 |------------------------|--------------------------------------------------------------------------------------|
-| Deconstruct · Diagnose | Silent: breaks the request apart, finds what's missing                               |
-| Develop                | Asks a few chunked questions, with options                                           |
+| Deconstruct · Diagnose | Silent: breaks the request apart, finds what's missing, a 3–5 bullet summary with assumptions you can correct |
+| Develop                | At most 2 questions a turn, each with options; a summary every 2–3 questions         |
+| Verify                 | Checks cheap assumptions with one read-only call, each marked verified or unverified |
 | Deliver                | A Clarified Specification: summary, scope, requirements, assumptions, open questions |
 
-⚙️ Simplifies when it's getting too much · offers a deeper pass when it's bigger than it looked · checks cheap assumptions with one call before delivering, each marked verified or unverified · offers to save the spec: a spec that changes skills → a Marketplace card plus brief; dev-project work → `/bandit:tasks spec`; anything else → the domain `_inbox` via bandit:notes (not with `domain: none`)
-📚 **References:** none. 🔗 Other skills hand off to it with "use the 4-D method".
-🚫 Pasted content that needs rewriting → bandit:rewrite.
+⚙️ Simplifies when it's getting too much · offers a deeper pass when it's bigger than it looked · offers a break after 4 or more questions · offers once where the spec goes: a spec that changes skills → a Marketplace card plus brief; dev-project work → `/bandit:tasks spec`; anything else → a note in the domain `_inbox` **and** a card, linked (say *note only* or *card only*; no domain → card only, no board → note only). Cards go through bandit:tasks, notes through bandit:notes.
+📚 **References:** `references/method.md` (phases 1–3 and verify) · `references/deliver.md` (the spec and where it goes) · `references/pacing.md` and `references/gotchas.md` (once per clarification). 🔗 Other skills hand off to it with "use the 4-D method".
+🚫 Pasted content that needs rewriting → bandit:rewrite · code, plans or WBS → hand the spec on.
 
 ---
 
 ### ✨ bandit:rewrite
 
 > [!abstract] Text you already have (notes, brain dumps, transcripts) → clean, scannable ND-friendly markdown, in one pass, no questions asked
-> `plugin` · [[bandit:rewrite/SKILL|open skill]] · 💬 "process this", "clean this up", "make this readable", "deduplicate this"
+> `plugin` · [[bandit:rewrite/SKILL|open skill]] · `/bandit:rewrite` with the content pasted or attached, or 💬 "process this", "clean this up", "make this readable", "deduplicate this"
 
 | Step               | Does                                      |
 |--------------------|-------------------------------------------|
@@ -295,9 +321,9 @@ updated: 2026-10-13
 | 3 · Write          | Rewrites into short, scannable blocks     |
 | 4 · Final pass     | Checks nothing was lost                   |
 
-⚙️ Gaps it finds go in an Open questions section at the end, with an offer to run `/bandit:clarify` on them.
-📚 **References:** none.
-🚫 A bare "clarify" with nothing to rewrite → clarify · recordings → bandit:minutes · filing into the vault → bandit:notes · code, data, slides.
+⚙️ Nothing added, nothing dropped: gaps it finds go in an Open questions section at the end, with an offer to run `/bandit:clarify` on them. Code stays as written. Delivers the file (inline for short input); a vault save goes through bandit:notes.
+📚 **References:** `references/rewrite.md` (all four steps).
+🚫 A bare "clarify" with nothing to rewrite → bandit:clarify · recordings → bandit:minutes · filing into the vault → bandit:notes · code, data, slides.
 
 ---
 
@@ -320,7 +346,7 @@ updated: 2026-10-13
 - `common-mistakes.md`: pitfalls to avoid
 
 ⚙️ Delivers the prompt in one copyable block and bakes in your standing conventions (modular packages, pinned versions, git flow, Compose V2).
-🚫 Doing the task itself · vague idea → clarify · project instructions → bandit:project · skills → bandit-maker:skill.
+🚫 Doing the task itself · vague idea → bandit:clarify · project instructions → bandit:project · skills → bandit-maker:skill.
 
 ---
 
@@ -328,20 +354,27 @@ updated: 2026-10-13
 
 ### 🧪 bandit-maker:skill
 
-> [!abstract] Create, test, benchmark and tune skills
-> `plugin` · [[bandit-maker:skill/SKILL|open skill]] · 💬 "make a skill for…", "improve this skill", "run evals"
+> [!abstract] Create, test, benchmark, tune and lint the marketplace skills
+> `plugin` · Claude Code, for maintainers · [[bandit-maker:skill/SKILL|open skill]] · 💬 "make a skill for…", "improve this skill", "run evals", "lint the skills", "make it house-standard"
 
-| 💬 Say                     | Does                                                                                                                 |
-|----------------------------|----------------------------------------------------------------------------------------------------------------------|
-| "turn this into a skill"   | Captures intent, interviews, writes the SKILL.md                                                                     |
-| "test it" · "run evals"    | Runs test prompts with and without the skill, opens the review viewer                                                |
-| "benchmark it"             | Repeated runs with variance analysis                                                                                 |
-| "which version is better?" | Blind A/B comparison                                                                                                 |
-| "fix the triggering"       | Optimizes the description against trigger evals                                                                      |
-| "make it house-standard"   | Applies the rulebook: trigger description, Gotchas, Never, emoji H2s. A `house_lint.py` ❌ blocks the package or card |
+| Command                         | ⚙️ Modifiers  | Does                                                                                                         | 📚 Reads                              |
+|---------------------------------|---------------|--------------------------------------------------------------------------------------------------------------|---------------------------------------|
+| `/bandit-maker:skill`           | —             | Works out where you are in the loop (draft, test, rewrite) and jumps in there                                | —                                     |
+| `/bandit-maker:skill create`    | —             | Captures intent, interviews, writes the `SKILL.md` and its test prompts                                      | `create.md`                           |
+| `/bandit-maker:skill eval`      | —             | Runs test prompts with and without the skill, grades them, opens the review viewer; benchmark with variance; blind A/B comparison ("which version is better?") | `eval.md`                             |
+| `/bandit-maker:skill improve`   | —             | Rewrites the skill from your feedback on the eval results, then runs the next iteration                      | `eval.md`                             |
+| `/bandit-maker:skill describe`  | —             | Optimizes the description's triggering against a train/test set of trigger evals                             | `description.md`                      |
+| `/bandit-maker:skill lint`      | `[folder…]`   | The house gate (`house_lint.py`) over the skills named, or every skill in `plugins/*/skills/*`; plus `python3 scripts/check_repo.py` in the marketplace repo; every ❌ and ⚠️ a fix row, only approved rows written. A ❌ blocks the package or the card | `lint.md`                             |
+| `/bandit-maker:skill package`   | —             | Builds a `.skill` file with `scripts/package_skill.py`, lint first                                           | `description.md` → Package and Present |
+
+
+> [!tip] House standard
+> Every skill built or edited here passes `references/rulebook.md` (R1–R15) plus the marketplace rules: description ≤ 300 characters, `SKILL.md` ≤ 150 lines with a router table and each procedure in its reference file, one home per rule, no project details, `## ⚠️ Gotchas` and `## 🚫 Never` sections, emoji H2s, and command names unique across every skill (R15).
 
 📚 **References:**
 
+- `references/rulebook.md`: before any draft (the house standard; it wins over the skill page)
+- `references/surfaces.md`: on Claude.ai or in Cowork (no subagents or display)
 - `references/schemas.md`: the eval and grading JSON formats
 - `agents/grader.md` · `agents/comparator.md` · `agents/analyzer.md`: when it spawns that subagent
 - `scripts/`: run_eval · run_loop · improve_description · aggregate_benchmark · generate_report · quick_validate · house_lint · package_skill
@@ -372,6 +405,53 @@ updated: 2026-10-13
 📚 **References:** every command reads its file in `references/` first (column above). `assets/data-reviewer.md` is the agent template.
 🚫 Spreadsheet files → xlsx · charts in HTML artifacts → dataviz · vault notes → bandit:notes.
 
+---
+
+## 🏃 Delivery (Claude Code)
+
+> [!tip] The `bandit-dev` plugin: the sprint pipeline from plan to close, plus the test data it runs on. Claude Code only, on `dev: true` projects. The stages, surfaces and gates are `docs/pipeline.md`; each project's recipe is its `bandit.yaml` (`docs/bandit-yaml.md`).
+
+### 🏃 bandit-dev:sprint
+
+> [!abstract] Turns a set of existing cards into one planned, approved sprint, then runs, debugs, releases and closes it. Every gate leaves evidence on the sprint card and in the sprint folder
+> `plugin` · Claude Code only, from the repo · needs `dev: true`, a `board:` project and `prefix` in the repo `CLAUDE.md` Project Context · 💬 "plan a sprint", "run the waves", "debug the sprint", "close the sprint"
+
+| Command                        | ⚙️ Modifiers                                          | Does                                                                                                                                                                                       |        | 📚 Reads      |
+|--------------------------------|-------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|---------------|
+| `/bandit-dev:sprint`           | —                                                     | Lists the commands and asks which one                                                                                                                                                      | 👀     | —             |
+| `/bandit-dev:sprint plan`      | `[card…]`                                             | The 12-step plan cycle below. No list → every open High card not in a sprint, stated and started straight away (open Urgent cards listed as "not selected"). Ends committed: tag, dates, execution prompt, ledger, one sub-task per wave | ✋      | `plan.md` · `pace.md` |
+| `/bandit-dev:sprint execute`   | `{sprint card}` `[wave N]`                            | One wave in this chat, in order (no number → the first open wave, said out loud). Refuses a batch card; moves the wave's cards on the Execution board; then stops: next wave, new chat     | ⚡      | `execute.md`  |
+| `/bandit-dev:sprint run`       | `{sprint card…}` · `--paced [minutes]` (under `/loop`) | Every open wave of each sprint, one new subagent per wave, strictly in sequence; the orchestrator checks each wave on the board before the next; stops on a blocker. Refuses a sprint whose plan review isn't ticked or that an open sprint blocks. `--paced`: one wave per wake-up, 45 minutes apart by default | ⚡      | `run.md`      |
+| `/bandit-dev:sprint debug`     | `{sprint card}`                                       | After the last wave, in a fresh chat: your adjustments → one decision table → verified fixes. New requirements are parked as cards outside the sprint                                       | ✋      | `debug.md`    |
+| `/bandit-dev:sprint release`   | `{sprint card}` + your deploy word                    | Preconditions (every card tested, debug done, your "deploy"/"release"/"ship it" in this message, migration tail recorded, backup confirmed, recipe present), then the project's `bandit.yaml` release recipe; a plugin release for Marketplace cards | ✋      | `release.md`  |
+| `/bandit-dev:sprint close`     | `{sprint card}` · "close without release"             | Refuses without a `Released:` line (unless you say "close without release"); completes the cards you approved in this chat, blockers first, then the sprint card; archives the sprint folder | ✋      | `close.md`    |
+
+> [!example]- 📋 The plan cycle: the sprint card's 12 step sub-tasks
+>
+> | #  | Step                              | Done when                                                                                       |
+> |----|-----------------------------------|-------------------------------------------------------------------------------------------------|
+> | 1  | Select and freeze the batch       | Sprint card in PM, the cards block it, the previous open sprint card blocks it, none in another sprint |
+> | 2  | Spec completeness, per card       | Every card read against its brief; gaps as fix rows                                             |
+> | 3  | Close the open questions          | One interview answered and recorded                                                             |
+> | 4  | Size and classify                 | Every card at most L (XL split), lane and boundaries checked                                    |
+> | 5  | Cross-card analysis               | Migrations, shared files, hidden order, docs regeneration written down                          |
+> | 6  | Sequence                          | Waves with reasons, split with the WBS (`/bandit:plan wbs`, sprint mode)                        |
+> | 7  | Write the one technical plan      | Plan note filed; every card's Technical plan filled; each live check's data from `/bandit-dev:testdata make` |
+> | 8  | Risk and rollback                 | Per card and for the sprint, in the plan                                                        |
+> | 9  | Definition of ready, per card     | Each Spec reconciled; stage moved on; fix rows for failures                                     |
+> | 10 | Approval gate                     | Your explicit approval, quoted on the card                                                      |
+> | 11 | Independent plan review           | The `plan-reviewer` agent's record in the sprint folder; majors applied; no blocker open (the only stop) |
+> | 12 | Commit the sprint                 | Tag, assignee, due date, size, execution prompt, ledger with `Committed:`; one sub-task per wave |
+
+> [!warning] Gates
+> **Gate 0** before any command: Claude Code only · Project Context with `dev: true` · a `PM` column (missing → one fix row) · repo state (work on the deploy branch is said out loud) · the board server, BanditCloud and a browser tool. **The checker is the proof:** `scripts/check_sprint.py` enforces the vault rules (SP1–SP7) at step 12, every wave end, `run` and `close`, and runs as the plugin's `Stop` hook. **The recipe** is read through `scripts/recipe.py` from `bandit.yaml`; a missing key refuses by name. Nothing reaches the deploy branch outside `release`, and only `close` completes cards.
+
+📚 **Also reads:** `references/templates.md` (note and card shapes, filenames) · `references/homes.md` (homes, write rules, owners, before a step's first write) · `references/gotchas.md` (once at the start of any command). **Agent:** `plan-reviewer` (read-only, step 11). **Hook:** the sprint checker on `Stop`.
+🔗 **Works with:** bandit:tasks (board rules, `spec reconcile` and the `plan-tech` card-write rules) · bandit:notes (the sprint folder, archived at close) · bandit:plan (`wbs` sprint mode) · bandit:project (the Project Context) · bandit-dev:testdata (each live check's data)
+🚫 One card's Spec or plan → `/bandit:tasks spec`, `/bandit:tasks plan-tech` · picking ready work outside a sprint → `/bandit:tasks pick-ready`.
+
+---
+
 ### 🌱 bandit-dev:testdata
 
 > [!abstract] Made-up data for a dev project's development, test and staging databases, never the user's own
@@ -379,15 +459,19 @@ updated: 2026-10-13
 
 | Command                                     | ⚙️ Modifiers                      | Does                                                                                                                       |      | 📚 Reads    |
 |---------------------------------------------|-----------------------------------|----------------------------------------------------------------------------------------------------------------------------|------|-------------|
+| `/bandit-dev:testdata`                      | —                                 | Lists the commands and asks which one                                                                                      | 👀   | —           |
 | `/bandit-dev:testdata map`                  | `[cards or sprint card]`          | Reads the schema, the live database's structure, the app's rules and what was built; which tables and rules each card touches | 👀   | `map.md`    |
-| `/bandit-dev:testdata fill`                 | `{development, test or staging}`  | A lasting made-up set across the whole app, following its rules: a made-up user sees made-up data on every page           | ⚡ · staging ✋ | `fill.md`   |
-| `/bandit-dev:testdata make`                 | `{cards or sprint card}`          | The data each acceptance line needs, with the SQL; nothing written                                                         | 👀   | `make.md`   |
+| `/bandit-dev:testdata fill`                 | `{development, test or staging}`  | A lasting made-up set across the whole app, following its rules, kept until `clean`: a made-up user sees made-up data on every page | ⚡ · staging ✋ | `fill.md`   |
+| `/bandit-dev:testdata make`                 | `{cards or sprint card}`          | The data each acceptance line needs, in states the rules allow, with the SQL; nothing written                              | 👀   | `make.md`   |
 | `/bandit-dev:testdata create`               | `{db}`                            | Writes what `make` prepared and records every id                                                                           | ⚡ · staging ✋ | `create.md` |
-| `/bandit-dev:testdata clean`                | `{db}` + record, `card {id}` or `fill` | Removes exactly the rows a record names, checks none is left                                                         | ⚡ · staging ✋ | `create.md` |
+| `/bandit-dev:testdata clean`                | `{db}` + a record, `card {label}` or `fill` | Removes exactly the rows a record names, checks none is left                                                     | ⚡ · staging ✋ | `create.md` |
+
+`python3 scripts/dbguard.py records` (in the skill) lists the open run records.
 
 > [!warning] The guard
 > Every database call goes through `scripts/dbguard.py`: only development, test and staging; no address or password in `bandit.yaml` (env var names, or `psql` inside the database container); INSERTs only, each recorded; `clean` deletes only recorded ids; staging writes need your yes on every run. Records live in the app's git-ignored `.testdata/`.
 
+📚 **Also reads:** `references/safety.md` once at the start of any command (made-up values, credentials, staging, what the guard enforces).
 🔗 **Works with:** bandit-dev:sprint (planning runs `make` per live check; waves run `create` before the check and `clean` after it).
 
 ---
@@ -406,7 +490,7 @@ Full setup review of this project: {Project name}. Work in three phases.
 
 PHASE 1 — DISCOVERY (read-only, write nothing)
 Run each of these with its own skill and procedure. No shortcuts, and no scoring by hand:
-  a. bandit:project full audit ("audit these instructions"). It includes /bandit:audit check and the vault and board rows. Build the updated instructions version, but don't write it yet.
+  a. /bandit:project audit, as a full audit ("audit these instructions"). It includes /bandit:audit check and the vault and board rows. Build the updated instructions version, but don't write it yet.
   b. /bandit:notes lint, limited to this project's folders.
   c. /bandit:tasks audit.
 Collect every fix row from a–c into ONE numbered table: | # | Skill | Action | Target | Recommended option |.
@@ -530,8 +614,12 @@ Show the pre-flight table and the planned changes as rows `| # | File | Change |
 
 - Any marketplace change that adds, removes or changes a command, modifier, trigger phrase or reference file updates this page in the same commit.
 - `house_lint.py --names docs/cheat-sheet.md` keeps its bare commands from clashing with skill commands (R15).
+- `python3 scripts/check_repo.py` fails when a skill command is missing from this page (rule CS1).
+- `python3 scripts/done_check.py` lists what changed since the last release and each place that must change with it, this page included (`docs/dependencies.md`).
 
 ## Related
 
 - `README.md` (repo root): the three plugins and how to install them
+- `docs/pipeline.md`: the ten stages from idea to closed release, and the command that owns each
+- `docs/dependencies.md`: what changes together
 - bandit-maker:skill `references/rulebook.md`: the house standard every skill is audited against

@@ -67,8 +67,8 @@ Then `/plugin` → Marketplaces → `bandit-brain` → **Enable auto-update** (o
 
 | Connector | Used by | Needed |
 |---|---|---|
-| **Bandit Brain** MCP server (the task board), an app version whose tools include `get_context` | `tasks`, `audit`, `project`, `sprint` | ✅ |
-| **Nextcloud** MCP server with WebDAV (the notes vault) | `notes`, `minutes`, `plan`, `project`, `audit`, `sprint` | ✅ |
+| **Bandit Brain** MCP server (the task board), on an app version that serves the 18 assistant tools (`get_context`, `list_tasks`, `create_tasks`, `update_tasks` …). After an app upgrade, reconnect the connector | `tasks`, `audit`, `project`, `sprint`, `testdata`; card reads in `notes` and `plan`; saving a spec as a card in `clarify` | ✅ |
+| **Nextcloud** MCP server with WebDAV (the notes vault) | `notes`, `minutes`, `plan`, `project`, `audit`, `sprint`; saving a spec as a note in `clarify` | ✅ |
 | Gmail | `/bandit:tasks email` | Optional |
 | Code execution (Claude.ai: Settings → Capabilities) | Every skill on Claude.ai | ✅ |
 
@@ -99,6 +99,7 @@ Every stage has an owner command, a record and a gate that fails when it's skipp
 | [Pipeline](docs/pipeline.md) | The ten stages from idea to closed release: surface, command, record, gate |
 | [`bandit.yaml` contract](docs/bandit-yaml.md) | The recipe a dev project supplies to the sprint skills |
 | [Decisions](docs/decisions.md) | Why things are the way they are: architecture, rules, guards |
+| [Dependencies](docs/dependencies.md) | What changes together: every place a change has to reach before it's done, and the done check that lists them |
 | [Changelog](CHANGELOG.md) · [Releases](https://github.com/l3ocho/bandit-brain-marketplace/releases) | What changed in each release |
 | [Instruction templates](templates/instructions/) | The one-page project instructions per project type |
 | [Test cases](tests/cases.md) | One case per behaviour, input → expected result |
@@ -114,11 +115,12 @@ The three plugins and the marketplace share one version and follow [Semantic Ver
 
 ```
 python3 scripts/check_repo.py                              # the gate (pre-commit hook and CI)
+python3 scripts/done_check.py                              # what changed since the last release, and each place that must change with it
 claude plugin validate plugins/<plugin>                    # one plugin
 python3 plugins/bandit-maker/skills/skill/scripts/house_lint.py plugins/bandit/skills/*
 ```
 
-Work happens on `development`; `main` moves only at a release. Every skill stays light: a description of at most 300 characters and a `SKILL.md` of at most 150 lines, because every installed skill loads into every chat. A new kind of mistake becomes a checker rule, not a new sentence. The full rules are in the [contributor guide](CLAUDE.md) and [decisions](docs/decisions.md); start with [CONTRIBUTING](CONTRIBUTING.md).
+Work happens on `development`; `main` moves only at a release. Every skill stays light: a description of at most 300 characters and a `SKILL.md` of at most 150 lines, because every installed skill loads into every chat. A new kind of mistake becomes a checker rule, not a new sentence: the gate also checks that the skills' board tool lists match the app's (AT1), that the project audit's tool list and the Project Context lines match their source (AT2), that a plugin change has a changelog entry (CL1) and that every skill command is on the [cheat sheet](docs/cheat-sheet.md) (CS1). Before a change is done, `done_check.py` lists every place it has to reach ([dependencies](docs/dependencies.md)): update each open one, or check it needs nothing. The full rules are in the [contributor guide](CLAUDE.md) and [decisions](docs/decisions.md); start with [CONTRIBUTING](CONTRIBUTING.md).
 
 ## 📄 License
 

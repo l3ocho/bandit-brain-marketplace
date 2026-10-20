@@ -7,6 +7,10 @@ All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace s
 ### Changed
 - **Bandit Brain's new assistant tools:** every skill works the board through the app's 18 current tools. Projects, tags, members, lanes and sprints come from one `get_context` call; whole boards from `list_tasks` with a `view`; card writes go through the array tools `create_tasks`, `update_tasks`, `reopen_tasks`, `delete_tasks` and `delete_board_items`, which answer each entry on its own; structure through `manage_subtasks`, `manage_recurrence`, `link_tasks`, `manage_projects`, `manage_columns_lanes`, `manage_tags`, `manage_folders` and `set_visibility`. Brain dumps, triage, dating the week, email proposals and sprint close now write in one call instead of one per card. Needs the app release that ships these tools; reconnect the Bandit Brain connector after it.
 - **Project instructions templates:** names resolve via `get_context`.
+- **Project Context block:** reads "Read by every `bandit` skill", as the templates do.
+
+### Removed
+- **`/bandit:tasks sprint`:** the old alias of `pick-ready`, kept since 0.1.0 for one release.
 
 ### Fixed
 - **Execution gate:** only completing waits for blockers; a blocked card can move to Next or Doing (checked on the app). Blockers and their dependents complete in one call, blockers listed first; sprint close does the same.
@@ -15,8 +19,11 @@ All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace s
 - **Error codes:** every refusal code the board tools return, with where it comes from and what to do.
 - **`/bandit:project audit`:** flags old Project Context lines and any board tool name that isn't current, in the instructions and, through the hand-over, the Claude Code `CLAUDE.md`. Run it in each project to move its instructions to the new tools.
 - **Docs:** README and install guide name the app version the skills need and the connector reconnect; decisions G5 matches the current settings.
+- **Cheat sheet:** every command of every skill, including a new `bandit-dev:sprint` section and the `bandit:project`, `bandit:plan` (one section, both modes) and `bandit-maker:skill` commands; old names, the stale blocker rule, the old alias and wrong reference lists are gone.
 
 ### Added
+- **Done check:** `docs/dependencies.md` maps what changes together; `scripts/done_check.py` lists every place a change since the last release has to reach, done or open.
+- **Checker rules AT1, AT2, CL1, CS1:** the skills' tool lists match the app's (app clone on Bandit Port); copies that must match do (the project audit's tool list, the Project Context lines); a plugin change needs a CHANGELOG line; every skill command is on the cheat sheet.
 - **Checker rule MT1:** fails on any of the 62 assistant tool names the app removed, in any shipped file.
 
 ## 0.5.2 · 2026-10-16

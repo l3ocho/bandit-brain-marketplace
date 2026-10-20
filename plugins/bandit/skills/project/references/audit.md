@@ -78,6 +78,18 @@ template section. Note:
     `scope:` line of a `## 🗺️ Task Board Scope` section (or a `taskops_scope` metadata field) →
     `board` (neither → `none`). Propose it as a fix, and on the updated version drop those
     five fields from the metadata comment and the old scope section.
+- **Project Context lines** — the three lines under the keys must read word for word as the block in
+  `references/project-context.md` (who reads it, the scope line, the names-only line). Any other
+  wording (old skill names, an old scope line, an old lookup tool) → ⚠️ **Legacy context lines**:
+  the updated version carries the current three lines.
+- **Legacy tool names** — every Bandit Brain tool the instructions name, anywhere, must be a current
+  one: `get_context`, `list_tasks`, `get_task`, `add_comment`, `list_events`, `create_tasks`,
+  `update_tasks`, `reopen_tasks`, `delete_tasks`, `manage_subtasks`, `manage_recurrence`,
+  `link_tasks`, `manage_projects`, `manage_columns_lanes`, `manage_tags`, `manage_folders`,
+  `set_visibility`, `delete_board_items`. Any other board tool name → ⚠️ **Legacy tool name**: the
+  updated version names the current call (bandit:tasks references give the shape). On Claude Code,
+  check the twin or repo `CLAUDE.md` the same way and list each hit in the hand-over; on Claude.ai,
+  the hand-over adds one line: *check the Claude Code `CLAUDE.md` for board tool names that aren't current.*
 - **Legacy lifecycle** — a `lifecycle` object in the metadata, or a `## 🔄 Project Lifecycle
   Workflow` section, is left over from the old planning skill. `/bandit:plan project` now keeps its
   plan, architecture and WBS in the vault's `Projects/{project}/` and reads its state from those

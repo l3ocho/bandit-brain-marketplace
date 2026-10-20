@@ -13,6 +13,7 @@ All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace s
 - **Sub-task order:** a new card's checklist goes in its create call and keeps its order; an added line lands at the top, so only adds are reordered. The sprint card's 12 steps are created in one call.
 - **Dev board shape:** the `lane/*` and `stage/*` tags are the app's own System tags; a missing one is reported, never created.
 - **Error codes:** every refusal code the board tools return, with where it comes from and what to do.
+- **`/bandit:project audit`:** flags old Project Context lines and any board tool name that isn't current, in the instructions and, through the hand-over, the Claude Code `CLAUDE.md`. Run it in each project to move its instructions to the new tools.
 - **Docs:** README and install guide name the app version the skills need and the connector reconnect; decisions G5 matches the current settings.
 
 ### Added

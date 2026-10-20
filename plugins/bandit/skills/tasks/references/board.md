@@ -4,7 +4,7 @@
 
 ## 📦 Project taxonomy
 
-Three types. **A real enum field on the project**, read via `list_projects` — never inferred
+Three types. **A real enum field on the project**, read via `get_context` → `projects` — never inferred
 from the column names.
 
 | | 🎯 **Deliverable** | 🔁 **Workflow** | 🔀 **Hybrid** |
@@ -33,7 +33,7 @@ three cards of noise on Execution, three dates to maintain, two dependency links
 
 **Propose. Never resize silently in either direction.**
 
-`promote_subtask` converts a subtask to a task — it inherits the parent's project and column,
+`manage_subtasks { action: "promote", subtaskId }` converts a subtask to a task — it inherits the parent's project and column,
 everything else starts unset, and it returns the new task id.
 
 ---
@@ -61,34 +61,37 @@ They are **instruments**, not decoration.
 | 🪜 **Stage** (dev boards) | `stage/spec` · `stage/planned` · `stage/ready` |
 | 🏁 **Sprint** (dev boards) | `sprint/{name}`, one per sprint, created with it (bandit-dev:sprint) |
 
-A sprint has no entity of its own: it is its tag. `list_sprints` lists every `sprint/*` tag with
-open, completed and total counts and the earliest and latest due date; `list_tasks(tagName:
-"sprint/{name}")` gives one sprint's cards, `list_tasks(tagPrefix: "sprint/")` every sprint card.
+A sprint has no entity of its own: it is its tag. `list_tasks { view: "sprint" }` (or
+`get_context` → `sprints`) lists every `sprint/*` tag with open, completed and total counts and the
+earliest and latest due date; `list_tasks { tagName: "sprint/{name}" }` gives one sprint's cards,
+`list_tasks { tagPrefix: "sprint/" }` every sprint card.
 
 Tags are account-wide, so the vocabulary is the **union** of all six rows. On dev boards Kind is
 expressed by the `lane/*` tag; `feature · issue · chore` stay valid everywhere else.
 
-🔴 **`set_task_tags` and `bulk_set_task_tags` REPLACE the whole set.**
+🔴 **`tagIds` in an `update_tasks` entry REPLACES the whole set.**
 
 Always `get_task` first, merge, then write. Applying one tag without reading silently wipes the
-rest. `bulk_set_task_tags` takes a full list **per task** for exactly this reason — there is no
-shared-set shortcut, on purpose.
+rest. Several cards are several entries, each with its own full list — there is no shared-set
+shortcut, on purpose.
 
 ---
 
 ## 📦 Bulk write
 
-Many tasks, one action, one call. Cap is **100** — above it the whole call is refused, so split
-it yourself.
+Many tasks, one call: every card write takes an array of entries. Cap is **100** — above it the
+whole call is refused, so split it yourself.
 
-`bulk_move_tasks` · `bulk_set_due_date` · `bulk_set_task_tags` · `bulk_set_execution_state` ·
-`bulk_complete_tasks`
+`create_tasks { items }` · `update_tasks { items }` · `reopen_tasks { taskIds }` ·
+`delete_tasks { items }` · `delete_board_items { items }`
 
-**Results come back per task.** A refusal on one **does not undo the others**. Report refusals
-by task name with the reason. Never report a partial batch as a failure — nineteen moved and one
-refused is a success.
+**Results come back per entry** (`{ ok, applied, refused, results }`). A refusal on one **does not
+undo the others**. Read `results` and report refusals by task name with the reason. Never report a
+partial batch as a failure — nineteen moved and one refused is a success.
 
-There is no bulk create and no bulk delete.
+**One task, one entry.** Two entries for the same task are refused: merge them. An `update_tasks`
+entry is all or nothing, applied in the order move, fields, tags, state, complete
+(`references/errors.md` → The answer shape).
 
 ---
 
@@ -105,7 +108,7 @@ splits, and bandit-dev:sprint's sprint card.
 |---|---|
 | `<p>…</p>` | Every paragraph or line of text, plain text included |
 | `<h2>…</h2>` | Section headings (dev cards: `references/dev.md` → Card sections) |
-| `<h3>…</h3>` | Headings inside a section. The app's lane templates (`get_lane_template`) use them; keep them as the template writes them |
+| `<h3>…</h3>` | Headings inside a section. The app's lane templates (`get_context` → `laneTemplates`) use them; keep them as the template writes them |
 | `<ul>` / `<ol>` + `<li><p>…</p></li>` | Lists |
 | `<b>…</b>` · `<code>…</code>` | Bold, inline code: **only inside** a `<p>`, `<li>` or heading, never at the top level |
 
@@ -115,18 +118,18 @@ new `<p>`) · escaped markup (`&lt;br/&gt;`, `&lt;p&gt;`) · markdown (`**`, `- 
 as normal HTML. Text that arrives as markdown (a WBS dictionary entry, an email, a note) is
 converted to these tags before the write, never passed through.
 
-🔁 **Read it back.** After any `create_task` or `update_task` that sets `description`: `get_task`
+🔁 **Read it back.** After any `create_tasks` or `update_tasks` entry that sets `description`: `get_task`
 and check three things. **1** it opens with `<p`, `<h1-6`, `<ul`, `<ol` or `<blockquote` and closes
 with `</p>`, `</h1-6>`, `</ul>`, `</ol>` or `</blockquote>` · **2** no escaped markup
 (`&lt;` followed by `br`, `p`, `b`, `ul`, `ol`, `li` or `h1-6`) · **3** no `**`, and no line
-starting `- ` or `#`. Any fails → rewrite the same content in the tags above and `update_task`
+starting `- ` or `#`. Any fails → rewrite the same content in the tags above and `update_tasks`
 once more. Still wrong after that → tell the user which card; never leave it.
 
 ---
 
 ## ☑️ Sub-tasks
 
-Order is set, never trusted: after any sub-task write, `reorder_subtasks` with the **full** order,
+Order is set, never trusted: after any sub-task write, `manage_subtasks { action: "reorder" }` with the **full** order,
 then `get_task` to read it back (`references/capture.md` → Subtasks).
 
 ---
@@ -135,15 +138,16 @@ then `get_task` to read it back (`references/capture.md` → Subtasks).
 
 **Write freely. Confirm destructive.**
 
-🔴 Confirm before calling: `delete_task` · `delete_project` · `delete_folder` · `delete_tag` ·
-`delete_project_column` · `delete_subtask` · `delete_series` · `delete_series_occurrence`
+🔴 Confirm before calling, for every entry: `delete_tasks` (kind `card` · `subtask` · `series` ·
+`occurrence`) · `delete_board_items` (kind `project` · `column` · `tag` · `folder`). A `delete_tasks`
+entry of kind `link` removes only a dependency and needs no yes
 
-- `delete_project` destroys every task inside it
-- `delete_tag` strips it from every task carrying it — **retag first, confirm zero, then delete**
-- `delete_series` destroys every occurrence, past and future
+- kind `project` destroys every task inside it
+- kind `tag` strips it from every task carrying it — **retag first, confirm zero, then delete**
+- kind `series` destroys every occurrence, past and future
 
 **None are recoverable. Archive before you delete** — almost every "get rid of this" is an
-archive, and `restore_project` puts it back exactly as it was.
+archive, and `manage_projects { action: "restore" }` puts it back exactly as it was.
 
 The `Backlog` column at position 0 is protected. Delete and rename are refused with
 `PROTECTED_COLUMN`. That is correct — do not work around it.
@@ -178,7 +182,7 @@ interview answer produces a bad board.
   the six dev lanes and adds the `PM` column, as approved rows — from `onboard` with `dev: true`, a
   bandit:audit S9 fix row, or (the `PM` column only) a sprint plan. Nothing else.
 
-`archive_project` is the other exception, and it lives in audit because audit is what discovers the
+`manage_projects { action: "archive" }` is the other exception, and it lives in audit because audit is what discovers the
 need for it.
 
 ---

@@ -55,9 +55,9 @@ finding.
 
 ## 🃏 Card sections
 
-**Start from the app's lane template**, never from memory: `get_lane_template(lane)`. Its
+**Start from the app's lane template**, never from memory: `get_context → laneTemplates` (incident, standard). Its
 headings are the contract (`audit`, `plan-tech` and the app's Spec lock look for them): `<h2>` for
-the sections, `<h3>` inside them, names kept word for word. `create_task` with a `lane/*` tag and
+the sections, `<h3>` inside them, names kept word for word. A `create_tasks` entry with a `lane/*` tag and
 no description pre-fills the same text.
 
 **Standard lanes** (every lane but Incident). `<h2>Spec</h2>` holds these `<h3>` sections, in order:
@@ -88,7 +88,7 @@ Subtasks carry the plan's steps. Everything longer lives in the plan note.
 
 ## 🔒 Spec lock (the app's)
 
-Once `<h2>Spec</h2>` holds text, `update_task` refuses any change to it with `SPEC_LOCKED`. Pass
+Once `<h2>Spec</h2>` holds text, `update_tasks` refuses any change to it with `SPEC_LOCKED`. Pass
 `overrideSpecLock: true`, without asking, when the change only writes in what is already settled:
 the user's words in this chat, the brief, the plan note, or decisions in the card's comments. Read
 the current Spec first (rulebook R14), write, read back, and report old and new after. A change
@@ -99,7 +99,7 @@ adding a Spec to a card with none are never refused.
 
 ## 🏷️ Tag merging on dev cards
 
-`set_task_tags` replaces the whole set (`references/board.md` → Tags), so every dev tag write is: `get_task` →
+`tagIds` in `update_tasks` replaces the whole set (`references/board.md` → Tags), so every dev tag write is: `get_task` →
 merge → write the full set.
 
 - **Stage change:** replace any `stage/*` tag with the new one, or **add** it when the card has
@@ -113,7 +113,7 @@ merge → write the full set.
 
 ## 🧾 Card fields
 
-Every dev card is written **complete**, in one `create_task`, then read back (`get_task`).
+Every dev card is written **complete**, in one `create_tasks` entry, then read back (`get_task`).
 
 | Field | Value |
 |---|---|
@@ -122,10 +122,10 @@ Every dev card is written **complete**, in one `create_task`, then read back (`g
 | `priority` | Always set: urgency only |
 | `complexity` | Always set |
 | `effort` | Always set. Claude.ai's is a first estimate; `plan-tech` confirms it. Max L (B7, `references/dev-workflow.md`) |
-| `assignedTo` | The user: the signed-in member, resolved live (`list_household_members`), never a stored id |
+| `assignedTo` | The user: the signed-in member, resolved live (`get_context → members`), never a stored id |
 | `dueDate` | Empty. Only `pick-ready` and a sprint plan date cards; **only the sprint plan sets a sprint batch's due date** (bandit-dev:sprint). Incident: today |
 | Execution state | Left as created. The midnight run moves it when due; `pick-ready` sets Assigned for a card picked for today; a sprint plan may seed its whole batch to Assigned. Incident: `assigned` straight away |
-| `dependencies` | `blockedBy` / `blocks` for every known link, in the same call |
+| `dependencies` | `blockedBy` / `blocks` for every known link, in the same entry |
 | `subtasks` | Claude Code only: the build steps, when it writes the card or at `plan-tech`. Claude.ai writes none. Order as `references/board.md` → Sub-tasks |
 | `description` | **🃏 Card sections**, written per `references/board.md` → Card descriptions |
 | Brief | One `brief` note per card through bandit:notes, `board-task` = the card's short id. Its body is bandit:notes' rule |
@@ -143,8 +143,8 @@ what the board sees.
 | Column | `PM` (**🧾 Card fields** column rule) |
 | Tags | No `lane/*`, no `stage/*`: it isn't a lane card. Exempt from audit V1, V3 and V6 |
 | Description | No Spec. Written per `references/board.md` → Card descriptions |
-| Batch | Every card in the sprint is a **blocker** of the sprint card (`add_dependency`, card → sprint card). The live blockers are the source of truth |
-| Sprint tag | `sprint/{name}` on each batch card, never on the sprint card. `list_sprints` lists every sprint tag with open, completed and total counts; `list_tasks(tagName: "sprint/{name}")` gives its cards |
+| Batch | Every card in the sprint is a **blocker** of the sprint card (`link_tasks { blockerTaskId: card, blockedTaskId: sprint card }`). The live blockers are the source of truth |
+| Sprint tag | `sprint/{name}` on each batch card, never on the sprint card. `list_tasks { view: "sprint" }` lists every sprint tag with open, completed and total counts; `list_tasks { tagName: "sprint/{name}" }` gives its cards |
 | Effort | Its own size as the umbrella; B7 applies to the batch cards, not to it |
 | Records | Plan, execution prompt, ledger, report and the batch's briefs, in the sprint folder (bandit:notes owns the names and the folder) |
 
@@ -156,15 +156,17 @@ Run from `onboard` (approved rows) or as a fix row for bandit:audit S9; the PM s
 sprint plan. The one lane and column procedure in this skill; any other lane or column design is
 still a design conversation. **Never silently:** every step is an approved row.
 
-1. `list_tags` → every missing tag of `lane/incident · lane/issue · lane/feature · lane/maintenance
+Read `get_context` once (tags, projects), then work by id.
+
+1. `get_context → tags` → every missing tag of `lane/incident · lane/issue · lane/feature · lane/maintenance
    · lane/content · lane/tech-debt · stage/spec · stage/planned · stage/ready` is a
-   `create_tag` row.
-2. `list_projects` → the board's current lanes. One row: `set_project_lanes` with the **complete**
+   `manage_tags { action: "create", name }` row.
+2. `get_context → projects` → the board's current lanes. One row: `manage_columns_lanes { action: "set_lanes", projectId, lanes }` with the **complete**
    list, in the lane table's order, each matcher `{field: "tag", values: [that lane tag's id]}`,
    ids resolved live after step 1 runs. The call replaces every lane, so existing lanes not in the
    list are named in the row.
 3. **PM column** (from `onboard` with `dev: true`, or from a sprint plan when the board has none).
-   `list_projects` → no `PM` column → one row with two calls: `add_project_column(projectId, "PM")`
-   (it lands last), then `reorder_project_columns` with **every** column, Backlog at 0 and `PM` at
+   `get_context → projects` → no `PM` column → one row with two calls: `manage_columns_lanes { action: "add", projectId, name: "PM" }`
+   (it lands last), then `manage_columns_lanes { action: "reorder", columns }` with **every** column, Backlog at 0 and `PM` at
    1, the rest in their current order. A board that already has `PM` gets no row.
 4. Execute only approved rows, tags before lanes, lanes before the column. Report per row.

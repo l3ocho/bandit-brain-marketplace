@@ -3,7 +3,7 @@
 One line per real failure: what went wrong → what to do instead. Read once before a `check` or an `audit`.
 
 - **2026-09-27 · The Personal audit skipped the board step and scored against the template.** The
-  chat ran its own quick `list_projects` check instead of bandit:tasks' onboard step, never opened
+  chat ran its own quick `get_context` projects check instead of bandit:tasks' onboard step, never opened
   the rulebook, and wrote "scope is already correct". → Scoring is the script's: build the
   snapshot, run `check_structure.py`, show its output. A report without a snapshot hash in its
   footer is invalid.

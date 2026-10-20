@@ -21,7 +21,7 @@ the `bandit-staging` board only. `read` cases are checked by reading the shipped
 | C6 | P1 SP7 | auto (SP7) | `check_sprint.py … --domain Good` (committed, review record present) | exit 0, "passes SP1-SP7" |
 | C7 | P1 review gate | cli | `run` on a staging sprint card whose step 11 sub-task is unticked | refused, names "Independent plan review" (step 11); no wave agent launched |
 | C8 | P3 order gate | cli | `run` on a staging sprint card blocked by an open sprint card | refused, names the blocking sprint card; no wave agent launched |
-| C9 | P3 order at plan | read | `references/plan.md` step 1 | the new sprint card is blocked by the previous open sprint card (`add_dependency`) |
+| C9 | P3 order at plan | read | `references/plan.md` step 1 | the new sprint card is blocked by the previous open sprint card (`link_tasks { blockerTaskId, blockedTaskId }`) |
 | C10 | P2 release preconditions | cli | `release` on a staging sprint card with an untested card and no deploy word | refused; names the untested card and the missing deploy word; no recipe step runs |
 | C11 | P2 close precondition | read | `references/close.md` precondition 4 | refuses without a `Released:` line unless "close without release" is quoted |
 | C12 | P2 debug push | read | `references/debug.md` Rules | pushes follow `execute.md` → Pushing; no "never push" |

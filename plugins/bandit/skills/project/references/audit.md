@@ -68,7 +68,7 @@ template section. Note:
 - **Project Context** — is the `## 🧭 Project Context` section present, right after Project
   Overview, with all five required keys and valid values? A `dev:` line must say `true`; any
   other value → propose fixing or removing the line. No `dev:` line is never a finding. Check them live: `domain` is a folder in
-  `MyNotes` (or `none`), `board` resolves via `list_projects` (or is `none` / `pending`).
+  `MyNotes` (or `none`), `board` resolves via `get_context → projects` (or is `none` / `pending`).
   Naming, board type and footprint aren't judged here: run `/bandit:audit check` in this project
   and carry its rows into the proposal (skip it for `domain: none`: bandit:audit scores domain
   projects only).

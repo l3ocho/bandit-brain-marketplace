@@ -32,9 +32,9 @@ Board rules still hold on every board: a locked Spec changes only through `Spec 
 
 ## 🔎 Resolving it
 
-1. `list_projects` once. It returns every project with its folder and that folder's
-   `parentFolderId`. **The domain's projects** = every project whose folder is the top-level folder
-   named exactly `domain:`, or a child of it. No folder of that name → stop and say so; never guess
+1. `get_context` once. Its `projects` carry each project's folder, and its `folders` are the
+   top-level folders with their child folders. **The domain's projects** = every project whose
+   folder is the top-level folder named exactly `domain:`, or a child of it. No folder of that name → stop and say so; never guess
    the nearest match.
 2. **The home board** = the `board:` name. It must be one of the domain's projects; a home board
    outside its domain folder → stop and say so (bandit:audit S4).
@@ -42,8 +42,8 @@ Board rules still hold on every board: a locked Spec changes only through `Spec 
 
 ## 🧹 Filtering the household-wide views
 
-`get_execution_board`, `get_week_board`, `get_inbox_board`, `get_workload` and `list_tasks` without
-a `projectId` return **every project in the household**. Before a result is shown, counted or used:
+`list_tasks` with `view: "inbox"`, `"execution"`, `"week"` or `"workload"`, and `list_tasks`
+without a `projectId`, return **every project in the household**. Before a result is shown, counted or used:
 
 - **Keep** the domain's cards; **drop** the rest, then re-count. Report the home board first, then
   the rest of the domain grouped by board

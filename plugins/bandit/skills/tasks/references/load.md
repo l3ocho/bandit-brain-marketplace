@@ -70,15 +70,15 @@ After a load that created a project, say: *set `board: project "{name}"` through
 
 ## ⚙️ Procedure
 
-1. **Resolve scope.** `list_projects` once: target folder or project, its columns and type.
+1. **Resolve scope.** `get_context` once: target folder or project (`folders`, `projects`), its columns and type.
 2. **Parse the WBS** into packages: ID, name, column, subtasks, blockers.
 3. **Validate before any write:** every dependency ID exists in the WBS · no cycles · no task above **30** links (both directions together). A failure → report it and stop; the WBS needs fixing in bandit:plan.
-4. **Match what already exists** (resume or load into an existing project): columns by exact name, tasks by exact title within that project (`list_tasks(projectId)`). Existing ones are reused, never duplicated or changed.
+4. **Match what already exists** (resume or load into an existing project): columns by exact name, tasks by exact title within that project (`list_tasks { projectId }`). Existing ones are reused, never duplicated or changed.
 5. ✋ **Show the plan and wait:** project (new / existing), columns (new · existing), tasks (new · existing), dependency links. Counts first, then the column list.
 6. **Create** on confirmation:
-   - `create_project` if new, then `add_project_column` per missing column, in WBS order.
-   - Tasks in **dependency order** — blockers before the tasks they block. Each `create_task` carries `projectId`, `projectColumnId`, `description`, `subtasks` and `dependencies.blockedBy` (the task ids already created or matched). Keep the WBS-ID → task-id map in this session only; never write it anywhere.
-7. **A refused create** leaves nothing behind. Record the reason, skip every task that depends on it, carry on with the rest.
+   - `manage_projects { action: "create", name, folderId, type: "deliverable" }` if new, then `manage_columns_lanes { action: "add", projectId, name }` per missing column, in WBS order.
+   - Tasks in **dependency order** — blockers before the tasks they block: one `create_tasks { items: [...] }` call per dependency level (≤100 entries, split above), each level only after the one before it answered. Each entry carries `projectId`, `projectColumnId`, `description`, `subtasks` and `dependencies.blockedBy` (the task ids already created or matched, from earlier `results`). Keep the WBS-ID → task-id map in this session only; never write it anywhere.
+7. **A refused entry** leaves nothing behind for that task, and the other entries still go through (`references/board.md` → Bulk write). Record its reason and `field`, skip every task that depends on it, carry on with the rest.
 8. **Report:** created · reused · refused (task name + reason) · skipped because a blocker was refused. Then the `board:` reminder when it applies.
 
 ---

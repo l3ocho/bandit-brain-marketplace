@@ -53,8 +53,8 @@ in:inbox is:unread -in:draft newer_than:7d
 4. For each, extract **the action, not the subject line**
 5. Present proposals as a numbered list
 6. Wait
-7. On confirmation: `create_task` per accepted item — one call each, there is no bulk create
-8. Report what was created and where it landed
+7. On confirmation: one `create_tasks { items: [{ title, … }, …] }` with every accepted item
+8. Read `results` (`references/board.md` → Bulk write): report what was created, where it landed, and any refused entry
 
 ---
 
@@ -75,7 +75,7 @@ in:inbox is:unread -in:draft newer_than:7d
 
 ## 📍 Where proposals land
 
-**Untriaged**, by default. `create_task(title)` with no `projectId`.
+**Untriaged**, by default. `create_tasks { items: [{ title }] }` with no `projectId`.
 
 Email proposals are captured, not filed. Filing is `/bandit:tasks triage`.
 

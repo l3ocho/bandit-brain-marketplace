@@ -24,7 +24,7 @@ prefix: {prefix}
 
 Read by bandit:notes, bandit:minutes, bandit:tasks, bandit:plan.
 **Home board first. Read and write across the domain. Nothing outside it.**
-Names only: skills resolve IDs live via `list_projects`. No hardcoded IDs, ever.
+Names only: skills resolve IDs live via `get_context`. No hardcoded IDs, ever.
 ```
 
 | Key | Values | Filled from (phases: `references/interview.md`) |
@@ -32,7 +32,7 @@ Names only: skills resolve IDs live via `list_projects`. No hardcoded IDs, ever.
 | `domain` | MyNotes domain folder (e.g. `Acme`), or `none` | Phase 4 Domain question. `none` for a custom path and artifact-only |
 | `project` | The project's own slug (e.g. `home-reno`) | Phase 4 slug question. When it wasn't asked, suggest a kebab-case slug from the project name and confirm it |
 | `type` | `product_service` · `workflow` · `claude_marketplace` | Phase 1 question 1 |
-| `board` | `project "{name}"` (the **home board**, filed inside the domain's board folder) · `none` · `pending` | Phase 1 question 5. Names exactly as `list_projects` returns them, quoted. `folder "…"` and `global` are retired (2026-10-14) |
+| `board` | `project "{name}"` (the **home board**, filed inside the domain's board folder) · `none` · `pending` | Phase 1 question 5. Names exactly as `get_context → projects` returns them, quoted. `folder "…"` and `global` are retired (2026-10-14) |
 | `prefix` | 2–3 character filename prefix, or `none` | Phase 4 prefix. `none` when artifact-only |
 | `dev` *(optional)* | `true`, or the line is absent | Phase 1 dev question (`references/interview.md`). Only for technical development projects that use the dev card workflow (bandit:tasks, bandit:notes) and sprints (bandit-dev:sprint, Claude Code) |
 

@@ -30,7 +30,7 @@ Contents: Interview and pace · Scope · Cards and Specs · Agents and checks ·
 - Specs still listed answered questions because the decisions lived in comments and the Spec was locked → collect decisions at step 3 and reconcile each Spec once at step 9, old and new in one table.
 - Rewrote descriptions from memory after someone edited the Spec (a parenthetical on the `Brief:` line) → `get_task` right before every write; on `SPEC_LOCKED` re-read, never override to get past it.
 - Wrote `Brief:` lines with a folder in brackets → filename only.
-- `set_task_tags` replaced the whole set → read, merge, write.
+- `tagIds` in `update_tasks` replaced the whole set → read, merge, write.
 - Sub-tasks added in parallel came out reversed → add one at a time or reorder, then read back.
 - A due date given as "tomorrow" → convert to an absolute date from the session date and write it once.
 - A card's `Scope out` stated a wrong fact (new Finance accounts "private by default") → spot-check any factual line a card makes against code.
@@ -75,7 +75,7 @@ Written before the first real run; correct them with what happens.
 - Debug fixed things nobody approved → every adjustment is a row in the decision table; apply only approved rows.
 - Close archived before the cards were complete → order is cards, sprint card, then folder; verify each.
 
-- Wave sub-tasks landed at the top of the card, reversed, even when added one at a time → always `reorder_subtasks` with the full order and read back.
+- Wave sub-tasks landed at the top of the card, reversed, even when added one at a time → always `manage_subtasks { action: "reorder", subtasks }` with the full order and read back.
 - Every wave got the same paste (`execute {sprint card}`) and it read like a per-card trigger → the command names the sprint card and the wave (`execute {sprint card} wave N`); a batch card id is refused.
 - "I want this today" was taken as approval to commit → urgency is not approval; ask one yes or no.
 - The execution prompt carried its own debug procedure beside `debug.md` → the prompt only points to the references.
@@ -102,4 +102,4 @@ Written before the first real run; correct them with what happens.
 - A card was detached at close (production steps moved to the next sprint) while its brief stayed in the sprint folder that was about to be archived, and the checker still counted the card as part of the sprint → write "detached" on its ledger row, and merge everything about the card into one note in the inbox before archiving (`close.md` step 3a); SP2 skips detached cards and SP6 fails a second brief for a card.
 - Sent a second long question list after the first → one list per gate with recommendations; follow up only on what the answers raise.
 - Sprint shared-finance, wave 2: the next wave's cards stayed in Assigned after the wave's cards reached Stand By, because the move waited for the wave-end checks and the orchestrator waited for the report → the next wave goes to Next the moment the last card reaches Stand By (`execute.md` → The wave, step 7), and the orchestrator sets the board before checking anything, whatever the wave reported (`run.md` → The loop, step 2).
-- `get_execution_board` with no filter returned 385,000 characters (every household card with its description) and overflowed the tool output on every board check; a wave agent was also cut off by a usage limit and left the board unset → read the sprint's cards by column with `list_tasks` (`execute.md` → Reading the board); `run` sets the board even when the wave sent no report.
+- The whole Execution board read with no filter returned 385,000 characters (every household card with its description) and overflowed the tool output on every board check; a wave agent was also cut off by a usage limit and left the board unset → read the sprint's cards by column with `list_tasks` (`execute.md` → Reading the board); `run` sets the board even when the wave sent no report.

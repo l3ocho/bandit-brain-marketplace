@@ -26,7 +26,7 @@ proposal, then tells the user the `board:` line to set through bandit:project.
 
 ## Procedure
 
-1. **`list_projects` once.** It returns every folder, project, column and lane with IDs. Match
+1. **`get_context` once.** Its `folders` and `projects` give every folder, project, column and lane with IDs. Match
    names exactly; never guess the nearest one.
 2. **Produce the rows:**
 
@@ -51,7 +51,7 @@ proposal, then tells the user the `board:` line to set through bandit:project.
    bandit:audit `references/structure-rulebook.md`: read it before proposing the row. A name that breaks
    it is reported with the rule number and a compliant name, never created as given.
 3. **Hand the rows and the `board:` line back** to bandit:project.
-4. **Execute only an approved row:** `create_project(name, type, folderId)`, the folder ID resolved
+4. **Execute only an approved row:** `manage_projects { action: "create", name, type, folderId }`, the folder ID resolved
    live from step 1. The project starts with the protected Backlog column and nothing else. Dev
    board shape rows run after it, as `references/dev.md` says.
 5. **Report per row:** created (with the name as the board shows it) or refused (with the reason).

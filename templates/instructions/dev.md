@@ -18,7 +18,7 @@ dev: true
 
 Read by every `bandit` skill.
 **Home board first. Read and write across the domain. Nothing outside it.**
-Names only: skills resolve IDs live via `list_projects`. No hardcoded IDs, ever.
+Names only: skills resolve IDs live via `get_context`. No hardcoded IDs, ever.
 
 ## 🎯 Role
 

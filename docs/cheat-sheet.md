@@ -131,7 +131,7 @@ updated: 2026-10-13
 
 > [!example]- 🏷️ Tags: three axes, plus the dev tags
 > **Kind** `feature` `issue` `chore` · **Energy** `quick-win` `deep-work` `needs-research` · **Handler** `claude-code` `claude-design` `claude-ai`
-> Dev boards: **Lane** `lane/incident` `lane/issue` `lane/feature` `lane/maintenance` `lane/content` `lane/tech-debt` · **Stage** `stage/spec` → `stage/planned` → `stage/ready` (kept after completion) · **Sprint** `sprint/{name}` (`list_sprints`)
+> Dev boards: **Lane** `lane/incident` `lane/issue` `lane/feature` `lane/maintenance` `lane/content` `lane/tech-debt` · **Stage** `stage/spec` → `stage/planned` → `stage/ready` (kept after completion) · **Sprint** `sprint/{name}` (`list_tasks { view: "sprint" }`)
 
 > [!note]- 🛠️ Dev surfaces
 > Claude.ai = high-level: `spec`, `stage … ready`, `pick-ready`. Claude Code (Project Context from the repo `CLAUDE.md`) = everything, plus `plan-tech` and all stages. Cards stay thin: `Spec` + `Technical plan`, up to L; XL splits. Every field filled (`dev.md` → 🧾 Card fields). A written Spec is locked: changes go in a `Spec change needed:` comment. Project-management cards go in the `PM` column.

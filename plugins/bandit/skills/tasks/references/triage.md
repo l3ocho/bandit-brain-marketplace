@@ -1,13 +1,13 @@
 # 📥 Triage
 
 **Commands:** `/bandit:tasks triage` `/bandit:tasks inbox`
-**Owns:** the Inbox board · `move_task` · `bulk_move_tasks` · right-sizing during review
+**Owns:** the Inbox board · moves (an `update_tasks` entry with `projectId` / `projectColumnId`) · right-sizing during review
 
 ---
 
 ## 🗺️ What the Inbox board actually is
 
-`get_inbox_board` returns:
+`list_tasks { view: "inbox" }` returns:
 
 | Column | Holds |
 |---|---|
@@ -33,17 +33,19 @@ Never collapse them. Asking "which project and which column" about twenty untria
 
 ## ⚙️ Procedure
 
-1. **Resolve scope.** `list_projects` once. Names → IDs, plus every project's columns and **type**;
+1. **Resolve scope.** `get_context` once. Names → IDs, plus every project's columns and **type**;
    the domain's projects (`references/scope.md`)
-2. **Read the board.** `get_inbox_board`, filtered to the domain (`references/scope.md` →
+2. **Read the board.** `list_tasks { view: "inbox" }`, filtered to the domain (`references/scope.md` →
    Filtering). **Untriaged is the workflow project's:** from any other project, Stage 1 is skipped
    and only the domain's parked columns are triaged
 3. **Report counts first.** Untriaged count (workflow project only), then parked count per project of the domain. Do not start proposing until the size is stated
 4. **Right-size** — see below. Propose only
 5. **Stage 1 — propose projects** for the untriaged items, as a list the user can correct in one message
 6. **Stage 2 — leave the inbox** (below) for the parked items the project's exit style lets out now
-7. **On confirmation**, write: fields with `update_task`, placement with `bulk_move_tasks` (batches of ≤100), the due date **last**
-8. **Report per-task results.** Refusals by task name with the reason
+7. **On confirmation**, write one `update_tasks` call, one entry per card (batches of ≤100):
+   `{ taskId, projectId, projectColumnId?, …fields, dueDate? }`. A move applies before fields, so
+   the due date in the same entry still lands **last**. A refused entry changed nothing on that card
+8. **Report per-task results** from `results`. Refusals by task name with the reason
 
 ---
 
@@ -58,7 +60,7 @@ with these answered, in this order, in one proposal row per card (the user corre
 | 2 | Priority | Urgency only |
 | 3 | Effort | Too large → propose the split first (right-sizing below) |
 | 4 | Complexity | High is fine now; it is driven down before execution |
-| 5 | Assignee | `list_project_members` (or household members on a shared project), resolved live |
+| 5 | Assignee | `get_context` → `projectMembers[projectId]` (or `members` on a shared project), resolved live |
 | 6 | Column | The project's real column (Stage 2 above) |
 | 7 | **Due date, last** | It commits the card: a parked card that gets a date moves to the first column on its own (rule 2 in SKILL.md). Never asked before the others |
 
@@ -67,7 +69,7 @@ field is missing. Never invent a value to get a card out.
 
 ### Exit style, by project type
 
-`list_projects` gives each project's type. It decides **how** cards leave, not whether the fields
+`get_context` → `projects` gives each project's type. It decides **how** cards leave, not whether the fields
 above are answered:
 
 | Type | The project inbox is | Cards leave |
@@ -87,7 +89,7 @@ filling fields here. Per item, offer one of:
 
 ## 🔀 Placement rules — memorise these
 
-`move_task` and `bulk_move_tasks` behave identically on placement:
+An `update_tasks` entry places a card the same way for one card or a hundred:
 
 | You pass | Where it lands |
 |---|---|
@@ -97,7 +99,7 @@ filling fields here. Per item, offer one of:
 | `projectId: null` | Untriaged |
 | `projectColumnId: null` | Inside the project, unfiled |
 
-🅿️ **A parked task can never hold a date.** Dating a parked task moves it into the first column automatically. This is the same rule from both directions — `set_task_due_date` does it too.
+🅿️ **A parked task can never hold a date.** Dating a parked task moves it into the first column automatically. This is the same rule from both directions — an `update_tasks` entry with only `dueDate` does it too.
 
 ⛔ **A completed task cannot be moved.** The refusal is not a bug.
 
@@ -115,9 +117,9 @@ Triage is where wrong-sized items get caught, because it is the only pass that s
 
 **Propose. Never resize silently in either direction.**
 
-- To split: `create_task` for the new pieces, then `delete_task` or `add_subtask` on the remainder
-- To demote a task into a checklist line: `add_subtask` on the keeper, `delete_task` on the original — **confirm the delete**
-- To promote a checklist line: `promote_subtask` — it takes the parent's project and column and **nothing else**, and returns the new id
+- To split: `create_tasks` for the new pieces, then `delete_tasks` (kind `card`) or `manage_subtasks { action: "add" }` on the remainder
+- To demote a task into a checklist line: `manage_subtasks { action: "add" }` on the keeper, `delete_tasks` (kind `card`) on the original — **confirm the delete**
+- To promote a checklist line: `manage_subtasks { action: "promote" }` — it takes the parent's project and column and **nothing else**, and returns the new id
 
 ---
 
@@ -131,11 +133,11 @@ Triage is where wrong-sized items get caught, because it is the only pass that s
 | Creating or renaming columns | Design conversation. Outside the skill — except a WBS load (`/bandit:tasks load`) and the dev board shape's `PM` column (`references/dev.md`) |
 
 🛠️ **Dev projects (`dev: true`).** Triage run **from the dev project** turns a parked item into a
-card: the move into its area column stays here (`move_task`), and `spec` (`references/dev-workflow.md`)
+card: the move into its area column stays here (`update_tasks` with `projectColumnId`), and `spec` (`references/dev-workflow.md`)
 writes its lane tag, `stage/spec` and `Spec` section. Triage run from a workflow project is
 unchanged: a dev item is filed into the dev project parked, and that project's `spec` picks it up.
 
-🔀 **`move_task` lives here and nowhere else.** If another surface needs a task moved, it says so explicitly and hands off.
+🔀 **Moves live here and nowhere else.** If another surface needs a task moved, it says so explicitly and hands off.
 
 ---
 
@@ -143,7 +145,7 @@ unchanged: a dev item is filed into the dev project parked, and that project's `
 
 | Code path | Meaning |
 |---|---|
-| Completed task | Move refused. Uncomplete first, or leave it |
+| Completed task | Move refused. Reopen first (`reopen_tasks`), or leave it |
 | Batch > 100 | **Whole call refused, nothing applied.** Split it yourself |
 | Malformed set | Whole call refused, nothing applied |
 

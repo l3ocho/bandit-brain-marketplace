@@ -18,7 +18,7 @@ Check all, report any miss as a fix row, and stop:
 
 Read the live state first (`get_task` for every card and the sprint card, the ledger, the report). **Every step checks before it writes: a state already correct is left alone and reported as "already done".**
 
-1. **Complete the cards.** `bulk_complete_tasks` for the approved batch cards not yet complete. Chained batch cards complete blockers first: a card cannot be completed while a blocker is incomplete, so call `bulk_complete_tasks` for the cards with no incomplete blocker, then again for the cards they unblocked, until none remain. A refusal on a blocker outside the batch: name it and stop that card.
+1. **Complete the cards.** `update_tasks { items: [{ taskId, complete: true }, …] }` for the approved batch cards not yet complete. Chained batch cards complete blockers first: a card cannot be completed while a blocker is incomplete, so call it for the cards with no incomplete blocker, then again for the cards they unblocked, until none remain. Read `results` entry by entry: a refused entry does not undo the others. A refusal on a blocker outside the batch: name it and stop that card.
 2. **Reconcile the statuses (the checklist).** Each row is checked against its live value and written only if different. One `get_task` immediately before each card or note write.
 
    | Where | Field | Becomes |
@@ -27,7 +27,7 @@ Read the live state first (`get_task` for every card and the sprint card, the le
    | Sprint card sub-tasks | 12 steps and every wave | All ticked, each with its comment already on the card |
    | Sprint card section 1 | Status line | `Closed {date}: {n} of {n} cards delivered and tested by the user` |
    | Sprint card section 12 | Approval and close-out | The user's quoted approval and date, what shipped, what carried over, where the report lives, lessons |
-   | Sprint card | completion | `complete_task`, only once every blocker is complete |
+   | Sprint card | completion | `update_tasks { items: [{ taskId, complete: true }] }`, only once every blocker is complete |
    | Ledger, At a glance | Current wave, Next action, Handover report, Last update | "Sprint closed", "none", FINAL, today |
    | Ledger, Waves and cards | Status per card | `Tested by the user` |
    | Ledger | Milestone log | One line: close date, approval quoted, cards completed |
@@ -36,7 +36,7 @@ Read the live state first (`get_task` for every card and the sprint card, the le
 
 3a. **Cards that do not close (detached or carried).** For every batch card left open (one detached to the next sprint, or one that waits for a trigger): remove its `sprint/{name}` tag and its link to the sprint card, leave it in Backlog, and write "detached" on its ledger row. **Then merge everything the sprint knows about it into one note, in the inbox, before the archive**: its brief (same filename, so the card's `Brief:` line still resolves; `status: inbox`, `file-to:`), plus what the plan, ledger and report say about the card (state, remaining steps, findings, decisions, acceptance-to-proof) in a closing section. The original leaves the sprint folder (it is moved, not copied). One document per card; the next `plan` files it into the next sprint folder. The checker enforces it (SP2 skips a detached card, SP6 fails a second brief for the same card).
 3. **Archive the sprint folder through bandit:notes.** Folder `Projects/{slug}/sprint-{name}/` moves to `_archive/Projects/{slug}/sprint-{name}/`, every note stamped `status: done`, `archived-from` and `archived`, mirror folders listed in the proposal, applied on the user's yes (one numbered proposal for the whole folder). Briefs, report and ledger go with it, and any leftover the sprint consumed outside its folder (an inbox draft, a superseded copy) is archived in the same proposal. Ledger edits in step 2 are made **before** the move, so the archived copy is final.
-4. **Verify.** Run `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py` and show its OK. Re-read live state and show it: `list_tasks({ tagName: 'sprint/{name}', completed: true })` (cards in Done), `list_sprints` (sprint closed), the sprint card (every sub-task ticked, section 1 and 12 filled), the vault listing (folder under `_archive/`, nowhere else) and one archived note's frontmatter. Any row still wrong is fixed or reported, not skipped.
+4. **Verify.** Run `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py` and show its OK. Re-read live state and show it: `list_tasks({ tagName: 'sprint/{name}', completed: true })` (cards in Done), `list_tasks { view: "sprint" }` (sprint closed), the sprint card (every sub-task ticked, section 1 and 12 filled), the vault listing (folder under `_archive/`, nowhere else) and one archived note's frontmatter. Any row still wrong is fixed or reported, not skipped.
 5. **Report.** Ten lines at most: cards completed, sprint card completed, statuses reconciled, folder archived, what stays open (push, deploy, production audits, `CLAUDE.md` corrections) and the line to restore if needed. Open items go on the sprint card as one comment so they stay visible after the archive.
 
 ## Never

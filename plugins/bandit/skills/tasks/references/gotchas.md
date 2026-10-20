@@ -20,13 +20,13 @@ One line per real failure: what went wrong → what to do instead. Read once at 
   **📝 Card descriptions**, and read every description back after the write.
 - **2026-10-06 · Dev cards drifted from the app's lane template.** The skill allowed only `<h2>`
   and said *Open questions for Claude Code*; the template uses `<h3>` and *Open questions*, and the
-  column rule never said module or page. → Start every card from `get_lane_template`, fill
+  column rule never said module or page. → Start every card from `get_context` → `laneTemplates`, fill
   Card fields in full, place it by the column rule (`references/dev.md`).
-- **2026-10-06 · A tag write dropped tags.** `set_task_tags` replaces the whole set, so writing one
+- **2026-10-06 · A tag write dropped tags.** `update_tasks` `tagIds` replaces the whole set, so writing one
   tag wiped the rest. → `get_task` first and send the full merged set, every time (**🏷️ Tags**).
 - **2026-10-06 · Sub-tasks came out in reverse order.** They were added with parallel
-  `add_subtask` calls, and later landed at the top, reversed, even one at a time. → After any
-  sub-task write, `reorder_subtasks` with the full order and read it back (**☑️ Sub-tasks**).
+  `manage_subtasks { action: "add" }` calls, and later landed at the top, reversed, even one at a time. → After any
+  sub-task write, `manage_subtasks { action: "reorder" }` with the full order and read it back (**☑️ Sub-tasks**).
 - **2026-10-06 · Two cards still showed raw tags.** They opened with a bare `<b>`; the app
   reads a description as rich text only when it opens and closes with a block tag, so it showed
   every tag as text. The 10-05 rule allowed a top-level `<b>` and its read-back never tested the

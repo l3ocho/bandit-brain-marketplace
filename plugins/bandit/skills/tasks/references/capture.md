@@ -17,7 +17,8 @@ A titled task in Untriaged is a success. An interrogation that ends with a perfe
 
 ## ➕ Creating
 
-`create_task(title, …)` — only `title` is required.
+`create_tasks { items: [{ title, … }] }` — one entry per task; only `title` is required. Read
+`results`: one entry per task, a refusal on one doesn't undo the others (`references/board.md` → Bulk write).
 
 | Field | Values |
 |---|---|
@@ -49,9 +50,9 @@ project, the home board's Inbox (parked), so the card stays in this project's si
 ## 🧠 Brain dumps
 
 1. One task per line, titles only
-2. `create_task` per line — **there is no bulk create.** Do not pretend otherwise
+2. One `create_tasks` call, one entry per line (split above 100)
 3. Land them in **Untriaged** unless the project is obvious from the line itself
-4. Report the count created
+4. Report the count created, and every refused entry by title
 5. Offer `/bandit:tasks triage`. Do not start triaging
 
 ⛔ Do not de-duplicate, re-order, re-word or merge lines during a dump. That is triage, and doing it here loses the user's own phrasing.
@@ -60,25 +61,25 @@ project, the home board's Inbox (parked), so the card stays in this project's si
 
 ## ☑️ Subtasks
 
-`add_subtask(taskId, title)` — a plain checklist inside the task.
+`manage_subtasks { action: "add", taskId, title }` — a plain checklist inside the task.
 
 🔁 **Order is set, never trusted.** New sub-tasks have landed at the top, reversed, even when added
-one at a time. After any sub-task write (`create_task` with `subtasks`, `add_subtask`,
-`promote_subtask`): `get_task` → `reorder_subtasks` with **every** sub-task of the parent and its
-intended position (0 = top; a partial list is refused) → `get_task` again and check the order. Still
+one at a time. After any sub-task write (`create_tasks` with `subtasks`, `manage_subtasks` add or
+promote): `get_task` → `manage_subtasks { action: "reorder", subtasks: [{ id, position }] }` with
+**every** sub-task of the parent and its intended position (0 = top; a partial list is refused) → `get_task` again and check the order. Still
 wrong → tell the user which card.
 
 - No dates, no priorities, no dependencies of their own
 - **Ticking them all does not complete the parent**
-- `set_subtask_completed` / `rename_subtask` / `delete_subtask`
+- `manage_subtasks` with `action: "tick"` (`subtaskId`, `completed`) / `"rename"` (`subtaskId`, `title`) · delete: `delete_tasks { items: [{ kind: "subtask", subtaskId }] }`
 
-`promote_subtask(subtaskId)` when a line turns out to need its own date or dependency. It takes the parent's **project and column and nothing else** — no date, no priority, no effort, no complexity, no tags. It is removed from the parent. Returns the new `taskId`.
+`manage_subtasks { action: "promote", subtaskId }` when a line turns out to need its own date or dependency. It takes the parent's **project and column and nothing else** — no date, no priority, no effort, no complexity, no tags. It is removed from the parent. Returns the new `taskId`.
 
 ---
 
 ## 🔗 Dependencies
 
-`add_dependency(blockerTaskId, blockedTaskId)`.
+`link_tasks { blockerTaskId, blockedTaskId }`.
 
 ⛔ Refused when:
 
@@ -86,7 +87,7 @@ wrong → tell the user which card.
 - **either task is recurring** — recurring tasks cannot take part in dependencies
 - the blocker is due **after** the task it would block
 
-Read links with `get_task`: in `blockedBy` and `blocks`, `id` is the **link** (pass to `remove_dependency`) and `taskId` is the other task. Confusing the two removes the wrong thing.
+Read links with `get_task`: in `blockedBy` and `blocks`, `id` is the **link** (pass to `delete_tasks { items: [{ kind: "link", dependencyId }] }`) and `taskId` is the other task. Confusing the two removes the wrong thing.
 
 ---
 
@@ -121,19 +122,21 @@ Read links with `get_task`: in `blockedBy` and `blocks`, `id` is the **link** (p
 
 ## 🔧 The lifecycle
 
-| Want | Tool | What survives |
+| Want | Call | What survives |
 |---|---|---|
-| New repeating task | `create_recurring_task` | `dueDate` **required** — it is the anchor and the first occurrence |
-| Make an existing task repeat | `attach_repeat_rule` | Same id, subtasks, comments, tags |
-| Read the rule | `get_repeat_rule` | Also `nextDueDate` and `endedAt` |
-| Change the rule | `update_repeat_rule` | Replaces it **whole** — read first, send complete |
-| Stop repeating | `end_repeat_rule` | Current occurrence becomes an ordinary task, same id, same date |
+| New repeating task | `create_tasks { items: [{ title, dueDate, repeat: rule }] }` | `dueDate` **required** — it is the anchor and the first occurrence |
+| Make an existing task repeat | `manage_recurrence { action: "attach", taskId, rule }` | Same id, subtasks, comments, tags |
+| Read the rule | `manage_recurrence { action: "get", taskId }` | Also `nextDueDate` and `endedAt` |
+| Change the rule | `manage_recurrence { action: "update", taskId, rule }` | Replaces it **whole** — read first, send complete |
+| Stop repeating | `manage_recurrence { action: "end", taskId }` | Current occurrence becomes an ordinary task, same id, same date |
 
-⛔ `attach_repeat_rule` is refused when the task: already repeats · has **no due date** to anchor to · is already complete · takes part in a dependency.
+Every `manage_recurrence` action takes the `taskId` of any occurrence, never the series.
 
-⛔ `update_repeat_rule` is refused on an ended series. The current occurrence keeps its id and everything attached; only its date moves to the first date the new rule produces — which for `completion` is today.
+⛔ `attach` is refused when the task: already repeats · has **no due date** to anchor to · is already complete · takes part in a dependency.
 
-⚠️ **`get_repeat_rule` returning `rule: null` means unreadable, not "no rule."** The series carries a rule this app cannot author. Do not approximate it to the nearest case. `NOT_RECURRING` is the code that actually means it does not repeat.
+⛔ `update` is refused on an ended series. The current occurrence keeps its id and everything attached; only its date moves to the first date the new rule produces — which for `completion` is today.
+
+⚠️ **`get` returning `rule: null` means unreadable, not "no rule."** The series carries a rule this app cannot author. Do not approximate it to the nearest case. `NOT_RECURRING` is the code that actually means it does not repeat.
 
 ⚠️ A day interval divisible by 7 always reads back as weeks. Same rule, different words — not a discrepancy.
 
@@ -143,6 +146,6 @@ Read links with `get_task`: in `blockedBy` and `blocks`, `id` is the **link** (p
 
 ## 🏷️ Tags
 
-The three axes, and the rule that `set_task_tags` **replaces the whole set**, live in `references/board.md` → *Tags*. Read it before tagging.
+The three axes, and the rule that `update_tasks` `tagIds` **replaces the whole set**, live in `references/board.md` → *Tags*. Read it before tagging.
 
 📌 On a recurring task, tags live on the **series**. Every occurrence carries them.

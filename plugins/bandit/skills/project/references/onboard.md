@@ -44,7 +44,7 @@ a list, or none.*
   never above 1,000) → the trim is built first and is row 1 of the same proposal: cut what the
   reference doc already holds, move detail there. Never write or hand over a version over the budget.
 - **Step 3 is bandit:tasks' procedure, loaded and run.** Never swap it for a quick check of your
-  own. Each board row cites the `list_projects` entry it came from.
+  own. Each board row cites the `get_context → projects` entry it came from.
 - **Approval covers the approved rows and nothing else.** Every finding has its own row, so one
   "all" fixes everything; a row the user didn't approve never runs. Nothing outside this project's own
   folders is touched except by a `fix` row they approved.

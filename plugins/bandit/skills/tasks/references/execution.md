@@ -7,9 +7,9 @@
 
 ## 🗂️ The six columns
 
-`get_execution_board` returns them in fixed order, but for **every card in the household with full descriptions**: on a busy household it overflows the tool output. Read one column at a time instead: `list_tasks({ executionState, projectId })` per board of the domain (add `tagName` for a sprint). Use `get_execution_board` only with an `assignee` filter on a small board.
+`list_tasks { view: "execution" }` returns them in fixed order, but for **every card in the household with full descriptions**: on a busy household it overflows the tool output. Read one column at a time instead: `list_tasks({ executionState, projectId })` per board of the domain (add `tagName` for a sprint). Use the `execution` view only with `assignee` on a small board (a view refuses any other filter).
 
-| # | Column | Settable via `set_task_execution_state`? |
+| # | Column | Settable via `update_tasks` `executionState`? |
 |---|---|---|
 | 1 | **Backlog** | ✅ `backlog` |
 | 2 | **Assigned** | ✅ `assigned` |
@@ -31,9 +31,9 @@
 | Backlog · Assigned · Stand By | Nothing |
 
 **Any column but Done can be set explicitly**, from any column; only Next and Doing are gated. A
-sprint plan may seed its whole batch to Assigned in one `bulk_set_execution_state`.
+sprint plan may seed its whole batch to Assigned in one `update_tasks` call, one entry per card.
 
-`complete_task` is refused while any blocker is incomplete.
+Completing (`complete: true`) is refused while any blocker is incomplete.
 
 ⛔ When a gate refuses: **name the blocking task**, do not retry, do not route around it. `relatedId` in the refusal is the blocker — resolve it to a title before reporting. Codes: `references/errors.md`.
 
@@ -79,24 +79,25 @@ Report the breach. Propose what moves back to Assigned or Stand By. **Do not sil
 ### `/bandit:tasks doing`
 
 1. Resolve the named task — `list_tasks` or the board just read
-2. `set_task_execution_state` → `doing`
+2. `update_tasks { items: [{ taskId, executionState: "doing" }] }`
 3. On a gate refusal, name the blocker and stop
 
 ### `/bandit:tasks done`
 
-1. `complete_task` — this is what moves it to Done
+1. `update_tasks { items: [{ taskId, complete: true }] }` — this is what moves it to Done. Every
+   card another system made for one record: `{ originSystem, originReference, complete: true }`
 2. **If it was a recurring occurrence**, completion advances the series and creates the next occurrence. Say so, and report the next date
 3. If the whole series just ended because the rule ran out, say that too
 
-⚠️ `uncomplete_task` returns the task to Backlog and makes it movable. On a recurring occurrence it also removes the next occurrence, and only when that one is an unedited fresh copy and this is the series' latest completion; otherwise it is refused (`references/errors.md`).
+⚠️ `reopen_tasks { taskIds }` returns the task to Backlog and makes it movable. On a recurring occurrence it also removes the next occurrence, and only when that one is an unedited fresh copy and this is the series' latest completion; otherwise it is refused (`references/errors.md`).
 
 ### `/bandit:tasks bump`
 
 Bumping is a **date** change, not a column change.
 
-1. `set_task_due_date`, or `bulk_set_due_date` for several
+1. `update_tasks { items: [{ taskId, dueDate }] }`, one entry per task for several
 2. Refused if the new date puts it out of order with something it blocks or that blocks it — report which
-3. Refused outright on a recurring occurrence — **its date comes from the rule.** Offer `skip_occurrence` instead
+3. Refused outright on a recurring occurrence — **its date comes from the rule.** Offer `manage_recurrence { action: "skip", taskId }` instead (the next occurrence is a new task: use the id it returns)
 
 📌 Three bumps on the same task is a right-sizing signal. Say it once. Do not nag.
 
@@ -104,9 +105,11 @@ Bumping is a **date** change, not a column change.
 
 ## 📦 Bulk
 
-`bulk_set_execution_state` — same gates, applied per task. Done is not a destination.
+`update_tasks` with `executionState` — same gates, applied per entry. Done is not a destination;
+`executionState` and `complete` never share an entry.
 
-`bulk_complete_tasks` · `bulk_set_due_date` — cap 100.
+`update_tasks` with `complete: true` or `dueDate` — cap 100, one result per entry
+(`references/board.md` → Bulk write).
 
 **Completing blockers and their dependents:** blockers first, dependents in a **second** call.
 Whether one call completes them in list order is **unchecked**; a dependent sent with its blocker

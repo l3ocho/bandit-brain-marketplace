@@ -204,6 +204,37 @@ def check_denylist():
            if hits else f"no old name in {len(shipped_files())} shipped files")
 
 
+# ── MT1 · no Bandit Brain assistant tool the app removed: a skill calling one answers NOT_FOUND ─
+# The app's own list (its src/domains/tasks/removedTools.ts); the 18 tools that replace them are in
+# its docs/handoff/mcp-tool-rename-for-skills.md. Whole words, so update_tasks never matches update_task.
+REMOVED_TOOLS = (
+    "list_projects list_folders list_tags list_household_members list_project_members get_lane_template "
+    "list_sprints get_execution_board get_week_board get_inbox_board get_workload create_task "
+    "create_recurring_task update_task complete_task complete_by_origin move_task set_task_execution_state "
+    "set_task_due_date set_task_tags bulk_move_tasks bulk_set_due_date bulk_set_execution_state "
+    "bulk_complete_tasks bulk_set_task_tags uncomplete_task delete_task delete_subtask remove_dependency "
+    "delete_series delete_series_occurrence add_subtask rename_subtask set_subtask_completed reorder_subtasks "
+    "promote_subtask attach_repeat_rule get_repeat_rule update_repeat_rule end_repeat_rule set_series_assignee "
+    "skip_occurrence list_occurrences add_dependency create_project update_project archive_project "
+    "restore_project add_project_column rename_project_column reorder_project_columns set_project_lanes "
+    "create_tag update_tag promote_tag create_folder update_folder set_project_visibility delete_project "
+    "delete_project_column delete_tag delete_folder").split()
+REMOVED_TOOLS_RE = re.compile(r"(?<![A-Za-z0-9_])(" + "|".join(REMOVED_TOOLS) + r")(?![A-Za-z0-9_])")
+
+
+def check_removed_tools():
+    hits = []
+    for f in shipped_files():
+        text, _ = strip_history(f, f.read_text(encoding="utf-8", errors="ignore"))
+        for n, line in enumerate(text.splitlines(), 1):
+            line = line.replace('action: "list_occurrences"', "")  # manage_recurrence's own action
+            for m in REMOVED_TOOLS_RE.finditer(line):
+                hits.append(f"{f.relative_to(ROOT)}:{n} `{m.group(1)}`")
+    report("MT1", not hits,
+           f"removed tools: {'; '.join(hits[:8])}{' …' if len(hits) > 8 else ''} ({len(hits)})" if hits
+           else f"no removed assistant tool in {len(shipped_files())} shipped files ({len(REMOVED_TOOLS)} names)")
+
+
 # ── R15 · command words are unique across every skill (house_lint's rule, one source) ────
 def house_lint():
     import importlib.util
@@ -530,6 +561,7 @@ def main(argv):
     check_tags()
     check_g6()
     check_denylist()
+    check_removed_tools()
     check_r15()
     check_guard_pin()
     check_l1()

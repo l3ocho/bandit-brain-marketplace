@@ -1,3 +1,4 @@
 .claude/settings.local.json
 .work/
 .claude/mirror-stamp.json
+__pycache__/

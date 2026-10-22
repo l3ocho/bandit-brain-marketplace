@@ -2,7 +2,7 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
-## Unreleased
+## 0.7.0 · 2026-10-21
 
 ### Added
 - **`bandit:finance`:** works the Bandit Brain Finance module from chat through the app's 17 `finance_*` tools. Commands `setup`, `log`, `import`, `sort`, `month`, `bills`, `reconcile`, `review` and `audit`. Previews before every bulk write, confirms every delete, keeps money in whole cents with its currency and never mixes currencies; the actions the app keeps for the person are pointed to the app. Needs app v0.31.0 or later; reconnect the Bandit Brain connector after the upgrade.

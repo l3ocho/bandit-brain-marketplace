@@ -46,9 +46,7 @@ These start outside, so no file here triggers them. Each has its own check.
 A place the done check lists as open, checked and found to need nothing for this release. One line
 each: the path as the map writes it, then why. `scripts/release.py --write` empties this list.
 
-- `templates/instructions/*.md` — the new `finance:` line is optional and absent by default; the templates' required keys and closing lines are unchanged (AT2 green).
-- `plugins/bandit/skills/project/assets/instructions/*.md` — same as the templates, byte for byte (L5 green).
-- `CLAUDE.md` — this repo's own project uses no Finance accounts, so it gets no `finance:` line.
+- none yet
 
 ## ✅ Before saying done
 

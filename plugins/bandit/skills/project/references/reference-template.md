@@ -100,7 +100,7 @@ State the project classification at the top of the overview. It shapes smart def
 **Concern:** Context
 **Purpose:** Tell every other skill which project this is: vault domain, slug, type, board scope, prefix.
 
-**Must contain:** the five required keys (plus the optional `dev: true`), in the fixed format defined in **Project Context Section** (SKILL.md — not restated here).
+**Must contain:** the five required keys (plus the optional `dev: true` and `finance:` lines), in the fixed format defined in **Project Context Section** (SKILL.md — not restated here).
 
 **Audit criteria:**
 - Present, directly after Project Overview

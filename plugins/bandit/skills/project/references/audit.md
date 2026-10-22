@@ -67,7 +67,9 @@ template section. Note:
 - **Metadata block** — is it present? What reference version was used?
 - **Project Context** — is the `## 🧭 Project Context` section present, right after Project
   Overview, with all five required keys and valid values? A `dev:` line must say `true`; any
-  other value → propose fixing or removing the line. No `dev:` line is never a finding. Check them live: `domain` is a folder in
+  other value → propose fixing or removing the line. No `dev:` line is never a finding. A
+  `finance:` line must read `accounts "…"` with each name an account `finance_get_context` returns;
+  a name that doesn't resolve → propose the fix. No `finance:` line is never a finding. Check them live: `domain` is a folder in
   `MyNotes` (or `none`), `board` resolves via `get_context → projects` (or is `none` / `pending`).
   Naming, board type and footprint aren't judged here: run `/bandit:audit check` in this project
   and carry its rows into the proposal (skip it for `domain: none`: bandit:audit scores domain
@@ -86,7 +88,13 @@ template section. Note:
   one: `get_context`, `list_tasks`, `get_task`, `add_comment`, `list_events`, `create_tasks`,
   `update_tasks`, `reopen_tasks`, `delete_tasks`, `manage_subtasks`, `manage_recurrence`,
   `link_tasks`, `manage_projects`, `manage_columns_lanes`, `manage_tags`, `manage_folders`,
-  `set_visibility`, `delete_board_items`. Any other board tool name → ⚠️ **Legacy tool name**: the
+  `set_visibility`, `delete_board_items`, and the Finance tools `finance_get_context`,
+  `finance_list_transactions`, `finance_get_budget`, `finance_list_schedules`, `finance_get_report`,
+  `finance_list_rules`, `finance_get_account_history`, `finance_manage_accounts`,
+  `finance_manage_transactions`, `finance_manage_budget`, `finance_manage_categories`,
+  `finance_manage_payees`, `finance_manage_schedules`, `finance_import_transactions`,
+  `finance_manage_reconciliation`, `finance_manage_rules`, `finance_delete_items`. Any other board
+  tool name → ⚠️ **Legacy tool name**: the
   updated version names the current call (bandit:tasks references give the shape). On Claude Code,
   check the twin or repo `CLAUDE.md` the same way and list each hit in the hand-over; on Claude.ai,
   the hand-over adds one line: *check the Claude Code `CLAUDE.md` for board tool names that aren't current.*

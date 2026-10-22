@@ -19,7 +19,7 @@ The third is the rule that enforces it, if one does.
 | `.claude-plugin/marketplace.json` | `README.md` · `docs/install.md` | 🔒 M1 |
 | `plugins/bandit/skills/tasks/references/*.md` | `plugins/bandit/skills/tasks/references/errors.md` · `plugins/bandit-dev/skills/sprint/references/*.md` | — |
 | `plugins/bandit-dev/skills/sprint/references/*.md` | `docs/pipeline.md` · `docs/cheat-sheet.md` | — |
-| `plugins/bandit/skills/project/references/project-context.md` | `templates/instructions/*.md` · `plugins/bandit/skills/project/assets/instructions/*.md` · `CLAUDE.md` | 🔒 AT2 |
+| `plugins/bandit/skills/project/references/project-context.md` | `templates/instructions/*.md` · `plugins/bandit/skills/project/assets/instructions/*.md` · `CLAUDE.md` · `plugins/bandit/skills/finance/references/scope.md` | 🔒 AT2 |
 | `templates/instructions/*.md` | `plugins/bandit/skills/project/assets/instructions/*.md` | 🔒 L5 |
 | `plugins/bandit/skills/project/references/audit.md` | `docs/cheat-sheet.md` | 🔒 AT2 (tool list) |
 | `plugins/bandit/skills/audit/references/structure-rulebook.md` | `plugins/bandit/skills/audit/references/structure-rules.yaml` · `plugins/bandit/skills/audit/scripts/check_structure.py` | 🔒 A1 |
@@ -37,7 +37,7 @@ These start outside, so no file here triggers them. Each has its own check.
 
 | When | Also update | Caught by |
 |---|---|---|
-| The app adds, removes or renames an assistant tool | Every skill naming it; `CURRENT_TOOLS` and `REMOVED_TOOLS` in `scripts/check_repo.py`; the tool list in `plugins/bandit/skills/project/references/audit.md`; `plugins/bandit/skills/tasks/references/errors.md` (codes); `README.md` and `docs/install.md` (app version needed); a smoke run on staging; then each project runs `/bandit:project audit` | 🔒 AT1 (app clone on Bandit Port), MT1 |
+| The app adds, removes or renames an assistant tool | Every skill naming it; `CURRENT_TOOLS`, `FINANCE_TOOLS` and `REMOVED_TOOLS` in `scripts/check_repo.py`; the tool list in `plugins/bandit/skills/project/references/audit.md`; `plugins/bandit/skills/tasks/references/errors.md` or `plugins/bandit/skills/finance/references/errors.md` (codes); `README.md` and `docs/install.md` (app version needed); a smoke run on staging; then each project runs `/bandit:project audit` | 🔒 AT1 (app clone on Bandit Port), MT1 |
 | The app changes a tool's behaviour (a gate, an order, a refusal) | The skill reference that describes it, checked live on staging; `errors.md` | Staging smoke run |
 | The Project Context block changes | Every project's instructions and Claude Code `CLAUDE.md`: each project runs `/bandit:project audit` | The audit's Project Context check |
 
@@ -46,7 +46,9 @@ These start outside, so no file here triggers them. Each has its own check.
 A place the done check lists as open, checked and found to need nothing for this release. One line
 each: the path as the map writes it, then why. `scripts/release.py --write` empties this list.
 
-- none yet
+- `templates/instructions/*.md` — the new `finance:` line is optional and absent by default; the templates' required keys and closing lines are unchanged (AT2 green).
+- `plugins/bandit/skills/project/assets/instructions/*.md` — same as the templates, byte for byte (L5 green).
+- `CLAUDE.md` — this repo's own project uses no Finance accounts, so it gets no `finance:` line.
 
 ## ✅ Before saying done
 

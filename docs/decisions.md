@@ -76,7 +76,7 @@ Stages 1–3 are core; stages 4–10 are `bandit-dev`. Dependencies point one wa
 | L7 | No top-level `bin/` in any plugin | `check_repo.py` |
 | L8 | No person in shipped files: skills speak of "the user" (they/them), never the owner's name or he/his/him, because every member of the household runs the same plugins (2026-10-14) | `check_repo.py` |
 
-Target: core descriptions ≤ 2,400 characters in total.
+Target: core descriptions ≤ 2,700 characters in total (2,400 until 2026-10-21, raised for a ninth core skill, `finance`).
 
 ### §5 · Project recipe: `bandit.yaml`
 

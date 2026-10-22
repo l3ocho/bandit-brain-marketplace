@@ -29,6 +29,10 @@ Each phase may take 1–2 messages when mixing both question types — that's fi
      — *"Will this project also run in Claude Code? 1. Yes 2. No"*. Yes → onboarding creates
      `Claude/code-{slug}/` (bandit:notes) and this skill produces the Claude Code twin (`references/project-context.md` → Claude Code twin). No → neither.
      No Project Context key: the answer goes to the onboarding hand-off only.
+   - **Finance accounts** (only when the user says this project works with money) — *"Should
+     Finance in this project see only some accounts? Name them, or say all."* Names → the Project
+     Context gets `finance: accounts "…"`, each checked live with `finance_get_context`. All → no
+     `finance` line.
 2. **What is this project?** (open-ended) — Purpose, domain, who it's for. Ask them to describe
    it like they'd explain it to a colleague in 2–3 sentences.
 3. **Tech stack** (open-ended) — Languages, frameworks, databases, key libraries. Ask for versions

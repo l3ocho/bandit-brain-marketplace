@@ -238,11 +238,17 @@ def check_removed_tools():
 
 
 # ── AT1 · the tool lists above are the app's: the app clone's tools and its removed list ──
-# The 18 tools the app serves today. The project audit's list must match it (AT2).
+# The 18 board tools the app serves today. The project audit's list must match it with FINANCE_TOOLS (AT2).
 CURRENT_TOOLS = (
     "get_context list_tasks get_task add_comment list_events create_tasks update_tasks reopen_tasks "
     "delete_tasks manage_subtasks manage_recurrence link_tasks manage_projects manage_columns_lanes "
     "manage_tags manage_folders set_visibility delete_board_items").split()
+# The 17 Finance tools (bandit:finance), from the app's finance descriptors.
+FINANCE_TOOLS = (
+    "finance_get_context finance_list_transactions finance_get_budget finance_list_schedules finance_get_report "
+    "finance_list_rules finance_get_account_history finance_manage_accounts finance_manage_transactions "
+    "finance_manage_budget finance_manage_categories finance_manage_payees finance_manage_schedules "
+    "finance_import_transactions finance_manage_reconciliation finance_manage_rules finance_delete_items").split()
 # The app clone on this host (read-only) and the branch the skills are built against.
 APP_REPO = Path(os.environ.get("BANDIT_APP_REPO") or ROOT.parent / "bandit_brain")
 APP_REF = os.environ.get("BANDIT_APP_REF") or "origin/development"
@@ -259,16 +265,22 @@ def check_app_tools():
         return report("AT1", True, f"skipped (no app clone at {APP_REPO} with {APP_REF})")
     raw = desc.split("RAW_TASK_OPERATIONS", 1)[-1]
     app_tools = set(re.findall(r"^\s{4}name: '([a-z_]+)'", raw, re.M))
+    fin = app_file("src/domains/finance/descriptors.ts") or ""
+    fin_tools = set(re.findall(r"^\s{4}name: '(finance_[a-z_]+)'", fin.split("RAW_FINANCE_OPERATIONS", 1)[-1], re.M))
     removed_src = app_file("src/domains/tasks/removedTools.ts") or ""
     app_removed = set(re.findall(r"^\s{2}([a-z_]+): \{ tool:", removed_src, re.M))
     bad = []
     if app_tools != set(CURRENT_TOOLS):
         bad.append(f"app tools ≠ CURRENT_TOOLS: new {sorted(app_tools - set(CURRENT_TOOLS))}, "
                    f"gone {sorted(set(CURRENT_TOOLS) - app_tools)}")
+    if fin_tools != set(FINANCE_TOOLS):
+        bad.append(f"app finance tools ≠ FINANCE_TOOLS: new {sorted(fin_tools - set(FINANCE_TOOLS))}, "
+                   f"gone {sorted(set(FINANCE_TOOLS) - fin_tools)}")
     if removed_src and app_removed != set(REMOVED_TOOLS):
         bad.append(f"app removed list ≠ REMOVED_TOOLS: {sorted(app_removed ^ set(REMOVED_TOOLS))}")
     report("AT1", not bad, "; ".join(bad) + " — update the skills, then both lists (docs/dependencies.md)" if bad
-           else f"skills' tool lists = the app's at {APP_REF} ({len(app_tools)} tools, {len(app_removed)} removed)")
+           else f"skills' tool lists = the app's at {APP_REF} ({len(app_tools)} board, {len(fin_tools)} finance, "
+                f"{len(app_removed)} removed)")
 
 
 # ── AT2 · copies that must match: the project audit's tool list, the Project Context lines ──
@@ -287,8 +299,9 @@ def check_copies():
     audit = PROJECT_AUDIT.read_text(encoding="utf-8")
     sec = audit.split("**Legacy tool names**", 1)[-1].split("- **Legacy lifecycle**", 1)[0]
     listed = re.findall(r"`([a-z_]+)`", sec.split("Any other", 1)[0])
-    if sorted(listed) != sorted(CURRENT_TOOLS):
-        bad.append(f"project audit's tool list ≠ CURRENT_TOOLS: {sorted(set(listed) ^ set(CURRENT_TOOLS))}")
+    if sorted(listed) != sorted(CURRENT_TOOLS + FINANCE_TOOLS):
+        bad.append(f"project audit's tool list ≠ CURRENT_TOOLS + FINANCE_TOOLS: "
+                   f"{sorted(set(listed) ^ set(CURRENT_TOOLS + FINANCE_TOOLS))}")
     canon = context_lines(CONTEXT_BLOCK.read_text(encoding="utf-8"))
     if len(canon) != 3:
         bad.append("project-context.md: the block's three lines not found")
@@ -384,7 +397,7 @@ def check_guard_pin():
 
 # ── L1 · description ≤ 300 characters, at most one "not for" clause ──────────────────────
 DESC_MAX = 300
-CORE_DESC_TOTAL = 2400
+CORE_DESC_TOTAL = 2700
 
 
 def frontmatter(skill):

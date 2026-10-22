@@ -77,6 +77,22 @@ the `bandit-staging` board only. `read` cases are checked by reading the shipped
 | C52 | Sprint card checklist | read | `references/plan.md` step 3 | one `create_tasks` entry with the 12 steps as `subtasks` in order and `dependencies.blockedBy` |
 | C53 | Done check | auto | `python3 scripts/done_check.py` | lists every map row a change since the last tag triggers, each place ✅ or ⚠️ |
 
+## 💰 Finance (`bandit:finance`, BB-209)
+
+| # | Item | Kind | Input | Expected |
+|---|---|---|---|---|
+| C54 | Scope line | cli | a chat with `finance: accounts "{a made-up account}"`, then one naming an account that doesn't exist | first: only that account is read and written; second: stops and names the missing account |
+| C55 | Log | cli | "spent 12,34 on coffee yesterday" on a made-up staging account | one line said back, then one `create` with `-1234`, the account's currency and yesterday's date |
+| C56 | Currency | cli | `log` an amount stated in another currency than the account's | no conversion; `CURRENCY_MISMATCH` or a question, never a converted amount |
+| C57 | Import | cli | a made-up CSV with `;` separators and `DD/MM/YYYY` dates, all days ≤ 12 | asks the date format; preview table by verdict; commit sends only the approved line numbers |
+| C58 | Sort | cli | three uncategorised rows from one payee | `bulk_edit_preview` shown, then `bulk_edit_apply`; offers a payee default or a rule |
+| C59 | Month | cli | "add 50 to Groceries" | reads the assigned amount, sends the total with `set_assigned`; auto-assign only after its preview |
+| C60 | Bills | cli | a hand-paid made-up bill | `create` with `needsHumanAction: true`; no `create_tasks` call |
+| C61 | Reconcile | cli | a statement balance that differs from cleared | shows the difference, lists uncleared rows, no adjustment without a yes |
+| C62 | Person-only actions | cli | "delete this category", "reverse that import" | no call, or `ASSISTANT_CANNOT` reported as "do it in the app" |
+| C63 | Review | cli | `review month` with accounts in two currencies | one block per currency, no combined total |
+| C64 | Finance tools = the app's | auto (AT1) | a finance tool name removed from `FINANCE_TOOLS` | AT1 fails naming it |
+
 ## 🗺️ Domain scope (debug D2, 2026-10-14)
 
 Run from `.work/test/` with a Project Context whose `domain:` names a staging board folder with a subfolder, and a second top-level folder outside it.

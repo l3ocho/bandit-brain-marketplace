@@ -5,7 +5,7 @@
 ## 🧭 Project Context Section
 
 This skill **owns the Project Context**: the one block every skill reads to learn which project
-it is in (`bandit:notes`, `bandit:minutes`, `bandit:tasks`, `bandit:plan`). The same block works on every surface: in the
+it is in (`bandit:notes`, `bandit:minutes`, `bandit:tasks`, `bandit:plan`, `bandit:finance`). The same block works on every surface: in the
 Claude.ai project instructions, and in a repo's `CLAUDE.md` on Claude Code. Other skills read it
 and point here; they never restate its format.
 
@@ -21,6 +21,7 @@ type: {type}
 board: {board}
 prefix: {prefix}
 {dev: true — this line only when the project opted in}
+{finance: accounts "{name}", "{name}" — this line only when the project limits Finance to some accounts}
 
 Read by every `bandit` skill.
 **Home board first. Read and write across the domain. Nothing outside it.**
@@ -35,17 +36,19 @@ Names only: skills resolve IDs live via `get_context`. No hardcoded IDs, ever.
 | `board` | `project "{name}"` (the **home board**, filed inside the domain's board folder) · `none` · `pending` | Phase 1 question 5. Names exactly as `get_context → projects` returns them, quoted. `folder "…"` and `global` are retired (2026-10-14) |
 | `prefix` | 2–3 character filename prefix, or `none` | Phase 4 prefix. `none` when artifact-only |
 | `dev` *(optional)* | `true`, or the line is absent | Phase 1 dev question (`references/interview.md`). Only for technical development projects that use the dev card workflow (bandit:tasks, bandit:notes) and sprints (bandit-dev:sprint, Claude Code) |
+| `finance` *(optional)* | `accounts "{name}", "{name}"`: Finance account names exactly as `finance_get_context` returns them, quoted, comma-separated; or the line is absent | Phase 1 Finance question (`references/interview.md`). Limits bandit:finance to those accounts; absent = every account the member can see (bandit:finance `references/scope.md` owns the rule) |
 
 **Format rules** (other skills parse this, so it is fixed): the heading text is `Project
 Context`; one `key: value` per line; these five required keys, lower-case, plus the optional
 `dev: true` line right after `prefix` (written only when the project opted in; otherwise
-omit the line, never `dev: false`); nothing else inside the block except the closing lines. `domain`
+omit the line, never `dev: false`) and the optional `finance:` line after it (written only when
+the project limits Finance; never empty, never `all`); nothing else inside the block except the closing lines. `domain`
 and `board` together set the board scope: the domain is the board's top-level folder of the same
 name, with its subfolders; the home board comes first, the rest of the domain is open to read and
 write, and nothing outside it is (bandit:tasks `references/scope.md` owns the rule).
 
 **How readers treat it:** a missing required key → ask; a missing `dev` line → not a dev project
-(never ask); a value that doesn't check out (the board name no
+(never ask); a missing `finance` line → every visible account (never ask); a value that doesn't check out (the board name no
 longer resolves, the domain isn't in `MyNotes`) → stop and say so, never guess at the nearest
 match. `board: none` or `pending` → bandit:tasks reads the domain and writes nothing (except
 `/bandit:tasks load` on `pending`).

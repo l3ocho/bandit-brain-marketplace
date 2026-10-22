@@ -24,6 +24,7 @@
 
 - 📥 **Capture and triage**: brain dumps become cards; every card leaves the inbox with its fields answered and its date set last
 - 🗺️ **Domain-aware**: each project works its own board first, reads and writes across its domain, and never sees anything outside it
+- 💰 **Money from chat**: log spending in plain words, import a bank CSV with a preview, sort the uncategorised, run the budget month, bills and reconciliation, without ever mixing currencies
 - 🗂️ **Notes that file themselves**: one set of vault conventions (Obsidian over WebDAV), meeting minutes from a recording, clean rewrites of messy text
 - 🧭 **From idea to plan**: clarify a fuzzy idea, write a project plan and architecture, break it into a gap-checked WBS
 - 🏃 **A sprint pipeline with gates**: plan in waves, an independent plan review, one subagent per wave, test, debug, release on your word
@@ -33,7 +34,7 @@
 
 | Plugin | For | Contents | Runs on |
 |---|---|---|---|
-| **`bandit`** | Everyone | 8 skills: `tasks` · `notes` · `project` · `audit` · `clarify` · `rewrite` · `plan` · `minutes` | Claude.ai + Claude Code |
+| **`bandit`** | Everyone | 9 skills: `tasks` · `notes` · `project` · `audit` · `clarify` · `rewrite` · `plan` · `minutes` · `finance` | Claude.ai + Claude Code |
 | **`bandit-dev`** | Developers | Skills `sprint` and `testdata` · agent `plan-reviewer` · sprint-checker Stop hook. Needs `bandit` | Claude Code |
 | **`bandit-maker`** | Maintainers | Skill `skill`: create, evaluate and lint skills to the house standard | Claude Code |
 
@@ -67,7 +68,7 @@ Then `/plugin` → Marketplaces → `bandit-brain` → **Enable auto-update** (o
 
 | Connector | Used by | Needed |
 |---|---|---|
-| **Bandit Brain** MCP server (the task board), on an app version that serves the 18 assistant tools (`get_context`, `list_tasks`, `create_tasks`, `update_tasks` …). After an app upgrade, reconnect the connector | `tasks`, `audit`, `project`, `sprint`, `testdata`; card reads in `notes` and `plan`; saving a spec as a card in `clarify` | ✅ |
+| **Bandit Brain** MCP server (the task board), on an app version that serves the 18 assistant tools (`get_context`, `list_tasks`, `create_tasks`, `update_tasks` …). For `finance`, app v0.31.0 or later (its 17 `finance_*` tools). After an app upgrade, reconnect the connector | `tasks`, `finance`, `audit`, `project`, `sprint`, `testdata`; card reads in `notes` and `plan`; saving a spec as a card in `clarify` | ✅ |
 | **Nextcloud** MCP server with WebDAV (the notes vault) | `notes`, `minutes`, `plan`, `project`, `audit`, `sprint`; saving a spec as a note in `clarify` | ✅ |
 | Gmail | `/bandit:tasks email` | Optional |
 | Code execution (Claude.ai: Settings → Capabilities) | Every skill on Claude.ai | ✅ |

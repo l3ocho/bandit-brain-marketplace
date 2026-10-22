@@ -10,7 +10,7 @@ own rules: this skill loads them and runs their onboarding procedures, it never 
 
 | Step | What | Who |
 |---|---|---|
-| 1 | Interview (new project) or audit (existing project): the five Project Context values (+ optional `dev`), the hub-note summary, and the modules when the domain is new | This skill |
+| 1 | Interview (new project) or audit (existing project): the five Project Context values (+ optional `dev` and `finance`), the hub-note summary, and the modules when the domain is new | This skill |
 | 2 | **Vault rows:** load the `bandit:notes` skill and run its *Onboarding rows* (Part 3) with `domain`, `project`, `type`, `dev` (when set), whether the project has a Claude Code surface, the summary and the modules | bandit:notes |
 | 3 | **Board rows:** load the `bandit:tasks` skill and run `references/onboard.md` with the board answer, project name, board type and folder, plus `dev: true` when set (onboard then adds its dev board shape rows to the same proposal) | bandit:tasks |
 | 4 | **Settings rows:** the instructions and reference doc files in `Claude/ai-{slug}/` (see **Vault Folder**) | This skill |

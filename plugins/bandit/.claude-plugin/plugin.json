@@ -1,7 +1,7 @@
 {
   "name": "bandit",
   "version": "0.6.0",
-  "description": "Core Bandit Brain skills: tasks, notes, project, audit, clarify, rewrite, plan and minutes.",
+  "description": "Core Bandit Brain skills: tasks, notes, project, audit, clarify, rewrite, plan, minutes and finance.",
   "author": {
     "name": "l3ocho"
   },
@@ -19,6 +19,8 @@
     "nextcloud",
     "project-management",
     "planning",
-    "minutes"
+    "minutes",
+    "finance",
+    "budget"
   ]
 }

@@ -28,3 +28,6 @@ guard:
   credentials:
     block: ['\bscripts/set-password\.py\b', '(?i)\bpassword_hash\b\s*=']
     allow: ['python3 scripts/set-dev-passwords\.py( .*)?']
+stop:
+  paths: [src, schema.sql]
+  close: the fixture's close step

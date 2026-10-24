@@ -27,12 +27,14 @@ One row per key the skills and scripts read (`recipe.py` `KEYS`; the checker hol
 | `handover.production.runbook` | `path#section` | `release` | The project's deploy steps the production card's prompt copies, read on `branches.deploy`; filled by `release` |
 | `guard.credentials.block` | list of regexes | credential guard hook | Commands no agent runs: credential scripts and raw writes to the login column. A hit is refused before it runs (exit 2) |
 | `guard.credentials.allow` | list of regexes (optional) | credential guard hook | The project's dev-only login commands, each matched against a whole part of the command; they still run |
+| `stop.paths` | list of git pathspecs | stop gate hook | What counts as implementation: an uncommitted change under one of them stops the chat from ending |
+| `stop.close` | text | stop gate hook | The close step the stop gate's message names (the command or step that commits the work) |
 
 For people only, read by no gate: `staging.up`, `staging.down`, `staging.where`.
 
 ## 🧩 Sections
 
-**Required:** `verify`, `branches`, `release`. **Optional sections:** `migrations`, `staging`, `testdata`, `handover` and `guard`. A repo without one leaves the whole section out: `recipe.py tail` prints `none` and the gates skip the tail; `recipe.py opt staging.refresh` prints `none` and `release` gives no staging step; without `handover` the plan asks once for it and no handover card is made. A section that is present must be complete (`migrations` without `check` still refuses). Without `testdata`, the skill of that name says the section is missing and stops; the sprint's live checks then build their own data. Without `guard`, the credential guard hook does nothing; inside it only `allow` may be left out.
+**Required:** `verify`, `branches`, `release`. **Optional sections:** `migrations`, `staging`, `testdata`, `handover`, `guard` and `stop`. A repo without one leaves the whole section out: `recipe.py tail` prints `none` and the gates skip the tail; `recipe.py opt staging.refresh` prints `none` and `release` gives no staging step; without `handover` the plan asks once for it and no handover card is made. A section that is present must be complete (`migrations` without `check` still refuses). Without `testdata`, the skill of that name says the section is missing and stops; the sprint's live checks then build their own data. Without `guard`, the credential guard hook does nothing; inside it only `allow` may be left out. Without `stop`, the stop gate hook does nothing; once the chat has launched an agent it counts only the files the chat edited itself.
 
 The `testdata` section is read by the testdata skill's guard, `dbguard.py`, through `recipe.py`. Its records of what it created live in `.testdata/` at the repo root, which the project's `.gitignore` must list; the guard refuses every write until it does.
 
@@ -52,4 +54,6 @@ The `testdata` section is read by the testdata skill's guard, `dbguard.py`, thro
 | `dbguard.py` when an env var the command names is unset | ``testdata: env var `{VAR}` is not set …`` (the name only) | 6 |
 | `dbguard.py create` or `clean` on staging without `--yes` | ``testdata: `staging` asks the user's yes on every run …`` | 6 |
 | Credential guard, a command part hits `guard.credentials.block` | ``Blocked: this command sets a real login credential (it matches `{pattern}` …)`` | 2 |
+| Stop gate, an uncommitted change under `stop.paths` | `Implementation changes are uncommitted: … Close the loop before stopping: {stop.close}.` (the chat does not end) | 2 |
+| Stop gate, a `stop` section it cannot read | ``bandit-dev stop gate: bandit.yaml `stop` cannot be read (…); not checked.`` (the chat ends) | 0 |
 | Credential guard, a `guard` section it cannot read (broken YAML, bad regex, no `block`, no PyYAML) | `Blocked: the credential guard cannot read bandit.yaml (…)`: every command, until fixed | 2 |

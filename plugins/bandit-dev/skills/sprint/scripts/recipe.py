@@ -39,9 +39,11 @@ KEYS = {
     "handover.staging.runbook": "execute: the staging deploy steps (path#section)",
     "guard.credentials.block": "credential guard hook: regexes of commands no agent runs",
     "guard.credentials.allow": "credential guard hook: regexes of the project's allowed dev-login commands",
+    "stop.paths": "stop gate hook: the paths that count as implementation (git pathspecs)",
+    "stop.close": "stop gate hook: the close step its message names",
 }
 # A repo without an optional section leaves it out; a section present is complete.
-OPTIONAL = ("migrations", "staging", "testdata", "handover", "guard")
+OPTIONAL = ("migrations", "staging", "testdata", "handover", "guard", "stop")
 
 
 class RecipeError(Exception):

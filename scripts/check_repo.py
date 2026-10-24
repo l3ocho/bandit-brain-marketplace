@@ -587,6 +587,8 @@ def check_recipe():
         (("--file", "bandit.missing-key.yaml", "require", "handover.production.runbook"), 3, "missing key `handover.production.runbook`"),
         (("opt", "guard.credentials.block"), 0, "set-password"),
         (("--file", "bandit.no-migrations.yaml", "opt", "guard.credentials.block"), 0, "none"),
+        (("opt", "stop.close"), 0, "the fixture's close step"),
+        (("--file", "bandit.no-migrations.yaml", "opt", "stop.paths"), 0, "none"),
     ]
     bad = []
     for args, code, text in cases:
@@ -688,6 +690,62 @@ def check_credential_guard():
     report("CG1", not bad, "; ".join(bad) or f"credential guard: {len(cases)} fixture cases (refused with the "
            "reason, allowed dev login runs, chained and broad-allow writes refused, off without a section, "
            "fails closed on a broken recipe)")
+
+
+# ── SG1 · the stop gate holds a chat with uncommitted implementation changes, not a clean or docs-only one ─
+def check_stop_gate():
+    import tempfile
+    script = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts" / "stop_gate.py"
+    bad = []
+    with tempfile.TemporaryDirectory() as d:
+        repo = Path(d) / "repo"
+        (repo / "src").mkdir(parents=True)
+        (repo / "docs").mkdir()
+        recipe_text = "verify: 'true'\nstop:\n  paths: [src]\n  close: /close-round\n"
+        (repo / "bandit.yaml").write_text(recipe_text)
+        (repo / "src" / "a.py").write_text("a = 1\n")
+        (repo / "docs" / "x.md").write_text("x\n")
+        git = lambda *a: subprocess.run(["git", "-C", str(repo), "-c", "user.email=t@t", "-c", "user.name=t", *a],  # noqa: E731
+                                        capture_output=True, text=True, check=True)
+        git("init", "-q")
+        git("add", "-A")
+        git("commit", "-qm", "start")
+
+        def transcript(name, *tools):
+            t = Path(d) / f"{name}.jsonl"
+            t.write_text("".join(json.dumps({"type": "assistant", "message": {"content": [
+                {"type": "tool_use", "name": n, "input": i}]}}) + "\n" for n, i in tools))
+            return str(t)
+
+        def case(label, code, text="", **payload):
+            got, out = run_hook(script, payload, repo)
+            if got != code or text not in out:
+                bad.append(f"{label} → {got} {out[-90:]!r}")
+
+        case("clean tree", 0)
+        (repo / "docs" / "x.md").write_text("y\n")
+        case("docs-only change", 0)
+        (repo / "src" / "a.py").write_text("a = 2\n")
+        case("src change", 2, "/close-round")
+        case("src change, stop_hook_active", 0, stop_hook_active=True)
+        agent = ("Agent", {"prompt": "wave"})
+        case("src change by a background agent", 0, transcript_path=transcript("t1", agent))
+        case("own edit, absolute path", 2, "src/a.py",
+             transcript_path=transcript("t2", ("Task", {}), ("Edit", {"file_path": str(repo / "src" / "a.py")})))
+        git("add", "-A")
+        git("commit", "-qm", "two")
+        git("mv", "src/a.py", "src/b.py")
+        case("own rename, relative path", 2, "src/b.py",
+             transcript_path=transcript("t3", agent, ("Write", {"file_path": "src/b.py"})))
+        (repo / "bandit.yaml").write_text("verify: 'true'\n")
+        case("no stop section", 0)
+        (repo / "bandit.yaml").write_text("stop:\n  paths: [unclosed\n")
+        case("broken recipe", 0, "not checked")
+        (repo / "bandit.yaml").write_text(recipe_text)
+        case("no transcript, rename staged", 2, "src/b.py")
+    report("SG1", not bad, "; ".join(bad) or "stop gate: 10 fixture cases (src change held with the close step, "
+           "clean and docs-only pass, a background agent's files pass, own edits by absolute path and rename "
+           "held, stop_hook_active, no section and a broken recipe pass)")
 
 
 # ── TD1 · the testdata guard refuses every unsafe database and removes only what it created (fixtures) ─
@@ -801,6 +859,7 @@ def main(argv):
     check_recipe()
     check_contract()
     check_credential_guard()
+    check_stop_gate()
     check_testdata()
     check_l5()
     for rule, ok, msg in results:

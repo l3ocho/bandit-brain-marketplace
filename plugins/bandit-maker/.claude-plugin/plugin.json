@@ -1,6 +1,6 @@
 {
   "name": "bandit-maker",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Builds and lints the Bandit Brain marketplace skills. Claude Code, for maintainers.",
   "author": {
     "name": "l3ocho"

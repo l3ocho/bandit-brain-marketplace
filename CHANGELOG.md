@@ -2,7 +2,7 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
-## Unreleased
+## 0.8.0 · 2026-10-24
 
 ### Added
 - **Sprint: deployment handover cards by default, staging and production.** Every sprint plan carries a Deployment handover section next to Final push. The sprint commit creates two cards on the board and columns the project names, each holding a not-ready prompt. The final push of `development` fills the staging card, so the CTO agent puts the build on staging before you test; each `debug` push refills it with the new hash; `/bandit-dev:sprint release` fills the production card. Each prompt carries the facts, the app runbook's steps copied word for word, stop-on-failure and an 8-line report. The cards have a fixed shape (`Prompt for the CTO agent`, one prompt block, `Source`) so a card hook can fire them and the agent reads the prompt from the description. The user fires each hook and closes each card; `close` leaves them alone.

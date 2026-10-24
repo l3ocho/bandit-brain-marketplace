@@ -9,7 +9,8 @@ All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace s
 - **`bandit.yaml` `handover` section (optional):** `handover.board`, then `column` and `runbook` under `handover.staging` and `handover.production`. Without it the plan asks once and no card is made.
 - **Checker rule Y1:** four more fixture cases for the `handover` section.
 - **The `bandit.yaml` contract ships with `bandit-dev`** (`skills/sprint/references/bandit-yaml.md`): every key, section and refusal, so a project's file can be checked without reading the scripts. `docs/bandit-yaml.md` keeps only the app's proposed recipe.
-- **Checker rule Y2:** the shipped contract lists every key in `recipe.py` once, and every key a `bandit-dev` reference or script reads is in that list.
+- **Credential guard hook (`bandit-dev`, PreToolUse on Bash):** refuses, before it runs, any command that matches the project's `bandit.yaml` `guard.credentials.block` (credential scripts, a raw write to the login column), for the main session and every subagent. The project's dev-only login commands in `guard.credentials.allow` still run; an allowed command cannot carry a blocked one after `;`, `&&` or a pipe. Off without a `guard` section; a `guard` section it cannot read refuses every command until fixed. Checker rule CG1 tests it.
+- **Checker rule Y2:** the shipped contract lists every key in `recipe.py` once, and every key a `bandit-dev` reference or script reads is in that list. It also loads the app's example recipe in `docs/bandit-yaml.md` (the `handover` example did not parse: the staging runbook placeholder is now quoted).
 
 ## 0.7.0 · 2026-10-21
 

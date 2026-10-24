@@ -35,7 +35,7 @@
 | Plugin | For | Contents | Runs on |
 |---|---|---|---|
 | **`bandit`** | Everyone | 9 skills: `tasks` · `notes` · `project` · `audit` · `clarify` · `rewrite` · `plan` · `minutes` · `finance` | Claude.ai + Claude Code |
-| **`bandit-dev`** | Developers | Skills `sprint` and `testdata` · agent `plan-reviewer` · sprint-checker Stop hook. Needs `bandit` | Claude Code |
+| **`bandit-dev`** | Developers | Skills `sprint` and `testdata` · agent `plan-reviewer` · hooks: sprint checker (Stop), credential guard (PreToolUse, on with a `guard` section in `bandit.yaml`). Needs `bandit` | Claude Code |
 | **`bandit-maker`** | Maintainers | Skill `skill`: create, evaluate and lint skills to the house standard | Claude Code |
 
 Every skill is called by plugin and area, with the verb as argument:

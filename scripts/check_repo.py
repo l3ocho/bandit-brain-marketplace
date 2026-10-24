@@ -585,6 +585,8 @@ def check_recipe():
         (("--file", "bandit.no-migrations.yaml", "opt", "handover.board"), 0, "none"),
         (("get", "handover.staging.runbook"), 0, "docs/staging-runbook.md#Deploy to staging"),
         (("--file", "bandit.missing-key.yaml", "require", "handover.production.runbook"), 3, "missing key `handover.production.runbook`"),
+        (("opt", "guard.credentials.block"), 0, "set-password"),
+        (("--file", "bandit.no-migrations.yaml", "opt", "guard.credentials.block"), 0, "none"),
     ]
     bad = []
     for args, code, text in cases:
@@ -633,8 +635,59 @@ def check_contract():
     dropped = text.replace("| `verify` |", "| verify |", 1)
     if not y2_errors(keys, dropped, readers) or not y2_errors(keys, text, {"x.md": "`recipe.py get branches.nope`"}):
         errors.append("self-test: Y2 did not fail on a dropped row or an unlisted reader key")
+    # The app's proposed recipe in docs/bandit-yaml.md must itself be a recipe the reader can load.
+    example = re.search(r"```yaml\n(.*?)```", (ROOT / "docs" / "bandit-yaml.md").read_text(encoding="utf-8"), re.S)
+    try:
+        if not example or not isinstance(recipe.parse_text(example.group(1)), dict):
+            errors.append("docs/bandit-yaml.md has no yaml example")
+    except recipe.RecipeError as e:
+        errors.append(f"docs/bandit-yaml.md example: {e}")
     report("Y2", not errors, "; ".join(errors) or f"contract lists the {len(keys)} keys once; every key "
-           f"read in {len(readers)} plugin files is listed")
+           f"read in {len(readers)} plugin files is listed; the app's example parses")
+
+
+def run_hook(script, payload, project, env_extra=None):
+    env = {**os.environ, "CLAUDE_PROJECT_DIR": str(project), **(env_extra or {})}
+    r = subprocess.run([sys.executable, "-B", str(script)], input=json.dumps(payload),
+                       capture_output=True, text=True, env=env)
+    return r.returncode, (r.stdout + r.stderr).strip()
+
+
+# ── CG1 · the credential guard refuses a credential write and lets the allowed dev login run ───────
+def check_credential_guard():
+    import shutil as sh
+    import tempfile
+    script = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts" / "credential_guard.py"
+    fixture = ROOT / "tests" / "fixture-app" / "bandit.yaml"
+    bash = lambda c: {"tool_name": "Bash", "tool_input": {"command": c}}  # noqa: E731
+    bad = []
+    with tempfile.TemporaryDirectory() as d:
+        on, off, none, broken, broad = (Path(d) / n for n in ("on", "off", "none", "broken", "broad"))
+        for p in (on, off, none, broken, broad):
+            p.mkdir()
+        sh.copy(fixture, on / "bandit.yaml")
+        (off / "bandit.yaml").write_text("verify: 'true'\nbranches: { trunk: a, deploy: b }\nrelease: [x]\n")
+        (broken / "bandit.yaml").write_text("guard:\n  credentials: [unclosed\n")
+        (broad / "bandit.yaml").write_text("guard:\n  credentials:\n    block: ['(?i)password_hash\\s*=']\n"
+                                           "    allow: ['python3 .*']\n")
+        cases = [
+            (on, "psql -c \"UPDATE users SET password_hash = 'x'\"", 2, "guard.credentials.block"),
+            (on, "python3 scripts/set-password.py someone", 2, "set-password"),
+            (on, "python3 scripts/set-dev-passwords.py", 0, ""),
+            (on, "python3 scripts/set-dev-passwords.py; psql -c 'update u set password_hash = 1'", 2, "Blocked"),
+            (broad, "python3 x.py && psql -c 'update u set password_hash = 1'", 2, "Blocked"),
+            (on, "git status", 0, ""),
+            (off, "psql -c 'update u set password_hash = 1'", 0, ""),
+            (none, "psql -c 'update u set password_hash = 1'", 0, ""),
+            (broken, "git status", 2, "cannot read bandit.yaml"),
+        ]
+        for project, command, code, text in cases:
+            got, out = run_hook(script, bash(command), project)
+            if got != code or text not in out:
+                bad.append(f"{project.name}: {command[:40]!r} → {got} {out[-90:]!r}")
+    report("CG1", not bad, "; ".join(bad) or f"credential guard: {len(cases)} fixture cases (refused with the "
+           "reason, allowed dev login runs, chained and broad-allow writes refused, off without a section, "
+           "fails closed on a broken recipe)")
 
 
 # ── TD1 · the testdata guard refuses every unsafe database and removes only what it created (fixtures) ─
@@ -747,6 +800,7 @@ def main(argv):
     check_sp8()
     check_recipe()
     check_contract()
+    check_credential_guard()
     check_testdata()
     check_l5()
     for rule, ok, msg in results:

@@ -20,8 +20,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-import yaml
-
 # Every key the bandit-dev skills read, and the command that reads it (references/bandit-yaml.md).
 KEYS = {
     "verify": "execute, run, debug: the check a wave, a fix and a push must pass",
@@ -39,9 +37,15 @@ KEYS = {
     "handover.production.runbook": "release: the production deploy steps (path#section)",
     "handover.staging.column": "plan, execute: the column of the staging handover card",
     "handover.staging.runbook": "execute: the staging deploy steps (path#section)",
+    "guard.credentials.block": "credential guard hook: regexes of commands no agent runs",
+    "guard.credentials.allow": "credential guard hook: regexes of the project's allowed dev-login commands",
 }
-# A repo without migrations, staging, testdata or handover leaves the whole section out; a section present is complete.
-OPTIONAL = ("migrations", "staging", "testdata", "handover")
+# A repo without an optional section leaves it out; a section present is complete.
+OPTIONAL = ("migrations", "staging", "testdata", "handover", "guard")
+
+
+class RecipeError(Exception):
+    """A recipe a hook cannot read: broken YAML, not a mapping, or PyYAML missing."""
 
 
 def refuse(code, msg):
@@ -49,16 +53,37 @@ def refuse(code, msg):
     sys.exit(code)
 
 
+def parse_text(text, name="bandit.yaml"):
+    """The recipe as a mapping; RecipeError when it cannot be read. yaml is imported only here."""
+    try:
+        import yaml
+    except ImportError:
+        raise RecipeError("PyYAML is not installed (pip install pyyaml)")
+    try:
+        data = yaml.safe_load(text) or {}
+    except yaml.YAMLError as e:
+        raise RecipeError(f"{name} is not valid YAML ({str(e).splitlines()[0]})")
+    if not isinstance(data, dict):
+        raise RecipeError(f"{name} is not a mapping of keys")
+    return data
+
+
+def parse(path):
+    return parse_text(path.read_text(encoding="utf-8"), str(path))
+
+
 def load(path):
     if not path.exists():
         refuse(3, f"no recipe file at {path}: the project must provide bandit.yaml")
     try:
-        data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-    except yaml.YAMLError as e:
-        refuse(3, f"{path} is not valid YAML ({str(e).splitlines()[0]})")
-    if not isinstance(data, dict):
-        refuse(3, f"{path} is not a mapping of keys")
-    return data
+        return parse(path)
+    except RecipeError as e:
+        refuse(3, str(e))
+
+
+def load_optional(path):
+    """For hooks: None when there is no file; RecipeError when it cannot be read."""
+    return parse(path) if path.exists() else None
 
 
 def lookup(data, key):

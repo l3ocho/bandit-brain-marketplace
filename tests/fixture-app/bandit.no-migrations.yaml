@@ -1,4 +1,4 @@
-# Test fixture: a repo with no migrations and no staging. Both sections are optional (docs/bandit-yaml.md).
+# Test fixture: a repo with no migrations and no staging. Both sections are optional (plugins/bandit-dev/skills/sprint/references/bandit-yaml.md).
 verify: "true"
 branches: { trunk: development, deploy: main }
 release:

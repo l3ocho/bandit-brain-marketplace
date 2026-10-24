@@ -183,3 +183,11 @@ The tables marked for the checker (`denylist:off`) are the only place the old sk
 | D23 | Never change a login credential; staging token is never production's | Kept |
 | D24 | Low density, brief, no re-asking, one list per gate with a recommendation, findings as fix rows | Kept |
 <!-- denylist:on -->
+
+---
+
+## 🪝 Agent guards (sprint 2026-w43-d, Leo, 2026-10-24)
+
+| # | Decision |
+|---|---|
+| HK1 | `bandit-dev` ships a credential guard: a PreToolUse hook on Bash that refuses (exit 2) any command part matching `bandit.yaml` `guard.credentials.block`, skips a part an `allow` pattern matches whole, does nothing without a `guard` section and fails closed when the section cannot be read. Script `skills/sprint/scripts/credential_guard.py`; `check_repo.py` rule CG1 tests it |

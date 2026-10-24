@@ -30,9 +30,15 @@ testdata:
     staging: "docker exec -i bandit_staging_db sh -c 'psql -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\"'"
 handover:
   board: Bandit CTO
-  production: { column: Bandit Labs VPS, runbook: docs/deployment.md#Deploy now }
-  staging: { column: Bandit Port, runbook: docs/staging-runbook.md#{section} }
+  production: { column: Bandit Labs VPS, runbook: 'docs/deployment.md#Deploy now' }
+  staging: { column: Bandit Port, runbook: 'docs/staging-runbook.md#SECTION' }  # SECTION: the app names it
+guard:
+  credentials:
+    block: ['\bscripts/set-password\.mjs\b', '\bscripts/bootstrap-household\.mjs\b', '(?i)\bpassword_hash\b\s*=']
+    allow: ['node scripts/set-dev-passwords\.mjs( .*)?']
 ```
+
+The `guard` lines are a proposal for the app (2026-10-24, from its own `.claude/hooks/block-credential-writes.mjs`: the two interactive credential scripts and any raw write to `identity_users.password_hash` are refused; `scripts/set-dev-passwords.mjs`, the dev-only fixed login pattern, is allowed). The app keeps its own hook until the plugin one is proven.
 
 The `handover` lines are a proposal for the app (2026-10-24, from the BC-24 deployment card: board and production column as used, deploy steps in the app's `docs/deployment.md` section "Deploy now"; staging runs on Bandit Port from `docs/staging-runbook.md`, whose section the app names).
 

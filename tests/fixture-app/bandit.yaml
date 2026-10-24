@@ -1,4 +1,4 @@
-# Test fixture: a complete recipe (contract: docs/bandit-yaml.md). The sprint gates run against it.
+# Test fixture: a complete recipe (contract: plugins/bandit-dev/skills/sprint/references/bandit-yaml.md). The sprint gates run against it.
 verify: "true"
 branches: { trunk: development, deploy: main }
 release:
@@ -24,3 +24,7 @@ handover:
   board: Fixture Ops
   production: { column: Fixture Host, runbook: docs/deployment.md#Deploy now }
   staging: { column: Fixture Lab, runbook: docs/staging-runbook.md#Deploy to staging }
+guard:
+  credentials:
+    block: ['\bscripts/set-password\.py\b', '(?i)\bpassword_hash\b\s*=']
+    allow: ['python3 scripts/set-dev-passwords\.py( .*)?']

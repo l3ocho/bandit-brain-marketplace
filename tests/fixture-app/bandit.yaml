@@ -20,3 +20,7 @@ testdata:
     development: 'python3 fake_db.py "$FIXTURE_DB_URL"'
     test: 'python3 fake_db.py "$FIXTURE_DB_URL"'
     staging: "sh -c 'python3 fake_db.py'"
+handover:
+  board: Fixture Ops
+  column: Fixture Host
+  runbook: docs/deployment.md#Deploy now

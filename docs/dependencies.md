@@ -46,7 +46,10 @@ These start outside, so no file here triggers them. Each has its own check.
 A place the done check lists as open, checked and found to need nothing for this release. One line
 each: the path as the map writes it, then why. `scripts/release.py --write` empties this list.
 
-- none yet
+- `README.md` — the sprint summary and requirements still hold; the handover card is described in the cheat sheet and `docs/bandit-yaml.md`.
+- `bandit.yaml` — the marketplace repo deploys nothing to a server, so it carries no `handover` section.
+- `docs/decisions.md` — no decision names the recipe cases Y1 runs; Y1 only gained fixture cases.
+- `docs/dependencies.md` — the Y1 row already maps `recipe.py` to the docs, `bandit.yaml` and the fixture.
 
 ## ✅ Before saying done
 

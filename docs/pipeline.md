@@ -16,7 +16,7 @@ This file is the single definition (decision S1). Skills point here; app repos h
 | 6 | **Run** the waves, push the trunk | Claude Code | `/bandit-dev:sprint run`; each live check's data from `/bandit-dev:testdata create`, removed by `clean` | Ledger lines, wave sub-tasks, cards in Stand By | Sprint-order gate; migration-tail stop; status line fresh; a check not run for lack of data fails the wave |
 | 7 | **Test** on staging | The person | The project's staging recipe (`bandit.yaml` `staging`) | Ledger "tested" lines | `release` precondition |
 | 8 | **Debug** | Claude Code | `/bandit-dev:sprint debug` | Bug log, fixes | Existing checks |
-| 9 | **Release** on the person's word | Claude Code | `/bandit-dev:sprint release` | Version, release line in ledger and sprint card; plugin bump when Marketplace cards ship | `close` refuses without a release line |
+| 9 | **Release** on the person's word | Claude Code | `/bandit-dev:sprint release` | Version, release line in ledger and sprint card; plugin bump when Marketplace cards ship; the deployment handover card filled (`bandit.yaml` `handover`) | `close` refuses without a release line |
 | 10 | **Close** | Claude Code | `/bandit-dev:sprint close` | Cards complete, sprint folder archived | Existing checks |
 
 ## 🧭 Surfaces
@@ -26,6 +26,6 @@ This file is the single definition (decision S1). Skills point here; app repos h
 
 ## 📦 What a project supplies
 
-The recipe for stages 6–9 (verify, branches, release steps, migration tail, staging, test data) is read from `bandit.yaml` at the app repo root.
+The recipe for stages 6–9 (verify, branches, release steps, migration tail, staging, test data, deployment handover) is read from `bandit.yaml` at the app repo root.
 
 **Test data** (`/bandit-dev:testdata`) runs at stage 4 (`make` names the data each live check needs), stage 6 and 8 (`create` before a check, `clean` after it) and on demand (`fill` puts a lasting made-up set in development, test or staging). Made-up data only; staging writes ask the person's yes on every run. A missing key refuses and names the key. Contract: `docs/bandit-yaml.md`.

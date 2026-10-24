@@ -2,7 +2,7 @@
 
 Part of `bandit-dev:sprint`. Frontmatter keys, values, filename rules, YAML style and inbox rules belong to bandit:notes; card sections belong to bandit:tasks. This file only fixes the sprint-specific shapes. A fixed shape is justified because other steps and chats read these records.
 
-Contents: Filenames · Sprint card · Step comment · Plan note · Brief change log · Execution prompt · Ledger · Report
+Contents: Filenames · Sprint card · Step comment · Plan note · Brief change log · Execution prompt · Ledger · Handover card · Report
 
 ## Filenames
 
@@ -43,7 +43,17 @@ The execution prompt must carry the No leftovers rule (`references/homes.md` →
 
 ## Ledger
 
-Sections: At a glance (sprint, current wave, next action, last update, report, trunk verified, `Committed: {date}` written at step 12, `Released: {version} · {date} · {commit}` written by `release`); Waves and cards (wave, card, branch, status, last milestone, commit, review, verify, UI, merged, report section); Milestone log; Verify-first results; Decisions taken without the user; Plan deviations; Needs the user (backup before deploy, production audits, rule corrections awaiting approval, push and deploy decisions, unresolved references); Follow-ups noticed; Bug log. Status values: Not started, In progress (step), Blocked (reason), Delivered awaiting the user's test, Tested by the user.
+Sections: At a glance (sprint, current wave, next action, last update, report, trunk verified, `Committed: {date}` written at step 12, `Released: {version} · {date} · {commit}` written by `release`); Waves and cards (wave, card, branch, status, last milestone, commit, review, verify, UI, merged, report section); Milestone log; Verify-first results; Decisions taken without the user; Plan deviations; Needs the user (backup before deploy, production audits, rule corrections awaiting approval, push and deploy decisions, unresolved references); Follow-ups noticed; Bug log. Status values: Not started, In progress (step), Blocked (reason), Delivered awaiting the user's test, Tested by the user. At a glance also carries `Handover card: {short id}`, written at step 12 or by `release`.
+
+## Handover card
+
+One card per sprint on the `handover.board` project, `handover.column` column. A card hook fires it and the agent reads the prompt from the description, so the shape is fixed: three parts, in this order, nothing else.
+
+1. `<h2>Prompt for the CTO agent</h2>`, then one `<p>` line: "Paste the block below into the CTO chat, or fire the card's hook."
+2. One `<pre>` holding the whole prompt. Ready form, in this order: the role line ("Put {app} {version} on production and confirm it is running"); **Facts** (tag, commit on `branches.deploy`, build state, image, the migration tail before and after, the backup the user confirmed with its date, the runbook path and section); **Steps**, one at a time showing each result: read the running version first (already the new one → skip to the checks), then the runbook's deploy, watch and confirm commands copied word for word with the runbook's own never-lines; never print or copy a password, token or env value; **If any step fails**, stop, retry nothing with force, improvise no fix, report the failing command, its output and the old state; **Report** in 8 lines at most: version before and after, commands run, log result, each confirmation, what needs the user.
+3. `<h2>Source</h2>`, then one `<p>`: project, sprint card, sprint name, release version and date.
+
+Title: ready form `Deploy {app} {version} (prompt for the CTO agent)`; not-ready form `Deploy {app}, sprint {name} (prompt for the CTO agent)`. The not-ready `<pre>` holds only: "NOT READY: sprint {name} ({sprint card}) is not released yet. Run nothing. Report that the card fired before `release` filled it." `release` replaces the title and the `<pre>`, never the headings.
 
 ## Report
 

@@ -18,9 +18,11 @@ The reader is `plugins/bandit-dev/skills/sprint/scripts/recipe.py`; no skill par
 | `staging.up` · `staging.down` · `staging.where` | command · command · text | People, the runbook | Documented for people, not read by a gate |
 | `testdata.schema` | list of paths or globs | `testdata` | Where the tables are defined |
 | `testdata.logic` | list of paths or globs | `testdata` | Where the app enforces its rules in code |
+| `handover.board` · `handover.column` | project name · column name | `plan`, `release` | Where the deployment handover card goes: `plan` creates it at the sprint commit, `release` fills its prompt (`references/templates.md` → Handover card). Names, resolved live |
+| `handover.runbook` | `path#section` | `release` | The app repo's deploy steps the handover prompt copies, read on `branches.deploy` |
 | `testdata.databases` | map of name → command | `testdata` | One command per test database (`development`, `test`, `staging`, no other name) that runs SQL read from stdin with `psql`. It names env vars, never an address or password; a database with no open port runs `psql` inside its container with the container's own login |
 
-**Required:** `verify`, `branches`, `release`. **Optional sections:** `migrations`, `staging` and `testdata`. A repo without them leaves the whole section out: `recipe.py tail` prints `none` and the gates skip the tail; `recipe.py opt staging.refresh` prints `none` and `release` gives no staging step. A section that is present must be complete (`migrations` without `check` still refuses). Without `testdata`, the skill of that name says the section is missing and stops; the sprint's live checks then build their own data as before.
+**Required:** `verify`, `branches`, `release`. **Optional sections:** `migrations`, `staging`, `testdata` and `handover`. A repo without them leaves the whole section out: `recipe.py tail` prints `none` and the gates skip the tail; `recipe.py opt staging.refresh` prints `none` and `release` gives no staging step; without `handover` the plan asks once for it and `release` makes no handover card. A section that is present must be complete (`migrations` without `check` still refuses). Without `testdata`, the skill of that name says the section is missing and stops; the sprint's live checks then build their own data as before.
 
 The `testdata` section is read by the skill's guard, `plugins/bandit-dev/skills/testdata/scripts/dbguard.py`, through `recipe.py`. Its records of what it created live in `.testdata/` at the app repo root, which the app's `.gitignore` must list; the guard refuses every write until it does.
 
@@ -33,7 +35,7 @@ The `testdata` section is read by the skill's guard, `plugins/bandit-dev/skills/
 | Any, no file | `bandit.yaml: no recipe file at {path}` | 3 |
 | `get` / `require` a missing or empty key | ``bandit.yaml: missing key `{key}` (used by …)`` | 3 |
 | `check-tail {n}` when the tail differs | `bandit.yaml: migration tail is {x}, the plan names {n}: stop the wave and report it` | 4 |
-| `opt` on a key outside `migrations` and `staging` | ``bandit.yaml: `{key}` is not optional: use get`` | 2 |
+| `opt` on a key outside the optional sections | ``bandit.yaml: `{key}` is not optional: use get`` | 2 |
 | `tail` when `migrations.check` fails | ``bandit.yaml: `migrations.check` failed …`` | 5 |
 | `dbguard.py` on a name outside `development`, `test`, `staging`, or a section listing one | ``testdata: `{name}` is not a test database …`` | 6 |
 | `dbguard.py` on a command holding an address or password | ``testdata: the `{db}` command holds an address or password …`` (the command is never printed) | 6 |
@@ -64,7 +66,13 @@ testdata:
     development: 'psql "$DATABASE_URL"'
     test: "sh -c 'set -a; . ./.env.test; psql \"$DATABASE_URL\"'"
     staging: "docker exec -i bandit_staging_db sh -c 'psql -U \"$POSTGRES_USER\" -d \"$POSTGRES_DB\"'"
+handover:
+  board: Bandit CTO
+  column: Bandit Labs VPS
+  runbook: docs/deployment.md#Deploy now
 ```
+
+The `handover` lines are a proposal for the app (2026-10-24, from the BC-24 deployment card: board and column as used, deploy steps in the app's `docs/deployment.md` section "Deploy now").
 
 The `testdata` lines are a proposal for the app (checked 2026-10-15: tables in `src/domains/*/schema.ts`, rules in the server actions, staging's database publishes no port, the test suite reads `DATABASE_URL` from the git-ignored `.env.test`). Development reads `DATABASE_URL` from the shell the skill runs in. The app commits its own `bandit.yaml` and adds `.testdata/` to its `.gitignore`.
 

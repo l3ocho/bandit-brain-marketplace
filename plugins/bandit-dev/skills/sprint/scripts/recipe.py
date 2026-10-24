@@ -34,9 +34,11 @@ KEYS = {
     "testdata.schema": "testdata: where the tables are defined",
     "testdata.logic": "testdata: where the app enforces its rules",
     "testdata.databases": "testdata: one command per database that runs SQL from stdin",
-    "handover.board": "plan, release: the board the deployment handover card goes on",
-    "handover.column": "plan, release: the column of that board the card goes in",
-    "handover.runbook": "release: the deploy steps the handover prompt is built from (path#section)",
+    "handover.board": "plan, execute, release: the board the deployment handover cards go on",
+    "handover.production.column": "plan, release: the column of the production handover card",
+    "handover.production.runbook": "release: the production deploy steps (path#section)",
+    "handover.staging.column": "plan, execute: the column of the staging handover card",
+    "handover.staging.runbook": "execute: the staging deploy steps (path#section)",
 }
 # A repo without migrations, staging, testdata or handover leaves the whole section out; a section present is complete.
 OPTIONAL = ("migrations", "staging", "testdata", "handover")

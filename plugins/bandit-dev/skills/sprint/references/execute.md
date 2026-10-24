@@ -79,7 +79,8 @@ Allowed. The user lifted the old "never push" rule on 2026-10-10: it was written
 - **When.** The sprint plan carries a "Final push" section by default (`plan.md` step 7), and the handover prompt repeats it. The last wave that changes code pushes at its end, after its merge into local `development` and a green `verify` (the project's `bandit.yaml`). A wave that is the user's own steps (production, host work) is never where the push waits.
 - **How.** `git status` clean and branch `development`; `git fetch origin`; if `origin/development` has commits local lacks, merge it into local `development` and re-run `verify`; then `git push origin development`. Fast-forward only: no force, no tags, no other branch.
 - **Proof.** The ledger records the pushed hash and `git status -sb` showing `development` level with `origin/development`.
-- **If it fails** (a refused or disconnected push): record the exact output under "Needs the user", leave `development` as it is, never retry with force. The wave is still delivered.
+- **Staging handover.** Right after the proof, fill the staging handover card the ledger's `Staging handover:` line names: `get_task`, then replace its title and description with the ready form (`references/templates.md` → Handover cards), built from the pushed hash and the `handover.staging.runbook` section read from the app repo; the runbook's commands are copied, never written by the agent. Comment: the pushed hash. No line in the ledger → one line under "Needs the user". The user fires the hook before testing.
+- **If it fails** (a refused or disconnected push): the staging card stays not ready; record the exact output under "Needs the user", leave `development` as it is, never retry with force. The wave is still delivered.
 - **Still the user's:** merging into `main` and deploying. They need their explicit say-so in the message being answered (project branching rule 9). A push of `development` starts the repo's own checks and staging build by itself; that is expected and is not a deploy.
 
 ## Never
@@ -90,4 +91,4 @@ Allowed. The user lifted the old "never push" rule on 2026-10-10: it was written
 - Run two waves in one chat.
 - Move a card to Doing past a gate, or past the five-item cap.
 - Move the sprint card before the last card of the last wave is in `standby`, or to anything but `standby`.
-- Write to cards outside the batch and the sprint card.
+- Write to cards outside the batch, the sprint card and the staging handover card (only as Pushing `development` says).

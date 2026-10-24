@@ -36,10 +36,10 @@ Check all before anything runs. Each miss is refused by name, with what would sa
    `close` checks). Milestone log: one line with the deploy word quoted.
 4. **Status line.** Sprint card section 1: `Released {version} on {date}; ready to close` (read the
    card first, change only that line). Comment on the sprint card: version, commit, recipe steps run.
-5. **Handover card.** The ledger's `Handover card:` line names it; none and the recipe has a
-   `handover` section → create it now, as `plan.md` step 12 says. `get_task`, then replace its title
-   and description with the ready form (`references/templates.md` → Handover card), built from this
-   release's facts and the `handover.runbook` section read from the app repo on `branches.deploy`;
+5. **Production handover card.** The ledger's `Production handover:` line names it; none and the
+   recipe has a `handover` section → create it now, as `plan.md` step 12 says. `get_task`, then replace
+   its title and description with the ready form (`references/templates.md` → Handover cards), built
+   from this release's facts and the `handover.production.runbook` section read on `branches.deploy`;
    the runbook's commands are copied, never written by the skill. Comment: version and commit. No
    `handover` section → no card; one line under "Needs the user". The card stays open: the user
    fires its hook and closes it.
@@ -67,5 +67,5 @@ marketplace repo itself, its recipe already runs these steps: run them once.
 - Continue past a failing recipe step, retry it with force, or edit the recipe to get past it
 - Run `staging.refresh`, touch production data, or run credential scripts
 - Complete a card or close the sprint: that is `close`
-- Put a password, token or env value in the handover card, or let its prompt run while the card
+- Put a password, token or env value in a handover card, or let its prompt run while the card
   is still in its not-ready form

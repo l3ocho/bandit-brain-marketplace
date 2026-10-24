@@ -22,5 +22,5 @@ testdata:
     staging: "sh -c 'python3 fake_db.py'"
 handover:
   board: Fixture Ops
-  column: Fixture Host
-  runbook: docs/deployment.md#Deploy now
+  production: { column: Fixture Host, runbook: docs/deployment.md#Deploy now }
+  staging: { column: Fixture Lab, runbook: docs/staging-runbook.md#Deploy to staging }

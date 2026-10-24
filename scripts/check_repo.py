@@ -583,7 +583,8 @@ def check_recipe():
         (("opt", "staging.refresh"), 0, "echo staging refresh"),
         (("opt", "handover.board"), 0, "Fixture Ops"),
         (("--file", "bandit.no-migrations.yaml", "opt", "handover.board"), 0, "none"),
-        (("--file", "bandit.missing-key.yaml", "require", "handover.runbook"), 3, "missing key `handover.runbook`"),
+        (("get", "handover.staging.runbook"), 0, "docs/staging-runbook.md#Deploy to staging"),
+        (("--file", "bandit.missing-key.yaml", "require", "handover.production.runbook"), 3, "missing key `handover.production.runbook`"),
     ]
     bad = []
     for args, code, text in cases:

@@ -45,5 +45,5 @@ Read the live state first (`get_task` for every card and the sprint card, the le
 - Write a status that is already correct, or overwrite a card or note without reading it first.
 - Delete anything. Archive mirrors the path and can be reversed.
 - Archive before the cards are complete, or complete the sprint card before its blockers.
-- Complete or move the handover card: the user closes it after the deployment
+- Complete or move a handover card: the user closes each after its deployment
 - Merge into the deploy branch or deploy: that is `release`, on the user's deploy word. Close does not push; execution and debug push `development`, and close only reports whether it is level with origin.

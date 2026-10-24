@@ -5,9 +5,9 @@ All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace s
 ## Unreleased
 
 ### Added
-- **Sprint: deployment handover card by default.** Every sprint plan carries a Deployment handover section next to Final push. The sprint commit creates one card on the board and column the project names, holding a not-ready prompt; `/bandit-dev:sprint release` fills the same card with the full deploy prompt for the CTO agent (facts of the release, the app runbook's deploy steps copied word for word, stop-on-failure, an 8-line report). The card has a fixed shape (`Prompt for the CTO agent`, one prompt block, `Source`) so a card hook can fire it and the agent reads the prompt from the description. The user fires the hook and closes the card; `close` leaves it alone.
-- **`bandit.yaml` `handover` section (optional):** `handover.board`, `handover.column` and `handover.runbook`. Without it the plan asks once and `release` makes no card.
-- **Checker rule Y1:** three more fixture cases for the `handover` section.
+- **Sprint: deployment handover cards by default, staging and production.** Every sprint plan carries a Deployment handover section next to Final push. The sprint commit creates two cards on the board and columns the project names, each holding a not-ready prompt. The final push of `development` fills the staging card, so the CTO agent puts the build on staging before you test; `/bandit-dev:sprint release` fills the production card. Each prompt carries the facts, the app runbook's steps copied word for word, stop-on-failure and an 8-line report. The cards have a fixed shape (`Prompt for the CTO agent`, one prompt block, `Source`) so a card hook can fire them and the agent reads the prompt from the description. The user fires each hook and closes each card; `close` leaves them alone.
+- **`bandit.yaml` `handover` section (optional):** `handover.board`, then `column` and `runbook` under `handover.staging` and `handover.production`. Without it the plan asks once and no card is made.
+- **Checker rule Y1:** four more fixture cases for the `handover` section.
 
 ## 0.7.0 · 2026-10-21
 

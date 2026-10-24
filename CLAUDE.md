@@ -70,6 +70,7 @@ scripts/done_check.py               lists each place a change since the last rel
 - **Never edit `.claude/settings*.json`** in a build session, except an approved hook change.
 - **Branches:** work on `development`, push it. `main` moves only on Leo's deploy word; tags only at release.
 - **The version number is Leo's.** Release only the number Leo gave, or the one I told him before building. Never pick a different one at release time, whatever the changelog rule says. No number agreed → ask in one line before the release.
+- **Releasing this repo: Leo's deploy word and a version are enough.** Leo can only test the plugins once they reach `main` (that is when Claude.ai and Claude Code pick them up). So the `bandit-dev` release gates do not apply here: no "tested by the user", no debug-done, no backup step. Before releasing, the checker is green, `done_check.py` has nothing open, and `development` is clean and level with origin. Then `release.py {version}`, `--write`, `--push`. Leo tests after it lands; his findings come back as fixes and a new release.
 - **The app clone** (`~/projects/banditlabs/bandit_brain`) is read-only reference.
 - **Staging:** `bb-staging status`, `smoke`, `logs` are fine. Never `bb-staging up --refresh` during a freeze.
 

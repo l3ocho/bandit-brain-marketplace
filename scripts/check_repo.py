@@ -648,8 +648,14 @@ def check_contract():
            f"read in {len(readers)} plugin files is listed; the app's example parses")
 
 
+def clean_env(**extra):
+    """os.environ without git's own variables: under the pre-commit hook GIT_INDEX_FILE and GIT_DIR point
+    at this repo, and a fixture's git command would write into its index."""
+    return {**{k: v for k, v in os.environ.items() if not k.startswith("GIT_")}, **extra}
+
+
 def run_hook(script, payload, project, env_extra=None):
-    env = {**os.environ, "CLAUDE_PROJECT_DIR": str(project), **(env_extra or {})}
+    env = clean_env(CLAUDE_PROJECT_DIR=str(project), **(env_extra or {}))
     r = subprocess.run([sys.executable, "-B", str(script)], input=json.dumps(payload),
                        capture_output=True, text=True, env=env)
     return r.returncode, (r.stdout + r.stderr).strip()
@@ -706,7 +712,7 @@ def check_stop_gate():
         (repo / "src" / "a.py").write_text("a = 1\n")
         (repo / "docs" / "x.md").write_text("x\n")
         git = lambda *a: subprocess.run(["git", "-C", str(repo), "-c", "user.email=t@t", "-c", "user.name=t", *a],  # noqa: E731
-                                        capture_output=True, text=True, check=True)
+                                        capture_output=True, text=True, check=True, env=clean_env())
         git("init", "-q")
         git("add", "-A")
         git("commit", "-qm", "start")

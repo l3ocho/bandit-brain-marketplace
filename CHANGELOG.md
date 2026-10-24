@@ -14,6 +14,9 @@ All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace s
 - **Dependency gate hook (`bandit-dev`, PostToolUse on `create_tasks` and `link_tasks`):** when a card is made to block another, the session is told which card owes a gate sub-task and how to add it last, read it back and comment. Always on; silent on a refused write, a new card that already lists its gate, and sprint cards. Checker rule DG1 tests it.
 - **Checker rule Y2:** the shipped contract lists every key in `recipe.py` once, and every key a `bandit-dev` reference or script reads is in that list. It also loads the app's example recipe in `docs/bandit-yaml.md` (the `handover` example did not parse: the staging runbook placeholder is now quoted).
 
+### Fixed
+- **Checker:** the stop-gate fixture's git commands strip git's own environment, so `git commit -a` (whose pre-commit hook runs the checker) no longer has them write into the repo's index.
+
 ## 0.7.0 · 2026-10-21
 
 ### Added

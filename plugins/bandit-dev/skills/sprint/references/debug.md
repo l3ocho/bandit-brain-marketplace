@@ -10,7 +10,7 @@ Contents: Rules · Read first · Intake · Fix loop · Board · Finishing · Nev
 - **The user's words are the baseline.** Each adjustment is judged against what they asked for, never against the plan's summary of it.
 - **Every adjustment is a row in the one decision table** (`references/plan.md` → Conventions), plain words, no numbers or codes: what the user saw, the card, the cause, the fix, the recommendation. A fix is applied only on the user's say-so, or under their standing "go with the recommendations".
 - **Bug fixes for defects in delivered cards are not new scope.** New requirements are parked as a card outside the sprint, with one yes or no on whether they join.
-- **Same authority as `execute`:** work on the trunk; pushes follow `execute.md` → Pushing `development`. Never deploy or touch production: release is its own command.
+- **Same authority as `execute`:** work on the trunk; pushes follow `execute.md` → Pushing `development`, staging handover included: each debug push refills the staging handover card with the new hash, so every build the user tests on staging comes with its card (a card the user already closed is reopened with `reopen_tasks`, then refilled). Never deploy or touch production: release is its own command.
 
 ## Read first
 

@@ -748,6 +748,50 @@ def check_stop_gate():
            "held, stop_hook_active, no section and a broken recipe pass)")
 
 
+# ── DG1 · a card made to block another tells the session which gate sub-task it owes ─────────────
+def check_dependency_gate():
+    script = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts" / "dependency_gate.py"
+    ok_text = [{"type": "text", "text": json.dumps({"ok": True, "applied": 1, "results": [{"ok": True, "shortId": "XY-9"}]})}]
+    link = {"tool_name": "mcp__board__link_tasks", "tool_input": {"blockerTaskId": "AB-1", "blockedTaskId": "AB-2"},
+            "tool_response": {"ok": True}}
+    create = lambda item, resp=ok_text: {"tool_name": "mcp__other_board__create_tasks",  # noqa: E731
+                                         "tool_input": {"items": [item]}, "tool_response": resp}
+    cases = [
+        ("link", link, ["AB-1 now blocks AB-2", "Skip if a gate for this blocker already exists", "sprint card blocked by its batch"]),
+        ("refused link", {**link, "tool_response": {"ok": False, "code": "CYCLE"}}, None),
+        ("create blockedBy", create({"title": "New", "dependencies": {"blockedBy": ["AB-1"]}}), ["AB-1 now blocks XY-9"]),
+        ("create blocks", create({"title": "New", "dependencies": {"blocks": ["AB-3"]}}), ["XY-9 now blocks AB-3"]),
+        ("create with its gate", create({"title": "New", "dependencies": {"blockedBy": ["AB-1"]},
+                                         "subtasks": ["Build it", "Gate: AB-1 delivered (the API) before deploy"]}), None),
+        ("sprint card", create({"title": "Sprint 2026-w01", "dependencies": {"blockedBy": ["AB-1", "AB-2"]}}), None),
+        ("refused create", create({"title": "New", "dependencies": {"blockedBy": ["AB-1"]}},
+                                  {"ok": True, "results": [{"ok": False, "code": "CYCLE"}]}), None),
+        ("no link", create({"title": "New"}), None),
+        ("another tool", {**link, "tool_name": "mcp__board__update_tasks"}, None),
+    ]
+    bad = []
+    for label, payload, want in cases:
+        r = subprocess.run([sys.executable, "-B", str(script)], input=json.dumps(payload), capture_output=True, text=True)
+        if r.returncode != 0:
+            bad.append(f"{label} → exit {r.returncode}")
+            continue
+        if want is None:
+            if r.stdout.strip():
+                bad.append(f"{label} → notice {r.stdout[:80]!r}, expected silence")
+            continue
+        try:
+            out = json.loads(r.stdout)["hookSpecificOutput"]
+        except (ValueError, KeyError, TypeError):
+            bad.append(f"{label} → no hookSpecificOutput: {r.stdout[:80]!r}")
+            continue
+        missing = [w for w in want if w not in out.get("additionalContext", "")]
+        if out.get("hookEventName") != "PostToolUse" or missing:
+            bad.append(f"{label} → missing {missing or out.get('hookEventName')}")
+    report("DG1", not bad, "; ".join(bad) or f"dependency gate: {len(cases)} fixture payloads (notice in the "
+           "session's context naming the blocked card and the skip line; silent on refusals, a created card "
+           "with its gate, sprint cards and other tools)")
+
+
 # ── TD1 · the testdata guard refuses every unsafe database and removes only what it created (fixtures) ─
 def check_testdata():
     import shutil as sh
@@ -860,6 +904,7 @@ def main(argv):
     check_contract()
     check_credential_guard()
     check_stop_gate()
+    check_dependency_gate()
     check_testdata()
     check_l5()
     for rule, ok, msg in results:

@@ -27,6 +27,7 @@ The third is the rule that enforces it, if one does.
 | `plugins/bandit-dev/skills/sprint/references/bandit-yaml.md` | `plugins/bandit-dev/skills/sprint/scripts/recipe.py` · `docs/bandit-yaml.md` | 🔒 Y2 |
 | `docs/bandit-yaml.md` | `plugins/bandit-dev/skills/sprint/references/bandit-yaml.md` · `bandit.yaml` | — |
 | `plugins/bandit-dev/hooks/hooks.json` | `README.md` · `docs/decisions.md` | — |
+| `plugins/bandit-dev/skills/sprint/scripts/dependency_gate.py` | `docs/decisions.md` · `README.md` | 🔒 DG1 |
 | `plugins/bandit-dev/skills/sprint/scripts/stop_gate.py` | `plugins/bandit-dev/skills/sprint/references/bandit-yaml.md` · `docs/bandit-yaml.md` · `docs/decisions.md` | 🔒 SG1 |
 | `plugins/bandit-dev/skills/sprint/scripts/credential_guard.py` | `plugins/bandit-dev/skills/sprint/references/bandit-yaml.md` · `docs/bandit-yaml.md` · `docs/decisions.md` | 🔒 CG1 |
 | `scripts/check_repo.py` | `docs/decisions.md` · `docs/dependencies.md` · `CHANGELOG.md` | — |

@@ -12,6 +12,18 @@
         ]
       }
     ],
+    "PostToolUse": [
+      {
+        "matcher": "mcp__.*__(create_tasks|link_tasks)",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 10,
+            "command": "if command -v python3 >/dev/null 2>&1; then exec python3 \"${CLAUDE_PLUGIN_ROOT}/skills/sprint/scripts/dependency_gate.py\"; else exec python \"${CLAUDE_PLUGIN_ROOT}/skills/sprint/scripts/dependency_gate.py\"; fi"
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [

@@ -59,7 +59,7 @@ def redact(text):
 def section(path):
     data = recipe.load(path)
     if data.get("testdata") in (None, "", {}):
-        refuse(3, f"{path.name} has no `testdata` section: add schema, logic and databases (docs/bandit-yaml.md)")
+        refuse(3, f"{path.name} has no `testdata` section: add schema, logic and databases (the sprint skill's references/bandit-yaml.md)")
     for key in ("testdata.schema", "testdata.logic", "testdata.databases"):
         recipe.lookup(data, key)
     dbs = data["testdata"]["databases"]

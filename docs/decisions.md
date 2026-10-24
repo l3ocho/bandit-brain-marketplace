@@ -80,7 +80,7 @@ Target: core descriptions ≤ 2,700 characters in total (2,400 until 2026-10-21,
 
 ### §5 · Project recipe: `bandit.yaml`
 
-Skills define the gate; the project provides the recipe in `bandit.yaml` at the app repo root. A missing key refuses and names the key. Contract: `docs/bandit-yaml.md`.
+Skills define the gate; the project provides the recipe in `bandit.yaml` at the app repo root. A missing key refuses and names the key. Contract: `plugins/bandit-dev/skills/sprint/references/bandit-yaml.md` (shipped with the plugin; checker Y2); the app's proposal: `docs/bandit-yaml.md`.
 
 ### §7 · What the brief supersedes
 

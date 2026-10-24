@@ -8,6 +8,8 @@ All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace s
 - **Sprint: deployment handover cards by default, staging and production.** Every sprint plan carries a Deployment handover section next to Final push. The sprint commit creates two cards on the board and columns the project names, each holding a not-ready prompt. The final push of `development` fills the staging card, so the CTO agent puts the build on staging before you test; each `debug` push refills it with the new hash; `/bandit-dev:sprint release` fills the production card. Each prompt carries the facts, the app runbook's steps copied word for word, stop-on-failure and an 8-line report. The cards have a fixed shape (`Prompt for the CTO agent`, one prompt block, `Source`) so a card hook can fire them and the agent reads the prompt from the description. The user fires each hook and closes each card; `close` leaves them alone.
 - **`bandit.yaml` `handover` section (optional):** `handover.board`, then `column` and `runbook` under `handover.staging` and `handover.production`. Without it the plan asks once and no card is made.
 - **Checker rule Y1:** four more fixture cases for the `handover` section.
+- **The `bandit.yaml` contract ships with `bandit-dev`** (`skills/sprint/references/bandit-yaml.md`): every key, section and refusal, so a project's file can be checked without reading the scripts. `docs/bandit-yaml.md` keeps only the app's proposed recipe.
+- **Checker rule Y2:** the shipped contract lists every key in `recipe.py` once, and every key a `bandit-dev` reference or script reads is in that list.
 
 ## 0.7.0 · 2026-10-21
 

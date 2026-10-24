@@ -1,47 +1,8 @@
 # 📦 `bandit.yaml`: the project recipe
 
-> The contract between the `bandit-dev` skills and an app repo. Skills hold the gates; the project holds the recipe in `bandit.yaml` at its repo root. A missing file or key refuses and names the key.
+> The contract between the `bandit-dev` skills and an app repo ships inside the plugin: [`plugins/bandit-dev/skills/sprint/references/bandit-yaml.md`](../plugins/bandit-dev/skills/sprint/references/bandit-yaml.md) (keys, sections, refusals). This file keeps only what is specific to the projects that use it: the app's proposed recipe and the sources behind it.
 
-The reader is `plugins/bandit-dev/skills/sprint/scripts/recipe.py`; no skill parses the file by hand.
-
-## 🗝️ Keys
-
-| Key | Type | Used by | What it is |
-|---|---|---|---|
-| `verify` | command | `execute`, `run`, `debug` | The check a wave, a fix and a push must pass |
-| `branches.trunk` | branch | `execute`, `run`, `debug` | Where waves merge and what a wave pushes |
-| `branches.deploy` | branch | `release` | What a release fast-forwards; never touched outside `release` |
-| `release` | list of commands | `release` | The ordered release steps, run one by one, stopping on the first failure. `{version}` in a step is replaced by the version picked at release |
-| `migrations.dir` | path | `plan` | Where migrations live (step 5, cross-card analysis) |
-| `migrations.check` | command | `execute`, `run`, `release` | Prints the current migration tail on its last line |
-| `staging.refresh` | command | `release` | The step the user runs to put a release on staging; shown, never run by a skill |
-| `staging.up` · `staging.down` · `staging.where` | command · command · text | People, the runbook | Documented for people, not read by a gate |
-| `testdata.schema` | list of paths or globs | `testdata` | Where the tables are defined |
-| `testdata.logic` | list of paths or globs | `testdata` | Where the app enforces its rules in code |
-| `handover.board` | project name | `plan`, `execute`, `release` | The board both deployment handover cards go on (`references/templates.md` → Handover cards); `plan` creates them at the sprint commit. A name, resolved live |
-| `handover.staging.column` · `handover.staging.runbook` | column name · `path#section` | `plan`, `execute` | The staging card's column, and the app's staging deploy steps its prompt copies; filled by the Final push |
-| `handover.production.column` · `handover.production.runbook` | column name · `path#section` | `plan`, `release` | The production card's column, and the app's deploy steps its prompt copies, read on `branches.deploy`; filled by `release` |
-| `testdata.databases` | map of name → command | `testdata` | One command per test database (`development`, `test`, `staging`, no other name) that runs SQL read from stdin with `psql`. It names env vars, never an address or password; a database with no open port runs `psql` inside its container with the container's own login |
-
-**Required:** `verify`, `branches`, `release`. **Optional sections:** `migrations`, `staging`, `testdata` and `handover`. A repo without them leaves the whole section out: `recipe.py tail` prints `none` and the gates skip the tail; `recipe.py opt staging.refresh` prints `none` and `release` gives no staging step; without `handover` the plan asks once for it and no handover card is made. A section that is present must be complete (`migrations` without `check` still refuses). Without `testdata`, the skill of that name says the section is missing and stops; the sprint's live checks then build their own data as before.
-
-The `testdata` section is read by the skill's guard, `plugins/bandit-dev/skills/testdata/scripts/dbguard.py`, through `recipe.py`. Its records of what it created live in `.testdata/` at the app repo root, which the app's `.gitignore` must list; the guard refuses every write until it does.
-
-`development` and `main` in the sprint references mean `branches.trunk` and `branches.deploy`.
-
-## 🚦 Refusals
-
-| Call | Refuses with | Exit |
-|---|---|---|
-| Any, no file | `bandit.yaml: no recipe file at {path}` | 3 |
-| `get` / `require` a missing or empty key | ``bandit.yaml: missing key `{key}` (used by …)`` | 3 |
-| `check-tail {n}` when the tail differs | `bandit.yaml: migration tail is {x}, the plan names {n}: stop the wave and report it` | 4 |
-| `opt` on a key outside the optional sections | ``bandit.yaml: `{key}` is not optional: use get`` | 2 |
-| `tail` when `migrations.check` fails | ``bandit.yaml: `migrations.check` failed …`` | 5 |
-| `dbguard.py` on a name outside `development`, `test`, `staging`, or a section listing one | ``testdata: `{name}` is not a test database …`` | 6 |
-| `dbguard.py` on a command holding an address or password | ``testdata: the `{db}` command holds an address or password …`` (the command is never printed) | 6 |
-| `dbguard.py` when an env var the command names is unset | ``testdata: env var `{VAR}` is not set …`` (the name only) | 6 |
-| `dbguard.py create` or `clean` on staging without `--yes` | ``testdata: `staging` asks the user's yes on every run …`` | 6 |
+The checker's rule Y2 holds the plugin file's key table equal to `recipe.py`'s `KEYS`, and every key a plugin reference or script reads to that list.
 
 ## 📝 Example (the Bandit Brain app, checked 2026-10-13)
 

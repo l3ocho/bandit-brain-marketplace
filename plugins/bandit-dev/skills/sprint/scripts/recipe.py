@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Reads the project's recipe, `bandit.yaml` at the repo root. The skill holds the gate; the
-project holds the recipe. A missing file or key refuses and names it (contract: the marketplace
-repo's docs/bandit-yaml.md).
+project holds the recipe. A missing file or key refuses and names it (contract: references/bandit-yaml.md
+in this skill).
 
 Usage:
   recipe.py [--file PATH] get KEY            print one value (a list prints one item per line,
@@ -22,10 +22,10 @@ from pathlib import Path
 
 import yaml
 
-# Every key the sprint skill reads, and the command that reads it (docs/bandit-yaml.md).
+# Every key the bandit-dev skills read, and the command that reads it (references/bandit-yaml.md).
 KEYS = {
     "verify": "execute, run, debug: the check a wave, a fix and a push must pass",
-    "branches.trunk": "execute, run, debug: the branch waves merge into and push",
+    "branches.trunk": "execute, run, debug, testdata: the branch waves merge into and push",
     "branches.deploy": "release: the branch a release fast-forwards",
     "release": "release: the ordered release steps",
     "migrations.dir": "plan: where migrations live",

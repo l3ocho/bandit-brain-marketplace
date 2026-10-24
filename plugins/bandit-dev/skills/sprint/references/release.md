@@ -22,7 +22,7 @@ Check all before anything runs. Each miss is refused by name, with what would sa
 5. **Backup confirmed.** The user confirms in this chat that the production backup the project's runbook
    names has been taken (quote them), or the recipe's own backup step is the first `release` step.
 6. **Recipe present.** `recipe.py require release branches.trunk branches.deploy`. A missing key is
-   refused by its name. `migrations` and `staging` are optional sections (`docs/bandit-yaml.md`).
+   refused by its name. `migrations` and `staging` are optional sections (`references/bandit-yaml.md`).
 7. **Clean trunk.** `git status --short` empty, branch `branches.trunk`, level with origin after a fetch.
 
 ## Steps

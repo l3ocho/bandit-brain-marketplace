@@ -31,6 +31,7 @@ plan, a live ledger and a handover.
 | `references/pace.md` | Once at the start of `plan`: one question list per gate, investigate before asking |
 | `references/homes.md` | Before a step's first write: homes, write rules, owners |
 | `references/gotchas.md` | Once at the start of any command |
+| `references/bandit-yaml.md` | The project recipe: every key, section and refusal |
 
 ## 🗺️ Gate 0: before step 1
 

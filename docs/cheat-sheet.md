@@ -485,7 +485,7 @@ The order is `project` → `wbs` → the board (`/bandit:tasks load`, or the dev
 ### 🌱 bandit-dev:testdata
 
 > [!abstract] Made-up data for a dev project's development, test and staging databases, never the user's own
-> `plugin` · Claude Code only, from the app repo · needs the `testdata` section of the app's `bandit.yaml` (contract: `docs/bandit-yaml.md`)
+> `plugin` · Claude Code only, from the app repo · needs the `testdata` section of the app's `bandit.yaml` (contract: the sprint skill's `references/bandit-yaml.md`)
 
 | Command                                     | ⚙️ Modifiers                      | Does                                                                                                                       |      | 📚 Reads    |
 |---------------------------------------------|-----------------------------------|----------------------------------------------------------------------------------------------------------------------------|------|-------------|

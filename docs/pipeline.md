@@ -28,4 +28,4 @@ This file is the single definition (decision S1). Skills point here; app repos h
 
 The recipe for stages 6–9 (verify, branches, release steps, migration tail, staging, test data, deployment handover) is read from `bandit.yaml` at the app repo root.
 
-**Test data** (`/bandit-dev:testdata`) runs at stage 4 (`make` names the data each live check needs), stage 6 and 8 (`create` before a check, `clean` after it) and on demand (`fill` puts a lasting made-up set in development, test or staging). Made-up data only; staging writes ask the person's yes on every run. A missing key refuses and names the key. Contract: `docs/bandit-yaml.md`.
+**Test data** (`/bandit-dev:testdata`) runs at stage 4 (`make` names the data each live check needs), stage 6 and 8 (`create` before a check, `clean` after it) and on demand (`fill` puts a lasting made-up set in development, test or staging). Made-up data only; staging writes ask the person's yes on every run. A missing key refuses and names the key. Contract: `plugins/bandit-dev/skills/sprint/references/bandit-yaml.md`, shipped with the plugin.

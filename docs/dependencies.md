@@ -23,8 +23,9 @@ The third is the rule that enforces it, if one does.
 | `templates/instructions/*.md` | `plugins/bandit/skills/project/assets/instructions/*.md` | 🔒 L5 |
 | `plugins/bandit/skills/project/references/audit.md` | `docs/cheat-sheet.md` | 🔒 AT2 (tool list) |
 | `plugins/bandit/skills/audit/references/structure-rulebook.md` | `plugins/bandit/skills/audit/references/structure-rules.yaml` · `plugins/bandit/skills/audit/scripts/check_structure.py` | 🔒 A1 |
-| `plugins/bandit-dev/skills/sprint/scripts/recipe.py` | `docs/bandit-yaml.md` · `bandit.yaml` · `tests/fixture-app/**` | 🔒 Y1 |
-| `docs/bandit-yaml.md` | `plugins/bandit-dev/skills/sprint/scripts/recipe.py` · `bandit.yaml` | 🔒 Y1 |
+| `plugins/bandit-dev/skills/sprint/scripts/recipe.py` | `plugins/bandit-dev/skills/sprint/references/bandit-yaml.md` · `docs/bandit-yaml.md` · `bandit.yaml` · `tests/fixture-app/**` | 🔒 Y1 · Y2 |
+| `plugins/bandit-dev/skills/sprint/references/bandit-yaml.md` | `plugins/bandit-dev/skills/sprint/scripts/recipe.py` · `docs/bandit-yaml.md` | 🔒 Y2 |
+| `docs/bandit-yaml.md` | `plugins/bandit-dev/skills/sprint/references/bandit-yaml.md` · `bandit.yaml` | — |
 | `scripts/check_repo.py` | `docs/decisions.md` · `docs/dependencies.md` · `CHANGELOG.md` | — |
 | `scripts/release.py` | `docs/install.md` · `CONTRIBUTING.md` | — |
 | `.claude/settings.json` | `docs/decisions.md` | 🔒 G6 (skill denies) |
@@ -50,6 +51,7 @@ each: the path as the map writes it, then why. `scripts/release.py --write` empt
 - `bandit.yaml` — the marketplace repo deploys nothing to a server, so it carries no `handover` section.
 - `docs/decisions.md` — no decision names the recipe cases Y1 runs; Y1 only gained fixture cases.
 - `docs/dependencies.md` — the Y1 row already maps `recipe.py` to the docs, `bandit.yaml` and the fixture.
+- `docs/install.md` — the README change only moves the contract link; the requirements table is unchanged.
 
 ## ✅ Before saying done
 

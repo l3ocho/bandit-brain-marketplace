@@ -594,6 +594,49 @@ def check_recipe():
     report("Y1", not bad, "; ".join(bad) or f"recipe.py: {len(cases)} fixture cases (keys, tail, refusal by name, optional sections)")
 
 
+# ── Y2 · the shipped contract lists every key the plugin reads, once ─────────
+def y2_errors(keys, contract, readers):
+    """keys: recipe.py KEYS · contract: the contract file's text · readers: {name: text} of plugin files."""
+    section = contract.split("## 🗝️ Keys", 1)[-1].split("\n## ", 1)[0]
+    listed = [m.group(1) for m in re.finditer(r"^\| `([a-z]+(?:\.[a-z]+)*)` \|", section, re.M)]
+    errors = [f"`{k}` listed {listed.count(k)}×" for k in sorted(set(listed)) if listed.count(k) > 1]
+    errors += [f"`{k}` in KEYS, not in the contract" for k in sorted(set(keys) - set(listed))]
+    errors += [f"`{k}` in the contract, not in KEYS" for k in sorted(set(listed) - set(keys))]
+    tops = {k.split(".")[0] for k in keys}
+    read = set()
+    for name, text in readers.items():
+        if name.endswith(".md"):
+            for m in re.finditer(r"recipe\.py (?:--file \S+ )?(?:get|opt|require) ([a-z. ]+)", text):
+                read |= {(name, k) for k in m.group(1).split() if "." in k or k in tops}
+        else:
+            read |= {(name, m.group(1)) for m in re.finditer(r"[\"']([a-z]+(?:\.[a-z]+)+)[\"']", text)
+                     if m.group(1).split(".")[0] in tops}
+    errors += [f"{n} reads `{k}`, not in KEYS" for n, k in sorted(read) if k not in keys]
+    return errors
+
+
+def check_contract():
+    import importlib.util
+    sprint = PLUGINS / "bandit-dev" / "skills" / "sprint"
+    contract = sprint / "references" / "bandit-yaml.md"
+    if not contract.exists():
+        return report("Y2", False, "plugins/bandit-dev/skills/sprint/references/bandit-yaml.md missing")
+    spec = importlib.util.spec_from_file_location("recipe", sprint / "scripts" / "recipe.py")
+    recipe = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(recipe)
+    keys, text = recipe.KEYS, contract.read_text(encoding="utf-8")
+    readers = {str(f.relative_to(PLUGINS)): f.read_text(encoding="utf-8")
+               for f in sorted((PLUGINS / "bandit-dev").rglob("*"))
+               if f.is_file() and f.suffix in (".md", ".py") and f.name != "recipe.py" and "__pycache__" not in f.parts}
+    errors = y2_errors(keys, text, readers)
+    # The rule must fail on a row dropped from the table, and on a reader of an unlisted key.
+    dropped = text.replace("| `verify` |", "| verify |", 1)
+    if not y2_errors(keys, dropped, readers) or not y2_errors(keys, text, {"x.md": "`recipe.py get branches.nope`"}):
+        errors.append("self-test: Y2 did not fail on a dropped row or an unlisted reader key")
+    report("Y2", not errors, "; ".join(errors) or f"contract lists the {len(keys)} keys once; every key "
+           f"read in {len(readers)} plugin files is listed")
+
+
 # ── TD1 · the testdata guard refuses every unsafe database and removes only what it created (fixtures) ─
 def check_testdata():
     import shutil as sh
@@ -703,6 +746,7 @@ def main(argv):
     check_sp7()
     check_sp8()
     check_recipe()
+    check_contract()
     check_testdata()
     check_l5()
     for rule, ok, msg in results:

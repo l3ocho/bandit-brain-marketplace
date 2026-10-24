@@ -98,7 +98,7 @@ Every stage has an owner command, a record and a gate that fails when it's skipp
 | [Cheat sheet](docs/cheat-sheet.md) | Every command, mode and modifier, grouped by skill, plus full-review prompts |
 | [Install](docs/install.md) | Installing, updating and first-time setup on each surface |
 | [Pipeline](docs/pipeline.md) | The ten stages from idea to closed release: surface, command, record, gate |
-| [`bandit.yaml` contract](docs/bandit-yaml.md) | The recipe a dev project supplies to the sprint skills |
+| [`bandit.yaml` contract](plugins/bandit-dev/skills/sprint/references/bandit-yaml.md) | The recipe a dev project supplies to the sprint skills, shipped in `bandit-dev`; the app's proposed recipe is in [docs/bandit-yaml.md](docs/bandit-yaml.md) |
 | [Decisions](docs/decisions.md) | Why things are the way they are: architecture, rules, guards |
 | [Dependencies](docs/dependencies.md) | What changes together: every place a change has to reach before it's done, and the done check that lists them |
 | [Changelog](CHANGELOG.md) · [Releases](https://github.com/l3ocho/bandit-brain-marketplace/releases) | What changed in each release |

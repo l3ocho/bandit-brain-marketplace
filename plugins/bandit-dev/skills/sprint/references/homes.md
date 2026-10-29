@@ -6,7 +6,7 @@
 
 | Record | Home |
 |---|---|
-| Sprint card | The project's `PM` column, title "Sprint {Name}", tag-free; blockers are the batch |
+| Sprint card | The board's `PM` column, title "Sprint {Name}", tag-free; blockers are the batch |
 | Sprint folder | `Projects/{slug}/sprint-{name}/` in the domain vault |
 | Plan, briefs, execution prompt, ledger, review record, handover report | The sprint folder; filenames in `references/templates.md` |
 | Sprint tag | `sprint/{name}` on the batch cards |

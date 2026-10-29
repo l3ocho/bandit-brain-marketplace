@@ -61,7 +61,7 @@ The `{L} - ` prefix exists only in Claude.ai, as a workaround until Claude.ai ca
 - The `## 🧭 Project Context` block (owned by `bandit:project`) has all 5 required keys: `domain`, `project`, `type`, `board`, `prefix`.
 - One optional key: `dev`. Valid value `true`, or the line is absent. Any other value is ❌. A project without the line is never flagged.
 - `domain` is the vault domain. `board` is `project "{name}"` naming an existing board, or `none`. `folder "…"`, `global` and `pending` don't pass.
-- The `board` project is filed in the domain's board folder or one of its subfolders: `domain` and `board` together are the project's board scope (bandit:tasks `references/scope.md`). A home board outside its domain folder is ❌.
+- The `board` line's board is filed in the domain's board folder or one of its subfolders: `domain` and `board` together are the project's board scope (bandit:tasks `references/scope.md`). A home board outside its domain folder is ❌.
 - **Check:** read from the production instructions file in the vault. Keys missing, `dev` invalid, `board` unresolved or outside the domain folder → ❌.
 
 ### S5 · Production version

@@ -6,7 +6,9 @@ All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace s
 
 ### Changed
 - **`bandit:tasks` uses the Board names:** `manage_boards`, `boardId`, `boardColumnId`, the `board` kind and scope, `get_context → boards` and `boardMembers`, and the renamed refusal codes (`BOARD_ARCHIVED`, `TASK_HAS_NO_BOARD` and the rest). Its own sentences call a board a board. Needs the app version that renamed Projects to Boards; reconnect the Bandit Brain connector after the upgrade.
-- **Checker rule BR1:** fails on any old project-named assistant name in `bandit:tasks`.
+- **`bandit:project`, `bandit:audit` and `bandit-dev:sprint` use the Board names** too: `get_context → boards`, `manage_boards`, and their sentences that call a board a board (onboarding's `create board` row, the interview's board answers, the sprint card's board). The Project Context line `board: project "…"` is unchanged. `bandit:notes` and `bandit-dev:testdata` needed no change.
+- **README and install:** the board skills need app v0.36.0 or later (the release that renames Projects to Boards). Release these plugins only once that app version is in production: older apps don't know `manage_boards` or `boardId`.
+- **Checker rule BR1:** fails on any old project-named assistant name in every shipped file but this changelog, with a self-test; `CURRENT_TOOLS` lists `manage_boards`.
 
 ## 0.8.0 · 2026-10-24
 

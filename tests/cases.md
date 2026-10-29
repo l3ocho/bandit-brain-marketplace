@@ -47,7 +47,7 @@ the `bandit-staging` board only. `read` cases are checked by reading the shipped
 | # | Item | Kind | Input | Expected |
 |---|---|---|---|---|
 | C15 | G1 leave the inbox | cli | `triage` on a staging project with one parked card | asks description, priority, effort, complexity, assignee, column, and the **due date last** |
-| C16 | G1 exit style | cli | `triage` on a staging **workflow** project and on a **deliverable** project | workflow: daily sweep (every card leaves today); deliverable: the evaluation gate (yes / not yet / no) |
+| C16 | G1 exit style | cli | `triage` on a staging domain's ` - wkflw` board and on another board | ` - wkflw`: daily sweep (every card leaves today); any other board, whatever its profile: the evaluation gate (yes / not yet / no) |
 | C17 | P8 dev offer | read | `references/triage.md` → Dev projects | a parked dev item is offered `/bandit:clarify` (fuzzy) or `/bandit:tasks spec` (clear) |
 | C18 | P8 Clarified Specification | read | `references/dev-workflow.md` → spec step 1 | a Clarified Specification maps into the Spec; `Source: clarify, {date}` |
 | C19 | P8 audit row | read | `references/audit.md` check 2 | untriaged parked cards come back as one fix row per project |
@@ -107,3 +107,8 @@ Run from `.work/test/` with a Project Context whose `domain:` names a staging bo
 | C31 | D2 capture | read | `tasks/references/capture.md` → Placement | no project named, from a non-workflow project → the home board's Inbox (parked) |
 | C32 | D2 retired values | read | `tasks/references/scope.md` → `board:` values | `folder "…"` and `global` stop and point to `/bandit:project update` |
 | C33 | D2 audit S4 | cli | `check_structure.py` on a snapshot whose project names a board in another top-level folder | S4 ❌ "board `…` is outside the `{domain}` folder", one fix row back to the domain board; the unchanged snapshot scores S4 ✅ (run 2026-10-14 on the 2026-09-29 Summitt snapshot, `.work/test/d2/`) |
+| C34 | Board profile, audit S3 | cli | `check_structure.py` on a schema-6 snapshot whose ` - wkflw` board is Technical | S3 ❌ "`… - wkflw` is profile `technical`", one fix row "Switch board … → profile workflow (its creator)" owned by bandit:tasks; with the board Workflow, S3 ✅ (run 2026-10-29 on the Summitt snapshot made schema 6, `.work/test/bb249/`) |
+| C35 | Board profile, audit S9 | cli | the same snapshot with the `dev: true` project's board Workflow | S9 ❌ "profile `workflow`, a dev project's board is `technical`", one dev board shape fix row; a schema-3 snapshot scores as before the change (report identical but hashes) |
+| C36 | Board profile, tasks gate | read | `tasks/references/dev.md` → Gate, from a project whose board is Workflow | a Dev command says the board isn't Technical and stops; `dev: true` alone does not open it |
+| C37 | Board profile, onboarding | staging | `/bandit:project` onboarding with a new board, against staging | the board row names a profile; the created board reads back with that profile (`get_context → boards`) |
+| C38 | Tag view, new tag | staging | a write needs a new App tag for a Workflow board's card, against staging | `manage_tags { action: "create", name, view: "workflow" }`; `get_context → tags` shows the view |

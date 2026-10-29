@@ -50,7 +50,7 @@ def load_rules(path, rulebook_path):
     pc = rules["project_context"]
     if pc.get("optional_keys", []) != ["dev"] or pc.get("dev_values") != ["true"]:
         raise ContractError("rules.project_context optional_keys/dev_values changed: update the script too")
-    for k in ("lane_tags", "stage_tags", "first_lane_tag"):
+    for k in ("lane_tags", "stage_tags", "first_lane_tag", "dev_profile"):
         if k not in rules["s9"]:
             raise ContractError(f"rules.s9: missing `{k}`")
     if not rules["s9"]["lane_tags"] or rules["s9"]["first_lane_tag"] != rules["s9"]["lane_tags"][0]:
@@ -67,7 +67,9 @@ def load_rules(path, rulebook_path):
         for k in keys:
             if k not in rules[blk]:
                 raise ContractError(f"rules.{blk}: missing `{k}`")
-    for k in ("twin_update", "dev_mirror", "surface_folder", "workdir_guard", "workdir_fix",
+    if "board_profile" not in rules["workflow"]:
+        raise ContractError("rules.workflow: missing `board_profile`")
+    for k in ("board_profile", "twin_update", "dev_mirror", "surface_folder", "workdir_guard", "workdir_fix",
               "brief_move", "duplicate_name", "frontmatter_fix", "root_move"):
         if k not in rules["owners"]:
             raise ContractError(f"rules.owners: missing `{k}`")
@@ -92,13 +94,14 @@ def load_snapshot(path):
     s = json.loads(raw)
     errs = []
     need = lambda cond, msg: None if cond else errs.append(msg)
-    need(s.get("schema") in (1, 2, 3, 4, 5), "snapshot.schema must be 1, 2, 3, 4 or 5")
+    need(s.get("schema") in (1, 2, 3, 4, 5, 6), "snapshot.schema must be 1 to 6")
     need(isinstance(s.get("taken_at"), str), "snapshot.taken_at missing")
     b, v = s.get("board", {}), s.get("vault", {})
     need(isinstance(b.get("folders"), list), "board.folders must be a list")
     need(isinstance(b.get("projects"), list), "board.projects must be a list")
     for i, p in enumerate(b.get("projects", [])):
-        for k in ("name", "type", "folder", "visibility", "system_owner"):
+        # Schema 6: the board's profile (workflow | technical) replaced the app's old type.
+        for k in ("name", "profile" if s.get("schema", 0) >= 6 else "type", "folder", "visibility", "system_owner"):
             need(k in p, f"board.projects[{i}] missing `{k}`")
     if s.get("schema", 0) >= 2:
         need(isinstance(s.get("tags"), list) and all(isinstance(x, str) for x in s.get("tags", [])),
@@ -909,6 +912,10 @@ class Domain:
                         "; ".join(f"`{n}` × {len(l)}" for n, l in dups) or "No filename twice in `Projects/` and `_inbox/`",
                         f"vault.projects.{self.name} + vault.inbox.{self.name}")
 
+    def kind(self, board):
+        """The board's profile (schema 6); older snapshots carry the app's old type in its place."""
+        return board["profile"] if self.snap["schema"] >= 6 else board["type"]
+
     def s9_problems(self, board, is_dev):
         s9 = self.rules["s9"]
         dev_tags = set(s9["lane_tags"]) | set(s9["stage_tags"])
@@ -919,6 +926,8 @@ class Domain:
                          if any(v.startswith(("lane/", "stage/")) or v in dev_tags for v in tag_vals(ln)))
             return [f"dev lane(s) {', '.join(f'`{h}`' for h in hit)}"] if hit else []
         probs = []
+        if self.snap["schema"] >= 6 and board["profile"] != s9["dev_profile"]:
+            probs.append(f"profile `{board['profile']}`, a dev project's board is `{s9['dev_profile']}`")
         missing = [x for x in s9["lane_tags"] + s9["stage_tags"] if x not in self.snap["tags"]]
         if missing:
             probs.append("missing tags " + ", ".join(f"`{m}`" for m in missing))
@@ -946,16 +955,18 @@ class Domain:
             self.rows.append(Row(f"Create or rename the board folder to `{self.name}`", "Bandit Brain folders",
                                  self.rules["owners"]["board_folder_rename"], "S1"))
         wf = [b for b in self.boards if b["name"].endswith(suf)]
-        wtype = [b for b in self.boards if b["type"] == self.rules["workflow"]["board_type"]]
+        wkind = self.rules["workflow"]["board_profile"]
+        # Before schema 6 the type marked the one workflow board; a profile is every everyday board's.
+        wtype = [b for b in self.boards if b["type"] == wkind] if self.snap["schema"] < 6 else []
         wf_projects = [p for p in self.projects if any(r["rule"] == "S3" and r["status"] != "na" for r in p["results"])]
         probs = []
         if len(wf) != 1:
             probs.append(f"{len(wf)} boards end in `{suf}`")
         for b in wf:
-            if b["type"] != "workflow":
-                probs.append(f"`{b['name']}` is type `{b['type']}`")
-                self.rows.append(Row(f"Retype board `{b['name']}` → workflow", f"Bandit Brain project \"{b['name']}\"",
-                                     self.rules["owners"]["board_retype"], "S3"))
+            if self.kind(b) != wkind:
+                probs.append(f"`{b['name']}` is {'profile' if self.snap['schema'] >= 6 else 'type'} `{self.kind(b)}`")
+                self.rows.append(Row(f"Switch board `{b['name']}` → profile {wkind} (its creator)",
+                                     f"Bandit Brain project \"{b['name']}\"", self.rules["owners"]["board_profile"], "S3"))
         for b in wtype:
             if not b["name"].endswith(suf):
                 probs.append(f"`{b['name']}` is type workflow without `{suf}`")

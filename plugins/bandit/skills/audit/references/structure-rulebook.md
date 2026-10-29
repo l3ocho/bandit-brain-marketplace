@@ -1,7 +1,7 @@
 ---
 type: reference
 summary: House standard for the user's domains and projects across Claude.ai, the MyNotes vault and BanditBrains. bandit:audit scores against these 16 rules.
-updated: 2026-10-15
+updated: 2026-10-29
 ---
 
 # 🧱 Structure Rulebook
@@ -51,10 +51,10 @@ The `{L} - ` prefix exists only in Claude.ai, as a workaround until Claude.ai ca
 ### S3 · One workflow per domain
 
 - Each domain has exactly one workflow project: one Claude.ai project, one board, one `ai-{slug}` folder.
-- The workflow board is named `{Name} - wkflw` **and** has type `workflow`. The two must agree.
+- The workflow board is named `{Name} - wkflw` **and** has profile Workflow. The two must agree.
 - The workflow board holds only tasks that belong to no project in the domain. Task placement is the user's call and isn't audited.
 - The workflow project's `board:` names its own workflow board: `project "{Name} - wkflw"`. Every project reads and writes across its domain folder; the workflow project also owns the Untriaged cards. What each may do there is bandit:tasks' rule (`references/scope.md`).
-- **Check:** exactly one board per domain folder ends in ` - wkflw`, its type is `workflow`, and no other board in the folder has type `workflow`. Exactly one project has `type: workflow`, and its `board:` names that board.
+- **Check:** exactly one board per domain folder ends in ` - wkflw`, and its profile is `workflow` (fix: its creator switches it, through bandit:tasks). Other boards may be Workflow too: it is every everyday board's profile. Exactly one project has `type: workflow`, and its `board:` names that board. A snapshot older than schema 6 reads the board's old type instead, as before.
 
 ### S4 · Project Context
 
@@ -88,11 +88,11 @@ While a newer file waits to be pasted (case 3), findings that the newer file alr
 
 Numbered after the shoulds so old reports keep their numbers; it's a must.
 
-- **With `dev: true`** in the project's Project Context: its board has a lane for each tag `lane/incident · lane/issue · lane/feature · lane/maintenance · lane/content · lane/tech-debt`, the **first** lane is Incident, and the tags `stage/spec · stage/planned · stage/ready` exist too.
+- **With `dev: true`** in the project's Project Context: its board's profile is Technical (lanes are hidden on a Workflow board), it has a lane for each tag `lane/incident · lane/issue · lane/feature · lane/maintenance · lane/content · lane/tech-debt`, the **first** lane is Incident, and the tags `stage/spec · stage/planned · stage/ready` exist too.
 - **Without it:** the board has no lane matching any `lane/*` or `stage/*` tag. A board with no vault project follows the same rule.
 - Scores **—** on `board: none` and on system-owned boards.
 - Card tags (a stray `lane/*` tag on a non-dev card) aren't checked here: tags are account-wide, and card hygiene is `bandit:tasks audit`.
-- **Check:** lanes and tags from the snapshot (schema 2). A schema-1 snapshot has no lanes: S9 scores **unchecked**. Fix rows go to bandit:tasks' dev board shape procedure; dev lanes on a non-dev board are the user's call.
+- **Check:** profile, lanes and tags from the snapshot (profile from schema 6, lanes and tags from schema 2). A schema-1 snapshot has no lanes: S9 scores **unchecked**. Fix rows go to bandit:tasks' dev board shape procedure; dev lanes on a non-dev board are the user's call.
 
 ### S10 · Claude Code twin
 
@@ -193,4 +193,5 @@ audit scores them from the snapshot (schema 5) and never replaces that checker.
 - **2026-09-30 · S11 freshness dropped**, with the user's explicit approval: GitHub's `pushed_at` lagged the CS Notes repo by a month (2026-08-28 in the 2026-09-29 snapshot), so S11 would have passed a stale mirror. `s11.repos` removed from the YAML.
 - **Exception:** S13–S16 were added as preventive shoulds with the user's explicit approval (2026-10-09), so bandit-dev:sprint's local checker cites one rulebook, before the findings had appeared in two domains.
 - **2026-10-13 · Moved into the bandit-brain-marketplace repo** with the skills (sprint marketplace-v1): this file and `structure-rules.yaml` now live in bandit:audit's `references/`, owner names follow the plugin names (`bandit:tasks`, `bandit:notes`, `bandit:project`), `s12.hook_sha12` follows the renamed guard script, and the YAML gains `paths.stamps`, the stamp ledger's home. No rule changed.
+- **2026-10-29 · Board profile** (sprint 2026-w44-d), with the user's approval: the app replaced Type with a profile on boards (Workflow or Technical). S3 checks the workflow board's profile, and no longer asks that no other board be Workflow; S9 adds that a dev project's board is Technical. Snapshot schema 6 carries the profile.
 - A rules or script change stops earlier reports from replaying (their footer hashes differ). Close live reports before installing one if their fixes are done; any left live become superseded (**📄 Report lifecycle**), and the next fresh audit archives them.

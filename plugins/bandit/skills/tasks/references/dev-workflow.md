@@ -61,8 +61,8 @@ can do it (*"`plan-tech` runs in Claude Code, from the repo"*).
 | B7 | Up to **L**. An L card's plan note lays out the landing/commit sequence. **XL splits** into 2+ cards, wherever the size is set: at `spec`, at `plan-tech` and at a sprint's sizing step. Each new card keeps the original's lane, stage and `sprint/{name}` tag, and stays in the same sprint (a blocker of the sprint card) |
 
 **WBS on dev projects.** Level names are bandit:plan's. Here: **L3 work package = one card**,
-created lazily through `spec` (B4). **Dev projects are never loaded** (`/bandit:tasks load` refuses
-them). Where L4 lines go is bandit-dev:sprint's.
+created lazily through `spec` (B4). **A Technical home board is never loaded** (`/bandit:tasks load` refuses
+it). Where L4 lines go is bandit-dev:sprint's.
 
 ---
 

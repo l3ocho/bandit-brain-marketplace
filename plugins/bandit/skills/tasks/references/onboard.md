@@ -18,7 +18,7 @@ proposal, then tells the user the `board:` line to set through bandit:project.
 |---|---|
 | Project name (as the board should show it) | `Bandit Labs` |
 | Board answer from the interview | existing board · new board · none · decide later |
-| Board type for a new board | `deliverable` · `workflow` · `hybrid` |
+| Board profile for a new board | `technical` with `dev: true`, `workflow` otherwise (`references/board.md` → Board profile) |
 | Domain (the Project Context `domain:`) | `Acme` |
 | `dev: true` (optional) | only for a technical development project |
 
@@ -33,7 +33,7 @@ proposal, then tells the user the `board:` line to set through bandit:project.
    | Board answer | Row | `board:` line |
    |---|---|---|
    | Existing board, found | none: nothing to create | `project "{name}"` |
-   | New board | `create board` · name · type · inside the domain's folder (a subfolder of it when the user names one) | `project "{name}"` |
+   | New board | `create board` · name · profile · inside the domain's folder (a subfolder of it when the user names one) | `project "{name}"` |
    | None | none | `none` |
    | Decide later | none | `pending` |
    | A name that doesn't resolve | none: stop and report it; bandit:project asks again | — |
@@ -43,15 +43,15 @@ proposal, then tells the user the `board:` line to set through bandit:project.
    offer to use the existing one.
 
    **`dev: true`:** add the rows of the **dev board shape** procedure (`references/dev.md`) for the
-   board, new or existing, to the same list: missing `lane/*` / `stage/*` tags, then its lanes,
-   then the `PM` column when the board has none.
+   board, new or existing, to the same list: missing `lane/*` / `stage/*` tags, an existing
+   Workflow board's switch to Technical, then its lanes, then the `PM` column when the board has none.
    It needs one board: with a `none` or `pending` answer, report that and add no dev rows.
 
    **A new board's name follows the structure rulebook**, S2 and S3 in
    bandit:audit `references/structure-rulebook.md`: read it before proposing the row. A name that breaks
    it is reported with the rule number and a compliant name, never created as given.
 3. **Hand the rows and the `board:` line back** to bandit:project.
-4. **Execute only an approved row:** `manage_boards { action: "create", name, type, folderId }`, the folder ID resolved
+4. **Execute only an approved row:** `manage_boards { action: "create", name, profile, folderId }`, the folder ID resolved
    live from step 1. The board starts with the protected Backlog column and nothing else. Dev
    board shape rows run after it, as `references/dev.md` says.
 5. **Report per row:** created (with the name as the board shows it) or refused (with the reason).

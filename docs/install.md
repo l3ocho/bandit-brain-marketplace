@@ -8,7 +8,7 @@
 |---|---|
 | A paid Claude plan (Pro, Max, Team or Enterprise) | Plugins on Claude.ai need one |
 | Claude.ai → Settings → Capabilities → **Code execution and file creation** on | Skills run in the code sandbox |
-| The **Bandit Brain** MCP server connected, on app v0.36.0 or later, which serves the 18 assistant tools under their Board names (`get_context`, `list_tasks`, `create_tasks`, `update_tasks`, `manage_boards` …) | The task board: `tasks`, `audit`, `project`, `sprint`, `testdata`; Finance (`finance`) needs app v0.31.0 or later, which serves the 17 `finance_*` tools; card reads in `notes` and `plan`; saving a spec as a card in `clarify`. After an app upgrade, reconnect the connector so it loads the new tool list |
+| The **Bandit Brain** MCP server connected, on the first app release after v0.36.0 or later: the one with board profiles and tag view (`manage_boards` takes `profile`, `manage_tags` takes `view`, Type is gone), serving the 18 assistant tools under their Board names (`get_context`, `list_tasks`, `create_tasks`, `update_tasks`, `manage_boards` …) | The task board: `tasks`, `audit`, `project`, `sprint`, `testdata`; Finance (`finance`) needs app v0.31.0 or later, which serves the 17 `finance_*` tools; card reads in `notes` and `plan`; saving a spec as a card in `clarify`. After an app upgrade, reconnect the connector so it loads the new tool list |
 | A **Nextcloud** MCP server with WebDAV connected | The notes vault: `notes`, `minutes`, `plan`, `project`, `audit`, `sprint`; saving a spec as a note in `clarify` |
 | Gmail connected (optional) | `/bandit:tasks email` |
 

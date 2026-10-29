@@ -3,7 +3,7 @@
 # `rulebook_updated` equal to the rulebook's `updated:` frontmatter.
 # check_structure.py refuses to run when they differ.
 schema: 1
-rulebook_updated: 2026-10-15
+rulebook_updated: 2026-10-29
 
 levels:            # must → ❌ on a break · should → ⚠️
   S1: must
@@ -42,7 +42,7 @@ names:
     - "flow$"
 
 workflow:
-  board_type: workflow
+  board_profile: workflow   # the board's profile (2026-10-29); before snapshot schema 6, its type
   project_type: workflow
   # Decision 2026-09-27 (option C): a workflow project's board: line names its
   # own `- wkflw` board. Its wider, limited scope comes from type: workflow.
@@ -145,10 +145,11 @@ s9:
   first_lane_tag: lane/incident
   lane_tags: [lane/incident, lane/issue, lane/feature, lane/maintenance, lane/content, lane/tech-debt]
   stage_tags: [stage/spec, stage/planned, stage/ready]
+  dev_profile: technical     # with `dev: true` the board's profile (2026-10-29; snapshot schema 6)
 
 owners:
   board_rename: bandit:tasks
-  board_retype: bandit:tasks
+  board_profile: bandit:tasks
   board_folder_rename: bandit:tasks
   dev_board_shape: bandit:tasks
   settings_archive: bandit:notes archive

@@ -1,7 +1,7 @@
 # 🏗️ Load
 
 **Command:** `/bandit:tasks load`
-**Owns:** turning a WBS into a Deliverable board — the board, its columns, tasks, subtasks and dependencies. **The only surface that creates boards and columns.**
+**Owns:** turning a WBS into a board — the board, its columns, tasks, subtasks and dependencies. **The only surface that creates boards and columns.**
 
 ---
 
@@ -41,12 +41,12 @@ Read the `board:` line as usual (`references/scope.md`). Load's own behaviour pe
 
 | `board:` | Load does |
 |---|---|
-| `pending` | Creates a **new** board inside the domain's folder (a subfolder of it when the user names one) |
-| `project "X"` | Loads into existing board X. Its `type` must be `deliverable`; otherwise stop and ask |
+| `pending` | Creates a **new** board inside the domain's folder (a subfolder of it when the user names one), profile **Workflow** unless the user says Technical |
+| `project "X"` | Loads into existing board X, whatever its profile, except a Technical home board (below) |
 | `none` | Refuse. The project isn't board-backed |
 | `folder "…"` · `global` | Retired: stop as `references/scope.md` says |
 
-🛠️ **Dev projects are never loaded.** Project Context `dev: true` → stop and say cards are created
+🛠️ **Technical home boards are never loaded.** The `board:` board has profile Technical → stop and say cards are created
 one work package at a time through `/bandit:tasks spec` (`references/dev-workflow.md`, B4).
 
 After a load that created a project, say: *set `board: project "{name}"` through bandit:project.* Load never edits project instructions.
@@ -57,7 +57,7 @@ After a load that created a project, say: *set `board: project "{name}"` through
 
 | WBS | Bandit Brain |
 |---|---|
-| WBS-0 | Board, `type: deliverable`, named after the WBS |
+| WBS-0 | Board, `profile: workflow` (or `technical` when the user says so), named after the WBS |
 | L2 deliverable | A column, named `X.Y {deliverable}`, in WBS order after the protected Backlog |
 | L3 work package | A task in its deliverable's column. Title = package name. Description = the WBS ID, its phase (`WBS-X {phase}`), plus Description and Done when from the dictionary if present |
 | L4 sub-step | A subtask of its package, in order |
@@ -70,13 +70,13 @@ After a load that created a project, say: *set `board: project "{name}"` through
 
 ## ⚙️ Procedure
 
-1. **Resolve scope.** `get_context` once: target folder or board (`folders`, `boards`), its columns and type.
+1. **Resolve scope.** `get_context` once: target folder or board (`folders`, `boards`), its columns and profile.
 2. **Parse the WBS** into packages: ID, name, column, subtasks, blockers.
 3. **Validate before any write:** every dependency ID exists in the WBS · no cycles · no task above **30** links (both directions together). A failure → report it and stop; the WBS needs fixing in bandit:plan.
 4. **Match what already exists** (resume or load into an existing board): columns by exact name, tasks by exact title within that board (`list_tasks { boardId }`). Existing ones are reused, never duplicated or changed.
 5. ✋ **Show the plan and wait:** board (new / existing), columns (new · existing), tasks (new · existing), dependency links. Counts first, then the column list.
 6. **Create** on confirmation:
-   - `manage_boards { action: "create", name, folderId, type: "deliverable" }` if new, then `manage_columns_lanes { action: "add", boardId, name }` per missing column, in WBS order.
+   - `manage_boards { action: "create", name, folderId, profile: "workflow" }` if new (`"technical"` only when the user said so), then `manage_columns_lanes { action: "add", boardId, name }` per missing column, in WBS order.
    - Tasks in **dependency order** — blockers before the tasks they block: one `create_tasks { items: [...] }` call per dependency level (≤100 entries, split above), each level only after the one before it answered. Each entry carries `boardId`, `boardColumnId`, `description`, `subtasks` and `dependencies.blockedBy` (the task ids already created or matched, from earlier `results`). Keep the WBS-ID → task-id map in this session only; never write it anywhere.
 7. **A refused entry** leaves nothing behind for that task, and the other entries still go through (`references/board.md` → Many cards in one call). Record its reason and `field`, skip every task that depends on it, carry on with the rest.
 8. **Report:** created · reused · refused (task name + reason) · skipped because a blocker was refused. Then the `board:` reminder when it applies.

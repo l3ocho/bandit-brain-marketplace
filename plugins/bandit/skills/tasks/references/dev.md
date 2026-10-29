@@ -11,15 +11,18 @@ rules here and never restates them.
 
 ---
 
-## 🚦 Gate — dev projects only
+## 🚦 Gate — Technical boards only
 
 Everything in this file and in `references/dev-workflow.md` applies **only** when the current
-Project Context has `dev: true` (key owned by bandit:project). No `dev` line → every other command
-behaves as it always has, and a Dev command says *"this project isn't a dev project (no `dev: true`
-in its Project Context)"* and stops. Family, Personal and the domain workflow boards are never
-touched.
+project's home board (its `board:` line) has profile **Technical** (`get_context → boards →
+profile`; `references/board.md` → Board profile). A Workflow board, or `board: none` or `pending`
+→ every other command behaves as it always has, and a Dev command says *"this project's board
+isn't Technical (its profile is Workflow)"* and stops. Family, Personal and the domain workflow
+boards are never touched.
 
-The gate always reads the **current** project's Project Context, never the board's.
+The Project Context `dev: true` line (owned by bandit:project) no longer gates these rules: it
+marks a project for sprints (bandit-dev:sprint) and onboarding's dev board shape rows. A `dev: true`
+project whose board is Workflow is a bandit:audit finding (S9), fixed by the dev board shape below.
 
 ---
 
@@ -162,12 +165,17 @@ Read `get_context` once (tags, boards), then work by id.
    · lane/content · lane/tech-debt · stage/spec · stage/planned · stage/ready`, scope `system`. The
    app provides them and refuses to create them (`TAG_NAME_RESERVED`): one missing → stop and
    report it as an app problem, no row.
-2. `get_context → boards` → the board's current lanes. One row: `manage_columns_lanes { action: "set_lanes", boardId, lanes }` with the **complete**
+2. `get_context → boards` → the board's `profile`. Workflow → one row first:
+   `manage_boards { action: "update", boardId, profile: "technical" }` (lanes are refused on a
+   Workflow board, `NEEDS_TECHNICAL_BOARD`). Only the board's creator may run it: anyone else
+   gets `REQUIRES_ADMIN` → name the creator (`createdBy`, `members`), add no lane row. A new board from
+   `onboard` is created Technical, so it needs no row.
+3. `get_context → boards` → the board's current lanes. One row: `manage_columns_lanes { action: "set_lanes", boardId, lanes }` with the **complete**
    list, in the lane table's order, each matcher `{field: "tag", values: [that lane tag's id]}`,
    ids resolved live after step 1 runs. The call replaces every lane, so existing lanes not in the
    list are named in the row.
-3. **PM column** (from `onboard` with `dev: true`, or from a sprint plan when the board has none).
+4. **PM column** (from `onboard` with `dev: true`, or from a sprint plan when the board has none).
    `get_context → boards` → no `PM` column → one row with two calls: `manage_columns_lanes { action: "add", boardId, name: "PM" }`
    (it lands last), then `manage_columns_lanes { action: "reorder", columns }` with **every** column, Backlog at 0 and `PM` at
    1, the rest in their current order. A board that already has `PM` gets no row.
-4. Execute only approved rows, lanes before the column. Report per row.
+5. Execute only approved rows: the profile, then lanes, then the column. Report per row.

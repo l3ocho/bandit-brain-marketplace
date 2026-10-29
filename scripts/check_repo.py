@@ -219,15 +219,18 @@ REMOVED_TOOLS = (
     "skip_occurrence list_occurrences add_dependency create_project update_project archive_project "
     "restore_project add_project_column rename_project_column reorder_project_columns set_project_lanes "
     "create_tag update_tag promote_tag create_folder update_folder set_project_visibility delete_project "
-    "delete_project_column delete_tag delete_folder").split()
+    "delete_project_column delete_tag delete_folder manage_projects").split()
 REMOVED_TOOLS_RE = re.compile(r"(?<![A-Za-z0-9_])(" + "|".join(REMOVED_TOOLS) + r")(?![A-Za-z0-9_])")
 
 
 def check_removed_tools():
     hits = []
-    for f in shipped_files():
+    # The CHANGELOG (its history, and its entries that name what changed) and the BR1 row name manage_projects.
+    for f in [f for f in shipped_files() if f not in BRIDGE_SKIP]:
         text, _ = strip_history(f, f.read_text(encoding="utf-8", errors="ignore"))
         for n, line in enumerate(text.splitlines(), 1):
+            if f == HISTORY_FILE and line.startswith("| BR1 |"):
+                continue
             line = line.replace('action: "list_occurrences"', "")  # manage_recurrence's own action
             for m in REMOVED_TOOLS_RE.finditer(line):
                 hits.append(f"{f.relative_to(ROOT)}:{n} `{m.group(1)}`")
@@ -281,6 +284,42 @@ def check_bridge_names():
     report("BR1", not hits,
            f"old project names: {'; '.join(hits[:8])}{' …' if len(hits) > 8 else ''} ({len(hits)})" if hits
            else f"no old project-named assistant name in {len(files)} files")
+
+
+# ── BP1 · no board type: the app replaced it with the board profile (sprint 2026-w44-d) ─
+# manage_boards refuses `type`, and the values deliverable and hybrid no longer exist. A skill may say
+# "type" for the Project Context key (`type: workflow`) or a vault note's frontmatter; not for a board.
+BOARD_TYPE_RE = re.compile(r"manage_boards[^\n]*\btype\b"                        # a type argument on manage_boards
+                           r"|\btype:\s*[`\"']?(?:deliverable|hybrid)\b"           # type: "deliverable"
+                           r"|\"type\"\s*:\s*\"(?:deliverable|hybrid)\""               # JSON "type": "hybrid"
+                           r"|`(?:deliverable|hybrid)`\s*·|·\s*(?:deliverable|hybrid)\s*·"  # a choice list or a row value
+                           r"|`type` must be `(?:deliverable|hybrid)`"                 # a type check
+                           r"|(?i:\b(?:deliverable|hybrid) board\b)"               # a Deliverable board
+                           r"|(?i:\bboard(?:'s)? type\b)")                          # Board type, the board's type
+BOARD_TYPE_CATCH = ('manage_boards { action: "create", name, folderId, type: "deliverable" }',
+                    "type (`deliverable` · `workflow` · `hybrid`)", "WBS → a new Deliverable board",
+                    "| Board type for a new board |", "`get_context` → `boards` gives each board's type", '"type": "hybrid", "folder"',
+                    '"Home Reno" · deliverable · folder', "Its `type` must be `deliverable`")
+BOARD_TYPE_KEEP = ("type: workflow", "`type:` (`product_service`, `workflow` or `claude_marketplace`)",
+                   "type: brief", "L2 deliverable", "Plan the project or a deliverable",
+                   'manage_boards { action: "create", name, profile, folderId }', "`hook.type`")
+
+
+def check_board_type():
+    missed = [s for s in BOARD_TYPE_CATCH if not BOARD_TYPE_RE.search(s)]
+    missed += [f"false hit: {s}" for s in BOARD_TYPE_KEEP if BOARD_TYPE_RE.search(s)]
+    if missed:
+        return report("BP1", False, f"rule self-test failed: {'; '.join(missed)}")
+    hits, files = [], [f for f in shipped_files() if f not in BRIDGE_SKIP]
+    for f in files:
+        for n, line in enumerate(f.read_text(encoding="utf-8", errors="ignore").splitlines(), 1):
+            if f == HISTORY_FILE and line.startswith("| BP1 |"):
+                continue
+            for m in BOARD_TYPE_RE.finditer(line):
+                hits.append(f"{f.relative_to(ROOT)}:{n} `{m.group(0)}`")
+    report("BP1", not hits,
+           f"board type: {'; '.join(hits[:8])}{' …' if len(hits) > 8 else ''} ({len(hits)}) — use the profile"
+           if hits else f"no board type in {len(files)} files (profile only)")
 
 
 # ── AT1 · the tool lists above are the app's: the app clone's tools and its removed list ──
@@ -938,6 +977,7 @@ def main(argv):
     check_denylist()
     check_removed_tools()
     check_bridge_names()
+    check_board_type()
     check_app_tools()
     check_copies()
     check_changelog_entry()

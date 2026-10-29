@@ -33,7 +33,7 @@ Never collapse them. Asking "which board and which column" about twenty untriage
 
 ## ⚙️ Procedure
 
-1. **Resolve scope.** `get_context` once. Names → IDs, plus every board's columns and **type**;
+1. **Resolve scope.** `get_context` once. Names → IDs, plus every board's columns;
    the domain's boards (`references/scope.md`)
 2. **Read the board.** `list_tasks { view: "inbox" }`, filtered to the domain (`references/scope.md` →
    Filtering). **Untriaged is the workflow project's:** from any other project, Stage 1 is skipped
@@ -67,20 +67,19 @@ with these answered, in this order, in one proposal row per card (the user corre
 A field the user leaves open keeps the card **parked** (its date stays empty), and the row says which
 field is missing. Never invent a value to get a card out.
 
-### Exit style, by board type
+### Exit style, by board
 
-`get_context` → `boards` gives each board's type. It decides **how** cards leave, not whether the fields
-above are answered:
+The board's profile decides what it shows, never how cards leave it. The exit style follows the
+board's role, by name:
 
-| Type | The board inbox is | Cards leave |
+| Board | The board inbox is | Cards leave |
 |---|---|---|
-| 🔁 **Workflow** | A place for the unforeseen things a process must handle | **Daily sweep:** every parked card leaves today, all fields answered. Nothing waits for a better time |
-| 🎯 **Deliverable** | The **evaluation gate**, and the **idea list** | One question per card: does it make sense now? **Yes** → a chat about it, then `spec` on a dev project (below) or the fields above · **Not yet** → stays parked, untouched (the board is the idea list: never a separate notes list) · **No** → archive the card (confirm) |
-| 🔀 **Hybrid** | Both, separated by lanes | By the card's lane: a process lane sweeps daily, a deliverable lane goes through the gate. Unknown lane → ask which |
+| 🔁 The domain's workflow board (` - wkflw`, bandit:audit rulebook S3) | A place for the unforeseen things a process must handle | **Daily sweep:** every parked card leaves today, all fields answered. Nothing waits for a better time |
+| 🎯 Every other board | The **evaluation gate**, and the **idea list** | One question per card: does it make sense now? **Yes** → a chat about it, then `spec` on a Technical board (below) or the fields above · **Not yet** → stays parked, untouched (the board is the idea list: never a separate notes list) · **No** → archive the card (confirm) |
 
-### 🛠️ Dev projects: clarify or spec
+### 🛠️ Technical boards: clarify or spec
 
-On a `dev: true` project a parked item that passes the gate becomes a card through `spec`, never by
+On a Technical board a parked item that passes the gate becomes a card through `spec`, never by
 filling fields here. Per item, offer one of:
 
 - **Fuzzy** (the outcome can't be stated in a sentence) → `/bandit:clarify` first; its Clarified
@@ -132,7 +131,7 @@ Triage is where wrong-sized items get caught, because it is the only pass that s
 | Creating tasks | `/bandit:tasks capture` |
 | Creating or renaming columns | Design conversation. Outside the skill — except a WBS load (`/bandit:tasks load`) and the dev board shape's `PM` column (`references/dev.md`) |
 
-🛠️ **Dev projects (`dev: true`).** Triage run **from the dev project** turns a parked item into a
+🛠️ **Technical boards.** Triage run **from a project whose board is Technical** turns a parked item into a
 card: the move into its area column stays here (`update_tasks` with `boardColumnId`), and `spec` (`references/dev-workflow.md`)
 writes its lane tag, `stage/spec` and `Spec` section. Triage run from a workflow project is
 unchanged: a dev item is filed into the dev project parked, and that project's `spec` picks it up.

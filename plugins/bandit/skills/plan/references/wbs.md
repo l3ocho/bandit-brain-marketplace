@@ -395,7 +395,7 @@ bandit:notes, as its own approval row on the saved file (an etag-guarded edit, `
 The row format is this skill's; the write is bandit:notes'.
 
 Next step to offer: *"Want it on the board? `/bandit:tasks load` builds the project from it."*
-With `dev: true`, offer the dev route instead: `/bandit:tasks spec` per work package, then
+When the project's home board is Technical, offer the dev route instead: `/bandit:tasks spec` per work package, then
 `/bandit-dev:sprint plan` in Claude Code (bandit:tasks `references/dev-workflow.md`); in sprint mode,
 hand back to bandit-dev:sprint.
 

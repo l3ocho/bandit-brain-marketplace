@@ -2,6 +2,21 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
+## Unreleased
+
+### Added
+- **Board profiles in the helpers.** `bandit:tasks` reads each board's profile (Workflow or Technical) where it read the old type: the dev rules (lanes, stages, card sections, the dev audit checks) apply on a Technical board only; the Project Context `dev: true` line now marks a project for sprints and the dev board shape. Onboarding (`bandit:project`, `bandit:tasks onboard`) creates a new board Technical for a `dev: true` project, Workflow otherwise; the dev board shape switches an existing Workflow board to Technical first (its creator only). `load` creates a Workflow board unless you say Technical, and loads into any existing board but a Technical home board. `bandit:clarify` and `bandit:plan` offer the dev route on a Technical home board.
+- **Tag view.** `bandit:tasks` explains a tag's view and sets it when it creates an App tag (the board's profile, or both). Its audit gains check 11, an App tag that shows on no board, and no longer calls a narrowed tag an orphan (its count leaves out the cards where it is hidden). The refusals `NEEDS_TECHNICAL_BOARD` and `TAG_HIDDEN_ON_BOARD` are in the errors table.
+- **Checker rule BP1:** fails on the old board type (`type` on `manage_boards`, `deliverable`, `hybrid`, "board type") in every shipped file but this changelog, with a self-test.
+
+### Changed
+- **Triage no longer depends on the board's type:** the domain's ` - wkflw` board keeps the daily sweep, found by its name; every other board, whatever its profile, keeps the evaluation gate (yes, not yet, no). The audit's untriaged check follows the same split.
+- **`bandit:audit` reads the profile:** S3 checks the workflow board is Workflow (other boards may be too); S9 adds that a dev project's board is Technical. Snapshot schema 6 carries `profile` in place of `type`; older snapshots score as before. Rulebook updated 2026-10-29.
+- **Needs the app release with board profiles and tag view** (migrations 0093 and 0094): release these plugins only once that app version is in production, right after it. Older apps refuse `profile` and `view`; this app refuses `type`.
+
+### Fixed
+- **Checker rule AT1:** `REMOVED_TOOLS` lists `manage_projects`, which the app stopped answering; MT1, like BR1, skips this changelog and the BR1 row.
+
 ## 0.9.0 · 2026-10-29
 
 ### Changed

@@ -15,21 +15,22 @@
 A read that fails → stop and say which. Don't build a partial snapshot: the script can't tell a
 missing folder from an empty one.
 
-## 🧾 Schema (`schema: 5`)
+## 🧾 Schema (`schema: 6`)
 
-Build schema 5. The script still reads older saved snapshots: schema 4 has no project files
+Build schema 6. The script still reads older saved snapshots: schema 5 carries each board's old
+`type` where schema 6 has its `profile` (S3 reads the type, S9 skips the profile), schema 4 has no project files
 (S13–S16 score **unchecked**), schema 3 has no working-folder manifests either (S12 unchecked too),
 schema 2 has no surfaces either (S10 and S11 unchecked too), schema 1 has no lanes either (S9
 unchecked too).
 
 ```json
 {
-  "schema": 5,
+  "schema": 6,
   "taken_at": "2026-09-27T19:18:00Z",
   "tags": ["deep-work", "lane/feature", "stage/spec"],
   "board": {
     "folders":  [{"name": "Personal", "parent": null}, {"name": "Career", "parent": "Personal"}],
-    "projects": [{"name": "Career Manager", "type": "hybrid", "folder": "Career",
+    "projects": [{"name": "Career Manager", "profile": "technical", "folder": "Career",
                   "visibility": "household", "system_owner": null,
                   "lanes": [{"name": "Feature", "position": 0,
                              "matcher": {"field": "tag", "values": ["lane/feature"]}}]}],
@@ -87,8 +88,8 @@ unchecked too).
 |---|---|---|
 | `taken_at` | clock | UTC, when the reads started |
 | `board.folders` | `get_context → folders` (one `get_context` call serves every `board` and `tags` row) | Every folder, each top-level one and each child listed inside it; a child's `parent` is its parent's **name** |
-| `board.projects` | `get_context → boards` (not archived: no `includeArchived`) | `name`, `type`, `folder` = `folder.name` (or `null`), `visibility`, `system_owner` = `systemOwner`. Every board, system ones included: the script exempts them |
-| `….lanes` | `get_context → boards` (lanes come with the columns) | Every lane: `name`, `position`, `matcher.field` as-is, and `matcher.values` with **tag ids replaced by tag names** from `get_context → tags` (priority and state values as-is). No lanes → `[]` |
+| `board.projects` | `get_context → boards` (not archived: no `includeArchived`) | `name`, `profile` (`workflow` or `technical`, as-is), `folder` = `folder.name` (or `null`), `visibility`, `system_owner` = `systemOwner`. Every board, system ones included: the script exempts them |
+| `….lanes` | `get_context → boards` (lanes come with the columns) | Every lane: `name`, `position`, `matcher.field` as-is, and `matcher.values` with **tag ids replaced by tag names** from `get_context → tags` (priority and state values as-is). No lanes → `[]` (a Workflow board always: the app hides its lanes) |
 | `tags` | `get_context → tags` | Every tag **name**, as-is |
 | `vault.domains` | `nc_webdav_list_directory("MyNotes")` | Folders not starting with `_` or `.` |
 | `settings.{D}` | list `MyNotes/{D}/Claude/` | One key per `ai-*` folder |

@@ -16,7 +16,7 @@ One skill, two modes. Each mode's whole procedure lives in its reference file: r
 | `project` | Idea → Project Plan (Phase 1) → Architecture Document (Phase 2), saved in the project's vault folder; state read from those files | `references/project.md` |
 | `wbs` | Project docs → gap analysis → numbered WBS; sprint mode (a batch of existing cards, run by `/bandit-dev:sprint plan`) and migration mode (an existing WBS) | `references/wbs.md` |
 
-The order is `project` → `wbs` → the board (`/bandit:tasks load`, or the dev route on `dev: true`).
+The order is `project` → `wbs` → the board (`/bandit:tasks load`, or the dev route on a Technical home board).
 
 ## ⚠️ Gotchas
 

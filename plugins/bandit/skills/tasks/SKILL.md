@@ -17,13 +17,13 @@ Natural language always works; a request that spans two surfaces reads both file
 
 | Surface | Commands | Reference | Owns |
 |---|---|---|---|
-| 📥 Triage | `triage` `inbox` | `references/triage.md` | Inbox board, leaving the inbox. **The only holder of moves** (an `update_tasks` entry with `projectId` / `projectColumnId`) |
+| 📥 Triage | `triage` `inbox` | `references/triage.md` | Inbox board, leaving the inbox. **The only holder of moves** (an `update_tasks` entry with `boardId` / `boardColumnId`) |
 | ▶️ Execution | `today` `doing` `done` `bump` | `references/execution.md` | The six Execution columns, the dependency gate, the five-item cap |
 | 📅 Week | `week` `review` | `references/week.md` | Week board, workload, projections, dating the week, `manage_recurrence { action: "skip" }` |
 | ✍️ Capture | `capture` | `references/capture.md` | Task creation, brain dumps, the whole repeat-rule lifecycle |
-| 🧹 Audit | `audit` | `references/audit.md` | Hygiene and structure checks, `manage_projects { action: "archive" }` |
+| 🧹 Audit | `audit` | `references/audit.md` | Hygiene and structure checks, `manage_boards { action: "archive" }` |
 | 📧 Email | `email` | `references/email.md` | Gmail → proposals only, zero writes |
-| 🏗️ Load | `load` | `references/load.md` | WBS → a new Deliverable project |
+| 🏗️ Load | `load` | `references/load.md` | WBS → a new Deliverable board |
 | 🚀 Onboard | `onboard` | `references/onboard.md` | The board step of project onboarding, run by bandit:project |
 | 🛠️ Dev | `spec` `scope` `plan-tech` `stage` `pick-ready` | `references/dev.md` · `references/dev-workflow.md` | Dev projects only: lanes, stages, card sections · the card procedures |
 
@@ -38,18 +38,18 @@ Natural language always works; a request that spans two surfaces reads both file
 apply **only** when the Project Context has `dev: true`. Without it a Dev command says the project
 isn't a dev project and stops. Surface roles: `references/dev-workflow.md` → Surface.
 
-**Only Load and Onboard create projects.** Only Load, and the dev board shape's `PM` step, create columns.
+**Only Load and Onboard create boards.** Only Load, and the dev board shape's `PM` step, create columns.
 
 ## 🔒 Hard rules
 
 1. 📅 **Date is king.** A due date is the single strongest signal on a task
-2. 🅿️ **Parked ≠ dated.** A parked task given a due date moves into the project's first column, so
+2. 🅿️ **Parked ≠ dated.** A parked task given a due date moves into the board's first column, so
    a parked task never holds a date. The date is set last, when a card leaves the inbox: in the
    same `update_tasks` entry as the move (a move applies before fields) or after it, never before
-3. 🔀 **Move is triage-only.** A move (`update_tasks` with `projectId` / `projectColumnId`) belongs
+3. 🔀 **Move is triage-only.** A move (`update_tasks` with `boardId` / `boardColumnId`) belongs
    to Inbox review. It is not a general verb
 4. 👻 **Projections aren't rows.** Week-board items may be recurring projections with no task record
-5. 🗣️ **Never say bare "backlog."** Say **project Backlog** or **Execution Backlog**
+5. 🗣️ **Never say bare "backlog."** Say **board Backlog** or **Execution Backlog**
 6. 🗺️ **Home board first. Read and write across the domain. Nothing outside it**
    (`references/scope.md`): every household-wide view is filtered to the domain before it's shown.
    Names resolve live with `get_context`; no stored ID, ever. A name that doesn't resolve → stop

@@ -236,6 +236,44 @@ def check_removed_tools():
            else f"no removed assistant tool in {len(shipped_files())} shipped files ({len(REMOVED_TOOLS)} names)")
 
 
+# ── BR1 · no project-named assistant name the app renamed for Boards (its docs/handoff/boards-rename-for-skills.md) ─
+# The old names answer through a bridge for one release only, then NOT_FOUND or an unknown argument.
+# Tool, argument and answer key names, refusal codes, and the argument and answer values.
+BRIDGE_NAMES = (
+    "manage_projects projectId projectColumnId projectName projectColor projectPosition projectFolderId projectIds "
+    "projectMembers PROJECT_ARCHIVED PROJECT_HAS_OTHERS_CARDS RESTRICTED_PROJECT_NEEDS_MEMBER SYSTEM_OWNED_PROJECT "
+    "TAG_WRONG_PROJECT TASK_HAS_NO_PROJECT").split()
+_WORDS = r"(?:tags|members|folders|columns|lanes|sprints)"
+BRIDGE_RE = re.compile(r"(?<![A-Za-z0-9_])(" + "|".join(BRIDGE_NAMES) + r")(?![A-Za-z0-9_])"
+                       r"|(?:kind|scope)\s*(?::|={1,3})?\s*[`\"']project[`\"']"   # kind: "project", scope === 'project'
+                       r"|delete_board_items`? \(project\)|get_context`? → `?projects\b|`projects`"
+                       r"|\([^)\n]*\b" + _WORDS + r"\b[^)\n]*\bprojects\b[^)\n]*\)"  # (tags, projects): get_context's keys
+                       r"|\([^)\n]*\bprojects\b[^)\n]*\b" + _WORDS + r"\b[^)\n]*\)")
+BRIDGE_SCOPE = (PLUGINS / "bandit" / "skills" / "tasks",)
+# Old lines the rule must catch (from the skills before the move) and kept meanings it must leave alone.
+BRIDGE_CATCH = ("Its `projects` carry each folder", "Its `folders` and `projects` give", "(`folders`, `projects`)",
+                "Read `get_context` once (tags, projects)", "first (projects, tags, members, sprints)",
+                "`delete_board_items` (project)", "kind: 'project'", 'scope === "project"', "kind `project`",
+                "get_context → projects", "`manage_projects`", "list_tasks { projectId }", "TASK_HAS_NO_PROJECT")
+BRIDGE_KEEP = ("the domain's workflow project", 'board: project "Home Reno"', "a WBS-backed project",
+               "Project-management cards", "projection")
+
+
+def check_bridge_names():
+    missed = [s for s in BRIDGE_CATCH if not BRIDGE_RE.search(s)]
+    missed += [f"false hit: {s}" for s in BRIDGE_KEEP if BRIDGE_RE.search(s)]
+    if missed:
+        return report("BR1", False, f"rule self-test failed: {'; '.join(missed)}")
+    hits, files = [], [f for f in shipped_files() if any(d in f.parents for d in BRIDGE_SCOPE)]
+    for f in files:
+        text, _ = strip_history(f, f.read_text(encoding="utf-8", errors="ignore"))
+        for n, line in enumerate(text.splitlines(), 1):
+            for m in BRIDGE_RE.finditer(line):
+                hits.append(f"{f.relative_to(ROOT)}:{n} `{m.group(0)}`")
+    report("BR1", not hits,
+           f"old project names: {'; '.join(hits[:8])}{' …' if len(hits) > 8 else ''} ({len(hits)})" if hits
+           else f"no old project-named assistant name in {len(files)} files")
+
 
 # ── AT1 · the tool lists above are the app's: the app clone's tools and its removed list ──
 # The 18 board tools the app serves today. The project audit's list must match it with FINANCE_TOOLS (AT2).
@@ -891,6 +929,7 @@ def main(argv):
     check_g6()
     check_denylist()
     check_removed_tools()
+    check_bridge_names()
     check_app_tools()
     check_copies()
     check_changelog_entry()

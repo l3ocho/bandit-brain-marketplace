@@ -25,25 +25,25 @@ board: pending
 | Another board in the domain | ✅ | ✅ Name the board in the reply ("on Garden"), and add a card comment naming the source project: `From {project}: {what changed}` |
 | Outside the domain, linked to a domain card (it blocks one, or one blocks it) | Title, board and state only | ❌ Never |
 | Outside the domain, not linked | ❌ Never shown, counted or summarised | ❌ Never |
-| Untriaged (no project) | Only from the domain's **workflow** project (`type: workflow`) | That project files them, into its own domain only |
+| Untriaged (no board) | Only from the domain's **workflow** project (`type: workflow`) | That project files them, into its own domain only |
 
 Board rules still hold on every board: a locked Spec changes only through `Spec change needed:` or
 `spec reconcile` (`references/dev.md`), deletes are confirmed (`references/board.md` → Safety).
 
 ## 🔎 Resolving it
 
-1. `get_context` once. Its `projects` carry each project's folder, and its `folders` are the
-   top-level folders with their child folders. **The domain's projects** = every project whose
+1. `get_context` once. Its `boards` carry each board's folder, and its `folders` are the
+   top-level folders with their child folders. **The domain's boards** = every board whose
    folder is the top-level folder named exactly `domain:`, or a child of it. No folder of that name → stop and say so; never guess
    the nearest match.
-2. **The home board** = the `board:` name. It must be one of the domain's projects; a home board
+2. **The home board** = the `board:` name. It must be one of the domain's boards; a home board
    outside its domain folder → stop and say so (bandit:audit S4).
 3. Keep both sets for the turn. 🔴 **No hardcoded IDs, ever**: a stored ID is a stale ID.
 
 ## 🧹 Filtering the household-wide views
 
 `list_tasks` with `view: "inbox"`, `"execution"`, `"week"` or `"workload"`, and `list_tasks`
-without a `projectId`, return **every project in the household**. Before a result is shown, counted or used:
+without a `boardId`, return **every board in the household**. Before a result is shown, counted or used:
 
 - **Keep** the domain's cards; **drop** the rest, then re-count. Report the home board first, then
   the rest of the domain grouped by board

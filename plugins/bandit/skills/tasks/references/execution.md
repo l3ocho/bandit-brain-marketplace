@@ -7,7 +7,7 @@
 
 ## 🗂️ The six columns
 
-`list_tasks { view: "execution" }` returns them in fixed order, but for **every card in the household with full descriptions**: on a busy household it overflows the tool output. Read one column at a time instead: `list_tasks({ executionState, projectId })` per board of the domain (add `tagName` for a sprint). Use the `execution` view only with `assignee` on a small board (a view refuses any other filter).
+`list_tasks { view: "execution" }` returns them in fixed order, but for **every card in the household with full descriptions**: on a busy household it overflows the tool output. Read one column at a time instead: `list_tasks({ executionState, boardId })` per board of the domain (add `tagName` for a sprint). Use the `execution` view only with `assignee` on a small board (a view refuses any other filter).
 
 | # | Column | Settable via `update_tasks` `executionState`? |
 |---|---|---|
@@ -18,7 +18,7 @@
 | 5 | **Stand By** | ✅ `standby` |
 | 6 | **Done** | 🔴 **Not settable.** A task reaches Done by being completed |
 
-🗣️ **This is the Execution Backlog.** Never say bare "backlog" — the project Backlog column is a different thing entirely.
+🗣️ **This is the Execution Backlog.** Never say bare "backlog" — the board Backlog column is a different thing entirely.
 
 ---
 
@@ -38,13 +38,13 @@ batch to Assigned in one `update_tasks` call, one entry per card.
 
 ## 📥 What the board contains
 
-Tasks that are **assigned to a project** and either:
+Tasks that are **assigned to a board** and either:
 
 - still due at any age, or
 - due this week, or
 - completed this week
 
-📌 Tasks with no project never appear here. They are in Untriaged — that is Triage's problem, not Execution's.
+📌 Tasks with no board never appear here. They are in Untriaged — that is Triage's problem, not Execution's.
 
 📌 **The midnight job** (`actor: system`) already moved anything due today or overdue into **Assigned**. `/bandit:tasks today` reads that result. **Do not synthesise a today-list** — the board is the list.
 
@@ -62,7 +62,7 @@ Report the breach. Propose what moves back to Assigned or Stand By. **Do not sil
 
 ### `/bandit:tasks today`
 
-1. `list_tasks({ executionState, projectId })` for `doing`, `next`, `assigned` and `standby`, one call per board of the domain (`references/scope.md` → Filtering)
+1. `list_tasks({ executionState, boardId })` for `doing`, `next`, `assigned` and `standby`, one call per board of the domain (`references/scope.md` → Filtering)
 2. Report **Doing** first, then **Next**, then Assigned; inside each, the home board first, then
    the rest of the domain by board
 3. Flag: cap breach · anything overdue · anything in Stand By older than a week, **except** a

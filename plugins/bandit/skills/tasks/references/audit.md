@@ -1,7 +1,7 @@
 # 🧹 Audit
 
 **Command:** `/bandit:tasks audit`
-**Owns:** hygiene checks · `manage_projects { action: "archive" }`
+**Owns:** hygiene checks · `manage_boards { action: "archive" }`
 
 ---
 
@@ -18,27 +18,27 @@
 Run them all, report only the ones that fire, each with its fix row. **Over the domain only:**
 every read goes through `references/scope.md` → Filtering; check 1 runs from the workflow project
 only, and checks 6–7 read tag names, which are household-wide by nature. Read `get_context` once
-first (projects, tags, members, sprints, lane templates), then work by id.
+first (boards, tags, members, sprints, lane templates), then work by id.
 
 | # | Check | How |
 |---|---|---|
 | 1 | **Untriaged pile** | `list_tasks { view: "inbox" }` → Untriaged count. Over ~15 is a triage backlog, not a hygiene problem |
-| 2 | **Untriaged parked cards** | `list_tasks { projectId, projectColumnId: null }` — in a project, in no column. Age via `list_events { taskId }`. Fires on a **workflow** project for any card older than a day (the daily sweep missed it), and on any type for a card older than ~30 days with no field answered. Fix row per project: run triage's **Leaving the inbox** for them (`references/triage.md`), or, on a deliverable project, keep them parked as ideas with the user's yes |
+| 2 | **Untriaged parked cards** | `list_tasks { boardId, boardColumnId: null }` — on a board, in no column. Age via `list_events { taskId }`. Fires on a **workflow** board for any card older than a day (the daily sweep missed it), and on any type for a card older than ~30 days with no field answered. Fix row per board: run triage's **Leaving the inbox** for them (`references/triage.md`), or, on a deliverable board, keep them parked as ideas with the user's yes |
 | 3 | **Stale overdue** | `list_tasks { view: "week" }` → Due column. Anything overdue by more than a month is a decision, not a date |
-| 4 | **Stand By rot** | `list_tasks { executionState: "standby", projectId }` per board. Nothing should sit there indefinitely. **Exempt:** cards carrying a `sprint/*` tag and sprint cards (`references/dev.md` → Sprint card): they wait there for the user's test |
+| 4 | **Stand By rot** | `list_tasks { executionState: "standby", boardId }` per board. Nothing should sit there indefinitely. **Exempt:** cards carrying a `sprint/*` tag and sprint cards (`references/dev.md` → Sprint card): they wait there for the user's test |
 | 5 | **Dead dependencies** | `get_task` on anything with `blockedBy` — links pointing at completed tasks |
 | 6 | **Orphan tags** | `get_context → tags` → `taskCount: 0`. **Exempt:** `sprint/*` (a closed sprint's tag is its record; `get_context → sprints` lists them) |
 | 7 | **Off-vocabulary tags** | `get_context → tags` → anything outside the vocabulary (`references/board.md` → Tags: three axes, dev tags, sprint tags). **Exempt:** `sprint/*` |
-| 8 | **Untouched projects** | `get_context → projects`, then `list_events` per project. No activity in ~60 days → archive candidate |
+| 8 | **Untouched boards** | `get_context → boards`, then `list_events` per board. No activity in ~60 days → archive candidate |
 | 9 | **Unreadable rules** | `manage_recurrence { action: "get", taskId }` → `rule: null` on a recurring task. Fix row: `manage_recurrence { action: "update", taskId, rule }` with the rule read from its occurrence history (`manage_recurrence { action: "list_occurrences", taskId, from, to }`), shown in full and marked **unchecked**. History too thin to read → the row asks for the schedule instead. Never rewritten without that row's yes |
 | 10 | **Effort/complexity blanks** | Only worth flagging on tasks in Next or Doing |
 
-### 🧱 Board structure — every project
+### 🧱 Board structure — every board
 
 Columns and lanes are two axes of one view (columns: the process or groups of work; lanes: a second
 grouping across them). A board that piles its needs into columns still works, and this check says
-how to do better. Read the project's columns and lanes, the household members and the project's members from
-the one `get_context` call (`projects`, `laneTemplates`, `members`, `projectMembers[projectId]`).
+how to do better. Read the board's columns and lanes, the household members and the board's members from
+the one `get_context` call (`boards`, `laneTemplates`, `members`, `boardMembers[boardId]`).
 
 | # | Check | Fires when | Fix row (recommended first) |
 |---|---|---|---|
@@ -84,9 +84,9 @@ Use it to answer *what changed and who changed it*. A task that "moved on its ow
 
 ## 📦 Archiving
 
-`manage_projects { action: "archive", projectId }` is the answer to almost every *"get rid of this."*
+`manage_boards { action: "archive", boardId }` is the answer to almost every *"get rid of this."*
 
-**Nothing is destroyed.** Tasks, columns, dates, states, tags, comments, dependencies and history are all kept exactly as they are. It disappears from Inbox, Execution, Week, Tags and the default project listing. `manage_projects { action: "restore", projectId }` puts it back precisely as it was.
+**Nothing is destroyed.** Tasks, columns, dates, states, tags, comments, dependencies and history are all kept exactly as they are. It disappears from Inbox, Execution, Week, Tags and the default board listing. `manage_boards { action: "restore", boardId }` puts it back precisely as it was.
 
 🔴 **It is never refused for having unfinished work inside.** The reply returns `incomplete` and `overdue` — how many unfinished tasks, and how many of those were past due, just left the boards.
 
@@ -102,7 +102,7 @@ Use it to answer *what changed and who changed it*. A task that "moved on its ow
 
 | Call | Blast radius |
 |---|---|
-| `delete_board_items { items: [{ kind: "project", id }] }` | **Every task inside it** |
+| `delete_board_items { items: [{ kind: "board", id }] }` | **Every task inside it** |
 | `delete_board_items { items: [{ kind: "folder", id }] }` | The folder |
 | `delete_board_items { items: [{ kind: "tag", id }] }` | Stripped from **every task carrying it** |
 | `delete_tasks { items: [{ kind: "card", taskId }] }` | Its subtasks, comments and dependency links |
@@ -140,6 +140,6 @@ The `Backlog` column at position 0 refuses rename and delete with `PROTECTED_COL
 
 ## 🚫 Outside audit
 
-Creating projects, renaming columns, configuring lanes — **a design conversation, every time** (except the three procedures in `references/board.md` → Outside this skill: load, onboard, dev board shape with its PM column). When a board's shape is causing the mess, audit still brings the fix: a row with the concrete change it recommends (which column, which name, which move) and why. That row opens the design conversation at the same approval; nothing runs until the user settles it.
+Creating boards, renaming columns, configuring lanes — **a design conversation, every time** (except the three procedures in `references/board.md` → Outside this skill: load, onboard, dev board shape with its PM column). When a board's shape is causing the mess, audit still brings the fix: a row with the concrete change it recommends (which column, which name, which move) and why. That row opens the design conversation at the same approval; nothing runs until the user settles it.
 
-`manage_projects { action: "archive" }` is the single exception, and it lives here because audit is what discovers the need for it.
+`manage_boards { action: "archive" }` is the single exception, and it lives here because audit is what discovers the need for it.

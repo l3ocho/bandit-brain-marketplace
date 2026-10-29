@@ -136,6 +136,7 @@ Skills define the gate; the project provides the recipe in `bandit.yaml` at the 
 | # | Decision |
 |---|---|
 | DN1 | `docs/dependencies.md` is the one map of what changes together. A change is done only when every place its rows name is updated or checked; `scripts/done_check.py` lists them, done or open, and its output goes in the report |
+| BR1 | No skill uses a name the app renamed for Boards (Projects became Boards, sprint 2026-w44-c): the tool `manage_projects`, the `project*` arguments and answer keys, the `PROJECT` refusal codes, the `project` kind and scope, `get_context → projects`. The app answers them through a bridge for one release only. `check_repo.py` rule BR1 fails on any of them in its scope |
 | AT1 | `CURRENT_TOOLS` and `REMOVED_TOOLS` in `check_repo.py` equal the app's tools and removed list, read from the app clone (`BANDIT_APP_REPO`, `BANDIT_APP_REF`, default `origin/development`); skipped where there is no clone |
 | AT2 | Copies that must match do: the project audit's tool list = `CURRENT_TOOLS`; the Project Context lines in `CLAUDE.md` and the templates = the block in `project-context.md` |
 | CL1 | A plugin file changed since the last release tag needs a CHANGELOG entry with a line (`Unreleased`, or the version being released) |

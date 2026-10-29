@@ -102,13 +102,13 @@ runbook needs no plan note: its `Technical plan` carries `Runbook: {repo path} �
 2. **Place it** by the column rule (`references/dev.md` → Card fields), never parked. Lane from the
    agreed scope. A WBS exists for the project → cite the matching `WBS-X.Y.Z` (bandit:notes finds
    the doc).
-3. **Merge check (B6):** `list_tasks { projectId, projectColumnId, tagId: {lane tag id}, completed: false }`
+3. **Merge check (B6):** `list_tasks { boardId, boardColumnId, tagId: {lane tag id}, completed: false }`
    (filters combine with AND). An open card with the same outcome → propose adding a subtask to it
    instead. Title match is a judgment call: show both, the user decides.
 4. **Propose** the card: title, every Card fields value, and the description built from
    `get_context → laneTemplates` (`references/dev.md` → Card sections).
    Effort XL → propose the split into L-or-smaller cards before anything is created (B7).
-5. **On yes:** one `create_tasks` entry with `projectId` and every Card fields value (subtasks and
+5. **On yes:** one `create_tasks` entry with `boardId` and every Card fields value (subtasks and
    dependencies included). Read its result (refused → report `code`, `reason` and `field`), then `get_task` and check it.
    **Updating an existing card** (a merge match, or a parked item triage just moved into its
    column): `get_task` → fill missing fields → write `Spec` only where it's empty; a Spec with text
@@ -162,7 +162,7 @@ Steps 1 and 5 are the **card-write rules** bandit-dev:sprint calls for a sprint'
 1. **Drift check first.** Compare the repo `CLAUDE.md` Project Context with the **production**
    Claude.ai block: the instructions version matching the project's self-check stamp, read the way
    bandit:project reads its vault folder. Report any difference before anything else; don't fix it.
-2. **List** the `stage/spec` cards (`list_tasks { projectId, tagId: {stage/spec tag id}, completed: false }`). Separately list the
+2. **List** the `stage/spec` cards (`list_tasks { boardId, tagId: {stage/spec tag id}, completed: false }`). Separately list the
    ones whose plan note is already filed (ask bandit:notes whether the filename in `Technical plan`
    exists in the project folder) and offer the `planned` flip for them.
 3. The user picks a card → technical discussion.

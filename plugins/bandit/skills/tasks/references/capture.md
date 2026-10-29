@@ -34,14 +34,14 @@ A titled task in Untriaged is a success. An interrogation that ends with a perfe
 
 | Given | Lands |
 |---|---|
-| No `projectId` | Untriaged |
-| `projectId`, no column, no date | That project's Inbox — **parked** |
-| `projectId`, no column, **with date** | The project's **first column** |
-| `projectId` + `projectColumnId` | That column |
+| No `boardId` | Untriaged |
+| `boardId`, no column, no date | That board's Inbox — **parked** |
+| `boardId`, no column, **with date** | The board's **first column** |
+| `boardId` + `boardColumnId` | That column |
 
-**No project named** → Untriaged from the domain's workflow project or a plain chat; from any other
+**No board named** → Untriaged from the domain's workflow project or a plain chat; from any other
 project, the home board's Inbox (parked), so the card stays in this project's sight
-(`references/scope.md`). A project named in the request must be in the domain.
+(`references/scope.md`). A board named in the request must be in the domain.
 
 🚫 **Never set `origin`.** It is only for a task created on behalf of another system, all three fields are required together, and none can ever be changed afterwards. A person asking for a task is not an origin.
 
@@ -51,7 +51,7 @@ project, the home board's Inbox (parked), so the card stays in this project's si
 
 1. One task per line, titles only
 2. One `create_tasks` call, one entry per line (split above 100)
-3. Land them in **Untriaged** unless the project is obvious from the line itself
+3. Land them in **Untriaged** unless the board is obvious from the line itself
 4. Report the count created, and every refused entry by title
 5. Offer `/bandit:tasks triage`. Do not start triaging
 
@@ -74,7 +74,7 @@ wrong → tell the user which card.
 - **Ticking them all does not complete the parent**
 - `manage_subtasks` with `action: "tick"` (`subtaskId`, `completed`) / `"rename"` (`subtaskId`, `title`) · delete: `delete_tasks { items: [{ kind: "subtask", subtaskId }] }`
 
-`manage_subtasks { action: "promote", subtaskId }` when a line turns out to need its own date or dependency. It takes the parent's **project and column and nothing else** — no date, no priority, no effort, no complexity, no tags. It is removed from the parent. Returns the new `taskId`.
+`manage_subtasks { action: "promote", subtaskId }` when a line turns out to need its own date or dependency. It takes the parent's **board and column and nothing else** — no date, no priority, no effort, no complexity, no tags. It is removed from the parent. Returns the new `taskId`.
 
 ---
 

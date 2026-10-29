@@ -63,8 +63,8 @@ Both are counts. **Neither knows how long anything takes.** Weight by `effort` i
 #### Dating the week — write, on request (folds the former week-planning verb)
 
 1. Read the week first. Always
-2. `list_tasks { completed: false, projectId }` for candidates — undated tasks in the domain's
-   projects, the home board first (`[project]` narrows it to one of them).
+2. `list_tasks { completed: false, boardId }` for candidates — undated tasks in the domain's
+   boards, the home board first (`[board]` narrows it to one of them).
    **`stage/ready` filter** (called by `/bandit:tasks pick-ready` on a dev project): add `tagId` = the
    `stage/ready` tag and `noTagWithPrefix: "sprint/"`, so only approved cards outside a sprint are
    candidates (a sprint's dates are its plan's, `references/dev.md` → Card fields). Nothing else changes
@@ -72,7 +72,7 @@ Both are counts. **Neither knows how long anything takes.** Weight by `effort` i
 4. On confirmation: `update_tasks { items: [{ taskId, dueDate }, …] }`, ≤100 per call
 5. Read `results` and report refused entries by name (`references/board.md` → Many cards in one call)
 
-⚠️ Dating a **parked** task moves it into the project's first column. Say so before doing it in bulk — it changes where things live, not just when.
+⚠️ Dating a **parked** task moves it into the board's first column. Say so before doing it in bulk — it changes where things live, not just when.
 
 ⛔ Dating is refused where it would put a task out of order with a dependency. The refusal names the other task.
 

@@ -117,7 +117,7 @@ Every dev card is written **complete**, in one `create_tasks` entry, then read b
 
 | Field | Value |
 |---|---|
-| `projectColumnId` | The **area column**: the module or page the change touches. `App` only when the change is shell-wide. Spans two, or no column fits → ask the user. Never create a column for it (columns come from `load`, the design conversation, or the PM step of **🏗️ Dev board shape**). **Project-management cards** (sprint planning, a sprint card, umbrella cards, planning checklists, process work) go in the `PM` column instead |
+| `boardColumnId` | The **area column**: the module or page the change touches. `App` only when the change is shell-wide. Spans two, or no column fits → ask the user. Never create a column for it (columns come from `load`, the design conversation, or the PM step of **🏗️ Dev board shape**). **Project-management cards** (sprint planning, a sprint card, umbrella cards, planning checklists, process work) go in the `PM` column instead |
 | `tagIds` | `lane/*` + `stage/spec` (none on Incident) + one Handler tag + one Energy tag (`references/board.md` → Tags), ids resolved live |
 | `priority` | Always set: urgency only |
 | `complexity` | Always set |
@@ -156,18 +156,18 @@ Run from `onboard` (approved rows) or as a fix row for bandit:audit S9; the PM s
 sprint plan. The one lane and column procedure in this skill; any other lane or column design is
 still a design conversation. **Never silently:** every step is an approved row.
 
-Read `get_context` once (tags, projects), then work by id.
+Read `get_context` once (tags, boards), then work by id.
 
 1. `get_context → tags` → the tags `lane/incident · lane/issue · lane/feature · lane/maintenance
    · lane/content · lane/tech-debt · stage/spec · stage/planned · stage/ready`, scope `system`. The
    app provides them and refuses to create them (`TAG_NAME_RESERVED`): one missing → stop and
    report it as an app problem, no row.
-2. `get_context → projects` → the board's current lanes. One row: `manage_columns_lanes { action: "set_lanes", projectId, lanes }` with the **complete**
+2. `get_context → boards` → the board's current lanes. One row: `manage_columns_lanes { action: "set_lanes", boardId, lanes }` with the **complete**
    list, in the lane table's order, each matcher `{field: "tag", values: [that lane tag's id]}`,
    ids resolved live after step 1 runs. The call replaces every lane, so existing lanes not in the
    list are named in the row.
 3. **PM column** (from `onboard` with `dev: true`, or from a sprint plan when the board has none).
-   `get_context → projects` → no `PM` column → one row with two calls: `manage_columns_lanes { action: "add", projectId, name: "PM" }`
+   `get_context → boards` → no `PM` column → one row with two calls: `manage_columns_lanes { action: "add", boardId, name: "PM" }`
    (it lands last), then `manage_columns_lanes { action: "reorder", columns }` with **every** column, Backlog at 0 and `PM` at
    1, the rest in their current order. A board that already has `PM` gets no row.
 4. Execute only approved rows, lanes before the column. Report per row.

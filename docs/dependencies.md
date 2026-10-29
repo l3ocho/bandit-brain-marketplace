@@ -51,11 +51,7 @@ These start outside, so no file here triggers them. Each has its own check.
 A place the done check lists as open, checked and found to need nothing for this release. One line
 each: the path as the map writes it, then why. `scripts/release.py --write` empties this list.
 
-- `plugins/bandit-dev/skills/sprint/references/*.md` — the sprint still gates on `dev: true` (kept for the sprint command, BB-249 decision); its behaviour on a Workflow board is the Sprint helper card of release 3, out of this change.
-- `templates/instructions/*.md` — the Project Context block is unchanged; only the `dev` key's description in the key table changed.
-- `plugins/bandit/skills/project/assets/instructions/*.md` — the Project Context block is unchanged; only the `dev` key's description in the key table changed.
-- `plugins/bandit/skills/finance/references/scope.md` — the Project Context block is unchanged; only the `dev` key's description in the key table changed.
-- `docs/dependencies.md` — the map has no row for a single checker rule; BP1 is in `docs/decisions.md` and the CHANGELOG.
+- none yet
 
 ## ✅ Before saying done
 

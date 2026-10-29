@@ -2,7 +2,7 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
-## Unreleased
+## 0.10.0 · 2026-10-29
 
 ### Added
 - **Board profiles in the helpers.** `bandit:tasks` reads each board's profile (Workflow or Technical) where it read the old type: the dev rules (lanes, stages, card sections, the dev audit checks) apply on a Technical board only; the Project Context `dev: true` line now marks a project for sprints and the dev board shape. Onboarding (`bandit:project`, `bandit:tasks onboard`) creates a new board Technical for a `dev: true` project, Workflow otherwise; the dev board shape switches an existing Workflow board to Technical first (its creator only). `load` creates a Workflow board unless you say Technical, and loads into any existing board but a Technical home board. `bandit:clarify` and `bandit:plan` offer the dev route on a Technical home board.

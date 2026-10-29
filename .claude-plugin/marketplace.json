@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Claude skills, agents and hooks for working with Bandit Brain: tasks, finance, notes, projects and the delivery pipeline.",
-    "version": "0.8.0"
+    "version": "0.9.0"
   },
   "plugins": [
     {

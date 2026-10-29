@@ -51,15 +51,7 @@ These start outside, so no file here triggers them. Each has its own check.
 A place the done check lists as open, checked and found to need nothing for this release. One line
 each: the path as the map writes it, then why. `scripts/release.py --write` empties this list.
 
-- `docs/pipeline.md` — Board rename (BB-244, BB-245): uses project in the repo or Claude.ai-project sense only
-- `templates/instructions/*.md` — Board rename (BB-244, BB-245): uses project in the repo or Claude.ai-project sense only
-- `plugins/bandit/skills/project/assets/instructions/*.md` — Board rename (BB-244, BB-245): uses project in the repo or Claude.ai-project sense only
-- `CLAUDE.md` — Board rename (BB-244, BB-245): uses project in the repo or Claude.ai-project sense only
-- `plugins/bandit/skills/finance/references/scope.md` — Board rename (BB-244, BB-245): uses project in the repo or Claude.ai-project sense only
-- `plugins/bandit/skills/audit/references/structure-rules.yaml` — Board rename (BB-244, BB-245): uses project in the repo or Claude.ai-project sense only
-- `plugins/bandit/skills/audit/scripts/check_structure.py` — Board rename (BB-244, BB-245): uses project in the repo or Claude.ai-project sense only
-- `plugins/bandit-dev/skills/sprint/scripts/recipe.py` — Board rename (BB-244, BB-245): uses project in the repo or Claude.ai-project sense only
-- `docs/bandit-yaml.md` — Board rename (BB-244, BB-245): uses project in the repo or Claude.ai-project sense only
+- none yet
 
 ## ✅ Before saying done
 

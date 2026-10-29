@@ -9,7 +9,7 @@ the exact target.
 
 | Fix | Owner |
 |---|---|
-| Rename or retype a board, rename a board folder | `bandit:tasks` |
+| Rename a board, switch its profile (its creator only), rename a board folder | `bandit:tasks` |
 | Missing dev lanes or `lane/*` / `stage/*` tags (S9) | `bandit:tasks` **dev board shape** procedure |
 | Dev lanes on a board without `dev: true` (S9) | One row, two options, recommended first: remove the lanes (`bandit:tasks`) or onboard the project as dev (`bandit:project`). The recommended one runs; the report names the other |
 | An invalid `dev:` value (S4) | `bandit:project` targeted update |
@@ -37,7 +37,7 @@ audit time.
 
 Every row runs in the same turn, no approval asked; this skill runs them **through their owners**,
 and the owner doesn't ask again. It loads the owner skill and
-follows that skill's own procedure for the row. It never renames, moves, retypes or writes
+follows that skill's own procedure for the row. It never renames, moves, switches profiles or writes
 instructions with its own calls. Its own writes are the report and the ledger, nothing else.
 
 **Linked rows.** A board or board-folder rename breaks every Project Context whose `board:` line

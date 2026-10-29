@@ -71,7 +71,7 @@ template section. Note:
   `finance:` line must read `accounts "…"` with each name an account `finance_get_context` returns;
   a name that doesn't resolve → propose the fix. No `finance:` line is never a finding. Check them live: `domain` is a folder in
   `MyNotes` (or `none`), `board` resolves via `get_context → boards` (or is `none` / `pending`).
-  Naming, board type and footprint aren't judged here: run `/bandit:audit check` in this project
+  Naming, board profile and footprint aren't judged here: run `/bandit:audit check` in this project
   and carry its rows into the proposal (skip it for `domain: none`: bandit:audit scores domain
   projects only).
   - **Missing (legacy instructions)** → flag ⚠️ **Legacy context** and build the block from what

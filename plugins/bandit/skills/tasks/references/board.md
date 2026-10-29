@@ -2,20 +2,22 @@
 
 > Read before any write that the command's own reference doesn't cover: the shared vocabulary of every `/bandit:tasks` command.
 
-## 📦 Board taxonomy
+## 📦 Board profile
 
-Three types. **A real enum field on the board**, read via `get_context` → `boards` — never inferred
-from the column names.
+Two profiles. **A real field on the board**, `profile`, read via `get_context` → `boards` — never
+inferred from the column names. The old board `type` is gone: `manage_boards` refuses it.
 
-| | 🎯 **Deliverable** | 🔁 **Workflow** | 🔀 **Hybrid** |
-|---|---|---|---|
-| Lifespan | Temporary | Continuous | Continuous |
-| Columns | One per deliverable | Process lines | Both, separated by lanes |
-| Primary entry | Planning decomposition | Inbox | Both |
-| Due dates | Absent while planning | Implicit, SLA-driven | Depends on lane |
+| | 🔁 **Workflow** | 🛠️ **Technical** |
+|---|---|---|
+| For | Everyday tasks | Building things |
+| Lanes | Hidden (kept, never deleted); `get_context` shows none | Shown |
+| `lane/*`, `stage/*` tags | Hidden on its cards, kept by every save; adding one is refused (`NEEDS_TECHNICAL_BOARD`) | Shown |
+| App tags | Those whose view is `workflow` or `both` | Those whose view is `technical` or `both` |
+| Dev rules (`references/dev.md`) | Never | Yes |
 
-⚠️ **Type is a label, not a rule.** The app keys no behaviour off it. Changing it moves,
-re-dates and re-files nothing. Every behavioural difference is yours.
+A new board starts **Workflow** (`manage_boards { action: "create", name, folderId, profile }`).
+**Only the board's creator may change its profile**, not even the admin (`REQUIRES_ADMIN`): name
+the creator from `get_context → boards → createdBy` and `members`, never retry. Switching hides, never deletes.
 
 ---
 
@@ -57,17 +59,28 @@ They are **instruments**, not decoration.
 | 🔖 **Kind** | `feature` · `issue` · `chore` |
 | ⚡ **Energy** | `quick-win` · `deep-work` · `needs-research` |
 | 🤖 **Handler** | `claude-code` · `claude-design` · `claude-ai` |
-| 🏊 **Lane** (dev boards) | `lane/incident` · `lane/issue` · `lane/feature` · `lane/maintenance` · `lane/content` · `lane/tech-debt` |
-| 🪜 **Stage** (dev boards) | `stage/spec` · `stage/planned` · `stage/ready` |
-| 🏁 **Sprint** (dev boards) | `sprint/{name}`, one per sprint, created with it (bandit-dev:sprint) |
+| 🏊 **Lane** (Technical boards) | `lane/incident` · `lane/issue` · `lane/feature` · `lane/maintenance` · `lane/content` · `lane/tech-debt` |
+| 🪜 **Stage** (Technical boards) | `stage/spec` · `stage/planned` · `stage/ready` |
+| 🏁 **Sprint** (Technical boards) | `sprint/{name}`, one per sprint, created with it (bandit-dev:sprint) |
 
 A sprint has no entity of its own: it is its tag. `list_tasks { view: "sprint" }` (or
 `get_context` → `sprints`) lists every `sprint/*` tag with open, completed and total counts and the
 earliest and latest due date; `list_tasks { tagName: "sprint/{name}" }` gives one sprint's cards,
 `list_tasks { tagPrefix: "sprint/" }` every sprint card.
 
-Tags are account-wide, so the vocabulary is the **union** of all six rows. On dev boards Kind is
-expressed by the `lane/*` tag; `feature · issue · chore` stay valid everywhere else.
+Tags are account-wide, so the vocabulary is the **union** of all six rows. On Technical boards Kind
+is expressed by the `lane/*` tag; `feature · issue · chore` stay valid everywhere else.
+
+👁️ **Tag view.** An App tag shows on the boards its `view` names, by their profile: `workflow`,
+`technical` or `both` (`get_context → tags`). On a board it leaves out it stays on its cards,
+hidden: card reads and tag filters leave it out, every save keeps it, adding it is refused
+(`TAG_HIDDEN_ON_BOARD`). Board and System tags have no view.
+
+**Creating a tag** (a write needs one that doesn't exist; ask first): the view follows the board
+profile. An App tag (the admin's to create) for one board's cards: `manage_tags { action: "create", name, view }` with that
+board's profile; meant for both kinds of board: `view: "both"` (also the app's default). A Board tag
+(`scope: "board"`, `boardId`) takes no view. Changing a view is `manage_tags { action: "update",
+tagId, view }`, the admin's only.
 
 🔴 **`tagIds` in an `update_tasks` entry REPLACES the whole set.**
 
@@ -173,12 +186,12 @@ conversation with raw tools, every time. There is no repeated procedure to encod
 interview answer produces a bad board.
 
 **Three exceptions are procedures:**
-- **`/bandit:tasks load`:** a WBS maps onto a Deliverable board mechanically (deliverables →
+- **`/bandit:tasks load`:** a WBS maps onto a board mechanically (deliverables →
   columns, work packages → tasks). It builds only what the WBS says. Anything beyond the mapping
   is back to the design conversation.
-- **`/bandit:tasks onboard`:** creates one empty board (the protected Backlog column only) as an
-  approved row of bandit:project' onboarding proposal. Columns and lanes come later, from a
-  load or the design conversation (with `dev: true`, onboard adds the dev board shape rows).
+- **`/bandit:tasks onboard`:** creates one empty board (the protected Backlog column only), with
+  its profile, as an approved row of bandit:project' onboarding proposal. Columns and lanes come
+  later, from a load or the design conversation (with `dev: true`, onboard adds the dev board shape rows).
 - **Dev board shape** (`references/dev.md`): checks the app's `lane/*` / `stage/*` tags, sets
   the six dev lanes and adds the `PM` column, as approved rows — from `onboard` with `dev: true`, a
   bandit:audit S9 fix row, or (the `PM` column only) a sprint plan. Nothing else.

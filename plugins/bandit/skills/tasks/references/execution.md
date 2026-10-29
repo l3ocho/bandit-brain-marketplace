@@ -126,7 +126,7 @@ Read them off the task; do not invent them.
 
 Priority is **urgency only** and is independent. A Complex XL task can be Urgent.
 
-Effort L or XL sitting in Doing is a split candidate — propose, never act. On a `dev: true` board only XL is (L cards are allowed there, `references/dev-workflow.md` B7).
+Effort L or XL sitting in Doing is a split candidate — propose, never act. On a Technical board only XL is (L cards are allowed there, `references/dev-workflow.md` B7).
 
 ---
 

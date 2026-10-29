@@ -45,8 +45,9 @@ Each phase may take 1–2 messages when mixing both question types — that's fi
    Call `get_context` first and present its `boards` in the domain's folder (the domain not
    known yet → ask the Phase 4 Domain question now, once). Options:
    - "One existing board" — pick from the domain's live board list
-   - "New board" — ask its name, type (`deliverable` · `workflow` · `hybrid`) and,
-     optionally, a subfolder of the domain's folder
+   - "New board" — ask its name and, optionally, a subfolder of the domain's folder. Its profile
+     is not asked: `technical` with `dev: true` (the dev rules and the dev board shape go
+     together), `workflow` otherwise
    - "Not board-backed"
    - "Decide later"
 

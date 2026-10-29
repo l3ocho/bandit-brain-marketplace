@@ -23,20 +23,20 @@ Natural language always works; a request that spans two surfaces reads both file
 | ✍️ Capture | `capture` | `references/capture.md` | Task creation, brain dumps, the whole repeat-rule lifecycle |
 | 🧹 Audit | `audit` | `references/audit.md` | Hygiene and structure checks, `manage_boards { action: "archive" }` |
 | 📧 Email | `email` | `references/email.md` | Gmail → proposals only, zero writes |
-| 🏗️ Load | `load` | `references/load.md` | WBS → a new Deliverable board |
+| 🏗️ Load | `load` | `references/load.md` | WBS → a new board |
 | 🚀 Onboard | `onboard` | `references/onboard.md` | The board step of project onboarding, run by bandit:project |
 | 🛠️ Dev | `spec` `scope` `plan-tech` `stage` `pick-ready` | `references/dev.md` · `references/dev-workflow.md` | Dev projects only: lanes, stages, card sections · the card procedures |
 
 | Also read | When |
 |---|---|
 | `references/scope.md` | Before every read or write: the home board, the domain, filtering the household-wide views |
-| `references/board.md` | Taxonomy, right-sizing, planning variables, tags, many-card writes, card descriptions, sub-tasks, safety, refusals, what lies outside this skill |
+| `references/board.md` | Board profile, right-sizing, planning variables, tags and tag view, many-card writes, card descriptions, sub-tasks, safety, refusals, what lies outside this skill |
 | `references/errors.md` | A call, or an entry in its `results`, comes back `{ ok: false, code, … }` |
 | `references/gotchas.md` | Once, at the start of a session that writes to the board |
 
 🚦 **Dev gate.** The Dev surface, `lane/*` / `stage/*` rules, card boundaries and dev audit checks
-apply **only** when the Project Context has `dev: true`. Without it a Dev command says the project
-isn't a dev project and stops. Surface roles: `references/dev-workflow.md` → Surface.
+apply **only** when the project's home board has profile Technical (`references/dev.md` → Gate).
+On a Workflow board a Dev command says so and stops. Surface roles: `references/dev-workflow.md` → Surface.
 
 **Only Load and Onboard create boards.** Only Load, and the dev board shape's `PM` step, create columns.
 

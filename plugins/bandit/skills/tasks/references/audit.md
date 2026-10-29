@@ -17,21 +17,22 @@
 
 Run them all, report only the ones that fire, each with its fix row. **Over the domain only:**
 every read goes through `references/scope.md` → Filtering; check 1 runs from the workflow project
-only, and checks 6–7 read tag names, which are household-wide by nature. Read `get_context` once
+only, and checks 6, 7 and 11 read tags, which are household-wide by nature. Read `get_context` once
 first (boards, tags, members, sprints, lane templates), then work by id.
 
 | # | Check | How |
 |---|---|---|
 | 1 | **Untriaged pile** | `list_tasks { view: "inbox" }` → Untriaged count. Over ~15 is a triage backlog, not a hygiene problem |
-| 2 | **Untriaged parked cards** | `list_tasks { boardId, boardColumnId: null }` — on a board, in no column. Age via `list_events { taskId }`. Fires on a **workflow** board for any card older than a day (the daily sweep missed it), and on any type for a card older than ~30 days with no field answered. Fix row per board: run triage's **Leaving the inbox** for them (`references/triage.md`), or, on a deliverable board, keep them parked as ideas with the user's yes |
+| 2 | **Untriaged parked cards** | `list_tasks { boardId, boardColumnId: null }` — on a board, in no column. Age via `list_events { taskId }`. Fires on the domain's ` - wkflw` board for any card older than a day (the daily sweep missed it), and on any board for a card older than ~30 days with no field answered. Fix row per board: run triage's **Leaving the inbox** for them (`references/triage.md`), or, on any other board, keep them parked as ideas with the user's yes |
 | 3 | **Stale overdue** | `list_tasks { view: "week" }` → Due column. Anything overdue by more than a month is a decision, not a date |
 | 4 | **Stand By rot** | `list_tasks { executionState: "standby", boardId }` per board. Nothing should sit there indefinitely. **Exempt:** cards carrying a `sprint/*` tag and sprint cards (`references/dev.md` → Sprint card): they wait there for the user's test |
 | 5 | **Dead dependencies** | `get_task` on anything with `blockedBy` — links pointing at completed tasks |
-| 6 | **Orphan tags** | `get_context → tags` → `taskCount: 0`. **Exempt:** `sprint/*` (a closed sprint's tag is its record; `get_context → sprints` lists them) |
+| 6 | **Orphan tags** | `get_context → tags` → `taskCount: 0`. **Exempt:** `sprint/*` (a closed sprint's tag is its record; `get_context → sprints` lists them), and an App tag whose `view` isn't `both`: the count leaves out the cards where it is hidden, so zero proves nothing (the app's delete dialog shows the true count) |
 | 7 | **Off-vocabulary tags** | `get_context → tags` → anything outside the vocabulary (`references/board.md` → Tags: three axes, dev tags, sprint tags). **Exempt:** `sprint/*` |
 | 8 | **Untouched boards** | `get_context → boards`, then `list_events` per board. No activity in ~60 days → archive candidate |
 | 9 | **Unreadable rules** | `manage_recurrence { action: "get", taskId }` → `rule: null` on a recurring task. Fix row: `manage_recurrence { action: "update", taskId, rule }` with the rule read from its occurrence history (`manage_recurrence { action: "list_occurrences", taskId, from, to }`), shown in full and marked **unchecked**. History too thin to read → the row asks for the schedule instead. Never rewritten without that row's yes |
 | 10 | **Effort/complexity blanks** | Only worth flagging on tasks in Next or Doing |
+| 11 | **Tag shown nowhere** | `get_context → tags` and `boards`: an App tag whose `view` is `workflow` or `technical` while no board you can see has that profile, so it shows on no board. Fix row: `manage_tags { action: "update", tagId, view: "both" }` (the admin's), or switch a board's profile (its creator's) |
 
 ### 🧱 Board structure — every board
 
@@ -49,7 +50,7 @@ the one `get_context` call (`boards`, `laneTemplates`, `members`, `boardMembers[
 Each row is a design proposal: it opens the design conversation at the same approval, and nothing
 runs until the user settles it (**🚫 Outside audit**). Structure fixes run with raw tools after that yes.
 
-### 🛠️ Dev-card checks — `dev: true` only, current board only
+### 🛠️ Dev-card checks — Technical board only, current board only
 
 Rules in `references/dev.md` and `references/dev-workflow.md`. Every finding is a fix row; the fix for a stage tag runs through `stage`.
 

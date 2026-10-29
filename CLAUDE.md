@@ -68,9 +68,9 @@ scripts/done_check.py               lists each place a change since the last rel
 - **Never invoke your own skills**, old or new names. Read their source as documents and follow it (G7).
 - **Nothing outside the repo.** Working files go in `.work/`. The only writes outside are vault rows in this project's folders and the Bandit CTO change log.
 - **Never edit `.claude/settings*.json`** in a build session, except an approved hook change.
-- **Branches:** work on `development`, push it. `main` moves only on Leo's deploy word; tags only at release.
-- **The version number is Leo's.** Release only the number Leo gave, or the one I told him before building. Never pick a different one at release time, whatever the changelog rule says. No number agreed → ask in one line before the release.
-- **Releasing this repo: Leo's deploy word and a version are enough.** Leo can only test the plugins once they reach `main` (that is when Claude.ai and Claude Code pick them up). So the `bandit-dev` release gates do not apply here: no "tested by the user", no debug-done, no backup step. Before releasing, the checker is green, `done_check.py` has nothing open, and `development` is clean and level with origin. Then `release.py {version}`, `--write`, `--push`. Leo tests after it lands; his findings come back as fixes and a new release.
+- **Branches:** work on `development`, push it. `main` and tags move only by `release.py`, which runs as the last step of done.
+- **The version number:** the one Leo gave, if he gave one. Otherwise the next one by the CHANGELOG's SemVer rule. Never ask.
+- **Done means released. No approval, no deploy word, no question.** A change is not done until it is released. Leo can only test the plugins once they reach `main` (that is when Claude.ai and Claude Code pick them up). So the `bandit-dev` release gates do not apply here: no "tested by the user", no debug-done, no backup step. Before releasing, the checker is green, `done_check.py` has nothing open, and `development` is clean and level with origin. Then `release.py {version}`, `--write`, `--push`, and check `main` and the tag on origin. Only then close the card or say done. Leo tests after it lands; his findings come back as fixes and a new release.
 - **The app clone** (`~/projects/banditlabs/bandit_brain`) is read-only reference.
 - **Staging:** `bb-staging status`, `smoke`, `logs` are fine. Never `bb-staging up --refresh` during a freeze.
 
@@ -83,7 +83,7 @@ claude plugin validate plugins/<plugin>     # one plugin
 python3 plugins/bandit-maker/skills/skill/scripts/house_lint.py plugins/bandit/skills/*
 ```
 
-The checker must be green before every commit. **Done** = the checker green, `done_check.py` with nothing open (or each open row checked and named), and app behaviour run on staging; both outputs go in the report (`docs/dependencies.md`). A new kind of mistake becomes a new checker rule, not a new sentence.
+The checker must be green before every commit. **Done** = the checker green, `done_check.py` with nothing open (or each open row checked and named), app behaviour run on staging, and the release pushed to `main` with its tag; the outputs go in the report (`docs/dependencies.md`). A new kind of mistake becomes a new checker rule, not a new sentence.
 
 ## 🗂️ Vault
 

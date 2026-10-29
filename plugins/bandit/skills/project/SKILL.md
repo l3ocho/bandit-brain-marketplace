@@ -54,7 +54,7 @@ The full list is `references/gotchas.md`: read it once before onboarding or an a
 
 - Leave a finding without a fix row, or stop an audit at a question when the fix is known
 - Create, rename or restructure anything on a board beyond bandit:tasks' onboard rows (one empty
-  project, and for `dev: true` its dev board shape)
+  board, and for `dev: true` its dev board shape)
 - Call `project_write` on a path already in the project's doc list, or `project_delete`
 - Inject content not gathered from the user, or cut content the user wants to keep (ask first in an audit)
 - Write or hand over instructions over the token budget, or duplicate information across sections

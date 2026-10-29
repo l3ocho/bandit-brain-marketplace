@@ -20,7 +20,7 @@ One row per key the skills and scripts read (`recipe.py` `KEYS`; the checker hol
 | `testdata.schema` | list of paths or globs | `testdata` | Where the tables are defined |
 | `testdata.logic` | list of paths or globs | `testdata` | Where the project enforces its rules in code |
 | `testdata.databases` | map of name → command | `testdata` | One command per test database (`development`, `test`, `staging`, no other name) that runs SQL read from stdin with `psql`. It names env vars, never an address or password; a database with no open port runs `psql` inside its container with the container's own login |
-| `handover.board` | project name | `plan`, `execute`, `release` | The board both deployment handover cards go on (`templates.md` → Handover cards); `plan` creates them at the sprint commit. A name, resolved live |
+| `handover.board` | board name | `plan`, `execute`, `release` | The board both deployment handover cards go on (`templates.md` → Handover cards); `plan` creates them at the sprint commit. A name, resolved live |
 | `handover.staging.column` | column name | `plan`, `execute` | The staging handover card's column |
 | `handover.staging.runbook` | `path#section` | `execute` | The project's staging deploy steps the staging card's prompt copies; filled by the Final push |
 | `handover.production.column` | column name | `plan`, `release` | The production handover card's column |

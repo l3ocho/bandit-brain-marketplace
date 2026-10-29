@@ -87,8 +87,8 @@ unchecked too).
 |---|---|---|
 | `taken_at` | clock | UTC, when the reads started |
 | `board.folders` | `get_context → folders` (one `get_context` call serves every `board` and `tags` row) | Every folder, each top-level one and each child listed inside it; a child's `parent` is its parent's **name** |
-| `board.projects` | `get_context → projects` (not archived: no `includeArchived`) | `name`, `type`, `folder` = `folder.name` (or `null`), `visibility`, `system_owner` = `systemOwner`. Every project, system ones included: the script exempts them |
-| `….lanes` | `get_context → projects` (lanes come with the columns) | Every lane: `name`, `position`, `matcher.field` as-is, and `matcher.values` with **tag ids replaced by tag names** from `get_context → tags` (priority and state values as-is). No lanes → `[]` |
+| `board.projects` | `get_context → boards` (not archived: no `includeArchived`) | `name`, `type`, `folder` = `folder.name` (or `null`), `visibility`, `system_owner` = `systemOwner`. Every board, system ones included: the script exempts them |
+| `….lanes` | `get_context → boards` (lanes come with the columns) | Every lane: `name`, `position`, `matcher.field` as-is, and `matcher.values` with **tag ids replaced by tag names** from `get_context → tags` (priority and state values as-is). No lanes → `[]` |
 | `tags` | `get_context → tags` | Every tag **name**, as-is |
 | `vault.domains` | `nc_webdav_list_directory("MyNotes")` | Folders not starting with `_` or `.` |
 | `settings.{D}` | list `MyNotes/{D}/Claude/` | One key per `ai-*` folder |

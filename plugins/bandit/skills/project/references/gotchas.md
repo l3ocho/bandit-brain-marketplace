@@ -13,7 +13,7 @@ One line per real failure: what went wrong → what to do instead. Read once bef
   the chat.** → Always save it with **Project copy** (`references/output.md`) (`present_to_user: false`, one-line
   confirmation).
 - **2026-09-27 · The Personal onboarding audit skipped the board step.** The chat ran its own
-  `get_context` projects check instead of loading bandit:tasks' onboard step, never opened the structure
+  `get_context` boards check instead of loading bandit:tasks' onboard step, never opened the structure
   rulebook, and wrote "no board rows, scope is already correct". The board names were wrong. →
   Step 3 is loaded and run, never swapped for a quick check (**🚀 Onboarding** (`references/onboard.md`) rules); structure is
   judged by `/bandit:audit check`.

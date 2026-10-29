@@ -8,7 +8,7 @@
 |---|---|
 | A paid Claude plan (Pro, Max, Team or Enterprise) | Plugins on Claude.ai need one |
 | Claude.ai → Settings → Capabilities → **Code execution and file creation** on | Skills run in the code sandbox |
-| The **Bandit Brain** MCP server connected, on an app version that serves the 18 assistant tools (`get_context`, `list_tasks`, `create_tasks`, `update_tasks` …) | The task board: `tasks`, `audit`, `project`, `sprint`, `testdata`; Finance (`finance`) needs app v0.31.0 or later, which serves the 17 `finance_*` tools; card reads in `notes` and `plan`; saving a spec as a card in `clarify`. After an app upgrade, reconnect the connector so it loads the new tool list |
+| The **Bandit Brain** MCP server connected, on app v0.36.0 or later, which serves the 18 assistant tools under their Board names (`get_context`, `list_tasks`, `create_tasks`, `update_tasks`, `manage_boards` …) | The task board: `tasks`, `audit`, `project`, `sprint`, `testdata`; Finance (`finance`) needs app v0.31.0 or later, which serves the 17 `finance_*` tools; card reads in `notes` and `plan`; saving a spec as a card in `clarify`. After an app upgrade, reconnect the connector so it loads the new tool list |
 | A **Nextcloud** MCP server with WebDAV connected | The notes vault: `notes`, `minutes`, `plan`, `project`, `audit`, `sprint`; saving a spec as a note in `clarify` |
 | Gmail connected (optional) | `/bandit:tasks email` |
 
@@ -50,7 +50,7 @@ What changed in each release: [CHANGELOG.md](../CHANGELOG.md). After a release t
 
 ## 5. First project
 
-1. In the project's Claude.ai chat: `/bandit:project onboard`. One proposal covers the vault folders, the board project and the instructions, with the **Project Context** block every skill reads. Answer all, a list, or none.
+1. In the project's Claude.ai chat: `/bandit:project onboard`. One proposal covers the vault folders, the board and the instructions, with the **Project Context** block every skill reads. Answer all, a list, or none.
 2. Paste the instructions it hands over into the project, then run `/bandit:audit check` there.
 3. **Dev projects** (`dev: true`): put the same Project Context block in the repo's `CLAUDE.md`, add a [`bandit.yaml`](bandit-yaml.md) at the repo root, and run the **🪞 Dev repo alignment** prompt from the [cheat sheet](cheat-sheet.md) in Claude Code.
 

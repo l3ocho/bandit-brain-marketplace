@@ -38,7 +38,7 @@ Contents: Interview and pace · Scope · Cards and Specs · Agents and checks ·
 ## Agents and checks
 
 - A live-check agent clicked a control that writes (a column sort) in the dev database → at planning, brief investigators: open and cancel, write nothing on existing data, report what could not be checked; name the known write controls. This is planning-only.
-- Sprint Privacy A wave 1: the execution prompt copied "live checks write nothing", so the ui-verifier skipped a card's key case (a folder with projects) because the dev database had none, and the report presented it as normal → execution prompts say the verifier creates and removes its own test data; a case not run for lack of data is a failed check.
+- Sprint Privacy A wave 1: the execution prompt copied "live checks write nothing", so the ui-verifier skipped a card's key case (a folder with boards) because the dev database had none, and the report presented it as normal → execution prompts say the verifier creates and removes its own test data; a case not run for lack of data is a failed check.
 - Investigator reports mixed verified facts and guesses → require "not verified" markers and spot-check the decisive facts before they enter a card.
 - The browser tool the brief named was not available to the sub-agent → state the tools that exist; accept an equivalent and note it.
 - One long sub-agent report per card flooded the chat → read the report, pass on only the merged list of findings and questions.

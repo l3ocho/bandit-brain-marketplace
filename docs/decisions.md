@@ -129,14 +129,14 @@ Skills define the gate; the project provides the recipe in `bandit.yaml` at the 
 
 | # | Decision |
 |---|---|
-| MT1 | The skills call only the app's current assistant tools: `get_context` for projects, tags, members, lanes and sprints; `list_tasks` (with `view` for a whole board); the array writes `create_tasks`, `update_tasks`, `reopen_tasks`, `delete_tasks`, `delete_board_items`; and `manage_*`, `link_tasks`, `set_visibility` for structure. `check_repo.py` rule MT1 fails on any of the 62 names the app removed, in any shipped file |
+| MT1 | The skills call only the app's current assistant tools: `get_context` for boards, tags, members, lanes and sprints; `list_tasks` (with `view` for a whole board); the array writes `create_tasks`, `update_tasks`, `reopen_tasks`, `delete_tasks`, `delete_board_items`; and `manage_*`, `link_tasks`, `set_visibility` for structure. `check_repo.py` rule MT1 fails on any of the 62 names the app removed, in any shipped file |
 
 ## 🔗 Done means every dependency (BB-205, Leo, 2026-10-20)
 
 | # | Decision |
 |---|---|
 | DN1 | `docs/dependencies.md` is the one map of what changes together. A change is done only when every place its rows name is updated or checked; `scripts/done_check.py` lists them, done or open, and its output goes in the report |
-| BR1 | No skill uses a name the app renamed for Boards (Projects became Boards, sprint 2026-w44-c): the tool `manage_projects`, the `project*` arguments and answer keys, the `PROJECT` refusal codes, the `project` kind and scope, `get_context → projects`. The app answers them through a bridge for one release only. `check_repo.py` rule BR1 fails on any of them in its scope |
+| BR1 | No skill uses a name the app renamed for Boards (Projects became Boards, sprint 2026-w44-c): the tool `manage_projects`, the `project*` arguments and answer keys, the `PROJECT` refusal codes, the `project` kind and scope, `get_context → projects`. The app answers them through a bridge for one release only. `check_repo.py` rule BR1 fails on any of them in a shipped file (the CHANGELOG's release history excepted) |
 | AT1 | `CURRENT_TOOLS` and `REMOVED_TOOLS` in `check_repo.py` equal the app's tools and removed list, read from the app clone (`BANDIT_APP_REPO`, `BANDIT_APP_REF`, default `origin/development`); skipped where there is no clone |
 | AT2 | Copies that must match do: the project audit's tool list = `CURRENT_TOOLS`; the Project Context lines in `CLAUDE.md` and the templates = the block in `project-context.md` |
 | CL1 | A plugin file changed since the last release tag needs a CHANGELOG entry with a line (`Unreleased`, or the version being released) |

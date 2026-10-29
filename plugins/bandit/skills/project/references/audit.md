@@ -70,7 +70,7 @@ template section. Note:
   other value → propose fixing or removing the line. No `dev:` line is never a finding. A
   `finance:` line must read `accounts "…"` with each name an account `finance_get_context` returns;
   a name that doesn't resolve → propose the fix. No `finance:` line is never a finding. Check them live: `domain` is a folder in
-  `MyNotes` (or `none`), `board` resolves via `get_context → projects` (or is `none` / `pending`).
+  `MyNotes` (or `none`), `board` resolves via `get_context → boards` (or is `none` / `pending`).
   Naming, board type and footprint aren't judged here: run `/bandit:audit check` in this project
   and carry its rows into the proposal (skip it for `domain: none`: bandit:audit scores domain
   projects only).
@@ -87,7 +87,7 @@ template section. Note:
 - **Legacy tool names** — every Bandit Brain tool the instructions name, anywhere, must be a current
   one: `get_context`, `list_tasks`, `get_task`, `add_comment`, `list_events`, `create_tasks`,
   `update_tasks`, `reopen_tasks`, `delete_tasks`, `manage_subtasks`, `manage_recurrence`,
-  `link_tasks`, `manage_projects`, `manage_columns_lanes`, `manage_tags`, `manage_folders`,
+  `link_tasks`, `manage_boards`, `manage_columns_lanes`, `manage_tags`, `manage_folders`,
   `set_visibility`, `delete_board_items`, and the Finance tools `finance_get_context`,
   `finance_list_transactions`, `finance_get_budget`, `finance_list_schedules`, `finance_get_report`,
   `finance_list_rules`, `finance_get_account_history`, `finance_manage_accounts`,

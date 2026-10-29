@@ -242,21 +242,27 @@ def check_removed_tools():
 BRIDGE_NAMES = (
     "manage_projects projectId projectColumnId projectName projectColor projectPosition projectFolderId projectIds "
     "projectMembers PROJECT_ARCHIVED PROJECT_HAS_OTHERS_CARDS RESTRICTED_PROJECT_NEEDS_MEMBER SYSTEM_OWNED_PROJECT "
-    "TAG_WRONG_PROJECT TASK_HAS_NO_PROJECT").split()
-_WORDS = r"(?:tags|members|folders|columns|lanes|sprints)"
-BRIDGE_RE = re.compile(r"(?<![A-Za-z0-9_])(" + "|".join(BRIDGE_NAMES) + r")(?![A-Za-z0-9_])"
-                       r"|(?:kind|scope)\s*(?::|={1,3})?\s*[`\"']project[`\"']"   # kind: "project", scope === 'project'
-                       r"|delete_board_items`? \(project\)|get_context`? → `?projects\b|`projects`"
-                       r"|\([^)\n]*\b" + _WORDS + r"\b[^)\n]*\bprojects\b[^)\n]*\)"  # (tags, projects): get_context's keys
-                       r"|\([^)\n]*\bprojects\b[^)\n]*\b" + _WORDS + r"\b[^)\n]*\)")
-BRIDGE_SCOPE = (PLUGINS / "bandit" / "skills" / "tasks",)
+    "TAG_WRONG_PROJECT TASK_HAS_NO_PROJECT task.project").split()
+_WORDS = r"(?:tags|members|columns|lanes|sprints|boards)"  # not folders: vault folders too
+BRIDGE_RE = re.compile(r"(?<![A-Za-z0-9_])(" + "|".join(re.escape(n) for n in BRIDGE_NAMES) + r")(?![A-Za-z0-9_])"
+                       r"|(?<![A-Za-z0-9_])(?:kind|scope)\s*(?::|={1,3})?\s*[`\"']project[`\"']"  # kind: "project", scope === 'project'
+                       r"|(?<![A-Za-z0-9_])(?:kind|scope):\s*project\b|`project` (?:kind|scope)\b"   # scope: project
+                       r"|delete_board_items`? \(project\)|get_context`?\s*(?:→|->)?\s*`?projects\b"
+                       r"|(?:get_context|`folders`)[^\n]*`projects`"                         # its `projects`: get_context's key
+                       r"|\((?=[^)\n]*\b" + _WORDS + r"\b)(?:[\w ]{1,20}, )*projects(?:, [\w ]{1,20})*\)")  # (tags, projects)
+# Every shipped file but the CHANGELOG (release history keeps the names it shipped with); the BR1 row itself names them.
+BRIDGE_SKIP = (ROOT / "CHANGELOG.md",)
 # Old lines the rule must catch (from the skills before the move) and kept meanings it must leave alone.
-BRIDGE_CATCH = ("Its `projects` carry each folder", "Its `folders` and `projects` give", "(`folders`, `projects`)",
+BRIDGE_CATCH = ("`get_context` once. Its `projects` carry each folder", "Its `folders` and `projects` give", "(`folders`, `projects`)",
                 "Read `get_context` once (tags, projects)", "first (projects, tags, members, sprints)",
                 "`delete_board_items` (project)", "kind: 'project'", 'scope === "project"', "kind `project`",
-                "get_context → projects", "`manage_projects`", "list_tasks { projectId }", "TASK_HAS_NO_PROJECT")
+                "get_context → projects", "`manage_projects`", "list_tasks { projectId }", "TASK_HAS_NO_PROJECT",
+                "`get_context` projects check", "get_context -> projects", "scope: project", "the `project` scope",
+                "(boards, projects)", "the hook body's task.project")
 BRIDGE_KEEP = ("the domain's workflow project", 'board: project "Home Reno"', "a WBS-backed project",
-               "Project-management cards", "projection")
+               "Project-management cards", "projection", "the stamp ledger: its `projects` object",
+               'elif board_kind == "project"', 'f"board.projects[{i}].lanes[{j}]"', "(dev projects, §1 Sprint folders)",
+               "(Claude folders, projects)", "(vault folders, projects, inbox)", "a project's task.projection")
 
 
 def check_bridge_names():
@@ -264,10 +270,12 @@ def check_bridge_names():
     missed += [f"false hit: {s}" for s in BRIDGE_KEEP if BRIDGE_RE.search(s)]
     if missed:
         return report("BR1", False, f"rule self-test failed: {'; '.join(missed)}")
-    hits, files = [], [f for f in shipped_files() if any(d in f.parents for d in BRIDGE_SCOPE)]
+    hits, files = [], [f for f in shipped_files() if f not in BRIDGE_SKIP]
     for f in files:
         text, _ = strip_history(f, f.read_text(encoding="utf-8", errors="ignore"))
         for n, line in enumerate(text.splitlines(), 1):
+            if f == HISTORY_FILE and line.startswith("| BR1 |"):
+                continue
             for m in BRIDGE_RE.finditer(line):
                 hits.append(f"{f.relative_to(ROOT)}:{n} `{m.group(0)}`")
     report("BR1", not hits,
@@ -279,7 +287,7 @@ def check_bridge_names():
 # The 18 board tools the app serves today. The project audit's list must match it with FINANCE_TOOLS (AT2).
 CURRENT_TOOLS = (
     "get_context list_tasks get_task add_comment list_events create_tasks update_tasks reopen_tasks "
-    "delete_tasks manage_subtasks manage_recurrence link_tasks manage_projects manage_columns_lanes "
+    "delete_tasks manage_subtasks manage_recurrence link_tasks manage_boards manage_columns_lanes "
     "manage_tags manage_folders set_visibility delete_board_items").split()
 # The 17 Finance tools (bandit:finance), from the app's finance descriptors.
 FINANCE_TOOLS = (

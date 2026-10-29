@@ -75,7 +75,7 @@ in:inbox is:unread -in:draft newer_than:7d
 
 ## 📍 Where proposals land
 
-**Untriaged**, by default. `create_tasks { items: [{ title }] }` with no `projectId`.
+**Untriaged**, by default. `create_tasks { items: [{ title }] }` with no `boardId`.
 
 Email proposals are captured, not filed. Filing is `/bandit:tasks triage`.
 

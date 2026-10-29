@@ -2,9 +2,9 @@
 
 > Read before any write that the command's own reference doesn't cover: the shared vocabulary of every `/bandit:tasks` command.
 
-## 📦 Project taxonomy
+## 📦 Board taxonomy
 
-Three types. **A real enum field on the project**, read via `get_context` → `projects` — never inferred
+Three types. **A real enum field on the board**, read via `get_context` → `boards` — never inferred
 from the column names.
 
 | | 🎯 **Deliverable** | 🔁 **Workflow** | 🔀 **Hybrid** |
@@ -33,7 +33,7 @@ three cards of noise on Execution, three dates to maintain, two dependency links
 
 **Propose. Never resize silently in either direction.**
 
-`manage_subtasks { action: "promote", subtaskId }` converts a subtask to a task — it inherits the parent's project and column,
+`manage_subtasks { action: "promote", subtaskId }` converts a subtask to a task — it inherits the parent's board and column,
 everything else starts unset, and it returns the new task id.
 
 ---
@@ -140,15 +140,15 @@ back (`references/capture.md` → Subtasks).
 **Write freely. Confirm destructive.**
 
 🔴 Confirm before calling, for every entry: `delete_tasks` (kind `card` · `subtask` · `series` ·
-`occurrence`) · `delete_board_items` (kind `project` · `column` · `tag` · `folder`). A `delete_tasks`
+`occurrence`) · `delete_board_items` (kind `board` · `column` · `tag` · `folder`). A `delete_tasks`
 entry of kind `link` removes only a dependency and needs no yes
 
-- kind `project` destroys every task inside it
+- kind `board` destroys every task inside it
 - kind `tag` strips it from every task carrying it — **retag first, confirm zero, then delete**
 - kind `series` destroys every occurrence, past and future
 
 **None are recoverable. Archive before you delete** — almost every "get rid of this" is an
-archive, and `manage_projects { action: "restore" }` puts it back exactly as it was.
+archive, and `manage_boards { action: "restore" }` puts it back exactly as it was.
 
 The `Backlog` column at position 0 is protected. Delete and rename are refused with
 `PROTECTED_COLUMN`. That is correct — do not work around it.
@@ -168,22 +168,22 @@ Report it. Do not substitute an approximation.
 
 ## 🚫 Outside this skill
 
-🏗️ **Board structure.** Creating projects, naming columns, configuring lanes — a design
+🏗️ **Board structure.** Creating boards, naming columns, configuring lanes — a design
 conversation with raw tools, every time. There is no repeated procedure to encode, and an
 interview answer produces a bad board.
 
 **Three exceptions are procedures:**
-- **`/bandit:tasks load`:** a WBS maps onto a Deliverable project mechanically (deliverables →
+- **`/bandit:tasks load`:** a WBS maps onto a Deliverable board mechanically (deliverables →
   columns, work packages → tasks). It builds only what the WBS says. Anything beyond the mapping
   is back to the design conversation.
-- **`/bandit:tasks onboard`:** creates one empty project (the protected Backlog column only) as an
+- **`/bandit:tasks onboard`:** creates one empty board (the protected Backlog column only) as an
   approved row of bandit:project' onboarding proposal. Columns and lanes come later, from a
   load or the design conversation (with `dev: true`, onboard adds the dev board shape rows).
 - **Dev board shape** (`references/dev.md`): checks the app's `lane/*` / `stage/*` tags, sets
   the six dev lanes and adds the `PM` column, as approved rows — from `onboard` with `dev: true`, a
   bandit:audit S9 fix row, or (the `PM` column only) a sprint plan. Nothing else.
 
-`manage_projects { action: "archive" }` is the other exception, and it lives in audit because audit is what discovers the
+`manage_boards { action: "archive" }` is the other exception, and it lives in audit because audit is what discovers the
 need for it.
 
 ---

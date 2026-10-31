@@ -252,7 +252,7 @@ Checks (each row: file, breach, proposed fix):
 | Filenames | Not kebab-case; dated type without date suffix; date-first; spaces; reserved link characters; unrenamed `Pasted image …` attachments |
 | Uniqueness | Same filename twice in the domain, `_inbox/` included (an inbox note whose name exists elsewhere is usually a consumed draft: fix row = archive it on proof, Leftovers; otherwise rename one). `README.md` is exempt (Part 2 §4) |
 | Frontmatter parses | The block doesn't parse as YAML. The row names the key on the failing line and proposes the quoted value (Part 2 §5 → YAML style) |
-| Sprint briefs | A `brief` whose `board-task` card carries a `sprint/{name}` tag (resolved live, read-only) and sits outside `Projects/{slug}/sprint-{name}/`. Fix: move it there (Part 2 §1) |
+| Sprint briefs | A `brief` whose `board-task` card is in sprint `{name}`: a real sprint, or an older `sprint/{name}` tag (resolved live, read-only, as bandit:tasks' `references/board.md` → Tags reads sprints) and sits outside `Projects/{slug}/sprint-{name}/`. Fix: move it there (Part 2 §1) |
 | Sprint project root | A project with sprint folders holding anything at its root but the hub, `sprint-*` and `planning/`. Fix: move it into `planning/` (or its card's sprint folder) |
 | Orphaned triaged notes | A filed `triaged` note whose `board-task` card no longer exists (resolved live, read-only). A question row for the user: keep, archive, or relink. Never acted on without their pick |
 | Frontmatter | Missing required keys (`summary` once filed); legacy keys; unknown keys (fix row: map to the known key it means, recommended; removing it only if the user picks that); invalid enum value; `project` not a link; `request` missing `requester`/`received` |

@@ -66,8 +66,8 @@ Both are counts. **Neither knows how long anything takes.** Weight by `effort` i
 2. `list_tasks { completed: false, boardId }` for candidates — undated tasks in the domain's
    boards, the home board first (`[board]` narrows it to one of them).
    **`stage/ready` filter** (called by `/bandit:tasks pick-ready` on a dev project): add `tagId` = the
-   `stage/ready` tag and `noTagWithPrefix: "sprint/"`, so only approved cards outside a sprint are
-   candidates (a sprint's dates are its plan's, `references/dev.md` → Card fields). Nothing else changes
+   `stage/ready` tag, `noSprint: true` and `noTagWithPrefix: "sprint/"`, so only approved cards in no
+   sprint record and with no old sprint tag are candidates (`references/board.md` → Tags, Sprints off stops it) (a sprint's dates are its plan's, `references/dev.md` → Card fields). Nothing else changes
 3. Propose dates as a list. One line per task
 4. On confirmation: `update_tasks { items: [{ taskId, dueDate }, …] }`, ≤100 per call
 5. Read `results` and report refused entries by name (`references/board.md` → Many cards in one call)

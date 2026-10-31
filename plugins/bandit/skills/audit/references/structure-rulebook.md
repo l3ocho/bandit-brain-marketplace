@@ -159,14 +159,14 @@ audit scores them from the snapshot (schema 5) and never replaces that checker.
 
 | Rule | Holds | Scope | Fix row |
 |---|---|---|---|
-| **S13 · Sprint briefs** (SP2) | A `type: brief` note whose `board-task` card carries `sprint/{name}` sits in `sprint-{name}/` | Sprint projects | bandit:notes: move it |
+| **S13 · Sprint briefs** (SP2) | A `type: brief` note whose `board-task` card is in sprint `{name}` (a real sprint, or its old `sprint/{name}` tag) sits in `sprint-{name}/` | Sprint projects | bandit:notes: move it |
 | **S14 · One filename** (SP3) | No `.md` filename twice across `Projects/` and `_inbox/`. `README.md` exempt | The domain | bandit:notes: archive the consumed copy on proof, or rename one |
 | **S15 · Frontmatter parses** (SP4) | Every note's frontmatter is valid YAML | Sprint projects | bandit:notes: quote the value on the failing line |
 | **S16 · Sprint project root** (SP5) | The root holds only the hub `{slug}.md`, `sprint-*` folders and `planning/` | Sprint projects | bandit:notes: move it into `planning/` (or its card's sprint folder) |
 
 - Not a sprint project → S13, S15, S16 score **—**. A schema-4 or older snapshot → **unchecked**.
-- **Check:** project files and frontmatter, `_inbox/` filenames and the cards carrying a `sprint/*`
-  tag, from the snapshot (schema 5).
+- **Check:** project files and frontmatter, `_inbox/` filenames and the cards in a sprint (real
+  sprints, and `sprint/*` tags until they retire), from the snapshot (schema 5).
 
 ---
 

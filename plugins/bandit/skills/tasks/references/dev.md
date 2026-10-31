@@ -147,7 +147,7 @@ what the board sees.
 | Tags | No `lane/*`, no `stage/*`: it isn't a lane card. Exempt from audit V1, V3 and V6 |
 | Description | No Spec. Written per `references/board.md` → Card descriptions |
 | Batch | Every card in the sprint is a **blocker** of the sprint card (`link_tasks { blockerTaskId: card, blockedTaskId: sprint card }`). The live blockers are the source of truth |
-| Sprint tag | `sprint/{name}` on each batch card, never on the sprint card. `list_tasks { view: "sprint" }` lists every sprint tag with open, completed and total counts; `list_tasks { tagName: "sprint/{name}" }` gives its cards |
+| Sprint tag | `sprint/{name}` on each batch card, never on the sprint card. Read it as `references/board.md` → Tags says (records and tags both, until the tags retire) |
 | Effort | Its own size as the umbrella; B7 applies to the batch cards, not to it |
 | Records | Plan, execution prompt, ledger, report and the batch's briefs, in the sprint folder (bandit:notes owns the names and the folder) |
 

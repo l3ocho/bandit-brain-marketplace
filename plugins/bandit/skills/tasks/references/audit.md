@@ -18,14 +18,16 @@
 Run them all, report only the ones that fire, each with its fix row. **Over the domain only:**
 every read goes through `references/scope.md` → Filtering; check 1 runs from the workflow project
 only, and checks 6, 7 and 11 read tags, which are household-wide by nature. Read `get_context` once
-first (boards, tags, members, sprints, lane templates), then work by id.
+first (boards, tags, members, sprints, lane templates), then work by id. Sprints are read as
+`references/board.md` → Tags says: `get_sprints { boardId }` per Technical board, plus the old
+`sprint/*` tags until they retire.
 
 | # | Check | How |
 |---|---|---|
 | 1 | **Untriaged pile** | `list_tasks { view: "inbox" }` → Untriaged count. Over ~15 is a triage backlog, not a hygiene problem |
 | 2 | **Untriaged parked cards** | `list_tasks { boardId, boardColumnId: null }` — on a board, in no column. Age via `list_events { taskId }`. Fires on the domain's ` - wkflw` board for any card older than a day (the daily sweep missed it), and on any board for a card older than ~30 days with no field answered. Fix row per board: run triage's **Leaving the inbox** for them (`references/triage.md`), or, on any other board, keep them parked as ideas with the user's yes |
 | 3 | **Stale overdue** | `list_tasks { view: "week" }` → Due column. Anything overdue by more than a month is a decision, not a date |
-| 4 | **Stand By rot** | `list_tasks { executionState: "standby", boardId }` per board. Nothing should sit there indefinitely. **Exempt:** cards carrying a `sprint/*` tag and sprint cards (`references/dev.md` → Sprint card): they wait there for the user's test |
+| 4 | **Stand By rot** | `list_tasks { executionState: "standby", boardId }` per board. Nothing should sit there indefinitely. **Exempt:** cards in a sprint (a record or a `sprint/*` tag) and old-way sprint cards (`references/dev.md` → Sprint card): they wait there for the user's test |
 | 5 | **Dead dependencies** | `get_task` on anything with `blockedBy` — links pointing at completed tasks |
 | 6 | **Orphan tags** | `get_context → tags` → `taskCount: 0`. **Exempt:** `sprint/*` (a closed sprint's tag is its record; `get_context → sprints` lists them), and an App tag whose `view` isn't `both`: the count leaves out the cards where it is hidden, so zero proves nothing (the app's delete dialog shows the true count) |
 | 7 | **Off-vocabulary tags** | `get_context → tags` → anything outside the vocabulary (`references/board.md` → Tags: three axes, dev tags, sprint tags). **Exempt:** `sprint/*` |

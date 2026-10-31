@@ -66,7 +66,8 @@ Report the breach. Propose what moves back to Assigned or Stand By. **Do not sil
 2. Report **Doing** first, then **Next**, then Assigned; inside each, the home board first, then
    the rest of the domain by board
 3. Flag: cap breach · anything overdue · anything in Stand By older than a week, **except** a
-   card carrying a `sprint/*` tag or a sprint card (`references/dev.md` → Sprint card): those wait
+   card in a sprint (a record or a `sprint/*` tag, `references/board.md` → Tags) or an old-way sprint card
+   (`references/dev.md` → Sprint card): those wait
    in Stand By for the user's test on purpose
 4. Stop. `/bandit:tasks today` is a read.
 

@@ -49,7 +49,8 @@ Each rule is written as one line with its `file:line`, in plain words.
 ## What was built
 
 - **One card or a sprint:** `get_task` each card: Spec Acceptance, Scope, Technical plan. For a
-  sprint, its batch cards are the blockers of the sprint card.
+  sprint, its cards are the real sprint's (`get_sprints { sprintId }`, `MODULE_DISABLED` → say
+  Sprints is off and stop); on an old-way sprint, the blockers of its sprint card.
 - **The code:** `git log --oneline {trunk}` for the cards' commits (card ids in messages, merge
   commits of their branches), then `git diff` of those commits: new tables or columns, new rules,
   changed refusals. `{trunk}` is `recipe.py get branches.trunk`.

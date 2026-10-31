@@ -16,8 +16,8 @@ This file is the single definition (decision S1). Skills point here; app repos h
 | 6 | **Run** the waves, push the trunk | Claude Code | `/bandit-dev:sprint run`; each live check's data from `/bandit-dev:testdata create`, removed by `clean` | Ledger lines and Waves rows, the sprint Executing then Debugging, cards in Stand By; the staging handover card filled by the final push | Sprint-order gate; migration-tail stop; status line fresh; a check not run for lack of data fails the wave |
 | 7 | **Test** on staging | The person | The project's staging recipe (`bandit.yaml` `staging`) | Ledger "tested" lines | `release` precondition |
 | 8 | **Debug** | Claude Code | `/bandit-dev:sprint debug` | Bug log, fixes | Existing checks |
-| 9 | **Release** on the person's word | Claude Code | `/bandit-dev:sprint release` | Version, release line in the ledger; plugin bump when Marketplace cards ship; the production handover card filled (`bandit.yaml` `handover`) | `close` refuses without a release line |
-| 10 | **Close** | Claude Code | `/bandit-dev:sprint close` | Cards complete, the sprint Closed, sprint folder archived; an old-way sprint brought into the app first | Existing checks |
+| 9 | **Release** on the person's word, optional | Claude Code | `/bandit-dev:sprint release` | Version, release line in the ledger naming every sprint it covers (this one and the deferred ones before it); plugin bump when Marketplace cards ship; one production handover card filled (`bandit.yaml` `handover`) | Release gates unchanged; a sprint that changed the helpers is not closed before their release |
+| 10 | **Close** | Claude Code | `/bandit-dev:sprint close` | Cards complete, the sprint Closed, sprint folder archived; `Release: deferred` when it closes with no app release; an old-way sprint brought into the app first | Existing checks |
 
 ## 🧭 Surfaces
 

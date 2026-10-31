@@ -10,6 +10,7 @@ All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace s
 - **Old-way sprints run to their close** from one new reference, `old-way.md`: a sprint card with wave sub-tasks keeps working in every command, and its close brings it into the app (sprint created, cards added while open, Ready, Executing, cards completed, Closed), retires its tag and completes its sprint card.
 
 ### Changed
+- **Releases are optional for sprints.** `close` no longer refuses a sprint with no app release: it writes `Release: deferred` and the next release covers it. One release names every sprint it covers in its `Released:` line, with one production handover card. A sprint that changed the helpers still needs their release before it closes, and `release` can release the plugins alone for it. The release gates are unchanged. Pipeline document and decisions (RS6, D22 superseded in part) follow.
 - **Card sizing:** bandit:tasks rule B7 also splits a card that is both L and Complex, and a sprint takes the small cards in place of an umbrella card that only groups them.
 - **Dependency gate:** a link with a sprint at either end no longer passes silently; a blocked sprint's gate is a line in its ledger's Gates section.
 - **Sprint notes** carry `sprint: {name}` in place of `board-task` (bandit:notes); old-way sprint notes keep the sprint card.

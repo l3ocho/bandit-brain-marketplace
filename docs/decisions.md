@@ -181,7 +181,7 @@ The tables marked for the checker (`denylist:off`) are the only place the old sk
 | D19 | Rules are code, never prose alone | Kept |
 | D20 | Step 0 = package with no behaviour change | **Superseded** by brief §7 (rebrand and lighten) |
 | D21 | Every marketplace skill may be edited here; outside skills and other projects' notes untouched | Kept |
-| D22 | One chat per sprint, one minor release per sprint; deploy only on Leo's word | Kept |
+| D22 | One chat per sprint, one minor release per sprint; deploy only on Leo's word | **Superseded** in part by RS6: releasing is optional per sprint; deploy only on Leo's word is kept |
 | D23 | Never change a login credential; staging token is never production's | Kept |
 | D24 | Low density, brief, no re-asking, one list per gate with a recommendation, findings as fix rows | Kept |
 <!-- denylist:on -->
@@ -206,4 +206,5 @@ The tables marked for the checker (`denylist:off`) are the only place the old sk
 | RS2 | Planning steps and wave progress live in the sprint's ledger (Plan steps and Waves tables), enforced by `check_sprint.py` SP9 and SP10, which key on the ledger's `Sprint record:` line so the archived old ledgers are not caught. `check_repo.py` rule SP9 tests both on fixtures |
 | RS3 | The old way (a sprint card and a `sprint/{name}` tag) keeps running to its close from one reference, `old-way.md`; close brings such a sprint into the app (create, add cards while open, date, Ready, Executing, complete the cards, Closed), then retires its tag and completes its sprint card. The file goes once no old-way sprint is left |
 | RS4 | The helpers read real sprints and, until the tags retire, the `sprint/*` tags too. With Sprints off they never report "no sprints": a sprint command stops; an exemption read (`today`, the hygiene audit) says so and uses the tags alone |
+| RS6 | Releasing is the user's option (BB-258): a sprint closes with no app release (`Release: deferred`), and one release covers every deferred sprint before it, its `Released:` line naming them all, with one production handover card. A sprint that changed the helpers still needs them released before it closes. The release gates are unchanged |
 | RS5 | The dependency gate (HK3) also covers sprint ends: a blocked card owes its gate sub-task; a blocked sprint, which has no sub-tasks, owes a line in its ledger's Gates section |

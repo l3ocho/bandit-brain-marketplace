@@ -11,7 +11,7 @@ Check all, report any miss as a fix row, and stop:
 1. Ledger "At a glance" says debug is done and no row is open (or debug never ran and the user says so: record that).
 2. Every batch card is in `standby`, or already complete (the user may have completed some by hand: that is fine, close is idempotent). None has an open sub-task. An open sub-task: name it.
 3. **The user's approval, or their statement that they tested them, is in this chat**, in their own words. Quote it in the ledger. Nothing from an earlier chat counts. If they cover only some cards, close only those and leave the rest.
-4. **A release line.** The ledger has a `Released:` line (written by `release`), unless the user says "close without release" in this chat: quote it in the ledger. Neither → refuse and give the paste for `release`.
+4. **Release, the user's option.** The ledger has a `Released:` line (written by `release`), or the sprint closes with no app release: then write `Release: deferred` in At a glance (the next release covers it, `release.md` → Covering), add one comment to its production handover card ("Deferred: the next release's card covers this sprint"), and say so in the report. **A sprint that changed the helpers** (Marketplace cards) still needs the plugin release before it closes: no plugin version in a `Released:` line → refuse and give the paste for `release`.
 5. Nothing needs the user that blocks closing. The ledger's needs-the-user list is read to them once; items for deploy, or a push that failed, stay open and go to the report (step 5), they do not block.
 
 ## Steps

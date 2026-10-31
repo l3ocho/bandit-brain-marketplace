@@ -57,8 +57,8 @@ Contents: Interview and pace · Scope · Cards and Specs · Agents and checks ·
 
 ## Process
 
-- Left out the wave sub-tasks, so the sprint card could not show wave progress → step 11 adds one sub-task per wave at the very end of the sprint card, and the execution prompt ticks each as its wave is delivered.
-- Ticked a step before its evidence was on the card → tick last.
+- Left out the wave sub-tasks, so the sprint card could not show wave progress → step 12 writes one Waves row per wave in the ledger, and each wave marks its row done with its evidence (old way: the sprint card's wave sub-tasks).
+- Ticked a step before its evidence was written → mark the step done last, with its evidence in the same row (SP9).
 - Reported cards as ready while their Specs listed open questions → run the definition of ready strictly, report who passes, fix rows for the rest.
 - Edited a verbatim document of the user's only after they asked → ask for permission once, with the exact row to change; after permission, edit it and note the old wording in the row.
 - Wrote a gate list, then found a gate (XL split) at the end → run the checklist in `plan.md` in order; do not skip ahead.
@@ -73,10 +73,10 @@ Written before the first real run; correct them with what happens.
 - A finished card was completed instead of parked → delivery is `standby`; only `close` completes, on the user's quoted approval.
 - Sub-tasks ticked in a batch at the end → tick each as it is done so the card shows live progress.
 - Debug fixed things nobody approved → every adjustment is a row in the decision table; apply only approved rows.
-- Close archived before the cards were complete → order is cards, sprint card, then folder; verify each.
+- Close archived before the cards were complete → order is cards, the sprint (old way: the sprint card), then folder; verify each.
 
-- Wave sub-tasks landed at the top of the card, reversed, even when added one at a time (an add always lands at the top) → always `manage_subtasks { action: "reorder", subtasks }` with the full order and read back.
-- Every wave got the same paste (`execute {sprint card}`) and it read like a per-card trigger → the command names the sprint card and the wave (`execute {sprint card} wave N`); a batch card id is refused.
+- Old way: wave sub-tasks landed at the top of the card, reversed, even when added one at a time (an add always lands at the top) → always `manage_subtasks { action: "reorder", subtasks }` with the full order and read back.
+- Every wave got the same paste (`execute {sprint card}`) and it read like a per-card trigger → the command names the sprint and the wave (`execute {sprint} wave N`); a batch card id is refused.
 - "I want this today" was taken as approval to commit → urgency is not approval; ask one yes or no.
 - The execution prompt carried its own debug procedure beside `debug.md` → the prompt only points to the references.
 - Waves were split without the WBS the user asked for → step 6 runs `/bandit:plan wbs` first.
@@ -93,7 +93,7 @@ Written before the first real run; correct them with what happens.
 
 - In `run`, the second wave never moved its working cards to Doing: its cards were chained behind first-wave cards sitting in Stand By, the board then refused Doing while a blocker was incomplete (it no longer does: only completing waits for blockers), and the skill said Stand By counted → never write a rule the board does not enforce; setting the board happens at the start of every wave; a refused move is recorded on the card and in the ledger, never skipped silently.
 
-- The sprint card moved along with its batch and sat in the way → it stays untouched until the last card of the last wave is in Stand By, then moves to Stand By once, and `close` completes it.
+- Old way: the sprint card moved along with its batch and sat in the way → it stays untouched until the last card of the last wave is in Stand By, then moves to Stand By once, and `close` completes it. A real sprint has no card on the Execution board: its status moves instead (`execute.md` → Sprint status).
 
 - A planned push was refused or left undone because the skill, an older prompt or a memory said "never push" → the user lifted that rule on 2026-10-10 (it dated from when testing and staging did not exist). `development` is pushed as `execute.md` → Pushing `development` says; `main` and deploy stay the user's. Execution prompts restate this so an old note cannot block it.
 

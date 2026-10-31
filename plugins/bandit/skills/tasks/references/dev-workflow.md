@@ -12,9 +12,9 @@ how work lands, where records live) stay in the repo; its `lane-triage.md` point
 commands never reuse a command word of this skill (rulebook R15): a repo triage command is not
 named after `/bandit:tasks triage`.
 
-**Sprints are bandit-dev:sprint's** (Claude Code): its 11 planning steps, the batch's dates, seeding the
-batch to Assigned, the wave sub-tasks and the sprint card's sections. Only its sprint plan sets a
-batch's due date. It calls `spec reconcile` and the `plan-tech` card-write rules (drift check, read
+**Sprints are bandit-dev:sprint's** (Claude Code): its 12 planning steps, the sprint in the app (its
+cards, run order, expected date and status), seeding the batch to Assigned, and the ledger's steps and
+waves. A sprint stamps no date on its cards: each keeps its own. It calls `spec reconcile` and the `plan-tech` card-write rules (drift check, read
 before writing, show old and new before replacing) from its own steps instead of restating them.
 `pick-ready` and `/bandit:tasks week` only pick and date ready work; neither plans a sprint.
 
@@ -58,7 +58,7 @@ can do it (*"`plan-tech` runs in Claude Code, from the repo"*).
 | B4 | Lazy: the next L3 work package becomes a card only through `spec`, which cites its `WBS-X.Y.Z` |
 | B5 | Thin card: `Spec` + `Technical plan`, each short. Everything else goes in the doc |
 | B6 | Before creating: merge check (below). Skipped for Incident |
-| B7 | Up to **L**. An L card's plan note lays out the landing/commit sequence. **XL splits** into 2+ cards, wherever the size is set: at `spec`, at `plan-tech` and at a sprint's sizing step. Each new card keeps the original's lane and stage and stays in the same sprint: added to its record (`manage_sprints { action: "add_cards" }`), or on an old-way sprint its `sprint/{name}` tag and a blocker of the sprint card |
+| B7 | Up to **L**. An L card's plan note lays out the landing/commit sequence. **XL splits** into 2+ cards, wherever the size is set: at `spec`, at `plan-tech` and at a sprint's sizing step. **Avoid** a card that is both high effort and high complexity (L and Complex): split it too. **No umbrella cards** that only group smaller ones: the smaller cards are the work, and a sprint takes them in its place. Each new card keeps the original's lane and stage and stays in the same sprint: added to its record (`manage_sprints { action: "add_cards" }`), or on an old-way sprint its `sprint/{name}` tag and a blocker of the sprint card |
 
 **WBS on dev projects.** Level names are bandit:plan's. Here: **L3 work package = one card**,
 created lazily through `spec` (B4). **A Technical home board is never loaded** (`/bandit:tasks load` refuses
@@ -124,7 +124,7 @@ runbook needs no plan note: its `Technical plan` carries `Runbook: {repo path} �
 ### `/bandit:tasks spec reconcile {card…}` — bring locked Specs in line with decisions
 
 For cards whose Spec is locked and has fallen behind decisions taken since (in comments, the brief,
-the sprint card). bandit-dev:sprint calls it from its planning steps.
+the sprint's ledger or an old-way sprint card). bandit-dev:sprint calls it from its planning steps.
 
 1. **Gate and role** (above). Per card: `get_task` → current `Spec`, comments, linked brief.
 2. Build the new `Spec` from the same template headings: answered questions move into Decisions,
@@ -197,5 +197,5 @@ Runs **Dating the week** (`/bandit:tasks week`, `references/week.md`) with its `
 weekly pick of approved cards, not sprint planning. Picked cards get due dates only; the midnight
 job moves them into Assigned when due. A card picked for today → its `update_tasks` entry also carries
 `executionState: "assigned"`, since the midnight run has already passed. Cards already in a sprint (a record or a `sprint/*` tag, `references/board.md` → Tags)
-keep the sprint plan's dates: they are not candidates.
+are the sprint's work: they are not candidates.
 

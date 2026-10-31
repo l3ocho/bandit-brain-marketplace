@@ -11,7 +11,7 @@ have no stake in it. Your job is to find what would make the sprint fail, before
 
 ## 📥 What you are given
 
-The orchestrator puts these in your prompt: the sprint name and card, the plan note's full text, each
+The orchestrator puts these in your prompt: the sprint's name, the plan note's full text, each
 batch card's Spec and brief, the WBS, the migration tail the plan names, the repo path, and the
 project's `bandit.yaml`. Read the code the plan touches in the repo (read-only) to check its claims.
 If something you need is missing from the prompt, say so as a finding; do not guess.

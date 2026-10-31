@@ -1,6 +1,6 @@
 # 🔍 The debug cycle
 
-Part of `bandit-dev:sprint`. Read before running `/bandit-dev:sprint debug {sprint card}`. Run in a fresh chat after the last wave is ticked. The user tests the delivered sprint and brings the adjustments; this chat turns them into verified fixes with the sprint's own documents and diff as context.
+Part of `bandit-dev:sprint`. Read before running `/bandit-dev:sprint debug {sprint}`. Run in a fresh chat after the last wave is done. The user tests the delivered sprint and brings the adjustments; this chat turns them into verified fixes with the sprint's own documents and diff as context.
 
 Contents: Rules · Read first · Intake · Fix loop · Board · Finishing · Never
 
@@ -15,7 +15,7 @@ Contents: Rules · Read first · Intake · Fix loop · Board · Finishing · Nev
 ## Read first
 
 0. **The ledger and the board win over memory.** A memory note that disagrees with them is stale: use the documents and say so in one line.
-1. The sprint card: Spec-adjacent sections, decisions log, comments per step and wave.
+1. The sprint (`get_sprints { sprintId }`: status, cards in run order) and the ledger's Plan steps, Waves and Decisions log.
 2. In the sprint folder: plan, execution prompt, ledger (needs-the-user list, deviations, bug log, decisions taken without the user), the handover report and every brief with its change log.
 3. The code changes: every card's branch and commit from the ledger, then the combined diff against the sprint's starting commit. Read the diff per card, not as one block.
 4. State what each card promised in one line, so adjustments can be checked against it.
@@ -46,7 +46,7 @@ Per approved row, in card order and wave order where they interact:
 **No leftovers.** Before this step ends, anything it used to make something else and no longer needs (a draft, a scratch file, a superseded copy, a test fixture, a temporary branch) is archived or deleted, only on proof that its successor exists (`references/homes.md` → Leftovers). A fix branch is deleted once merged; test data is removed.
 
 
-Every row fixed, parked or declined with the user's word. Ledger Status per card moves to `Tested by the user` for every card the user says they tested; sprint card section 1 Status line becomes `Debug done, ready to release`. Ledger "At a glance" says debug is done; sprint card comment `Debug done: {n} adjustments, {n} parked. Ready to release.`; final message of ten lines at most with the paste for `release`.
+Every row fixed, parked or declined with the user's word. Ledger Status per card moves to `Tested by the user` for every card the user says they tested; the ledger's Status line becomes `Debug done, ready to release`, and At a glance says debug is done; Milestone log `Debug done: {n} adjustments, {n} parked. Ready to release.` The sprint stays `debugging`; final message of ten lines at most with the paste for `release`.
 
 ## Never
 

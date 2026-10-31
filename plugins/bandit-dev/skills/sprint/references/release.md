@@ -1,6 +1,6 @@
 # 🚀 The release cycle
 
-Part of `bandit-dev:sprint`. Read before running `/bandit-dev:sprint release {sprint card}`. Run after
+Part of `bandit-dev:sprint`. Read before running `/bandit-dev:sprint release {sprint}`. Run after
 debug and before close: one release per sprint (pipeline stage 9). The recipe is the project's
 `bandit.yaml` (`release`, `branches`, and the optional `migrations.check` and `staging.refresh`), read through
 `scripts/recipe.py`; this file holds the gate, never the project's commands.
@@ -34,8 +34,8 @@ Check all before anything runs. Each miss is refused by name, with what would sa
 2. **Marketplace cards** (below), when the sprint carries any.
 3. **Record the release.** Ledger At a glance: `Released: {version} · {date} · {commit}` (the line
    `close` checks). Milestone log: one line with the deploy word quoted.
-4. **Status line.** Sprint card section 1: `Released {version} on {date}; ready to close` (read the
-   card first, change only that line). Comment on the sprint card: version, commit, recipe steps run.
+4. **Status line.** Ledger: `Released {version} on {date}; ready to close`. Milestone log: version,
+   commit, recipe steps run.
 5. **Production handover card.** The ledger's `Production handover:` line names it; none and the
    recipe has a `handover` section → create it now, as `plan.md` step 12 says. `get_task`, then replace
    its title and description with the ready form (`references/templates.md` → Handover cards), built

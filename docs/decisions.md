@@ -195,3 +195,15 @@ The tables marked for the checker (`denylist:off`) are the only place the old sk
 | HK1 | `bandit-dev` ships a credential guard: a PreToolUse hook on Bash that refuses (exit 2) any command part matching `bandit.yaml` `guard.credentials.block`, skips a part an `allow` pattern matches whole, does nothing without a `guard` section and fails closed when the section cannot be read. Script `skills/sprint/scripts/credential_guard.py`; `check_repo.py` rule CG1 tests it |
 | HK2 | `bandit-dev` ships a stop gate: a second Stop hook that refuses to end a chat (exit 2) while a change under `bandit.yaml` `stop.paths` is uncommitted, and names `stop.close`. Once the chat has launched an agent it counts only the files the chat edited itself, so a background wave agent sharing the folder never holds the main chat. Off without a `stop` section; a section it cannot read lets the chat end with one line. Script `skills/sprint/scripts/stop_gate.py`; rule SG1 |
 | HK3 | `bandit-dev` ships a dependency gate: a PostToolUse hook on any MCP server's `create_tasks` and `link_tasks` that, when a card is made to block another, puts a notice into the session's context naming the blocked card and the gate sub-task it owes. Always on, no `bandit.yaml` key. Silent on a refused write, a created card that lists its own gate and a sprint card; after `link_tasks` the notice says to skip a card that already has its gate, because the answer holds no checklist. Script `skills/sprint/scripts/dependency_gate.py`; rule DG1 |
+
+---
+
+## 🏁 Real sprints (sprint 2026-w44-e, wave 7, Leo, 2026-10-30)
+
+| # | Decision |
+|---|---|
+| RS1 | A sprint is a record in the app (`manage_sprints`, `get_sprints`): it holds the status and the cards in run order. `bandit-dev:sprint` creates it at plan step 1 and moves it: Ready to execute at step 12, Executing at the first wave, Debugging after the last, Closed at close. No sprint card, no sprint tag, no date stamped on the cards. Commands name the sprint |
+| RS2 | Planning steps and wave progress live in the sprint's ledger (Plan steps and Waves tables), enforced by `check_sprint.py` SP9 and SP10, which key on the ledger's `Sprint record:` line so the archived old ledgers are not caught. `check_repo.py` rule SP9 tests both on fixtures |
+| RS3 | The old way (a sprint card and a `sprint/{name}` tag) keeps running to its close from one reference, `old-way.md`; close brings such a sprint into the app (create, add cards while open, date, Ready, Executing, complete the cards, Closed), then retires its tag and completes its sprint card. The file goes once no old-way sprint is left |
+| RS4 | The helpers read real sprints and, until the tags retire, the `sprint/*` tags too. With Sprints off they never report "no sprints": a sprint command stops; an exemption read (`today`, the hygiene audit) says so and uses the tags alone |
+| RS5 | The dependency gate (HK3) also covers sprint ends: a blocked card owes its gate sub-task; a blocked sprint, which has no sub-tasks, owes a line in its ledger's Gates section |

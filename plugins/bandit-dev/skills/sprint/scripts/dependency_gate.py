@@ -8,8 +8,11 @@ it puts a notice into the session's context (`additionalContext`) naming the car
 
 Any MCP server's `create_tasks` and `link_tasks`, recognised by the call's own shape. Silent when the
 write was refused, when no link was made, for a created card that already lists its own gate for that
-blocker, and for a sprint card (title `Sprint …`), whose checklist is the plan's fixed steps. After
-`link_tasks` the answer holds no checklist, so the notice says to skip a card that already has its gate.
+blocker, and for an old-way sprint card (title `Sprint …`), whose checklist is the plan's fixed steps.
+After `link_tasks` the answer holds no checklist, so the notice says to skip a card that already has its gate.
+
+A sprint can be either end (`blockerSprintId`, `blockedSprintId`; `blocksSprints`, `blockedBySprints` on a
+created card). A sprint has no sub-tasks, so a blocked sprint's gate is a line in its ledger's Gates section.
 """
 import json
 import re
@@ -17,6 +20,7 @@ import sys
 
 TOOL = re.compile(r"^mcp__.+__(create_tasks|link_tasks)$")
 SPRINT = "Sprint "
+SPRINT_END = "sprint "
 
 
 def answer_of(response):
@@ -44,6 +48,11 @@ def ids(value):
     return [v for v in value if isinstance(v, str) and v.strip()] if isinstance(value, list) else []
 
 
+def sprint(value):
+    """A sprint end, named so the notice can tell it from a card."""
+    return f"{SPRINT_END}{value}" if isinstance(value, str) and value.strip() else None
+
+
 def has_gate(item, blocker):
     return any(isinstance(s, str) and s.lower().startswith("gate") and blocker in s for s in item.get("subtasks") or [])
 
@@ -57,7 +66,8 @@ def links_made(tool_name, tool_input, response):
     if refused(answer):
         return []
     if m.group(1) == "link_tasks":
-        blocker, blocked = tool_input.get("blockerTaskId"), tool_input.get("blockedTaskId")
+        blocker = tool_input.get("blockerTaskId") or sprint(tool_input.get("blockerSprintId"))
+        blocked = tool_input.get("blockedTaskId") or sprint(tool_input.get("blockedSprintId"))
         return [(blocker, blocked)] if isinstance(blocker, str) and isinstance(blocked, str) else []
     results = (answer or {}).get("results") if isinstance(answer, dict) else None
     links = []
@@ -72,7 +82,10 @@ def links_made(tool_name, tool_input, response):
         me = result.get("shortId") or result.get("taskId") or result.get("id") or f'the new card "{title}"'
         deps = item.get("dependencies") if isinstance(item.get("dependencies"), dict) else {}
         links += [(me, blocked) for blocked in ids(deps.get("blocks"))]
+        links += [(me, sprint(blocked)) for blocked in ids(deps.get("blocksSprints"))]
         links += [(blocker, me) for blocker in ids(deps.get("blockedBy")) if not has_gate(item, blocker)]
+        links += [(sprint(blocker), me) for blocker in ids(deps.get("blockedBySprints"))
+                  if not has_gate(item, blocker)]
     return links
 
 
@@ -80,15 +93,20 @@ def notice(payload):
     links = links_made(payload.get("tool_name"), payload.get("tool_input") or {}, payload.get("tool_response"))
     if not links:
         return None
+    def line(a, b):
+        if b.startswith(SPRINT_END):
+            return (f'- {a} now blocks {b}: a sprint has no sub-tasks, so add to that sprint\'s ledger, section Gates, '
+                    f'the line "Gate: {a} delivered (<what it hands over>) before closing the sprint", unless it is there.')
+        return (f'- {a} now blocks {b}: add to {b} a sub-task "Gate: {a} delivered/feedback received (<what it '
+                f"hands over>) before <{b}'s next step, e.g. deploy>\", unless {b} already has a gate for {a}.")
     return "\n".join([
-        "🔗 Dependency gate: every blocked card carries a gate sub-task for each blocker.",
-        *(f'- {a} now blocks {b}: add to {b} a sub-task "Gate: {a} delivered/feedback received (<what it '
-          f"hands over>) before <{b}'s next step, e.g. deploy>\", unless {b} already has a gate for {a}." for a, b in links),
-        'For each: manage_subtasks { action: "add" } on the blocked card → manage_subtasks { action: "reorder" } '
+        "🔗 Dependency gate: every blocked card carries a gate sub-task for each blocker; a blocked sprint, a gate line in its ledger.",
+        *(line(a, b) for a, b in links),
+        'For each card: manage_subtasks { action: "add" } on the blocked card → manage_subtasks { action: "reorder" } '
         "with the FULL order so the gate is last → get_task to read it back → add_comment on the blocked card "
         "naming the link and the gate. Say in your reply which gates you added.",
-        "Skip if a gate for this blocker already exists on the blocked card. A sprint card blocked by its batch "
-        "or the previous sprint needs no gate: its checklist is the plan's fixed steps.",
+        "Skip if a gate for this blocker already exists on the blocked card. An old-way sprint card blocked by its "
+        "batch or the previous sprint needs no gate: its checklist is the plan's fixed steps.",
     ])
 
 

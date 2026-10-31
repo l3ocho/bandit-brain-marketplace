@@ -11,6 +11,11 @@ Rules (each one a failure, not a warning):
        everything into that one note, which waits in the inbox; its ledger row says "detached")
   SP7  a sprint whose ledger says it is committed (a `Committed:` line, written at plan step 12) has its independent
        plan review record, {project}-review-sprint-{name}-YYYY-MM-DD.md, in the sprint folder
+  SP9  a sprint kept in the app (its ledger has a `Sprint record:` line) lists the 12 plan steps in order in
+       its ## Plan steps table; a step marked done carries its evidence; a committed ledger has every step done
+  SP10 a committed sprint kept in the app has a ## Waves table, one row per wave in order; a wave marked done
+       carries its evidence and follows only done waves; every card it names is in the Waves and cards table
+       (an old-way ledger, with no `Sprint record:` line, is skipped by SP9 and SP10)
 
 Usage:
   check_sprint.py [--vault DIR] [--domain NAME]   (defaults: $MYNOTES_DIR or ~/Documents/MyNotes;
@@ -34,6 +39,12 @@ RECORDS = ("plan", "handover-prompt", "progress")
 CARD_ROW = re.compile(r"^\|\s*[^|]+\|\s*((?:[A-Z]+-\d+)(?:\s*,\s*[A-Z]+-\d+)*)\s*\|", re.M)
 CARD_ID = re.compile(r"[A-Z]+-\d+")
 COMMITTED = re.compile(r"^\W*Committed:", re.M)
+STEPS = ("Select and freeze the batch", "Spec completeness check, per card", "Close the open questions",
+         "Size and classify", "Cross-card analysis", "Sequence", "Write the one technical plan", "Risk and rollback",
+         "Definition of ready, per card", "Approval gate", "Independent plan review", "Commit the sprint")
+SPRINT_RECORD = re.compile(r"^\W*Sprint record:", re.M)
+STEP_ROW = re.compile(r"^\|\s*(\d{1,2})\s*\|\s*([^|]+?)\s*\|\s*([^|]*?)\s*\|\s*([^|]*?)\s*\|\s*$", re.M)
+WAVE_ROW = re.compile(r"^\|\s*Wave\s+(\d+)\s*\|\s*([^|]+?)\s*\|\s*([^|]*?)\s*\|\s*([^|]*?)\s*\|\s*$", re.M)
 
 
 def frontmatter(path: Path) -> tuple[dict | None, str | None]:
@@ -48,6 +59,47 @@ def frontmatter(path: Path) -> tuple[dict | None, str | None]:
     except yaml.YAMLError as exc:
         return None, f"frontmatter is not valid YAML ({str(exc).splitlines()[0]})"
     return (data if isinstance(data, dict) else {}), None
+
+
+def section(text: str, heading: str) -> str:
+    m = re.search(rf"^##\s+{re.escape(heading)}\s*$", text, re.M)
+    if not m:
+        return ""
+    nxt = re.search(r"^##\s", text[m.end():], re.M)
+    return text[m.end(): m.end() + nxt.start() if nxt else None]
+
+
+def check_record_ledger(rel_folder, text: str, table_cards: set) -> list[str]:
+    """SP9 and SP10: a sprint kept as a record in the app tracks its steps and waves in the ledger."""
+    errors = []
+    steps = [(int(n), name, done, ev) for n, name, done, ev in STEP_ROW.findall(section(text, "Plan steps"))]
+    if [(n, name) for n, name, _, _ in steps] != list(enumerate(STEPS, 1)):
+        errors.append(f"SP9 {rel_folder}: the ledger's ## Plan steps table must list the 12 plan steps in order, "
+                      "one row each: | n | step | done date | evidence |")
+    else:
+        for n, name, done, ev in steps:
+            if done and not ev:
+                errors.append(f"SP9 {rel_folder}: step {n} ({name}) is marked done with no evidence")
+        if COMMITTED.search(text) and any(not done for _, _, done, _ in steps):
+            errors.append(f"SP9 {rel_folder}: the ledger says committed but a plan step is not done")
+    if COMMITTED.search(text):
+        waves = WAVE_ROW.findall(section(text, "Waves"))
+        if not waves or [int(n) for n, *_ in waves] != list(range(1, len(waves) + 1)):
+            errors.append(f"SP10 {rel_folder}: a committed sprint's ledger has a ## Waves table, one row per wave "
+                          "in order: | Wave n | card ids | done date | evidence |")
+        else:
+            open_seen = False
+            for n, ids, done, ev in waves:
+                if done and open_seen:
+                    errors.append(f"SP10 {rel_folder}: Wave {n} is done while an earlier wave is not")
+                if done and not ev:
+                    errors.append(f"SP10 {rel_folder}: Wave {n} is marked done with no evidence")
+                open_seen = open_seen or not done
+                missing = set(CARD_ID.findall(ids)) - table_cards
+                if missing:
+                    errors.append(f"SP10 {rel_folder}: Wave {n} names {', '.join(sorted(missing))}, "
+                                  "not in the Waves and cards table")
+    return errors
 
 
 def sprint_folders(domain: Path) -> list[tuple[str, Path]]:
@@ -135,6 +187,11 @@ def check(domain: Path) -> list[str]:
                 for f in folder.iterdir()):
             errors.append(f"SP7 {rel_folder}: the ledger says committed but there is no "
                           f"{project}-review-sprint-{name}-YYYY-MM-DD.md (plan step 11, the independent review)")
+        ledger_text = ledger.read_text(errors="replace")
+        if SPRINT_RECORD.search(ledger_text):
+            table_cards = {i for m in CARD_ROW.finditer(section(ledger_text, "Waves and cards"))
+                           for i in CARD_ID.findall(m.group(1))}
+            errors.extend(check_record_ledger(rel_folder, ledger_text, table_cards))
         cards = set()
         detached = set()
         for match in CARD_ROW.finditer(ledger.read_text(errors="replace")):
@@ -223,7 +280,7 @@ def main() -> int:
             return 0
     if not errors:
         if not args.hook:
-            print(f"OK: {domain} passes SP1-SP7 ({len(sprint_folders(domain))} sprint folders)")
+            print(f"OK: {domain} passes SP1-SP10 ({len(sprint_folders(domain))} sprint folders)")
         return 0
     out = sys.stderr if args.hook else sys.stdout
     print(f"bandit-dev:sprint check FAILED in {domain} ({len(errors)}). Fix these before finishing:", file=out)

@@ -41,14 +41,16 @@ hub once (on approval) and afterwards treats it as an ordinary note the user own
 sprint's name on the board: the real sprint's name, or on an older sprint its `sprint/{name}` tag
 in lowercase kebab-case (`Debut`, `sprint/debut` → `sprint-debut/`; `W44 e` → `sprint-w44-e/`). Nothing else goes in it.
 
-| Record | Filename | `type` | `board-task` |
+| Record | Filename | `type` | `sprint` (or `board-task`) |
 |---|---|---|---|
-| Plan (the one shared technical plan) | `{project}-sprint-{name}-plan.md` | `plan` | the sprint card |
-| Execution prompt (instructions for the execution chat) | `{project}-sprint-{name}-handover-prompt.md` | `reference` | the sprint card |
-| Ledger (live progress) | `{project}-sprint-{name}-progress.md` | `reference` | the sprint card |
-| Report (handover test report) | `{project}-sprint-{name}-handover-report.md` | `reference` | the sprint card |
-| Review (the independent plan review, sprint plan step 11) | `{project}-review-sprint-{name}-YYYY-MM-DD.md` | `log` | the sprint card |
-| Briefs of the sprint's cards | §4 brief pattern | `brief` | that card |
+| Plan (the one shared technical plan) | `{project}-sprint-{name}-plan.md` | `plan` | the sprint's name |
+| Execution prompt (instructions for the execution chat) | `{project}-sprint-{name}-handover-prompt.md` | `reference` | the sprint's name |
+| Ledger (live progress) | `{project}-sprint-{name}-progress.md` | `reference` | the sprint's name |
+| Report (handover test report) | `{project}-sprint-{name}-handover-report.md` | `reference` | the sprint's name |
+| Review (the independent plan review, sprint plan step 11) | `{project}-review-sprint-{name}-YYYY-MM-DD.md` | `log` | the sprint's name |
+| Briefs of the sprint's cards | §4 brief pattern | `brief` | `board-task`: that card |
+
+A sprint's records carry `sprint: {name}` (the sprint's name in the app) in place of `board-task`. An old-way sprint's records (planned with a sprint card) keep `board-task` = the sprint card.
 
 **Written straight in**, like the planning documents (`references/other-skills.md`): these records are
 worked on across many sessions while the sprint runs. They still follow §5 (frontmatter, `status`,
@@ -204,7 +206,7 @@ ones in `_archive/Claude/ai-*`.
 | `minutes` | `meeting`: `supervisors` · `department` · `project` (nothing else) — `meeting-date`: `YYYY-MM-DD` — `participants`: list of names mentioned — `room`: where it was held (free text, optional) |
 | `request` | `requester`: a **role**, not a name ("CS Director", "Billing team") — `received`: date — `due`: date or empty |
 | `brief` | `lane`: the repo's lane name (on a dev project, the bare lane value: `feature`) — plus `kind` (not on dev projects), `handler` |
-| `plan` | `lane`: the bare lane value; **left out on a sprint plan** (a sprint has no lane) — `board-task`: **required**, the card's task id, or the sprint card's on a sprint plan — `related` |
+| `plan` | `lane`: the bare lane value; **left out on a sprint plan** (a sprint has no lane) — `board-task`: **required**, the card's task id; a sprint plan carries `sprint` (the sprint's name) instead, or on an old-way sprint `board-task` = the sprint card — `related` |
 | archived notes | `archived-from`: original folder path — `archived`: `YYYY-MM-DD` |
 
 `meeting` has **exactly three values**, the ones in the Source picker of the user's meeting template:
@@ -459,7 +461,7 @@ rules wherever `file` or `lint` meet it. The card workflow itself is bandit:task
   (`status: triaged`, `file-to: Projects/{slug}/`, or its `planning/` on a project with sprint
   folders, §1); they are **not** part of the planning-docs exception.
   **Sprint plan:** one plan note shared by every card of a sprint, written straight into the sprint
-  folder (§1), no `lane`, `board-task` = the sprint card. Each card's `Technical plan` names its
+  folder (§1), no `lane`, `sprint` = the sprint's name (old way: `board-task` = the sprint card). Each card's `Technical plan` names its
   filename.
 - **Card briefs** (`type: brief`, §4 filename, §5 keys) are the long form of one card's Spec: one
   brief per card, `board-task` = the card's short id, written when `/bandit:tasks spec` writes the
@@ -470,7 +472,7 @@ rules wherever `file` or `lint` meet it. The card workflow itself is bandit:task
   (YYYY-MM-DD)` (each with where it was checked: a file, a tool result) · `## Open questions` ·
   `## Change log` (optional: one dated line per change to the brief and why) · `## Related`.
   **No card state in the body** (column, lane, stage): the card holds it, so a copy goes stale. A
-  `Card: {short id}` line under the summary is fine; the short id never changes. A sprint card's
+  `Card: {short id}` line under the summary is fine; the short id never changes. A sprint's card
   briefs live in its sprint folder (§1).
 - **WBS card links.** `{slug}-wbs.md` (in `Projects/{slug}/`, or its `planning/` on a project with
   sprint folders, §1) carries a `## 🔗 Card links` table (format owned by bandit:plan: WBS id ·

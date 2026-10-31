@@ -3,7 +3,7 @@
 **Read with:** `references/dev-workflow.md` (the commands `spec`, `spec reconcile`, `plan-tech`,
 `stage`, `pick-ready`, surface roles, card boundaries, record homes)
 **Owns:** the generic app-dev lanes and stage tags · the lane template headings · the Spec lock ·
-tag merging · card fields · the sprint card's board shape · the **dev board shape** procedure
+tag merging · card fields · the old-way sprint card's board shape · the **dev board shape** procedure
 
 This file holds what the board itself enforces or expects. How work moves through it is
 `references/dev-workflow.md`. Planning a sprint is `bandit-dev:sprint`'s (Claude Code): it calls the
@@ -120,13 +120,13 @@ Every dev card is written **complete**, in one `create_tasks` entry, then read b
 
 | Field | Value |
 |---|---|
-| `boardColumnId` | The **area column**: the module or page the change touches. `App` only when the change is shell-wide. Spans two, or no column fits → ask the user. Never create a column for it (columns come from `load`, the design conversation, or the PM step of **🏗️ Dev board shape**). **Project-management cards** (sprint planning, a sprint card, umbrella cards, planning checklists, process work) go in the `PM` column instead |
+| `boardColumnId` | The **area column**: the module or page the change touches. `App` only when the change is shell-wide. Spans two, or no column fits → ask the user. Never create a column for it (columns come from `load`, the design conversation, or the PM step of **🏗️ Dev board shape**). **Project-management cards** (sprint planning, an old-way sprint card, planning checklists, process work) go in the `PM` column instead |
 | `tagIds` | `lane/*` + `stage/spec` (none on Incident) + one Handler tag + one Energy tag (`references/board.md` → Tags), ids resolved live |
 | `priority` | Always set: urgency only |
 | `complexity` | Always set |
 | `effort` | Always set. Claude.ai's is a first estimate; `plan-tech` confirms it. Max L (B7, `references/dev-workflow.md`) |
 | `assignedTo` | The user: the signed-in member, resolved live (`get_context → members`), never a stored id |
-| `dueDate` | Empty. Only `pick-ready` and a sprint plan date cards; **only the sprint plan sets a sprint batch's due date** (bandit-dev:sprint). Incident: today |
+| `dueDate` | Empty. Only `pick-ready` dates cards; a sprint keeps its date on itself, not on its cards (an old-way sprint plan dated its batch). Incident: today |
 | Execution state | Left as created. The midnight run moves it when due; `pick-ready` sets Assigned for a card picked for today; a sprint plan may seed its whole batch to Assigned. Incident: `assigned` straight away |
 | `dependencies` | `blockedBy` / `blocks` for every known link, in the same entry |
 | `subtasks` | Claude Code only: the build steps, when it writes the card or at `plan-tech`. Claude.ai writes none. Order as `references/board.md` → Sub-tasks |

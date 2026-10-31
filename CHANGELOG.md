@@ -4,7 +4,15 @@ All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace s
 
 ## Unreleased
 
+### Added
+- **`bandit-dev:sprint` works on real sprints.** `plan` creates the sprint in the app, adds its cards in run order and moves it to Ready to execute at commit; `execute` and `run` move it to Executing and, after the last wave, Debugging; `close` closes it. No sprint card, no sprint tag, no date stamped on the cards: each keeps its own. Commands name the sprint (`execute {sprint} wave 2`). Planning steps and wave progress live in the ledger's Plan steps and Waves tables. The order gate reads sprint blocking.
+- **Checker rules SP9 and SP10** in `check_sprint.py`: a sprint kept in the app lists its twelve plan steps in order, each done step with its evidence, and a committed one its waves in order, each done wave with its evidence and only after the waves before it. `check_repo.py` rule SP9 tests both on new fixtures.
+- **Old-way sprints run to their close** from one new reference, `old-way.md`: a sprint card with wave sub-tasks keeps working in every command, and its close brings it into the app (sprint created, cards added while open, Ready, Executing, cards completed, Closed), retires its tag and completes its sprint card.
+
 ### Changed
+- **Card sizing:** bandit:tasks rule B7 also splits a card that is both L and Complex, and a sprint takes the small cards in place of an umbrella card that only groups them.
+- **Dependency gate:** a link with a sprint at either end no longer passes silently; a blocked sprint's gate is a line in its ledger's Gates section.
+- **Sprint notes** carry `sprint: {name}` in place of `board-task` (bandit:notes); old-way sprint notes keep the sprint card.
 - **The helpers read real sprints.** A sprint is now a record on a Technical board (`get_sprints`, `manage_sprints`). `bandit:tasks` reads sprints from the records and, until the sprint tags retire, from the old `sprint/*` tags too: the week's pick of ready cards, the Execution and audit Stand By exemptions, an XL split joining its sprint. `bandit:audit`'s snapshot and S13 (a real sprint's name kebab-cased to its folder; rulebook updated 2026-10-31), `bandit:notes`' sprint folder and brief checks and `bandit-dev:testdata`'s sprint input read both the same way. With Sprints off they never report "no sprints": a sprint command stops, `today` and the hygiene audit say so and use the tags alone. The sprint refusal codes (`MODULE_DISABLED`, `SPRINT_MOVE_REFUSED`, `SPRINT_CLOSED`, the five reasons a card cannot join, `NOT_IN_SPRINT`) are in the errors table.
 - **README and install:** the board skills need the first app release after v0.37.0 (sprints as records, 20 assistant tools). Release these plugins only once that app version is in production. `CURRENT_TOOLS` and the project audit's tool list name `get_sprints` and `manage_sprints`.
 

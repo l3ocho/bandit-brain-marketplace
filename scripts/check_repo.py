@@ -652,6 +652,20 @@ def check_sp8():
            if ok else f"own → {got['own'][0]}, other → {got['other'][0]} {got['other'][1][-120:]!r}")
 
 
+# ── SP9 · the sprint checker holds a sprint kept in the app to its plan steps and waves (fixtures) ─
+def check_sp9():
+    script = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts" / "check_sprint.py"
+    vault = ROOT / "tests" / "fixture-vault"
+    good = run_script(script, "--vault", str(vault), "--domain", "Record")
+    bad = run_script(script, "--vault", str(vault), "--domain", "RecordBad")
+    want = ("step 3 (Close the open questions) is marked done with no evidence",
+            "Wave 2 is done while an earlier wave is not", "Wave 2 names GA-3")
+    ok = good[0] == 0 and bad[0] == 1 and all(w in bad[1] for w in want) and bad[1].count("\n- ") == 3
+    report("SP9", ok, "check_sprint passes a record sprint's steps and waves, refuses a step with no evidence, "
+           "a wave out of order and a card outside the table (SP9, SP10)"
+           if ok else f"fixtures: good → {good[0]} {good[1][-120:]!r}; bad → {bad[0]} {bad[1][-200:]!r}")
+
+
 # ── Y1 · the recipe reader refuses a missing key and a wrong migration tail (fixtures) ────
 def check_recipe():
     script = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts" / "recipe.py"
@@ -848,7 +862,7 @@ def check_dependency_gate():
     create = lambda item, resp=ok_text: {"tool_name": "mcp__other_board__create_tasks",  # noqa: E731
                                          "tool_input": {"items": [item]}, "tool_response": resp}
     cases = [
-        ("link", link, ["AB-1 now blocks AB-2", "Skip if a gate for this blocker already exists", "sprint card blocked by its batch"]),
+        ("link", link, ["AB-1 now blocks AB-2", "Skip if a gate for this blocker already exists", "sprint card blocked by its"]),
         ("refused link", {**link, "tool_response": {"ok": False, "code": "CYCLE"}}, None),
         ("create blockedBy", create({"title": "New", "dependencies": {"blockedBy": ["AB-1"]}}), ["AB-1 now blocks XY-9"]),
         ("create blocks", create({"title": "New", "dependencies": {"blocks": ["AB-3"]}}), ["XY-9 now blocks AB-3"]),
@@ -859,6 +873,10 @@ def check_dependency_gate():
                                   {"ok": True, "results": [{"ok": False, "code": "CYCLE"}]}), None),
         ("no link", create({"title": "New"}), None),
         ("another tool", {**link, "tool_name": "mcp__board__update_tasks"}, None),
+        ("link to a sprint", {**link, "tool_input": {"blockerTaskId": "AB-1", "blockedSprintId": "sp-2"}},
+         ["AB-1 now blocks sprint sp-2", "ledger, section Gates"]),
+        ("create blocked by a sprint", create({"title": "New", "dependencies": {"blockedBySprints": ["sp-1"]}}),
+         ["sprint sp-1 now blocks XY-9: add to XY-9 a sub-task"]),
     ]
     bad = []
     for label, payload, want in cases:
@@ -879,7 +897,7 @@ def check_dependency_gate():
         if out.get("hookEventName") != "PostToolUse" or missing:
             bad.append(f"{label} → missing {missing or out.get('hookEventName')}")
     report("DG1", not bad, "; ".join(bad) or f"dependency gate: {len(cases)} fixture payloads (notice in the "
-           "session's context naming the blocked card and the skip line; silent on refusals, a created card "
+           "session's context naming the blocked card or sprint and the skip line; silent on refusals, a created card "
            "with its gate, sprint cards and other tools)")
 
 
@@ -993,6 +1011,7 @@ def main(argv):
     check_audit_contract()
     check_sp7()
     check_sp8()
+    check_sp9()
     check_recipe()
     check_contract()
     check_credential_guard()

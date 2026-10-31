@@ -66,12 +66,12 @@ They are **instruments**, not decoration.
 **Sprints are records** on a Technical board, not tags (bandit-dev:sprint plans them).
 `get_sprints { boardId }` lists a board's sprints with their status and open, completed and total
 counts; `get_sprints { sprintId }` (run order) or `list_tasks { sprintId }` gives one sprint's cards;
-`list_tasks { noSprint: true }` the cards in none. **Until the sprint tags retire, read both:** an
+`list_tasks { noSprint: true }` the cards in none; `get_task` → `sprint` one card's sprint. **Until the sprint tags retire, read both:** an
 older sprint is still a `sprint/{name}` tag (`list_tasks { view: "sprint" }` or `get_context` →
 `sprints` list them, `list_tasks { tagName: "sprint/{name}" }` gives its cards), so a card is in a
-sprint when a record holds it or it carries a `sprint/*` tag. A refused `view: "sprint"` means the
-tags have retired: read the records only. **Sprints off:** `get_sprints` answers `MODULE_DISABLED`;
-say so and stop, never report it as no sprints (`references/errors.md`).
+sprint when a record holds it or it carries a `sprint/*` tag. A `view: "sprint"` refused with another
+code than `MODULE_DISABLED` means the tags have retired: read the records only. **Sprints off**
+(`MODULE_DISABLED`, `references/errors.md`) is never read as "no sprints".
 
 Tags are account-wide, so the vocabulary is the **union** of all six rows. On Technical boards Kind
 is expressed by the `lane/*` tag; `feature · issue · chore` stay valid everywhere else.

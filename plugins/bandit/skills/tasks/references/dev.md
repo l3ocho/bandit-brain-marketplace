@@ -137,7 +137,8 @@ Every dev card is written **complete**, in one `create_tasks` entry, then read b
 
 ## 🏁 Sprint card — board shape
 
-A sprint runs on one **sprint card**, the umbrella for a batch of cards. Its sections and sub-tasks
+**The old way** (sprints planned before sprints were records, `references/board.md` → Tags): a sprint
+runs on one **sprint card**, the umbrella for a batch of cards. A real sprint has no sprint card. Its sections and sub-tasks
 (the planning steps, one per wave) are bandit-dev:sprint's (`templates.md` there); this file holds only
 what the board sees.
 

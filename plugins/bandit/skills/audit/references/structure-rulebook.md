@@ -1,7 +1,7 @@
 ---
 type: reference
 summary: House standard for the user's domains and projects across Claude.ai, the MyNotes vault and BanditBrains. bandit:audit scores against these 16 rules.
-updated: 2026-10-29
+updated: 2026-10-31
 ---
 
 # 🧱 Structure Rulebook

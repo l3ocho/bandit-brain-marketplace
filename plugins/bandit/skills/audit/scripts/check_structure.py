@@ -89,6 +89,11 @@ def load_rules(path, rulebook_path):
     return rules, sha12(raw)
 
 
+def kebab(name):
+    """A sprint name as its folder word: lower case, runs of anything but letters and digits as one hyphen."""
+    return re.sub(r"[^a-z0-9]+", "-", str(name).lower()).strip("-")
+
+
 def load_snapshot(path):
     raw = Path(path).read_bytes()
     s = json.loads(raw)
@@ -860,7 +865,8 @@ class Domain:
             if not sprints:
                 continue
             top = f.split("/", 1)[0] if "/" in f else ""
-            want = [f"sprint-{s[len(prefix):] if s.startswith(prefix) else s}" for s in sprints]
+            # A real sprint's name is free text; its folder is the name in kebab-case (bandit:notes §1).
+            want = [f"sprint-{kebab(s[len(prefix):] if s.startswith(prefix) else s)}" for s in sprints]
             if top not in want:
                 misplaced.append(f"`{f}` (card {bt} → `{want[0]}/`)")
                 rows.append(Row(f"Move the brief `{f}` into `{want[0]}/` (its card's sprint)", f"{base}/{f}",

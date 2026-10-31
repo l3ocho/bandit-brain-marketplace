@@ -12,7 +12,7 @@ Rules (each one a failure, not a warning):
   SP7  a sprint whose ledger says it is committed (a `Committed:` line, written at plan step 12) has its independent
        plan review record, {project}-review-sprint-{name}-YYYY-MM-DD.md, in the sprint folder
   SP9  a sprint kept in the app (its ledger has a `Sprint record:` line) lists the 12 plan steps in order in
-       its ## Plan steps table; a step marked done carries its evidence; a committed ledger has every step done
+       its ## Plan steps table; a step marked done carries a YYYY-MM-DD date and its evidence; a committed ledger has steps 1 to 11 done
   SP10 a committed sprint kept in the app has a ## Waves table, one row per wave in order; a wave marked done
        carries its evidence and follows only done waves; every card it names is in the Waves and cards table
        (an old-way ledger, with no `Sprint record:` line, is skipped by SP9 and SP10)
@@ -43,8 +43,9 @@ STEPS = ("Select and freeze the batch", "Spec completeness check, per card", "Cl
          "Size and classify", "Cross-card analysis", "Sequence", "Write the one technical plan", "Risk and rollback",
          "Definition of ready, per card", "Approval gate", "Independent plan review", "Commit the sprint")
 SPRINT_RECORD = re.compile(r"^\W*Sprint record:", re.M)
-STEP_ROW = re.compile(r"^\|\s*(\d{1,2})\s*\|\s*([^|]+?)\s*\|\s*([^|]*?)\s*\|\s*([^|]*?)\s*\|\s*$", re.M)
-WAVE_ROW = re.compile(r"^\|\s*Wave\s+(\d+)\s*\|\s*([^|]+?)\s*\|\s*([^|]*?)\s*\|\s*([^|]*?)\s*\|\s*$", re.M)
+STEP_ROW = re.compile(r"^\|\s*(\d{1,2})\s*\|\s*([^|]+?)\s*\|\s*([^|]*?)\s*\|\s*((?:[^|\\]|\\.)*?)\s*\|\s*$", re.M)
+DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+WAVE_ROW = re.compile(r"^\|\s*Wave\s+(\d+)\s*\|\s*([^|]+?)\s*\|\s*([^|]*?)\s*\|\s*((?:[^|\\]|\\.)*?)\s*\|\s*$", re.M)
 
 
 def frontmatter(path: Path) -> tuple[dict | None, str | None]:
@@ -78,10 +79,13 @@ def check_record_ledger(rel_folder, text: str, table_cards: set) -> list[str]:
                       "one row each: | n | step | done date | evidence |")
     else:
         for n, name, done, ev in steps:
-            if done and not ev:
+            if done and not DATE.match(done):
+                errors.append(f"SP9 {rel_folder}: step {n} ({name}) has `{done}` as its done date, not YYYY-MM-DD")
+            elif done and not ev:
                 errors.append(f"SP9 {rel_folder}: step {n} ({name}) is marked done with no evidence")
-        if COMMITTED.search(text) and any(not done for _, _, done, _ in steps):
-            errors.append(f"SP9 {rel_folder}: the ledger says committed but a plan step is not done")
+        # Step 12 is the commit itself: its row is marked once the checker passes.
+        if COMMITTED.search(text) and any(not done for n, _, done, _ in steps if n < 12):
+            errors.append(f"SP9 {rel_folder}: the ledger says committed but a plan step before 12 is not done")
     if COMMITTED.search(text):
         waves = WAVE_ROW.findall(section(text, "Waves"))
         if not waves or [int(n) for n, *_ in waves] != list(range(1, len(waves) + 1)):
@@ -90,6 +94,8 @@ def check_record_ledger(rel_folder, text: str, table_cards: set) -> list[str]:
         else:
             open_seen = False
             for n, ids, done, ev in waves:
+                if done and not DATE.match(done):
+                    errors.append(f"SP10 {rel_folder}: Wave {n} has `{done}` as its done date, not YYYY-MM-DD")
                 if done and open_seen:
                     errors.append(f"SP10 {rel_folder}: Wave {n} is done while an earlier wave is not")
                 if done and not ev:

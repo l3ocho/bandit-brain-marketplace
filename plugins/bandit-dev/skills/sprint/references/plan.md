@@ -46,7 +46,7 @@ For each card: `get_task`; find its brief (bandit:notes lookup by filename from 
 
 ## 4 · Size and classify
 
-Effort and complexity per card; lane per card. Check the card boundaries in bandit:tasks `dev.md`: one lane, one branch, one landing, up to L; **XL splits into two or more cards** now. **Avoid** cards that are both high effort and high complexity (L and Complex), and umbrella cards that only group smaller ones: split the first, and put the small cards in the sprint in place of the umbrella (B7, bandit:tasks `references/dev-workflow.md`). A split card keeps its Spec's intent, gets its own brief and Spec, blocks or is blocked by its sibling, and **joins the sprint** (`manage_sprints { action: "add_cards" }`). Record old and new sizes in the step's row.
+Effort and complexity per card; lane per card. Check the card boundaries in bandit:tasks `dev.md`: one lane, one branch, one landing, up to L; **XL splits into two or more cards** now. Apply bandit:tasks B7 (`references/dev-workflow.md`), its sizing and no-umbrella rules included; a split original or an umbrella leaves the sprint (`manage_sprints { action: "remove_card" }`). A split card keeps its Spec's intent, gets its own brief and Spec, blocks or is blocked by its sibling, and **joins the sprint** (`manage_sprints { action: "add_cards" }`). Record old and new sizes in the step's row.
 
 ## 5 · Cross-card analysis
 
@@ -90,7 +90,7 @@ Present the state in a short summary (cards, waves, plan, risks, what needs the 
 Automatic, after the approval and before the commit. It stops the user only on a blocker.
 
 1. **Launch the `plan-reviewer` agent** (the Agent tool, `bandit-dev` agent `plan-reviewer`) and wait
-   for it. Its prompt carries: the sprint name and card, the plan note's full text, each batch card's
+   for it. Its prompt carries: the sprint's name, the plan note's full text, each batch card's
    Spec and brief, the WBS, the Migration tail table, the repo path and the project's `bandit.yaml`.
 2. **Write the review record** into the sprint folder: `{project}-review-sprint-{name}-YYYY-MM-DD.md`,
    `type: log`, `sprint` = the sprint's name (bandit:notes conventions §1). Body: the agent's
@@ -110,11 +110,11 @@ blocker is open. `run` and `execute` refuse a sprint whose step 11 row is not do
 
 1. **Batch cards:** assign each to the user (the signed-in member, live lookup) and set `stage/ready`. No tag and no due date: each card keeps its own (the sprint's date is the sprint's).
 2. **The sprint:** `manage_sprints { action: "update", expectedDate }` = the sprint date, then `move` to `ready_to_execute` (it needs the date and a card; a refusal names what is missing). Read it back.
-3. **Ledger:** the **Waves** table, one row per wave in order (`| Wave {n} | {card ids} | | |`), the Decisions log, `Committed: {date}` in At a glance (the line SP7, SP9 and SP10 read) and the Status line `Committed {date}; next: Wave 1`. Write the execution prompt (templates).
+3. **Ledger:** the **Waves** table, one row per wave in order (`| Wave {n} | {card ids} | | |`), the Decisions log, `Committed: {date}` in At a glance (the line SP7, SP9 and SP10 read; SP9 then needs steps 1 to 11 done) and the Status line `Committed {date}; next: Wave 1`. Write the execution prompt (templates).
 4. **Briefs and leftovers:** move every batch brief into the sprint folder (`Projects/{slug}/sprint-{name}/`) and archive every source the planning consumed (inbox drafts, spec notes, a superseded WBS draft; `references/homes.md` → Leftovers).
 5. **Create the two handover cards** (unless the plan dropped them): one `create_tasks` call on the `handover.board` board, the staging card in `handover.staging.column` and the production card in `handover.production.column` (resolved live by name), titles and descriptions from `references/templates.md` → Handover cards, in their not-ready form; write `Staging handover: {short id}` and `Production handover: {short id}` in At a glance.
 6. **Seed the Execution board:** every batch card to `assigned` with `update_tasks { items: [{ taskId, executionState: "assigned" }, …] }`, reading `results` per card, so the user sees the whole sprint before work starts. Verify with `get_sprints { sprintId }` and the sprint's columns (`execute.md` → Reading the board).
-7. Run `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py` and paste its output into step 12's row; the row is not done until it prints OK.
+7. Run `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py` and paste its output into the Milestone log; only once it prints OK, mark step 12's row done ("committed, checker OK").
 
 ## Investigator brief
 

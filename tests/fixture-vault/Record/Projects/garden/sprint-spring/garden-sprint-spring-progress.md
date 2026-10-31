@@ -27,12 +27,12 @@ sprint: spring
 | 4 | Size and classify | 2026-10-31 | Step 4 evidence. |
 | 5 | Cross-card analysis | 2026-10-31 | Step 5 evidence. |
 | 6 | Sequence | 2026-10-31 | Step 6 evidence. |
-| 7 | Write the one technical plan | 2026-10-31 | Step 7 evidence. |
+| 7 | Write the one technical plan | 2026-10-31 | Plan filed, [[garden-sprint-spring-plan\|the plan]]. |
 | 8 | Risk and rollback | 2026-10-31 | Step 8 evidence. |
 | 9 | Definition of ready, per card | 2026-10-31 | Step 9 evidence. |
 | 10 | Approval gate | 2026-10-31 | Step 10 evidence. |
 | 11 | Independent plan review | 2026-10-31 | Step 11 evidence. |
-| 12 | Commit the sprint | 2026-10-31 | Step 12 evidence. |
+| 12 | Commit the sprint | | |
 
 ## Waves
 

@@ -96,7 +96,8 @@ def notice(payload):
     def line(a, b):
         if b.startswith(SPRINT_END):
             return (f'- {a} now blocks {b}: a sprint has no sub-tasks, so add to that sprint\'s ledger, section Gates, '
-                    f'the line "Gate: {a} delivered (<what it hands over>) before closing the sprint", unless it is there.')
+                    f'the line "Gate: {a} delivered (<what it hands over>) before closing the sprint" (a sprint id: write the '
+                    f'sprint\'s name), unless it is there.')
         return (f'- {a} now blocks {b}: add to {b} a sub-task "Gate: {a} delivered/feedback received (<what it '
                 f"hands over>) before <{b}'s next step, e.g. deploy>\", unless {b} already has a gate for {a}.")
     return "\n".join([

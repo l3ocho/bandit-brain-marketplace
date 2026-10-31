@@ -9,7 +9,7 @@ Contents: Command · Rules · Start · The wave · Sprint status · Board moves 
 `/bandit-dev:sprint execute {sprint} wave N` (for example `execute 2026-w42 wave 2`). **The wave is the unit; the sprint's name says which sprint it belongs to.** A sprint card id instead: `references/old-way.md`. Rules, checked before anything moves:
 
 1. **Only a sprint is accepted**: a real sprint on the home board, or an old-way sprint card. A batch card (any card of a sprint) is refused with: "That is a card inside {sprint}. Point me at {sprint} and a wave number." Nothing is run for a single card.
-2. **Wave N is named or chosen, and said out loud.** `wave N` runs that wave. No number: run the first wave not ticked, and state the choice in the opening line ("Running Wave 2: {ids}") before any move.
+2. **Wave N is named or chosen, and said out loud.** `wave N` runs that wave. No number: run the first wave not done in the Waves table (old way: the first unticked wave sub-task), and state the choice in the opening line ("Running Wave 2: {ids}") before any move.
 3. **Waves run in order.** Wave N is refused while wave N-1 is not done in the ledger's Waves table, naming the open wave, unless the user says to skip it in this chat. Cards completed by hand count as delivered once the board and the ledger agree.
 4. **Only the cards in that wave's row are touched.** No card outside it is moved, worked or commented on.
 
@@ -24,7 +24,7 @@ Contents: Command · Rules · Start · The wave · Sprint status · Board moves 
 
 1. Gate 0 from SKILL.md (surface, Project Context, repo state, tools). Planning's PM-column check is not needed.
 2. Resolve the sprint named in the command (`get_sprints { boardId }` by name, then `get_sprints { sprintId }`); its folder and ledger follow from the name. The ledger's Plan steps must be done to 12 (step 11 is the independent review) and its Waves table present. Not approved, not reviewed or not committed (step 10, 11 or 12 not done): say which and stop. **Order gate:** the sprint's `blockedBy` holds an entry with `completed: false` (an open sprint or card) → name it and stop.
-3. Read the ledger, the plan and the execution prompt from the sprint folder. Apply the command rules (wave given or first unticked, order, scope). All ticked: say so and offer `debug`.
+3. Read the ledger, the plan and the execution prompt from the sprint folder. Apply the command rules (wave given or first not done, order, scope). All done: say so and offer `debug`.
 4. `git branch --show-current` and `git status --short`; reconcile with the ledger. Mismatch: stop and report.
 
 ## The wave

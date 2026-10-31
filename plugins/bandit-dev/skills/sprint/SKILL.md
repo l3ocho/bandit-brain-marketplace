@@ -44,7 +44,8 @@ old-way sprint: follow `references/old-way.md`. No command → offer the table a
    project and `prefix`. Missing or not dev → say which and stop. Resolve the board, its columns
    and members **live**. The board must be Technical (sprints live only there)
 3. **Sprints on.** `get_sprints { boardId }` answers. `MODULE_DISABLED` → say Sprints is off and who
-   turns it on (bandit:tasks `references/errors.md`), and stop
+   turns it on (bandit:tasks `references/errors.md`), and stop. An old-way sprint card skips this step,
+   except at its Close (`references/old-way.md`)
 4. **Repo state.** `git branch --show-current`, `git status --short`. Work on the deploy branch → say
    so and keep every commit for the trunk
 5. **Tools.** Board server, BanditCloud server, a browser tool. A missing server stops the run
@@ -58,7 +59,7 @@ evidence in its row**; the checker (SP9, SP10) refuses a done row without it.
 | # | Step | Done when |
 |---|---|---|
 | 1 | Select and freeze the batch | The sprint created in Planning with the batch as its cards, in no other sprint; the previous open sprint blocks it |
-| 2 | Spec completeness, per card | Every card read against its brief; gaps as fix rows |
+| 2 | Spec completeness check, per card | Every card read against its brief; gaps as fix rows |
 | 3 | Close the open questions | One interview answered and recorded |
 | 4 | Size and classify | Every card at most L (XL split), lane and boundaries checked |
 | 5 | Cross-card analysis | Migrations, shared files, hidden order, docs regeneration written down |
@@ -94,7 +95,7 @@ The full list is `references/gotchas.md`: read it once at the start of any comma
 - Ask which cards when no list was given
 - Mark a card complete or call anything approved, except `close` completing cards the user approved in that chat
 - Rewrite a locked Spec without showing old and new and getting a yes
-- Write to a card outside the batch and its two handover cards, or to a sprint but this one; create columns, boards or tags
+- Write to a card outside the batch and its two handover cards (old way: and the sprint card), or to a sprint but this one; create columns, boards or tags
 - Merge into the deploy branch or deploy outside `release`; force-push, or push anything but the trunk (`references/execute.md` → Pushing)
 - Run two wave agents at once, two waves in one chat, a single card, or a wave out of order without the user's say-so
 - Move a card to Done by anything but `close`, or treat an urgency remark as approval

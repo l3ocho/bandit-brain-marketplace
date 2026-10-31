@@ -25,7 +25,9 @@ Everything else in each reference applies as written.
 | The batch | `get_sprints { sprintId }` → `cards` | The sprint card's blockers; while the tag exists also `list_tasks({ tagName: 'sprint/{name}' })` |
 | Reading the board (`execute.md`) | `list_tasks({ sprintId, executionState })` | `list_tasks({ tagName: 'sprint/{name}', executionState })` while the tag exists; once the tags have retired, the batch's ids from the sprint card's blockers |
 | Sprint status (`execute.md`) | The app's status moves | No status. **The sprint card** is not moved while any wave runs, goes to `standby` once, when the last card of the last wave reaches `standby`, is never `next` or `doing`, never counts in the five-item cap and is completed only by Close |
-| Wave done (`execute.md` → Finishing a wave) | The ledger's Waves row | Also tick the wave's sub-task (`manage_subtasks { action: "tick" }`), only when every card is delivered and verified |
+| Wave choice and order (`execute.md` → Command) | The ledger's Waves table | The wave sub-tasks: the first unticked is the next wave |
+| Wave done (`execute.md` → Finishing a wave) | The ledger's Waves row | Instead, tick the wave's sub-task (`manage_subtasks { action: "tick" }`), only when every card is delivered and verified |
+| Debug's first read (`debug.md` → Read first) | `get_sprints { sprintId }` | `get_task` on the sprint card: its sections, decisions log and comments |
 | Status line (every command) | The ledger's Status line | Also the sprint card's section 1 Status line (`get_task` first, change only that line) |
 | Wave, debug, release notes | The ledger's Milestone log | Also one comment on the sprint card with the same line |
 | `run`'s wave check | Waves row, sprint status | The wave sub-task ticked; the sprint card unmoved while waves remain and in `standby` after the last |
@@ -44,9 +46,12 @@ resumes where it stopped.
    (the sprint folder's path). A sprint of that name already on the board from an earlier attempt:
    use it.
 3. **Add its cards while they are open:** `manage_sprints { action: "add_cards", sprintId, taskIds }`
-   with the batch in wave order. A card completed by hand before the close cannot join
+   with the batch cards that will close, in wave order. A card that stays open (detached, carried, not
+   approved in this chat) is not added: `close.md` step 0 handles it, with its tag and its link to the
+   sprint card in place of `remove_card`. A card completed by hand before the close cannot join
    (`SPRINT_CARD_COMPLETED`): leave it out and name it in the ledger and the report.
-4. **Date and status:** `update` `expectedDate` = the sprint card's due date, then `move` to
+4. **Date and status:** `update` `expectedDate` = the sprint card's due date (none: the sprint date in
+   the ledger's At a glance), then `move` to
    `ready_to_execute`, then to `executing`. Read it back.
 5. **Complete the cards:** `close.md` step 1.
 6. **Close the sprint:** `move` to `closed` (Executing to Closed is the one skip).
@@ -58,8 +63,9 @@ resumes where it stopped.
    log, then `update_tasks { items: [{ taskId, complete: true }] }`
    (its blockers are complete now).
 9. **Archive the sprint card:** no tool sets a card's archive date, so the production handover card
-   (the ledger's `Production handover:` line) is refilled, reopened first with `reopen_tasks` when the
-   user closed it, with the one archive statement the app's runbook names
+   (the ledger's `Production handover:` line) is refilled, **only once the user has closed it** (its
+   deploy is done; reopen it with `reopen_tasks`). Still open: one line under "Needs the user" to close
+   it after the deploy, then run this step again. The refill holds the one archive statement the app's runbook names
    (`handover.production.runbook`), copied, never written here. The runbook names none → one line
    under "Needs the user".
 10. Then `close.md` steps 2 to 5 (statuses, archive, verify, report), with the sprint card's rows

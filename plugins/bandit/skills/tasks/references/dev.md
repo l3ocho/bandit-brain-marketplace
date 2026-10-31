@@ -120,7 +120,7 @@ Every dev card is written **complete**, in one `create_tasks` entry, then read b
 
 | Field | Value |
 |---|---|
-| `boardColumnId` | The **area column**: the module or page the change touches. `App` only when the change is shell-wide. Spans two, or no column fits → ask the user. Never create a column for it (columns come from `load`, the design conversation, or the PM step of **🏗️ Dev board shape**). **Project-management cards** (sprint planning, an old-way sprint card, umbrella cards, planning checklists, process work) go in the `PM` column instead |
+| `boardColumnId` | The **area column**: the module or page the change touches. `App` only when the change is shell-wide. Spans two, or no column fits → ask the user. Never create a column for it (columns come from `load`, the design conversation, or the PM step of **🏗️ Dev board shape**). **Project-management cards** (sprint planning, an old-way sprint card, planning checklists, process work) go in the `PM` column instead |
 | `tagIds` | `lane/*` + `stage/spec` (none on Incident) + one Handler tag + one Energy tag (`references/board.md` → Tags), ids resolved live |
 | `priority` | Always set: urgency only |
 | `complexity` | Always set |

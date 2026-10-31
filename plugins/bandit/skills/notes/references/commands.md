@@ -266,7 +266,7 @@ Checks (each row: file, breach, proposed fix):
 | Obsidian settings | Each row of the §11 table, read from `.obsidian/*.json`; property types per §5. Fix → `/bandit:notes settings` |
 | Conflicts | Sync-conflict copies |
 | Version | README `mynotes-version` older than the current convention version → suggest `onboard` |
-| Plan notes (dev projects only) | Resolving each `board-task` id live, read-only: a `plan` note with neither `board-task` nor `sprint` (a sprint plan's `sprint` resolves through `get_sprints`) · a plan note whose card is complete but the note isn't `done` (propose `done` + archive) · a plan note whose task id no longer resolves (card deleted). A renamed card still resolves: never report it as deleted |
+| Plan notes (dev projects only) | Resolving each `board-task` id live, read-only: a `plan` note with neither `board-task` nor `sprint` (a sprint plan's `sprint` resolves through `get_sprints`) · a plan note whose card is complete, or whose sprint is `closed` (`get_sprints`), but the note isn't `done` (propose `done` + archive) · a plan note whose task id no longer resolves (card deleted). A renamed card still resolves: never report it as deleted |
 
 Group the report by check, counts first. **Every breach is a numbered fix row** (file, breach,
 fix), so the report is the proposal: the user answers all, a list or none. A breach whose fix belongs

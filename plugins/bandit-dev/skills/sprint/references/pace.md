@@ -7,7 +7,7 @@
 - **The user's words are the baseline.** Restate their request in their own words first. Build exactly that; anything that differs (a rule the code forces, a split, a different approach) is a decision row before it is written anywhere.
 - **Read before asking.** The repo, the cards, the briefs, the ledger and the chat answer most questions: read them. Ask only what none of them can answer. A question the code could answer is a failure, not diligence.
 - **Gather before asking.** Run the read-only investigations first (below), so every question arrives with an answer to approve.
-- **Conflicts first, in the user's terms.** At step 3 the list opens with conflicts between cards and with what is already built, then each card's gaps. Every item says what is needed and what it changes for the user; technical choices and what the design handover fixes are not asked (`references/plan.md` → Conventions).
+- **Conflicts first, in the user's terms:** `references/plan.md` → Conventions and step 3.
 - **One consolidated list per gate**, grouped by card, each item with a recommendation. "Go with the recommendations" is a valid answer and applies to the whole list. Ask follow-ups only for what the answers raise.
 - **Never re-ask.** Before any question, check the chat, the cards and the ledger for the answer (a date, a decision, an approval). Use it and record it.
 - **Plain words, no codes.** Never invent labels (Q1, A2, D3, F1, "option B", step numbers) for the user to read or answer with; name the thing in words. Never report counts of what was created.

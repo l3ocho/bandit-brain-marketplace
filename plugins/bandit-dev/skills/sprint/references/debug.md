@@ -2,7 +2,7 @@
 
 Part of `bandit-dev:sprint`. Read before running `/bandit-dev:sprint debug {sprint}`. Run in a fresh chat after the last wave is done. The user tests the delivered sprint and brings the adjustments; this chat turns them into verified fixes with the sprint's own documents and diff as context.
 
-Contents: Rules · Read first · Intake · Fix loop · Board · Finishing · Never
+Contents: Rules · Read first · Intake · Combined test · Fix loop · Board · Finishing · Never
 
 ## Rules
 
@@ -31,7 +31,7 @@ Contents: Rules · Read first · Intake · Fix loop · Board · Finishing · Nev
 For a sprint whose Marketplace cards change the helpers along with the app: the user tests both together on staging before either is released.
 
 1. **The test session.** The helpers come from the marketplace repo, loaded by path in a separate session (the repo's own test launcher), never the installed copy; the production board server is blocked and the staging one used.
-2. **Prove it first,** from the session's startup record, not its answer: which plugins loaded and from where, which board server it called. A run that called production is a failed run.
+2. **Prove it first,** from the session's startup record, not its answer: which plugins loaded and from where, which board server it called. A run that called production does not count: say so and run it again.
 3. **Before each round,** compare the sprint's cards on staging with production: staging is a copy from its last refresh. Bring their columns in line, or name what differs.
 4. Each case the helpers need runs through the test session; its log is the evidence in the Bug log.
 5. Release then ships the app, and the helpers right after it (`release.md` → Marketplace cards).
@@ -56,7 +56,7 @@ Per approved row, in card order and wave order where they interact:
 **No leftovers.** Before this step ends, anything it used to make something else and no longer needs (a draft, a scratch file, a superseded copy, a test fixture, a temporary branch) is archived or deleted, only on proof that its successor exists (`references/homes.md` → Leftovers). A fix branch is deleted once merged; test data is removed.
 
 
-Every row fixed, parked or declined with the user's word. Ledger Status per card moves to `Tested by the user` for every card the user says they tested; the ledger's Status line becomes `Debug done, ready to release`, and At a glance says debug is done; Milestone log `Debug done: {n} adjustments, {n} parked. Ready to release.` The sprint stays `debugging`; final message of ten lines at most with the paste for `release`.
+Every row fixed or declined with the user's word; anything new filed as a card. Ledger Status per card moves to `Tested by the user` for every card the user says they tested; the ledger's Status line becomes `Debug done, ready to release`, and At a glance says debug is done; Milestone log `Debug done: {n} adjustments, {n} new cards. Ready to release.` The sprint stays `debugging`; final message of ten lines at most with the paste for `release`.
 
 ## Never
 

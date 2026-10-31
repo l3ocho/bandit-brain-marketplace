@@ -24,6 +24,7 @@ If something you need is missing from the prompt, say so as a finding; do not gu
 - The migration numbers follow the tail the plan names, one per migration, in wave order
 - Tests prove each card's acceptance; risky changes have a rollback line that would actually work
 - Nothing in the plan breaks a project hard rule (its `CLAUDE.md`, its docs)
+- Each line of the plan's Gaps answered by convention block is true: the code shows that behaviour today, or the named doc says it
 
 **2 · Product manager.** Will the sprint deliver what the cards promise?
 - Every acceptance line has a proof in the plan's verification table

@@ -652,6 +652,31 @@ def check_sp8():
            if ok else f"own → {got['own'][0]}, other → {got['other'][0]} {got['other'][1][-120:]!r}")
 
 
+# ── NA1 · the sprint helper never tells an executor to decide and continue without asking ─
+NO_ASK_RE = re.compile(r"conservative reading|do(?:n't| not) ask (?:any )?questions|decide and continue", re.I)
+
+
+def no_ask_hits(files):
+    return [f"{f.relative_to(ROOT)}:{i}" for f in files for i, line in
+            enumerate(f.read_text(encoding="utf-8").splitlines(), 1) if NO_ASK_RE.search(line)]
+
+
+def check_no_decide_and_continue():
+    import tempfile
+    sprint = PLUGINS / "bandit-dev" / "skills" / "sprint"
+    # gotchas.md records the old wording as history; every other file is an instruction.
+    files = [f for f in sorted(sprint.rglob("*.md")) if f.name != "gotchas.md"]
+    hits = no_ask_hits(files)
+    with tempfile.TemporaryDirectory() as d:
+        bad = Path(d) / "x.md"
+        bad.write_text("Do not ask questions; take the conservative reading and continue.\n", encoding="utf-8")
+        selftest = len(NO_ASK_RE.findall(bad.read_text())) == 2
+    report("NA1", not hits and selftest,
+           f"no 'decide and continue' wording in {len(files)} sprint files (self-test ok)" if not hits and selftest
+           else f"tells the executor to decide alone: {'; '.join(hits) or 'self-test failed'} — a gap with no "
+                "convention stops that card and asks (execute.md → Needs a decision)")
+
+
 # ── SP9 · the sprint checker holds a sprint kept in the app to its plan steps and waves (fixtures) ─
 def check_sp9():
     script = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts" / "check_sprint.py"
@@ -1012,6 +1037,7 @@ def main(argv):
     check_sp7()
     check_sp8()
     check_sp9()
+    check_no_decide_and_continue()
     check_recipe()
     check_contract()
     check_credential_guard()

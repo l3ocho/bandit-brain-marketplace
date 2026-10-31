@@ -27,3 +27,4 @@ The sprint folder and its record types are owned by bandit:notes (conventions §
 | Tags, handler and energy tags, five hard rules | bandit:tasks `SKILL.md` |
 | Vault folders, filenames, frontmatter, etag writes, inbox rules | bandit:notes `SKILL.md` and `references/conventions.md` |
 | Project Context keys | bandit:project |
+| The project's rules, technical specs and guides for Claude | The project itself: its `CLAUDE.md`, its `.claude` folder (hooks, settings, agents) and its docs. The helpers read them and never copy or set them |

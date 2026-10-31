@@ -69,7 +69,7 @@ project's last `Released:` line. Their code is on the trunk already, so the rele
 ## Marketplace cards
 
 A sprint that carries cards from the **Marketplace** column (skill changes) also releases the
-marketplace repo, as its own version (decision D12), after the app's recipe. When the project is the
+marketplace repo, as its own version (decision D12), right after the app's recipe, in the same run: the two were tested together in debug (`debug.md` → Combined test). When the project is the
 marketplace repo itself, its recipe already runs these steps: run them once.
 
 1. **Pick the version** by Semantic Versioning, from what the CHANGELOG's `## Unreleased` entry

@@ -26,7 +26,7 @@ old-way sprint: follow `references/old-way.md`. No command → offer the table a
 | `run` | One or more sprints; `--paced [minutes]` under `/loop` | Every open wave, each in its own subagent, strictly in sequence; checks each wave on the board; stops on a blocker | `references/run.md` |
 | `debug` | Sprint | Turns the user's adjustments into verified fixes | `references/debug.md` |
 | `release` | Sprint, with the user's deploy word | Preconditions (cards tested, debug done, deploy word, migration tail, backup), then the project's `bandit.yaml` recipe; plugin release for Marketplace cards; fills the production handover card | `references/release.md` |
-| `close` | Sprint | Refuses without a release line (unless "close without release"); completes the approved cards, closes the sprint, archives the sprint folder; brings an old-way sprint into the app first | `references/close.md` |
+| `close` | Sprint | Releasing is optional (no app release: `Release: deferred`, the next release covers it; helpers changed: their release first); completes the approved cards, closes the sprint, archives the sprint folder; brings an old-way sprint into the app first | `references/close.md` |
 
 | Read | When |
 |---|---|

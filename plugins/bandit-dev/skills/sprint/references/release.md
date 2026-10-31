@@ -1,11 +1,12 @@
 # 🚀 The release cycle
 
 Part of `bandit-dev:sprint`. Read before running `/bandit-dev:sprint release {sprint}`. Run after
-debug and before close: one release per sprint (pipeline stage 9). The recipe is the project's
+debug and before close (pipeline stage 9). **Releasing is the user's option**: a sprint may close
+with no app release, and a later release covers it (Covering, below). The recipe is the project's
 `bandit.yaml` (`release`, `branches`, and the optional `migrations.check` and `staging.refresh`), read through
 `scripts/recipe.py`; this file holds the gate, never the project's commands.
 
-Contents: Preconditions · Steps · Marketplace cards · Never
+Contents: Preconditions · Steps · Covering · Marketplace cards · Never
 
 ## Preconditions
 
@@ -32,7 +33,7 @@ Check all before anything runs. Each miss is refused by name, with what would sa
    Versioning (Marketplace cards, step 1). A failing step stops the release: nothing after it runs,
    the output goes under "Needs the user", and the ledger says which step failed.
 2. **Marketplace cards** (below), when the sprint carries any.
-3. **Record the release.** Ledger At a glance: `Released: {version} · {date} · {commit}` (the line
+3. **Record the release.** Ledger At a glance: `Released: {version} · {date} · {commit} · covers {sprints}` (the line
    `close` checks). Milestone log: one line with the deploy word quoted.
 4. **Status line.** Ledger: `Released {version} on {date}; ready to close`. Milestone log: version,
    commit, recipe steps run.
@@ -46,6 +47,24 @@ Check all before anything runs. Each miss is refused by name, with what would sa
 6. **Staging.** `recipe.py opt staging.refresh`: give the user that instruction to put the release on
    staging; never run it. `none` → no staging step.
 7. Final message, ten lines at most, with the handover card's id and the paste for `close`.
+
+## Covering
+
+A release covers this sprint and every **deferred** sprint of the project: one whose ledger (in
+`Projects/{slug}/` or `_archive/Projects/{slug}/`) says `Release: deferred` and that closed after the
+project's last `Released:` line. Their code is on the trunk already, so the release ships it.
+
+- **The `Released:` line names them all:** `Released: {version} · {date} · {commit} · covers {sprint},
+  {sprint}`. The deferred sprints' notes stay as they are: they say deferred, and this line covers them.
+- **One handover card:** this sprint's production handover card carries the release; its Facts name
+  every sprint covered. A deferred sprint's own production card was left with one comment at its close
+  (`close.md`), and the user closes it.
+- **Plugins alone.** A sprint with Marketplace cards whose app release the user defers still releases
+  the plugins: on the user's word for the plugins alone, run only Marketplace cards (below); the
+  `Released:` line names the plugin version and `app deferred`, and close writes `Release: deferred`
+  for the app.
+- **The gates are unchanged.** Every precondition reads this sprint; the migration tail is this sprint's
+  last row, which already follows the deferred sprints' migrations.
 
 ## Marketplace cards
 

@@ -58,7 +58,7 @@ can do it (*"`plan-tech` runs in Claude Code, from the repo"*).
 | B4 | Lazy: the next L3 work package becomes a card only through `spec`, which cites its `WBS-X.Y.Z` |
 | B5 | Thin card: `Spec` + `Technical plan`, each short. Everything else goes in the doc |
 | B6 | Before creating: merge check (below). Skipped for Incident |
-| B7 | Up to **L**. An L card's plan note lays out the landing/commit sequence. **XL splits** into 2+ cards, wherever the size is set: at `spec`, at `plan-tech` and at a sprint's sizing step. Each new card keeps the original's lane, stage and `sprint/{name}` tag, and stays in the same sprint (a blocker of the sprint card) |
+| B7 | Up to **L**. An L card's plan note lays out the landing/commit sequence. **XL splits** into 2+ cards, wherever the size is set: at `spec`, at `plan-tech` and at a sprint's sizing step. Each new card keeps the original's lane and stage and stays in the same sprint: added to its record (`manage_sprints { action: "add_cards" }`), or on an old-way sprint its `sprint/{name}` tag and a blocker of the sprint card |
 
 **WBS on dev projects.** Level names are bandit:plan's. Here: **L3 work package = one card**,
 created lazily through `spec` (B4). **A Technical home board is never loaded** (`/bandit:tasks load` refuses
@@ -196,6 +196,6 @@ Steps 1 and 5 are the **card-write rules** bandit-dev:sprint calls for a sprint'
 Runs **Dating the week** (`/bandit:tasks week`, `references/week.md`) with its `stage/ready` filter, and adds nothing: a
 weekly pick of approved cards, not sprint planning. Picked cards get due dates only; the midnight
 job moves them into Assigned when due. A card picked for today → its `update_tasks` entry also carries
-`executionState: "assigned"`, since the midnight run has already passed. Cards already in a sprint (`sprint/*` tag)
+`executionState: "assigned"`, since the midnight run has already passed. Cards already in a sprint (a record or a `sprint/*` tag, `references/board.md` → Tags)
 keep the sprint plan's dates: they are not candidates.
 

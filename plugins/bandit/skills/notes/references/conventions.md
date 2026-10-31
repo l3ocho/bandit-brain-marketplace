@@ -38,8 +38,8 @@ hub once (on approval) and afterwards treats it as an ordinary note the user own
 #### Sprint folders
 
 `Projects/{slug}/sprint-{name}/` holds one sprint's records on a dev project (§13). `{name}` is the
-sprint's name, the same word as its `sprint/{name}` tag on the board (`sprint/debut` →
-`sprint-debut/`). Nothing else goes in it.
+sprint's name on the board: the real sprint's name, or on an older sprint its `sprint/{name}` tag
+in lowercase kebab-case (`Debut`, `sprint/debut` → `sprint-debut/`; `W44 e` → `sprint-w44-e/`). Nothing else goes in it.
 
 | Record | Filename | `type` | `board-task` |
 |---|---|---|---|

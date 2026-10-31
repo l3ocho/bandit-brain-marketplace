@@ -3,7 +3,7 @@
 # `rulebook_updated` equal to the rulebook's `updated:` frontmatter.
 # check_structure.py refuses to run when they differ.
 schema: 1
-rulebook_updated: 2026-10-29
+rulebook_updated: 2026-10-31
 
 levels:            # must → ❌ on a break · should → ⚠️
   S1: must
@@ -132,7 +132,7 @@ vault_content:
   # bandit-dev:sprint's local checker enforces the same rules at write time (SP2–SP5).
   # A sprint project is a Projects/{slug}/ with at least one sprint folder at its root.
   sprint_folder_pattern: "^sprint-[a-z0-9]+(-[a-z0-9]+)*$"
-  sprint_tag_prefix: "sprint/"      # board tag sprint/{name} ↔ folder sprint-{name}
+  sprint_tag_prefix: "sprint/"      # sprint {name} (a real sprint, or its old tag sprint/{name}) ↔ folder sprint-{name}
   planning_dir: planning            # S16: the one other folder at a sprint project's root
   brief_type: brief                 # S13: notes with this type and a board-task in a sprint
   unique_exempt: [README.md]        # S14: the domain home page

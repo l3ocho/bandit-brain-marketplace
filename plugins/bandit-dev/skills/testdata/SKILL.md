@@ -18,9 +18,9 @@ data, and the data each card's acceptance lines need to be tested. The app build
 
 | Command | Input | Does | Writes | Reference |
 |---|---|---|---|---|
-| `map` | Nothing, or card ids, or a sprint card | Reads the schema, the live database's structure, the app's rules and what was built; says which tables and rules each card touches | Nothing | `references/map.md` |
+| `map` | Nothing, or card ids, or a sprint | Reads the schema, the live database's structure, the app's rules and what was built; says which tables and rules each card touches | Nothing | `references/map.md` |
 | `fill` | A database: `development`, `test` or `staging` | A complete made-up set across the whole app, following the rules; it stays until `clean` | The database, a run record | `references/fill.md` |
-| `make` | Card ids or a sprint card | Works out the made-up data each acceptance line needs, in states the rules allow; shows it with its SQL | Nothing | `references/make.md` |
+| `make` | Card ids or a sprint | Works out the made-up data each acceptance line needs, in states the rules allow; shows it with its SQL | Nothing | `references/make.md` |
 | `create` | A database, after `make` | Creates that data straight in the database and records every id | The database, a run record | `references/create.md` |
 | `clean` | A database and a record, `card {label}`, or `fill` | Removes exactly the rows a record names, then checks none is left | The database | `references/create.md` |
 

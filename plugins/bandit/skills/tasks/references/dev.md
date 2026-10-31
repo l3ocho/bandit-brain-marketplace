@@ -137,7 +137,8 @@ Every dev card is written **complete**, in one `create_tasks` entry, then read b
 
 ## 🏁 Sprint card — board shape
 
-A sprint runs on one **sprint card**, the umbrella for a batch of cards. Its sections and sub-tasks
+**The old way** (sprints planned before sprints were records, `references/board.md` → Tags): a sprint
+runs on one **sprint card**, the umbrella for a batch of cards. A real sprint has no sprint card. Its sections and sub-tasks
 (the planning steps, one per wave) are bandit-dev:sprint's (`templates.md` there); this file holds only
 what the board sees.
 
@@ -147,7 +148,7 @@ what the board sees.
 | Tags | No `lane/*`, no `stage/*`: it isn't a lane card. Exempt from audit V1, V3 and V6 |
 | Description | No Spec. Written per `references/board.md` → Card descriptions |
 | Batch | Every card in the sprint is a **blocker** of the sprint card (`link_tasks { blockerTaskId: card, blockedTaskId: sprint card }`). The live blockers are the source of truth |
-| Sprint tag | `sprint/{name}` on each batch card, never on the sprint card. `list_tasks { view: "sprint" }` lists every sprint tag with open, completed and total counts; `list_tasks { tagName: "sprint/{name}" }` gives its cards |
+| Sprint tag | `sprint/{name}` on each batch card, never on the sprint card. Read it as `references/board.md` → Tags says (records and tags both, until the tags retire) |
 | Effort | Its own size as the umbrella; B7 applies to the batch cards, not to it |
 | Records | Plan, execution prompt, ledger, report and the batch's briefs, in the sprint folder (bandit:notes owns the names and the folder) |
 

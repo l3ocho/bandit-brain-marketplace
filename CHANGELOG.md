@@ -2,6 +2,12 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
+## Unreleased
+
+### Changed
+- **The helpers read real sprints.** A sprint is now a record on a Technical board (`get_sprints`, `manage_sprints`). `bandit:tasks` reads sprints from the records and, until the sprint tags retire, from the old `sprint/*` tags too: the week's pick of ready cards, the Execution and audit Stand By exemptions, an XL split joining its sprint. `bandit:audit`'s snapshot and S13 (a real sprint's name kebab-cased to its folder; rulebook updated 2026-10-31), `bandit:notes`' sprint folder and brief checks and `bandit-dev:testdata`'s sprint input read both the same way. With Sprints off they never report "no sprints": a sprint command stops, `today` and the hygiene audit say so and use the tags alone. The sprint refusal codes (`MODULE_DISABLED`, `SPRINT_MOVE_REFUSED`, `SPRINT_CLOSED`, the five reasons a card cannot join, `NOT_IN_SPRINT`) are in the errors table.
+- **README and install:** the board skills need the first app release after v0.37.0 (sprints as records, 20 assistant tools). Release these plugins only once that app version is in production. `CURRENT_TOOLS` and the project audit's tool list name `get_sprints` and `manage_sprints`.
+
 ## 0.10.0 · 2026-10-29
 
 ### Added

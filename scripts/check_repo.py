@@ -206,7 +206,7 @@ def check_denylist():
 
 
 # ── MT1 · no Bandit Brain assistant tool the app removed: a skill calling one answers NOT_FOUND ─
-# The app's own list (its src/domains/tasks/removedTools.ts); the 18 tools that replace them are in
+# The app's own list (its src/domains/tasks/removedTools.ts); the 20 tools that replace them are in
 # its docs/handoff/mcp-tool-rename-for-skills.md. Whole words, so update_tasks never matches update_task.
 REMOVED_TOOLS = (
     "list_projects list_folders list_tags list_household_members list_project_members get_lane_template "
@@ -323,11 +323,11 @@ def check_board_type():
 
 
 # ── AT1 · the tool lists above are the app's: the app clone's tools and its removed list ──
-# The 18 board tools the app serves today. The project audit's list must match it with FINANCE_TOOLS (AT2).
+# The 20 board tools the app serves today. The project audit's list must match it with FINANCE_TOOLS (AT2).
 CURRENT_TOOLS = (
     "get_context list_tasks get_task add_comment list_events create_tasks update_tasks reopen_tasks "
     "delete_tasks manage_subtasks manage_recurrence link_tasks manage_boards manage_columns_lanes "
-    "manage_tags manage_folders set_visibility delete_board_items").split()
+    "manage_tags manage_folders set_visibility delete_board_items manage_sprints get_sprints").split()
 # The 17 Finance tools (bandit:finance), from the app's finance descriptors.
 FINANCE_TOOLS = (
     "finance_get_context finance_list_transactions finance_get_budget finance_list_schedules finance_get_report "

@@ -97,6 +97,8 @@ Written before the first real run; correct them with what happens.
 
 - A planned push was refused or left undone because the skill, an older prompt or a memory said "never push" → the user lifted that rule on 2026-10-10 (it dated from when testing and staging did not exist). `development` is pushed as `execute.md` → Pushing `development` says; `main` and deploy stay the user's. Execution prompts restate this so an old note cannot block it.
 
+- Sprint 2026-w44-e: the execution prompt said "do not ask, take the conservative reading and continue", so gaps were decided during execution and only logged; several were things the user wanted to decide → gaps are answered by convention in the plan, shown at approval; anything else stops that card and asks (`execute.md` → Needs a decision). The checker fails if "decide and continue" comes back.
+
 ## Owner changes proposed
 
 - A card was detached at close (production steps moved to the next sprint) while its brief stayed in the sprint folder that was about to be archived, and the checker still counted the card as part of the sprint → write "detached" on its ledger row, and merge everything about the card into one note in the inbox before archiving (`close.md` step 3a); SP2 skips detached cards and SP6 fails a second brief for a card.

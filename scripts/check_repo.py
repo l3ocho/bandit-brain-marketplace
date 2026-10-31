@@ -652,6 +652,33 @@ def check_sp8():
            if ok else f"own → {got['own'][0]}, other → {got['other'][0]} {got['other'][1][-120:]!r}")
 
 
+# ── NA1 · the sprint helper never tells an executor to decide and continue without asking ─
+NO_ASK_RE = re.compile(r"conservative\s+reading|cautious\s+reading|do(?:n['’]t|\s+not)\s+ask(?:\s+any)?\s+questions"
+                       r"|never\s+ask\s+the\s+user|decide\s+(?:and\s+(?:continue|proceed)|alone)", re.I)
+HISTORY_RE = re.compile(r"^- Sprint \d{4}-w\d+", re.M)  # a gotcha's dated history line quotes the old wording
+
+
+def no_ask_hits(text):
+    """Matches across hard line wraps; a dated gotcha history paragraph is skipped."""
+    paras = [p for p in re.split(r"\n(?=- |\n)", text) if not HISTORY_RE.match(p.strip())]
+    return [m.group(0) for p in paras for m in NO_ASK_RE.finditer(" ".join(p.split()))]
+
+
+def check_no_decide_and_continue():
+    roots = [PLUGINS / "bandit-dev" / "skills" / "sprint", PLUGINS / "bandit-dev" / "agents"]
+    files = [f for r in roots for f in sorted(r.rglob("*.md"))]
+    hits = [f"{f.relative_to(ROOT)}: {h!r}" for f in files for h in no_ask_hits(f.read_text(encoding="utf-8"))]
+    cases = [("Do not ask questions; take the\nconservative reading.", 2), ("Don’t ask questions.", 1),
+             ("Then decide and proceed.", 1), ("You may decide alone.", 1),
+             ("autonomy (no questions about what the Spec, the plan or the project's rules already answer)", 0),
+             ("- Sprint 2026-w44-e: the prompt said \"do not ask questions\" → fixed.", 0)]
+    bad_cases = [c for c, n in cases if len(no_ask_hits(c)) != n]
+    ok = not hits and not bad_cases
+    report("NA1", ok, f"no 'decide and continue' wording in {len(files)} sprint and agent files ({len(cases)} self-test cases)"
+           if ok else f"tells the executor to decide alone: {'; '.join(hits + bad_cases)} — a gap with no "
+           "convention stops that card and asks (execute.md → Needs a decision)")
+
+
 # ── SP9 · the sprint checker holds a sprint kept in the app to its plan steps and waves (fixtures) ─
 def check_sp9():
     script = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts" / "check_sprint.py"
@@ -1012,6 +1039,7 @@ def main(argv):
     check_sp7()
     check_sp8()
     check_sp9()
+    check_no_decide_and_continue()
     check_recipe()
     check_contract()
     check_credential_guard()

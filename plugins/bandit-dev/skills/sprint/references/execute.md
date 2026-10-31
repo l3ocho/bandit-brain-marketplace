@@ -19,6 +19,7 @@ Contents: Command · Rules · Start · The wave · Sprint status · Board moves 
 - **The ledger is the memory.** A new chat knows nothing: read the ledger, the plan and the sprint (`get_sprints { sprintId }`) before acting, and reconcile the repo with the ledger.
 - **The execution prompt in the sprint folder governs the work itself** (authority, stop-lines, autonomy, gates, handover report). This file adds the board choreography on top.
 - **The user watches the Execution board.** Every card's column must show the truth at every moment.
+- **Nothing is decided out of the user's sight** (The wave, step 4a).
 
 ## Start (every run)
 
@@ -33,6 +34,7 @@ Contents: Command · Rules · Start · The wave · Sprint status · Board moves 
 2. **Set the board for this wave, at the start of EVERY wave, not only the first** (Board moves below). A later wave's cards arrive in `assigned` or `next`; this step is what puts them in `doing`. Procedure: read the sprint's columns (Board moves → Reading the board); for each card of this wave that you are about to work, `update_tasks { items: [{ taskId, executionState: "doing" }] }`; read the board again and show the columns in the wave's opening report. A card that is not in `doing` when you start working it is a failed step. The board never refuses a move to `next`, `doing` or `standby` because of a blocker; only completing a card waits for its blockers. A move that fails for any other reason: comment it on the card, write it under "Needs the user" in the ledger, and put it in the final message.
 3. **Migration tail, before any migration is written.** `python3 ${CLAUDE_SKILL_DIR}/scripts/recipe.py check-tail {tail}` with the tail the plan's Migration tail table names for this wave. Exit 4 (the tail differs) or 3 (a missing key): stop the wave, card Blocked with the output, the line under "Needs the user". A match: one ledger line `Migration tail {tail} matched`. Never pick the next free number. A plan that says "No migrations" checks `none`.
 4. **Work the cards as the plan and execution prompt say.** Tick each card's sub-tasks as each is done, one `manage_subtasks { action: "tick", subtaskId, completed: true }` per tick, not in a batch at the end.
+4a. **Needs a decision.** A question none of the Spec, the plan, its Gaps answered by convention block or the project's rules answers: stop that card (it stays in `doing`), write `Paused: {card}: {reason}` in the ledger's Status line and under Needs the user, comment the reason on the card, and ask the user one question in their terms (what is needed, what it changes, the recommendation). Work goes on with other cards of the wave that do not depend on it; with none, the wave stops there. Resume on the user's answer, recorded in the Decisions log. Until the app shows a paused sprint, the pause lives in the ledger.
 5. **A card whose development is finished** (code, tests, gates passed, board comment written) moves to `standby` for the user's approval. Never complete it. Stage and ledger status become "Delivered awaiting the user's test".
 6. **Re-set the board** after each card finishes (Doing frees a slot; the next card may move up).
 7. **The moment this wave's last card reaches `standby`, move the next wave's cards to `next`** (cap permitting), before any wave-end checks, then read the sprint's columns (Board moves → Reading the board) and confirm every card is where Board moves says. The board is never left showing a finished wave with the next wave still in `assigned`.
@@ -58,6 +60,7 @@ Waves in between move nothing. A `debug` round keeps it in `debugging`.
 | Not yet reached (later waves) | `assigned` |
 | Next wave | `next` as soon as this wave's last card reaches `standby`, cap permitting |
 | This wave, being worked | `doing`, one to three at a time per the plan's parallelism |
+| This wave, paused for the user's decision (The wave, step 4a) | stays in `doing` until the answer |
 | This wave, queued behind a sequential card | `next` |
 | Finished, awaiting the user | `standby` |
 
@@ -71,11 +74,11 @@ Waves in between move nothing. A `debug` round keeps it in `debugging`.
 **No leftovers.** Before this step ends, anything it used to make something else and no longer needs (a draft, a scratch file, a superseded copy, a test fixture, a temporary branch) is archived or deleted, only on proof that its successor exists (`references/homes.md` → Leftovers).
 
 
-1. All of the wave's cards in `standby`, or Blocked with the reason on the card and in the ledger.
+1. All of the wave's cards in `standby`, or Blocked or paused with the reason on the card and in the ledger. A wave with a paused card is not finished: steps 2 to 6 wait for the answer.
 2. Mark the wave done in the ledger's Waves table (date and evidence: cards, how verified) only when every card in it is delivered and verified. A wave with a blocked card is not marked done.
 3. **Last wave only:** when every other wave is done and this wave's last card has reached `standby`, move the sprint to `debugging` (Sprint status), then read the board and show it. Any earlier wave: the sprint's status is not touched; read the board and confirm the next wave's cards are in `next` (The wave, step 7). They move to `doing` at the start of their own wave (one wave per chat), not earlier.
 4. Ledger: At a glance (next wave, next action), milestone log, report section. Then run `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py`; the wave is not finished until it prints OK.
-5. Ledger Status line: `Wave {n} of {total} delivered, awaiting the user's test; next: Wave {n+1}`. Ledger Status per card: `Delivered, awaiting the user's test`.
+5. Ledger Status line: `Wave {n} of {total} delivered, awaiting the user's test; next: Wave {n+1}`. While a card is paused, its `Paused:` line stays the Status line. Ledger Status per card: `Delivered, awaiting the user's test`.
 6. Milestone log: `Wave {n} done: {cards}, {verified how}. Next: Wave {n+1} in a new chat.`
 7. Final message, ten lines at most: what the user can test, what moved, what needs them, and the exact paste for the next wave with its number (`/bandit-dev:sprint execute {sprint} wave {n+1}`), or after the last wave the paste for `debug`.
 

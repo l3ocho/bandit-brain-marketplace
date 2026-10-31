@@ -2,29 +2,39 @@
 
 Part of `bandit-dev:sprint`. Read before running `/bandit-dev:sprint debug {sprint}`. Run in a fresh chat after the last wave is done. The user tests the delivered sprint and brings the adjustments; this chat turns them into verified fixes with the sprint's own documents and diff as context.
 
-Contents: Rules · Read first · Intake · Fix loop · Board · Finishing · Never
+Contents: Rules · Read first · Intake · Combined test · Fix loop · Board · Finishing · Never
 
 ## Rules
 
 - **Documents first, then code.** Read the sprint folder before the diff, so each fix is judged against what was promised.
 - **The user's words are the baseline.** Each adjustment is judged against what they asked for, never against the plan's summary of it.
 - **Every adjustment is a row in the one decision table** (`references/plan.md` → Conventions), plain words, no numbers or codes: what the user saw, the card, the cause, the fix, the recommendation. A fix is applied only on the user's say-so, or under their standing "go with the recommendations".
-- **Bug fixes for defects in delivered cards are not new scope.** New requirements are parked as a card outside the sprint, with one yes or no on whether they join.
+- **The debug list holds defects only:** what does not match its card's Spec or the project's approved design. A visual point is checked against the design before it is called a defect. Anything new (more than the card asked for, a better layout, an idea) goes to the board as a card for a later sprint, through bandit:tasks capture, with no question about joining this one.
 - **Same authority as `execute`:** work on the trunk; pushes follow `execute.md` → Pushing `development`, staging handover included: each debug push refills the staging handover card with the new hash, so every build the user tests on staging comes with its card (a card the user already closed is reopened with `reopen_tasks`, then refilled). Never deploy or touch production: release is its own command.
 
 ## Read first
 
 0. **The ledger and the board win over memory.** A memory note that disagrees with them is stale: use the documents and say so in one line.
 1. The sprint (`get_sprints { sprintId }`: status, cards in run order) and the ledger's Plan steps, Waves and Decisions log.
-2. In the sprint folder: plan, execution prompt, ledger (needs-the-user list, deviations, bug log, decisions taken without the user), the handover report and every brief with its change log.
+2. In the sprint folder: plan, execution prompt, ledger (needs-the-user list, deviations, bug log, conventions applied), the handover report and every brief with its change log.
 3. The code changes: every card's branch and commit from the ledger, then the combined diff against the sprint's starting commit. Read the diff per card, not as one block.
 4. State what each card promised in one line, so adjustments can be checked against it.
 
 ## Intake
 
-1. The user gives adjustments in any form. Restate them in their own words as table rows, each tied to a card and to the document line or acceptance row it breaks, or marked "new".
+1. The user gives adjustments in any form, questions included (a question that ends in a choice is an adjustment). Restate them in their own words as table rows, each tied to a card and to the document line, acceptance row or design point it breaks. One that breaks none is new: a card for a later sprint (Rules).
 2. Investigate read-only first, in parallel where cards differ (the investigator brief in `plan.md`). A live check at this stage writes nothing on existing data; if a case needs data the database lacks, it creates it and removes it afterwards, through `/bandit-dev:testdata` when the project has a `testdata` section (Test data in `plan.md`).
 3. Present one list with a recommendation per row. Ask follow-ups only for what the answers raise.
+
+## Combined test
+
+For a sprint whose Marketplace cards change the helpers along with the app: the user tests both together on staging before either is released.
+
+1. **The test session.** The helpers come from the marketplace repo, loaded by path in a separate session (the repo's own test launcher), never the installed copy; the production board server is blocked and the staging one used.
+2. **Prove it first,** from the session's startup record, not its answer: which plugins loaded and from where, which board server it called. A run that called production does not count: say so and run it again.
+3. **Before each round,** compare the sprint's cards on staging with production: staging is a copy from its last refresh. Bring their columns in line, or name what differs.
+4. Each case the helpers need runs through the test session; its log is the evidence in the Bug log.
+5. Release then ships the app, and the helpers right after it (`release.md` → Marketplace cards).
 
 ## Fix loop
 
@@ -46,7 +56,7 @@ Per approved row, in card order and wave order where they interact:
 **No leftovers.** Before this step ends, anything it used to make something else and no longer needs (a draft, a scratch file, a superseded copy, a test fixture, a temporary branch) is archived or deleted, only on proof that its successor exists (`references/homes.md` → Leftovers). A fix branch is deleted once merged; test data is removed.
 
 
-Every row fixed, parked or declined with the user's word. Ledger Status per card moves to `Tested by the user` for every card the user says they tested; the ledger's Status line becomes `Debug done, ready to release`, and At a glance says debug is done; Milestone log `Debug done: {n} adjustments, {n} parked. Ready to release.` The sprint stays `debugging`; final message of ten lines at most with the paste for `release`.
+Every row fixed or declined with the user's word; anything new filed as a card. Ledger Status per card moves to `Tested by the user` for every card the user says they tested; the ledger's Status line becomes `Debug done, ready to release`, and At a glance says debug is done; Milestone log `Debug done: {n} adjustments, {n} new cards. Ready to release.` The sprint stays `debugging`; final message of ten lines at most with the paste for `release`.
 
 ## Never
 

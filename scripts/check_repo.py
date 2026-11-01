@@ -686,10 +686,13 @@ def check_sp9():
     good = run_script(script, "--vault", str(vault), "--domain", "Record")
     bad = run_script(script, "--vault", str(vault), "--domain", "RecordBad")
     want = ("step 3 (Close the open questions) is marked done with no evidence",
-            "Wave 2 is done while an earlier wave is not", "Wave 2 names GA-3")
-    ok = good[0] == 0 and bad[0] == 1 and all(w in bad[1] for w in want) and bad[1].count("\n- ") == 3
+            "Wave 2 is done while an earlier wave is not", "Wave 2 names GA-3",
+            "missing garden-sprint-summer-plan.md")
+    # Record also holds a sprint still in planning (no plan or prompt yet), which must pass;
+    # RecordBad's planning sprint has step 7 done with no plan, which must fail SP1.
+    ok = good[0] == 0 and bad[0] == 1 and all(w in bad[1] for w in want) and bad[1].count("\n- ") == 4
     report("SP9", ok, "check_sprint passes a record sprint's steps and waves, refuses a step with no evidence, "
-           "a wave out of order and a card outside the table (SP9, SP10)"
+           "a wave out of order, a card outside the table, and a plan missing after step 7; a sprint still in planning passes (SP1, SP9, SP10)"
            if ok else f"fixtures: good → {good[0]} {good[1][-120:]!r}; bad → {bad[0]} {bad[1][-200:]!r}")
 
 

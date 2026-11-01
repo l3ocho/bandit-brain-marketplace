@@ -61,16 +61,16 @@ They are **instruments**, not decoration.
 | 🤖 **Handler** | `claude-code` · `claude-design` · `claude-ai` |
 | 🏊 **Lane** (Technical boards) | `lane/incident` · `lane/issue` · `lane/feature` · `lane/maintenance` · `lane/content` · `lane/tech-debt` |
 | 🪜 **Stage** (Technical boards) | `stage/spec` · `stage/planned` · `stage/ready` |
-| 🏁 **Sprint** (Technical boards) | `sprint/{name}`: the old way, one per sprint planned before sprints were records; it retires with them |
+| 🏁 **Sprint** (Technical boards) | None now: a sprint is a record. A name starting `sprint/` is refused (`TAG_NAME_RESERVED`); the one tag left belongs to a running old-way sprint and goes at its close |
 
 **Sprints are records** on a Technical board, not tags (bandit-dev:sprint plans them).
 `get_sprints { boardId }` lists a board's sprints with their status and open, completed and total
 counts; `get_sprints { sprintId }` (run order) or `list_tasks { sprintId }` gives one sprint's cards;
-`list_tasks { noSprint: true }` the cards in none; `get_task` → `sprint` one card's sprint. **Until the sprint tags retire, read both:** an
-older sprint is still a `sprint/{name}` tag (`list_tasks { view: "sprint" }` or `get_context` →
-`sprints` list them, `list_tasks { tagName: "sprint/{name}" }` gives its cards), so a card is in a
-sprint when a record holds it or it carries a `sprint/*` tag. A `view: "sprint"` refused with another
-code than `MODULE_DISABLED` means the tags have retired: read the records only. **Sprints off**
+`list_tasks { noSprint: true }` the cards in none; `get_task` → `sprint` one card's sprint;
+`get_context` → `sprints` every sprint you can see (id, name, status, board, expected date, open,
+completed and total). `list_tasks` has no sprint view any more. **An old-way sprint still running**
+keeps its `sprint/{name}` tag until its close (`list_tasks { tagName: "sprint/{name}" }` gives its
+cards), so a card is in a sprint when a record holds it or it carries a `sprint/*` tag. **Sprints off**
 (`MODULE_DISABLED`, `references/errors.md`) is never read as "no sprints".
 
 Tags are account-wide, so the vocabulary is the **union** of all six rows. On Technical boards Kind

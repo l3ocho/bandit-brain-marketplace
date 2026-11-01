@@ -137,7 +137,7 @@ updated: 2026-10-20
 
 > [!example]- 🏷️ Tags: three axes, plus the dev tags
 > **Kind** `feature` `issue` `chore` · **Energy** `quick-win` `deep-work` `needs-research` · **Handler** `claude-code` `claude-design` `claude-ai`
-> Technical boards: **Lane** `lane/incident` `lane/issue` `lane/feature` `lane/maintenance` `lane/content` `lane/tech-debt` · **Stage** `stage/spec` → `stage/planned` → `stage/ready` (kept after completion) · **Sprint** a record on the board (`get_sprints`, `manage_sprints`); old sprints `sprint/{name}` (`list_tasks { view: "sprint" }`) until the tags retire
+> Technical boards: **Lane** `lane/incident` `lane/issue` `lane/feature` `lane/maintenance` `lane/content` `lane/tech-debt` · **Stage** `stage/spec` → `stage/planned` → `stage/ready` (kept after completion) · **Sprint** a record on the board (`get_sprints`, `manage_sprints`); an old-way sprint still running keeps its `sprint/{name}` tag until its close
 
 > [!note]- 🛠️ Dev surfaces
 > Claude.ai = high-level: `spec`, `scope`, `stage … ready` (on your approval), `pick-ready`. Claude Code (Project Context from the repo `CLAUDE.md`) = the same plus `plan-tech`, every stage and incident `spec`. Cards stay thin: `Spec` + `Technical plan`, up to L; XL splits. Every field filled (`dev.md` → 🧾 Card fields). A written Spec is locked: changes go in a `Spec change needed:` comment. Project-management cards go in the `PM` column.

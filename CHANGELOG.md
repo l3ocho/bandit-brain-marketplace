@@ -2,7 +2,7 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
-## Unreleased
+## 0.11.0 · 2026-11-01
 
 ### Added
 - **`bandit-dev:sprint` works on real sprints.** `plan` creates the sprint in the app, adds its cards in run order and moves it to Ready to execute at commit; `execute` and `run` move it to Executing and, after the last wave, Debugging; `close` closes it. No sprint card, no sprint tag, no date stamped on the cards: each keeps its own. Commands name the sprint (`execute {sprint} wave 2`). Planning steps and wave progress live in the ledger's Plan steps and Waves tables. The order gate reads sprint blocking.

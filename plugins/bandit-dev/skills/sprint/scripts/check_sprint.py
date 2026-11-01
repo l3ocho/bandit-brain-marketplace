@@ -3,6 +3,7 @@
 
 Rules (each one a failure, not a warning):
   SP1  every sprint folder has its plan, handover prompt and ledger, named {project}-sprint-{name}-{record}.md
+       (a sprint kept in the app: the ledger from plan step 1, the plan once step 7 is done, the prompt once committed)
   SP2  a brief whose board-task is a card of a sprint (from the ledger's wave table) lives inside that sprint folder
   SP3  no two .md files in the domain share a filename (Obsidian links resolve by filename)
   SP5  a project with sprint folders keeps only its hub note {project}.md, its sprint-* folders and planning/ (WBS, project plan, architecture) at its root
@@ -108,6 +109,23 @@ def check_record_ledger(rel_folder, text: str, table_cards: set) -> list[str]:
     return errors
 
 
+def records_due(ledger: Path) -> tuple:
+    """SP1: a sprint kept in the app writes its ledger at plan step 1, its plan at step 7 and its
+    execution prompt at step 12, so a folder still in planning holds only what is due so far."""
+    if not ledger.exists():
+        return RECORDS
+    text = ledger.read_text(errors="replace")
+    if not SPRINT_RECORD.search(text):
+        return RECORDS
+    done = {int(n) for n, _, d, _ in STEP_ROW.findall(section(text, "Plan steps")) if d}
+    due = ["progress"]
+    if 7 in done or COMMITTED.search(text):
+        due.append("plan")
+    if COMMITTED.search(text):
+        due.append("handover-prompt")
+    return tuple(due)
+
+
 def sprint_folders(domain: Path) -> list[tuple[str, Path]]:
     found = []
     for base in (domain / "Projects", domain / "_archive" / "Projects"):
@@ -181,11 +199,11 @@ def check(domain: Path) -> list[str]:
     for project, folder in sprint_folders(domain):
         name = folder.name[len("sprint-"):]
         rel_folder = folder.relative_to(domain)
-        for record in RECORDS:
+        ledger = folder / f"{project}-sprint-{name}-progress.md"
+        for record in records_due(ledger):
             expected = folder / f"{project}-sprint-{name}-{record}.md"
             if not expected.exists():
                 errors.append(f"SP1 {rel_folder}: missing {expected.name}")
-        ledger = folder / f"{project}-sprint-{name}-progress.md"
         if not ledger.exists():
             continue
         if COMMITTED.search(ledger.read_text(errors="replace")) and not any(

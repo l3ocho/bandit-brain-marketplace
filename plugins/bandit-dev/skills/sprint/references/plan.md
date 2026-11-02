@@ -83,7 +83,7 @@ Ready means: Spec clear with no open questions, acceptance testable, dependencie
 
 ## 10 · Approval gate
 
-Present the state in a short summary (cards, waves, plan, risks, what needs the user, and the Gaps answered by convention block as one short list). Take the user's explicit approval or return to the step it names. Quote the approval in the ledger's Decisions log and the step's row. If the user's wording is ambiguous ("approved" mid-list), state the reading you applied in one line. **An urgency remark ("I want this today", "go fast") is not an approval of the plan**: put the summary in front of them and ask one yes or no. A date they give is used as the sprint date; it does not commit the sprint.
+Present the state in a short summary (cards, waves, plan, risks, what needs the user, and the Gaps answered by convention block as one short list). Take the user's explicit approval or return to the step it names. Quote the approval in the ledger's Decisions log and the step's row. If the user's wording is ambiguous ("approved" mid-list), state the reading you applied in one line. **An urgency remark ("I want this today", "go fast") is not an approval of the plan**: put the summary in front of them and ask one yes or no. A date they give is used as the sprint date; it does not commit the sprint. **No date given: the sprint date is this week's Sunday** (the week runs Monday to Sunday, from the session date).
 
 ## 11 · Independent plan review
 
@@ -108,12 +108,12 @@ blocker is open. `run` and `execute` refuse a sprint whose step 11 row is not do
 
 ## 12 · Commit the sprint
 
-1. **Batch cards:** assign each to the user (the signed-in member, live lookup) and set `stage/ready`. No tag and no due date: each card keeps its own (the sprint's date is the sprint's).
+1. **Batch cards:** assign each to the user (the signed-in member, live lookup) and set `stage/ready`. No tag. **A card with no due date gets the sprint date** (`update_tasks { dueDate }`); a card with its own due date keeps it. A refused date names the links responsible: the card keeps no date and is named as not on the Execution board yet, with the reason. The Execution board shows an open card only by its own due date, on or before this week's Sunday; the sprint's date is not read there.
 2. **The sprint:** `manage_sprints { action: "update", expectedDate }` = the sprint date, then `move` to `ready_to_execute` (it needs the date and a card; a refusal names what is missing). Read it back.
 3. **Ledger:** the **Waves** table, one row per wave in order (`| Wave {n} | {card ids} | | |`), the Decisions log, `Committed: {date}` in At a glance (the line SP7, SP9 and SP10 read; SP9 then needs steps 1 to 11 done) and the Status line `Committed {date}; next: Wave 1`. Write the execution prompt (templates).
 4. **Briefs and leftovers:** move every batch brief into the sprint folder (`Projects/{slug}/sprint-{name}/`) and archive every source the planning consumed (inbox drafts, spec notes, a superseded WBS draft; `references/homes.md` → Leftovers).
 5. **Create the two handover cards** (unless the plan dropped them): one `create_tasks` call on the `handover.board` board, the staging card in `handover.staging.column` and the production card in `handover.production.column` (resolved live by name), titles and descriptions from `references/templates.md` → Handover cards, in their not-ready form; write `Staging handover: {short id}` and `Production handover: {short id}` in At a glance.
-6. **Seed the Execution board:** every batch card to `assigned` with `update_tasks { items: [{ taskId, executionState: "assigned" }, …] }`, reading `results` per card, so the user sees the whole sprint before work starts. Verify with `get_sprints { sprintId }` and the sprint's columns (`execute.md` → Reading the board).
+6. **Seed the Execution board:** every batch card to `assigned` with `update_tasks { items: [{ taskId, executionState: "assigned" }, …] }`, reading `results` per card, so the user sees the whole sprint before work starts. **Verify by date, not by column:** `get_task` each batch card and compare its due date with this week's Sunday. On or before it: on the Execution board. After it, or none: not on the board yet. The step's row lists every card and where it stands; the sprint's columns alone never prove the board shows a card.
 7. Run `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py` and paste its output into the Milestone log; only once it prints OK, mark step 12's row done ("committed, checker OK").
 
 ## Investigator brief
@@ -140,7 +140,7 @@ A live-browser investigator **at planning time** is told which controls write (s
 
 ## Plan final message
 
-End of step 12: ten lines at most, and one exact paste per wave, each naming the sprint and the wave: `/bandit-dev:sprint execute {sprint} wave 1`, `... wave 2`, and so on, then `/bandit-dev:sprint debug {sprint}` and `/bandit-dev:sprint close {sprint}`. Never one generic paste for every wave.
+End of step 12: ten lines at most. A sprint date after this week's Sunday: say the cards stay off the Execution board until that week. Name every card not on the board yet, with why. Then one exact paste per wave, each naming the sprint and the wave: `/bandit-dev:sprint execute {sprint} wave 1`, `... wave 2`, and so on, then `/bandit-dev:sprint debug {sprint}` and `/bandit-dev:sprint close {sprint}`. Never one generic paste for every wave.
 
 ## Handover
 

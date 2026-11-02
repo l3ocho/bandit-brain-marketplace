@@ -443,7 +443,7 @@ The order is `project` → `wbs` → the board (`/bandit:tasks load`, or the dev
 
 ### 🏃 bandit-dev:sprint
 
-> [!abstract] Turns a set of existing cards into one planned, approved sprint, then runs, debugs, releases and closes it. The sprint is a real sprint in the app (status, cards in run order); every gate leaves evidence in its ledger. No sprint card, no tag, no date stamped on the cards. A sprint card instead (planned the old way) runs by `old-way.md`
+> [!abstract] Turns a set of existing cards into one planned, approved sprint, then runs, debugs, releases and closes it. The sprint is a real sprint in the app (status, cards in run order); every gate leaves evidence in its ledger. No sprint card, no tag; cards with no due date get the sprint date at commit (this week's Sunday when none is given), so the Execution board shows them. A sprint card instead (planned the old way) runs by `old-way.md`
 > `plugin` · Claude Code only, from the repo · needs `dev: true`, a `board:` project and `prefix` in the repo `CLAUDE.md` Project Context · 💬 "plan a sprint", "run the waves", "debug the sprint", "close the sprint"
 
 | Command                        | ⚙️ Modifiers                                          | Does                                                                                                                                                                                       |        | 📚 Reads      |

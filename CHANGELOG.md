@@ -5,6 +5,7 @@ All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace s
 ## Unreleased
 
 ### Added
+- **Design step for screen changes** (BB-239). The pipeline gets a Design stage between clarify and spec (stage 3; the stages after it move up by one, eleven in all) for cards that change a screen; the rest skip it. It runs through Claude Design inside Claude Code: `/design-sync` once per project loads the design system from the code, `/design` makes the card's design, and the design is checked against the project's recorded traps before it is linked. The card carries `Design: {link}` beside `Brief:` and the user's approval as a comment. `/bandit:tasks spec` and `stage` refuse `stage/spec` on a screen-changing card without both, and sprint planning's Spec check makes it a fix row. The old standalone design site's design system copy is no longer used. Decision RS10.
 - **Checker rule EX1:** the sprint plan's commit step keeps dating undated cards and checking each card's due date against this week's Sunday; it fails if the check falls back to columns.
 
 ### Changed

@@ -110,7 +110,7 @@ runbook needs no plan note: its `Technical plan` carries `Runbook: {repo path} �
    `get_context → laneTemplates` (`references/dev.md` → Card sections).
    Effort XL → propose the split into L-or-smaller cards before anything is created (B7).
 5. **On yes:** one `create_tasks` entry with `boardId` and every Card fields value (subtasks and
-   dependencies included). Read its result (refused → report `code`, `reason` and `field`), then `get_task` and check it.
+   dependencies included); a screen-changing card gets `stage/spec` only through the Design step's gate. Read its result (refused → report `code`, `reason` and `field`), then `get_task` and check it.
    **Updating an existing card** (a merge match, or a parked item triage just moved into its
    column): `get_task` → fill missing fields → write `Spec` only where it's empty; a Spec with text
    is locked (`references/dev.md` → Spec lock): a settled change is written straight away and
@@ -121,6 +121,25 @@ runbook needs no plan note: its `Technical plan` carries `Runbook: {repo path} �
 7. **WBS link:** the card cites a `WBS-X.Y.Z` → hand bandit:notes one approval row adding the
    Card links row to `{slug}-wbs.md` (bandit:notes owns the write and the path, bandit:plan the
    format).
+
+### Design step — screen-changing cards, before `stage/spec`
+
+Pipeline stage 3 (`docs/pipeline.md` in the marketplace). Cards that change no screen skip it.
+
+1. **Which cards.** A card changes a screen when its Outcome or Scope in changes what a page shows
+   or how it looks. Read it from the card's own words; unclear → ask the user once, yes or no.
+2. **Route: Claude Design inside Claude Code**, from the app repo, starting from the real page.
+   **Once per project**, `/design-sync` loads the design system from the code; run it again when the
+   theme changes. Then `/design` makes the card's design. The design system copies on the old
+   standalone design site are not used (the site closes 2026-12-14); nothing there is deleted.
+3. **Trap check before linking.** Check the design against the project's recorded traps (its
+   `CLAUDE.md` and the docs it names). A design that hits one is changed before it is linked.
+4. **Link and approval.** The design's link goes in the Spec's Source block, `<p>Design: {link}</p>`
+   beside `Brief:`. The user approves it explicitly; record `Design approved {date}: {link}` as a card
+   comment. Neither is assumed.
+5. **Gate.** On a screen-changing card, `spec` and `stage … spec` write `stage/spec` only when the
+   `Design:` line and the approval comment are both there. Missing → the card keeps its lane with no
+   stage, and the report names the design step as owed.
 
 ### `/bandit:tasks spec reconcile {card…}` — bring locked Specs in line with decisions
 
@@ -181,7 +200,8 @@ Steps 1 and 5 are the **card-write rules** bandit-dev:sprint calls for a sprint'
 
 1. **Role:** `ready` is set only on the user's explicit approval, on either surface (or by the user by hand).
    Claude.ai sets nothing else. Claude Code sets `spec` and `planned` on its own judgement.
-2. `get_task` → refuse on a `lane/incident` card.
+2. `get_task` → refuse on a `lane/incident` card. **`spec`** on a screen-changing card: refuse without its
+   `Design:` line and approval comment (Design step, gate), and name the step owed.
 3. **`planned`:** its plan note must be filed (bandit:notes lookup of the filename in `Technical
    plan`), or, on a recurring card, a `Runbook:` line must name the runbook (**🗂️ Record homes**).
    A **shared sprint plan** counts: one filed plan note whose filename sits in the `Technical plan`

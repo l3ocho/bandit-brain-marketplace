@@ -44,7 +44,7 @@ project whose board is Workflow is a bandit:audit finding (S9), fixed by the dev
 
 | Stage | Means | Set by |
 |---|---|---|
-| `stage/spec` | Scope agreed, `Spec` written | `spec` |
+| `stage/spec` | Scope agreed, `Spec` written; a screen-changing card also has its approved design linked | `spec` |
 | `stage/planned` | Plan note reviewed and filed by the user | `stage … planned`, after `/bandit:notes file` |
 | `stage/ready` | The user approved; a sprint candidate | `stage … ready`, or the user by hand |
 
@@ -67,7 +67,7 @@ no description pre-fills the same text.
 
 | `<h3>` | Holds | From the template? |
 |---|---|---|
-| Source | `<p>Claude.ai</p>` or `<p>Claude Code</p>`, then `<p>Brief: {filename}</p>`: filename only, never a folder | Added |
+| Source | `<p>Claude.ai</p>` or `<p>Claude Code</p>`, then `<p>Brief: {filename}</p>`: filename only, never a folder; a screen-changing card adds `<p>Design: {link}</p>` (`dev-workflow.md` → Design step) | Added |
 | Outcome | What is true when done, one or two sentences | ✅ |
 | Lane | The `lane/*` value | ✅ |
 | Problem | **`lane/issue` only:** the wrong behaviour and where it comes from | Added |
@@ -121,7 +121,7 @@ Every dev card is written **complete**, in one `create_tasks` entry, then read b
 | Field | Value |
 |---|---|
 | `boardColumnId` | The **area column**: the module or page the change touches. `App` only when the change is shell-wide. Spans two, or no column fits → ask the user. Never create a column for it (columns come from `load`, the design conversation, or the PM step of **🏗️ Dev board shape**). **Project-management cards** (sprint planning, an old-way sprint card, planning checklists, process work) go in the `PM` column instead |
-| `tagIds` | `lane/*` + `stage/spec` (none on Incident) + one Handler tag + one Energy tag (`references/board.md` → Tags), ids resolved live |
+| `tagIds` | `lane/*` + `stage/spec` (none on Incident; on a screen-changing card only once its design is linked and approved) + one Handler tag + one Energy tag (`references/board.md` → Tags), ids resolved live |
 | `priority` | Always set: urgency only |
 | `complexity` | Always set |
 | `effort` | Always set. Claude.ai's is a first estimate; `plan-tech` confirms it. Max L (B7, `references/dev-workflow.md`) |

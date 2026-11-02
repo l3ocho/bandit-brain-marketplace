@@ -2,7 +2,7 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
-## Unreleased
+## 0.12.1 · 2026-11-02
 
 ### Fixed
 - **The pipeline puts the design step where it runs:** stage 3 is now Triage and specify, stage 4 Design. `/bandit:tasks spec` writes the card first; the design is made, linked and approved after it, and gates `stage/spec`. Claude.ai runs stages 1–3. The Tasks helper and decision RS10 say the same.

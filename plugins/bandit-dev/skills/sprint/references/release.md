@@ -1,7 +1,7 @@
 # 🚀 The release cycle
 
 Part of `bandit-dev:sprint`. Read before running `/bandit-dev:sprint release {sprint}`. Run after
-debug and before close (pipeline stage 9). **Releasing is the user's option**: a sprint may close
+debug and before close (pipeline stage 10). **Releasing is the user's option**: a sprint may close
 with no app release, and a later release covers it (Covering, below). The recipe is the project's
 `bandit.yaml` (`release`, `branches`, and the optional `migrations.check` and `staging.refresh`), read through
 `scripts/recipe.py`; this file holds the gate, never the project's commands.

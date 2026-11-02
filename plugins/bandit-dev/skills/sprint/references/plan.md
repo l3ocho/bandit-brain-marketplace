@@ -32,7 +32,7 @@ Contents: Conventions · Steps 1 to 12 · Investigator brief · Handover
 
 For each card: `get_task`; find its brief (bandit:notes lookup by filename from the Spec's `Brief:` line); compare card and brief; check Outcome, Scope in and out, Acceptance, Decisions and Open questions exist; check referenced cards, files and idea ids resolve; note sub-tasks, tags, effort, complexity, lane and stage.
 
-**Fix rows for:** missing sections, card and brief disagreement, an unresolved reference, a `Brief:` line carrying a folder (filename only). No fix row for Spec or brief wording older than a decision on the card: the decision wins.
+**Fix rows for:** missing sections, card and brief disagreement, an unresolved reference, a `Brief:` line carrying a folder (filename only), a screen-changing card without its linked, approved design (bandit:tasks `dev-workflow.md` → Design step). No fix row for Spec or brief wording older than a decision on the card: the decision wins.
 
 ## 3 · Close the open questions
 

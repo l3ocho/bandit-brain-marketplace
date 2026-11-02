@@ -652,6 +652,22 @@ def check_sp8():
            if ok else f"own → {got['own'][0]}, other → {got['other'][0]} {got['other'][1][-120:]!r}")
 
 
+# ── EX1 · the sprint commit proves the Execution board by due date, not by column ─
+def check_execution_by_date():
+    plan = (PLUGINS / "bandit-dev" / "skills" / "sprint" / "references" / "plan.md").read_text(encoding="utf-8")
+    step = plan.split("## 12 · Commit the sprint", 1)[-1].split("\n## ", 1)[0]
+    flat = " ".join(step.split())
+    missing = [w for w in ("A card with no due date gets the sprint date", "this week's Sunday",
+                           "Verify by date, not by column") if w not in flat]
+    old = [w for w in ("No tag and no due date", "keeps its own (the sprint's date is the sprint's)")
+           if w in flat]
+    sunday = "No date given: the sprint date is this week's Sunday" in " ".join(plan.split())
+    ok = not missing and not old and sunday
+    report("EX1", ok, "plan step 12 dates undated cards and checks each due date against this week's Sunday"
+           if ok else f"plan step 12 lost the Execution board check: missing {missing}, old wording {old}, "
+           f"Sunday default {'present' if sunday else 'missing'} (BB-282, decision RS9)")
+
+
 # ── NA1 · the sprint helper never tells an executor to decide and continue without asking ─
 NO_ASK_RE = re.compile(r"conservative\s+reading|cautious\s+reading|do(?:n['’]t|\s+not)\s+ask(?:\s+any)?\s+questions"
                        r"|never\s+ask\s+the\s+user|decide\s+(?:and\s+(?:continue|proceed)|alone)", re.I)
@@ -1043,6 +1059,7 @@ def main(argv):
     check_sp8()
     check_sp9()
     check_no_decide_and_continue()
+    check_execution_by_date()
     check_recipe()
     check_contract()
     check_credential_guard()

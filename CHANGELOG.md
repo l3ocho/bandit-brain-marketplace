@@ -4,7 +4,11 @@ All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace s
 
 ## Unreleased
 
+### Added
+- **Checker rule EX1:** the sprint plan's commit step keeps dating undated cards and checking each card's due date against this week's Sunday; it fails if the check falls back to columns.
+
 ### Changed
+- **A committed sprint shows on the Execution board** (BB-282). The board shows an open card only by its own due date, up to this week's Sunday, and never reads the sprint's date. So with no date given the sprint date is this week's Sunday, and at commit every sprint card with no due date gets the sprint date; a card with its own date keeps it. The commit step checks each card's due date against this week's Sunday instead of reading columns, and the final message names every card not on the board yet. Decision RS9 (supersedes in part "cards keep their own due dates").
 - **Sprint planning sticks to the Spec** (BB-278). The Sprint helper opens with the rule: stick to the Spec unless the user asks you to be "creative"; planning means planning the execution, with the dependencies addressed in the plan. Investigators report dependencies and risks, never questions for the user. Step 3 asks only the open questions the cards list, and no longer stops when there are none. A decision row exists only when a Spec cannot be built as written. Step 9 no longer reconciles Specs or updates briefs: decisions stay as card comments, and `/bandit:tasks spec reconcile` runs only on the user's word. Planning stops at step 10 (and step 3 for a card's open question). The plan reviewer judges against the Spec and the dependencies only, with no questions section. Decision RS8.
 
 ## 0.11.0 · 2026-11-01

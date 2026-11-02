@@ -14,7 +14,7 @@ named after `/bandit:tasks triage`.
 
 **Sprints are bandit-dev:sprint's** (Claude Code): its 12 planning steps, the sprint in the app (its
 cards, run order, expected date and status), seeding the batch to Assigned, and the ledger's steps and
-waves. A sprint stamps no date on its cards: each keeps its own. It uses the `plan-tech` card-write rules (drift check, read
+waves. A sprint gives its date only to cards with no due date, at commit; a card with its own date keeps it. It uses the `plan-tech` card-write rules (drift check, read
 before writing, show old and new before replacing) from its own steps instead of restating them, and
 edits no Spec or brief unless the user asks (`spec reconcile` runs only on the user's word).
 `pick-ready` and `/bandit:tasks week` only pick and date ready work; neither plans a sprint.

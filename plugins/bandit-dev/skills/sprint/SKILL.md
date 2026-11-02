@@ -8,7 +8,8 @@ description: "Plans, runs, debugs and closes a sprint on a dev project's Bandit 
 Turns a set of existing cards into one planned, approved sprint that a fresh chat can execute, test
 and debug from documents alone. The cards stay on the board; the sprint is a **real sprint** in the
 app (its status and its ordered cards) and adds a shared plan, a live ledger and a handover in the
-vault. No sprint card, no sprint tag, no date stamped on the cards: they keep their own.
+vault. No sprint card, no sprint tag. A card with no due date gets the sprint date at commit, so the
+Execution board shows it; a card with its own date keeps it.
 
 > **The standard.** Every gate leaves evidence in the sprint's ledger and in the app's sprint. If this
 > chat vanished, the next one could continue from those two places.
@@ -75,7 +76,7 @@ evidence in its row**; the checker (SP9, SP10) refuses a done row without it.
 | 9 | Definition of ready, per card | Each card checked; stage moved on; fix rows for failures |
 | 10 | Approval gate | The user's explicit approval, quoted in the ledger |
 | 11 | Independent plan review | The `plan-reviewer` agent's record in the sprint folder; majors applied; no blocker open (the only stop) |
-| 12 | Commit the sprint | Assignee, the sprint's expected date, Ready to execute, execution prompt, ledger with `Committed:` and its Waves table, the two handover cards |
+| 12 | Commit the sprint | Assignee, undated cards given the sprint date and checked against this week's Sunday, the sprint's expected date, Ready to execute, execution prompt, ledger with `Committed:` and its Waves table, the two handover cards |
 
 ## 🔒 Hard rules
 

@@ -18,7 +18,7 @@ The third is the rule that enforces it, if one does.
 | `plugins/*/.claude-plugin/plugin.json` | `.claude-plugin/marketplace.json` · `README.md` · `docs/install.md` | 🔒 M1 |
 | `.claude-plugin/marketplace.json` | `README.md` · `docs/install.md` | 🔒 M1 |
 | `plugins/bandit/skills/tasks/references/*.md` | `plugins/bandit/skills/tasks/references/errors.md` · `plugins/bandit-dev/skills/sprint/references/*.md` | — |
-| `plugins/bandit-dev/skills/sprint/references/*.md` | `docs/pipeline.md` · `docs/cheat-sheet.md` | — |
+| `plugins/bandit-dev/skills/sprint/references/*.md` | `docs/pipeline.md` · `docs/cheat-sheet.md` | 🔒 EX1 (plan step 12 checks the Execution board by date) |
 | `plugins/bandit/skills/project/references/project-context.md` | `templates/instructions/*.md` · `plugins/bandit/skills/project/assets/instructions/*.md` · `CLAUDE.md` · `plugins/bandit/skills/finance/references/scope.md` | 🔒 AT2 |
 | `templates/instructions/*.md` | `plugins/bandit/skills/project/assets/instructions/*.md` | 🔒 L5 |
 | `plugins/bandit/skills/project/references/audit.md` | `docs/cheat-sheet.md` | 🔒 AT2 (tool list) |

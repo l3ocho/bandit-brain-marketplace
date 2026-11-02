@@ -17,7 +17,7 @@ Contents: Interview and pace · Scope · Cards and Specs · Agents and checks ·
 
 ## Scope
 
-- Slipped invented rules (a move-out guard, a child comment ban, a rule exception) into "applied defaults" the user never saw, then asked about them for an hour → add nothing not asked for; anything code forces is a table row that differs, before it is written anywhere.
+- Slipped invented rules (a move-out guard, a child comment ban, a rule exception) into "applied defaults" the user never saw, then asked about them for an hour → add nothing not asked for; a dependency the code forces is addressed in the plan; a row only when the Spec cannot be built as written.
 - Put decisions in three formats (old/new Spec lines, "calls", numbered fix rows) with cross-references → one decision table, `Issue | Recommendation | Different from what you requested? | If yes, how?`, plain words, no numbers.
 - Answered "what is missing" with sections, housekeeping and recaps → the missing list only.
 - Ran the same greps while two investigators were already on it → once delegated, wait for the reports.
@@ -27,13 +27,12 @@ Contents: Interview and pace · Scope · Cards and Specs · Agents and checks ·
 ## Cards and Specs
 
 - Sized a card XL and found the L ceiling at the gate → check the boundary at step 4 and split then; the new card joins the sprint and blocks it.
-- Specs still listed answered questions because the decisions lived in comments and the Spec was locked → collect decisions at step 3 and reconcile each Spec once at step 9, old and new in one table.
 - Rewrote descriptions from memory after someone edited the Spec (a parenthetical on the `Brief:` line) → `get_task` right before every write; on `SPEC_LOCKED` re-read, never override to get past it.
 - Wrote `Brief:` lines with a folder in brackets → filename only.
 - `tagIds` in `update_tasks` replaced the whole set → read, merge, write.
 - Sub-tasks added in parallel came out reversed → an added line always lands at the top: create the checklist with the card (`create_tasks` `subtasks`), or reorder after adds, then read back.
 - A due date given as "tomorrow" → convert to an absolute date from the session date and write it once.
-- A card's `Scope out` stated a wrong fact (new Finance accounts "private by default") → spot-check any factual line a card makes against code.
+- A card's `Scope out` stated a wrong fact (new Finance accounts "private by default") → spot-check any factual line a card makes against code, for the plan; never turn it into a Spec change.
 
 ## Agents and checks
 

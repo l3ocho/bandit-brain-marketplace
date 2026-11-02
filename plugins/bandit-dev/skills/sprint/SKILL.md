@@ -13,6 +13,12 @@ vault. No sprint card, no sprint tag, no date stamped on the cards: they keep th
 > **The standard.** Every gate leaves evidence in the sprint's ledger and in the app's sprint. If this
 > chat vanished, the next one could continue from those two places.
 
+> **Stick to the Spec unless the user asks you to be "creative".** A card's Spec is what gets
+> built. Planning means planning its execution: analyse the dependencies and address them in the
+> plan. Never change, improve or question a Spec. What an investigation finds is settled from the
+> Spec, the card's decisions or how the product already works, and goes in the plan; it is not a
+> question for the user.
+
 ## 🧭 Router
 
 `/bandit-dev:sprint <command> {sprint}`, `{sprint}` the sprint's name on the home board (resolved
@@ -60,13 +66,13 @@ evidence in its row**; the checker (SP9, SP10) refuses a done row without it.
 |---|---|---|
 | 1 | Select and freeze the batch | The sprint created in Planning with the batch as its cards, in no other sprint; the previous open sprint blocks it |
 | 2 | Spec completeness check, per card | Every card read against its brief; gaps as fix rows |
-| 3 | Close the open questions | One interview answered and recorded |
+| 3 | Close the open questions | The open questions the cards list answered and recorded; none listed: "none", no stop |
 | 4 | Size and classify | Every card at most L (XL split), lane and boundaries checked |
 | 5 | Cross-card analysis | Migrations, shared files, hidden order, docs regeneration written down |
 | 6 | Sequence | Waves with reasons, split with the WBS (`/bandit:plan wbs`, sprint mode) |
 | 7 | Write the one technical plan | Plan note filed; every card's Technical plan filled |
 | 8 | Risk and rollback | Per card and for the sprint, in the plan |
-| 9 | Definition of ready, per card | Each Spec reconciled; stage moved on; fix rows for failures |
+| 9 | Definition of ready, per card | Each card checked; stage moved on; fix rows for failures |
 | 10 | Approval gate | The user's explicit approval, quoted in the ledger |
 | 11 | Independent plan review | The `plan-reviewer` agent's record in the sprint folder; majors applied; no blocker open (the only stop) |
 | 12 | Commit the sprint | Assignee, the sprint's expected date, Ready to execute, execution prompt, ledger with `Committed:` and its Waves table, the two handover cards |

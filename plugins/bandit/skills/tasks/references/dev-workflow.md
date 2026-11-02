@@ -14,8 +14,9 @@ named after `/bandit:tasks triage`.
 
 **Sprints are bandit-dev:sprint's** (Claude Code): its 12 planning steps, the sprint in the app (its
 cards, run order, expected date and status), seeding the batch to Assigned, and the ledger's steps and
-waves. A sprint stamps no date on its cards: each keeps its own. It calls `spec reconcile` and the `plan-tech` card-write rules (drift check, read
-before writing, show old and new before replacing) from its own steps instead of restating them.
+waves. A sprint stamps no date on its cards: each keeps its own. It uses the `plan-tech` card-write rules (drift check, read
+before writing, show old and new before replacing) from its own steps instead of restating them, and
+edits no Spec or brief unless the user asks (`spec reconcile` runs only on the user's word).
 `pick-ready` and `/bandit:tasks week` only pick and date ready work; neither plans a sprint.
 
 ---
@@ -124,7 +125,7 @@ runbook needs no plan note: its `Technical plan` carries `Runbook: {repo path} �
 ### `/bandit:tasks spec reconcile {card…}` — bring locked Specs in line with decisions
 
 For cards whose Spec is locked and has fallen behind decisions taken since (in comments, the brief,
-the sprint's ledger or an old-way sprint card). bandit-dev:sprint calls it from its planning steps.
+the sprint's ledger or an old-way sprint card). Run only when the user asks; sprint planning never calls it.
 
 1. **Gate and role** (above). Per card: `get_task` → current `Spec`, comments, linked brief.
 2. Build the new `Spec` from the same template headings: answered questions move into Decisions,

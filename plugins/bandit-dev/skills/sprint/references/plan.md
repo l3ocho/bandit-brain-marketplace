@@ -8,12 +8,12 @@ Contents: Conventions · Steps 1 to 12 · Investigator brief · Handover
 
 - **Order and evidence.** Do the step, then fill its row in the ledger's **Plan steps** table (date and evidence: what was found and done, in a few lines, with ids). The ledger exists from step 1, so a lost chat resumes from it.
 - **Read before every write.** `get_task` right before any description or tag write. A card changed since the last read: use the new text.
-- **Decisions to the user: one table, one format.** Columns exactly `Issue | Recommendation | Different from what you requested? | If yes, how?`. Plain words in every cell; no row numbers, no references to other rows or earlier messages. Spec changes, open questions and fix rows all use it; never a second format.
+- **Decisions to the user: one table, one format.** Columns exactly `Issue | Recommendation | Different from what you requested? | If yes, how?`. Plain words in every cell; no row numbers, no references to other rows or earlier messages. Open questions, a Spec that cannot be built as written, and fix rows all use it; never a second format.
 - **The user's original request is the baseline.** Compare against their own words (the card's original-request comment, the brief), never against an earlier summary of yours. Only rows that differ from the request need a decision; the rest are applied without asking.
-- **Add nothing the user did not ask for.** No invented rule, no "applied unless you object" block. A gap is answered only by a **convention**: the app keeps how it works today, or the project's own rule says so (its `CLAUDE.md`, `.claude` folder or docs). Each such gap is one line in the plan's **Gaps answered by convention** block, shown at approval. A rule the code forces goes in the table as a row that differs, saying why; it is never written into a plan or card before the user's yes.
+- **Add nothing the user did not ask for.** No invented rule, no "applied unless you object" block. A gap is answered only by a **convention**: the app keeps how it works today, or the project's own rule says so (its `CLAUDE.md`, `.claude` folder or docs). Each such gap is one line in the plan's **Gaps answered by convention** block, shown at approval. A dependency the code forces goes in the plan, addressed there. A decision row exists only when the Spec truly cannot be built as written, saying why.
 - **Questions in the user's terms.** Each says what is needed and what it changes for the user, with the recommendation, briefly. Not asked: technical choices (they are the executor's), and anything the project's design handover already fixes, small fit adjustments included.
 - **"What is missing"** is answered with that list only: each missing item and who owes it. No summaries, no housekeeping, no recap.
-- **Decisions** go on the card they concern as a comment starting `Planning decisions {date}`, and into the Spec at step 9.
+- **Decisions** go on the card they concern as a comment starting `Planning decisions {date}`. The Spec and the brief are edited only when the user asks.
 - **Date.** Today is in the session context. Convert "tomorrow" to an absolute date.
 
 ## 1 · Select and freeze the batch
@@ -32,15 +32,15 @@ Contents: Conventions · Steps 1 to 12 · Investigator brief · Handover
 
 For each card: `get_task`; find its brief (bandit:notes lookup by filename from the Spec's `Brief:` line); compare card and brief; check Outcome, Scope in and out, Acceptance, Decisions and Open questions exist; check referenced cards, files and idea ids resolve; note sub-tasks, tags, effort, complexity, lane and stage.
 
-**Fix rows for:** missing sections, card and brief disagreement, an unresolved reference, a `Brief:` line carrying a folder (filename only).
+**Fix rows for:** missing sections, card and brief disagreement, an unresolved reference, a `Brief:` line carrying a folder (filename only). No fix row for Spec or brief wording older than a decision on the card: the decision wins.
 
 ## 3 · Close the open questions
 
-0. **The project's own rules first.** Read the cards and the batch's intended approach against the project's settings and docs (its `CLAUDE.md`, its `.claude` folder, its docs; `references/homes.md` → Owners). A conflict between them and a card, or the plan, is a question. Nothing from them is copied into the plan: it names the doc.
-1. Collect every open question across the batch, plus questions the checks raised. **Order:** conflicts first (between cards, and with what is already built: other features, dependencies), then each card's own gaps, asked as Conventions says. A gap a convention answers goes in the Gaps answered by convention block, not the list.
+0. **The project's own rules first.** Read the cards and the batch's intended approach against the project's settings and docs (its `CLAUDE.md`, its `.claude` folder, its docs; `references/homes.md` → Owners). A conflict is addressed in the plan; it is a question only when the Spec cannot be built as written. Nothing from them is copied into the plan: it names the doc.
+1. Collect the open questions the cards themselves list, and only those. None listed: the step's row says "none" and planning goes on without stopping. **Order:** conflicts first (between cards, and with what is already built), then each card's own, asked as Conventions says. What a check or an investigation finds is settled from the Spec, the card's decisions or how the product works today, and goes in the plan.
 2. **Investigate first, read-only, in parallel**: one investigator per card (brief below). One live-browser check at a time, only for what code cannot answer (touch behaviour, what the UI shows).
 3. **Spot-check** the decisive facts in code before they go into a card.
-4. Present **one decision table** (Conventions), grouped by card. Decisions that need the user only; nothing is applied that the Gaps answered by convention block does not list. "Go with your recommendations" approves exactly the rows shown, nothing else.
+4. Present **one decision table** (Conventions), grouped by card: the cards' own open questions, and a Spec that cannot be built as written. Nothing is applied that the Gaps answered by convention block does not list. "Go with your recommendations" approves exactly the rows shown, nothing else.
 5. Record the answers (comment per card). Ask follow-ups only for what the answers raise.
 6. A large new requirement that surfaces: record the rule, create a parked card **outside** the sprint, ask one yes or no whether it joins.
 
@@ -78,10 +78,8 @@ In the plan: how rollback works for every card (code, schema, backups, deploy sh
 
 Ready means: Spec clear with no open questions, acceptance testable, dependencies resolved or sequenced, Technical plan written with filename, branch and size, effort at most L, plan note filed.
 
-1. Check each card strictly and report who passes and who fails, with fix rows.
-2. **Reconcile each Spec once**: answered questions into Decisions, open questions cleared, wrong lines fixed, acceptance lines brought in line with decisions. Put to the user only the lines that differ from their original request, in the decision table; on the user's yes write with the Spec-lock override, after `get_task`. A section outside the Spec (Technical plan) is written by copying the stored Spec text byte for byte from `get_task`, never retyped.
-3. Update each brief: requirements, decisions with reasons, verified facts with where each was checked, no open questions, a dated **Change log** of what changed and why, and no card state (column, lane, stage) in the body.
-4. Move passing cards to `stage/planned`, then `stage/ready` on the user's approval (step 10), through the stage procedure in bandit:tasks.
+1. Check each card strictly and report who passes and who fails, with fix rows. Answered questions count as answered by their `Planning decisions` comment: the Spec and the brief are not edited unless the user asks. A section outside the Spec (Technical plan) is written by copying the stored Spec text byte for byte from `get_task`, never retyped.
+2. Move passing cards to `stage/planned`, then `stage/ready` on the user's approval (step 10), through the stage procedure in bandit:tasks.
 
 ## 10 · Approval gate
 
@@ -96,7 +94,7 @@ Automatic, after the approval and before the commit. It stops the user only on a
    Spec and brief, the WBS, the Migration tail table, the repo path and the project's `bandit.yaml`.
 2. **Write the review record** into the sprint folder: `{project}-review-sprint-{name}-YYYY-MM-DD.md`,
    `type: log`, `sprint` = the sprint's name (bandit:notes conventions §1). Body: the agent's
-   verdict and findings table as returned, then the risk additions and questions.
+   verdict and findings table as returned, then the risk additions.
 3. **Apply** every major finding, and each minor one that is cheap, to the plan (read, then the etag
    edit) and fill the record's "Applied via" column (`plan §…`, `card {id} Technical plan`). Notes stay.
 4. **A blocker stops the step:** put the blockers to the user in one list, each with its recommendation;
@@ -125,7 +123,7 @@ Read-only. Give each investigator: the card's Spec, the repo path, what to find,
 1. Current state: what exists today that the card touches, with `file:line`.
 2. The card's claims checked against the code; wrong ones named.
 3. Constraints that apply (project hard rules, boundaries, tests that pin behaviour).
-4. Risks, and the questions the user must answer, **each with a recommendation**, shaped as Conventions says. A gap today's behaviour or the project's rules answer is reported as such, not as a question.
+4. Dependencies and risks only, each with how the plan addresses it. No questions for the user: a gap is settled from the Spec, the card's decisions, today's behaviour or the project's rules, and reported as such.
 5. Mark anything not verified. Do not edit, run migrations or touch credentials; do not propose scope or cards.
 
 A live-browser investigator **at planning time** is told which controls write (sorts, toggles) on existing data, to open and cancel, and to report what it could not check. That read-only rule belongs to planning only; it never goes into an execution prompt or plan section.

@@ -2,6 +2,11 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
+## Unreleased
+
+### Changed
+- **Sprint planning sticks to the Spec** (BB-278). The Sprint helper opens with the rule: stick to the Spec unless the user asks you to be "creative"; planning means planning the execution, with the dependencies addressed in the plan. Investigators report dependencies and risks, never questions for the user. Step 3 asks only the open questions the cards list, and no longer stops when there are none. A decision row exists only when a Spec cannot be built as written. Step 9 no longer reconciles Specs or updates briefs: decisions stay as card comments, and `/bandit:tasks spec reconcile` runs only on the user's word. Planning stops at step 10 (and step 3 for a card's open question). The plan reviewer judges against the Spec and the dependencies only, with no questions section. Decision RS8.
+
 ## 0.11.0 · 2026-11-01
 
 ### Added

@@ -10,8 +10,8 @@ This file is the single definition (decision S1). Skills point here; app repos h
 |---|---|---|---|---|---|
 | 1 | **Capture** an idea into the board inbox | Claude.ai, phone, Claude Code | `/bandit:tasks capture` | A parked or untriaged card | `/bandit:tasks audit` row for untriaged parked cards |
 | 2 | **Clarify** the fuzzy ones | Claude.ai | `/bandit:clarify` | Clarified Specification | Hand-off row to `/bandit:tasks spec` |
-| 3 | **Design** the cards that change a screen; the rest skip it | Claude Code, from the app repo | Claude Design inside Claude Code: `/design-sync` once per project, `/design` per card (bandit:tasks `dev-workflow.md` → Design step) | The design's link on the card (`Design:` beside `Brief:`), checked against the project's recorded traps, and the person's approval as a card comment | `/bandit:tasks spec` and `stage` refuse `stage/spec` on a screen-changing card without both |
-| 4 | **Triage and specify**: leave the inbox, fields answered, date last; write the Spec | Claude.ai or Claude Code | `/bandit:tasks triage`, `/bandit:tasks spec` | Card fields, Spec, lane, `stage/spec`, brief | The board's Spec lock; brief present |
+| 3 | **Triage and specify**: leave the inbox, fields answered, date last; write the Spec | Claude.ai or Claude Code | `/bandit:tasks triage`, `/bandit:tasks spec` | Card fields, Spec, lane, `stage/spec` (a screen-changing card waits without it until Design), brief | The board's Spec lock; brief present |
+| 4 | **Design** the cards that change a screen, after their Spec is written; the rest skip it | Claude Code, from the app repo | Claude Design inside Claude Code: `/design-sync` once per project, `/design` per card (bandit:tasks `dev-workflow.md` → Design step) | The design's link on the card (`Design:` beside `Brief:`), checked against the project's recorded traps, and the person's approval as a card comment | `/bandit:tasks spec` and `stage` refuse `stage/spec` on a screen-changing card without both |
 | 5 | **Plan the sprint** | Claude Code | `/bandit-dev:sprint plan` | The sprint in the app (status, cards in run order), plan, WBS (sprint mode), execution prompt, ledger | The ledger's Plan steps; sprint checker (SP9, SP10) |
 | 6 | **Independent plan review** | Claude Code (agent) | `/bandit-dev:sprint plan`, step 11 (`plan-reviewer` agent) | Review record in the sprint folder | `run` refuses a review not done; checker SP7 |
 | 7 | **Run** the waves, push the trunk | Claude Code | `/bandit-dev:sprint run`; each live check's data from `/bandit-dev:testdata create`, removed by `clean` | Ledger lines and Waves rows, the sprint Executing then Debugging, cards in Stand By; the staging handover card filled by the final push | Sprint-order gate; migration-tail stop; status line fresh; a check not run for lack of data fails the wave |
@@ -22,8 +22,8 @@ This file is the single definition (decision S1). Skills point here; app repos h
 
 ## 🧭 Surfaces
 
-- **Claude.ai** runs stages 1, 2 and 4. Its agent is the project instructions (from `templates/instructions/`) plus the `bandit` skills. Hooks and agents don't run there, so only the board's own refusals enforce rules.
-- **Claude Code** runs stages 3–11: the design step with Claude Design, the rest with `bandit-dev`: its hooks and the `plan-reviewer` agent run there.
+- **Claude.ai** runs stages 1–3. Its agent is the project instructions (from `templates/instructions/`) plus the `bandit` skills. Hooks and agents don't run there, so only the board's own refusals enforce rules.
+- **Claude Code** runs stages 3–11: stage 4 with Claude Design, stages 5–11 with `bandit-dev`: its hooks and the `plan-reviewer` agent run there.
 
 ## 📦 What a project supplies
 

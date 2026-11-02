@@ -124,7 +124,7 @@ runbook needs no plan note: its `Technical plan` carries `Runbook: {repo path} �
 
 ### Design step — screen-changing cards, before `stage/spec`
 
-Pipeline stage 3 (`docs/pipeline.md` in the marketplace). Cards that change no screen skip it.
+Pipeline stage 4 (`docs/pipeline.md` in the marketplace): after `spec` writes the card, before `stage/spec`. Cards that change no screen skip it.
 
 1. **Which cards.** A card changes a screen when its Outcome or Scope in changes what a page shows
    or how it looks. Read it from the card's own words; unclear → ask the user once, yes or no.

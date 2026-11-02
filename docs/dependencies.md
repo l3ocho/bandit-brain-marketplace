@@ -52,7 +52,9 @@ These start outside, so no file here triggers them. Each has its own check.
 A place the done check lists as open, checked and found to need nothing for this release. One line
 each: the path as the map writes it, then why. `scripts/release.py --write` empties this list.
 
-- none yet
+- `docs/cheat-sheet.md` — names the Design step, not its stage number; nothing changed there.
+- `plugins/bandit/skills/tasks/references/errors.md` — only the stage number moved; no refusal code changed.
+- `plugins/bandit-dev/skills/sprint/references/*.md` — the Sprint helper names the Design step, not its stage number.
 
 ## ✅ Before saying done
 

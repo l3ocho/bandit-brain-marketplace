@@ -52,8 +52,7 @@ These start outside, so no file here triggers them. Each has its own check.
 A place the done check lists as open, checked and found to need nothing for this release. One line
 each: the path as the map writes it, then why. `scripts/release.py --write` empties this list.
 
-- `plugins/bandit/skills/tasks/references/errors.md` — the Design step's refusal is the helper's own, not an app refusal code; the errors table holds app codes only.
-- `docs/install.md` — README changed only the pipeline's stage count; the requirements table is unchanged.
+- none yet
 
 ## ✅ Before saying done
 

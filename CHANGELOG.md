@@ -2,7 +2,7 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
-## Unreleased
+## 0.12.0 · 2026-11-02
 
 ### Added
 - **Design step for screen changes** (BB-239). The pipeline gets a Design stage between clarify and spec (stage 3; the stages after it move up by one, eleven in all) for cards that change a screen; the rest skip it. It runs through Claude Design inside Claude Code: `/design-sync` once per project loads the design system from the code, `/design` makes the card's design, and the design is checked against the project's recorded traps before it is linked. The card carries `Design: {link}` beside `Brief:` and the user's approval as a comment. `/bandit:tasks spec` and `stage` refuse `stage/spec` on a screen-changing card without both, and sprint planning's Spec check makes it a fix row. The old standalone design site's design system copy is no longer used. Decision RS10.

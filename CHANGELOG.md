@@ -2,6 +2,11 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
+## Unreleased
+
+### Changed
+- **The production handover card is optional** (BB-304). A project's `bandit.yaml` can leave `handover.production` out: `/bandit-dev:sprint plan` then creates only the staging handover card, and `release` runs the production deploy, its watch and its version check through the recipe's own steps, logging each result. A sprint closed with its release deferred, and a release covering earlier sprints, write their note in the ledger instead of on a card. The deploy word and the backup confirmation are still required. A recipe that names a production card works as before.
+
 ## 0.12.1 · 2026-11-02
 
 ### Fixed

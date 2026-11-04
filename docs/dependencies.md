@@ -52,7 +52,8 @@ These start outside, so no file here triggers them. Each has its own check.
 A place the done check lists as open, checked and found to need nothing for this release. One line
 each: the path as the map writes it, then why. `scripts/release.py --write` empties this list.
 
-- none yet
+- `README.md` — says nothing about handover cards or the release's deploy (wave 1, BB-304).
+- `bandit.yaml` — the marketplace's own recipe has no `handover` section; nothing reads the new optional part here (wave 1, BB-304).
 
 ## ✅ Before saying done
 

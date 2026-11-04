@@ -69,7 +69,9 @@ template section. Note:
   Overview, with all five required keys and valid values? A `dev:` line must say `true`; any
   other value → propose fixing or removing the line. No `dev:` line is never a finding. A
   `finance:` line must read `accounts "…"` with each name an account `finance_get_context` returns;
-  a name that doesn't resolve → propose the fix. No `finance:` line is never a finding. Check them live: `domain` is a folder in
+  a name that doesn't resolve → propose the fix. No `finance:` line is never a finding. A
+  `design:` line must read `column "…"` (optionally `on board "…"`) with a column that resolves on
+  that board via `get_context`; one that doesn't → propose the fix. No `design:` line is never a finding. Check them live: `domain` is a folder in
   `MyNotes` (or `none`), `board` resolves via `get_context → boards` (or is `none` / `pending`).
   Naming, board profile and footprint aren't judged here: run `/bandit:audit check` in this project
   and carry its rows into the proposal (skip it for `domain: none`: bandit:audit scores domain

@@ -9,6 +9,8 @@ it puts a notice into the session's context (`additionalContext`) naming the car
 Any MCP server's `create_tasks` and `link_tasks`, recognised by the call's own shape. Silent when the
 write was refused, when no link was made, for a created card that already lists its own gate for that
 blocker, and for an old-way sprint card (title `Sprint …`), whose checklist is the plan's fixed steps.
+A created blocker titled `Design: …` is a design card (bandit:tasks Design card): its gate line names the design
+handover and the build card's `stage/spec`.
 After `link_tasks` the answer holds no checklist, so the notice says to skip a card that already has its gate.
 
 A sprint can be either end (`blockerSprintId`, `blockedSprintId`; `blocksSprints`, `blockedBySprints` on a
@@ -21,6 +23,8 @@ import sys
 TOOL = re.compile(r"^mcp__.+__(create_tasks|link_tasks)$")
 SPRINT = "Sprint "
 SPRINT_END = "sprint "
+DESIGN = "Design:"
+DESIGNS = set()  # blockers created in this write whose title marks a design card (bandit:tasks Design card)
 
 
 def answer_of(response):
@@ -81,6 +85,8 @@ def links_made(tool_name, tool_input, response):
         result = result if isinstance(result, dict) else {}
         me = result.get("shortId") or result.get("taskId") or result.get("id") or f'the new card "{title}"'
         deps = item.get("dependencies") if isinstance(item.get("dependencies"), dict) else {}
+        if title.startswith(DESIGN) and ids(deps.get("blocks")):
+            DESIGNS.add(me)
         links += [(me, blocked) for blocked in ids(deps.get("blocks"))]
         links += [(me, sprint(blocked)) for blocked in ids(deps.get("blocksSprints"))]
         links += [(blocker, me) for blocker in ids(deps.get("blockedBy")) if not has_gate(item, blocker)]
@@ -98,6 +104,9 @@ def notice(payload):
             return (f'- {a} now blocks {b}: a sprint has no sub-tasks, so add to that sprint\'s ledger, section Gates, '
                     f'the line "Gate: {a} delivered (<what it hands over>) before closing the sprint" (a sprint id: write the '
                     f'sprint\'s name), unless it is there.')
+        if a in DESIGNS:
+            return (f'- {a} (a design card) now blocks {b}: add to {b} the sub-task "Gate: {a} delivered (the design '
+                    f'handover is linked and approved) before {b} gets stage/spec", unless {b} already has a gate for {a}.')
         return (f'- {a} now blocks {b}: add to {b} a sub-task "Gate: {a} delivered/feedback received (<what it '
                 f"hands over>) before <{b}'s next step, e.g. deploy>\", unless {b} already has a gate for {a}.")
     return "\n".join([

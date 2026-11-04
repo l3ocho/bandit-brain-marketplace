@@ -2,7 +2,7 @@
 
 Part of `bandit-dev:sprint`. Read before running `/bandit-dev:sprint debug {sprint}`. Run in a fresh chat after the last wave is done. The user tests the delivered sprint and brings the adjustments; this chat turns them into verified fixes with the sprint's own documents and diff as context.
 
-Contents: Rules · Read first · Intake · Combined test · Fix loop · Board · Finishing · Never
+Contents: Rules · Read first · Intake · Combined test · Fix loop · Pushing · Board · Finishing · Never
 
 ## Rules
 
@@ -41,10 +41,14 @@ For a sprint whose Marketplace cards change the helpers along with the app: the 
 Per approved row, in card order and wave order where they interact:
 
 1. Reproduce or confirm from the code. If it does not reproduce, say so and ask.
-2. Fix with a test that fails against the old behaviour, then the gates in the execution prompt (code review, verify, UI check when the UI changed).
+2. Fix with a test that fails against the old behaviour. Then the fix's own gates, lighter than a wave's: the targeted tests of the files it touched, code review, and the UI check only on the screens the fix changed. No full check per fix: it runs once before each push (Pushing).
 3. Commit on the local development branch (or the card's branch if it is still open).
-4. Record in the ledger Bug log: row, card, cause, fix, commit, how verified. Update the handover report's card section.
+4. Record in the ledger Bug log: row, card, cause, fix, commit, how verified (the targeted tests it ran, by name or pattern). Update the handover report's card section.
 5. Comment on the card: what was adjusted and why. Reopen nothing; the card stays in Stand By.
+
+## Pushing
+
+Several fixes may share one push. Right before each push of `development` (the push that refills the staging handover card, Rules): one full check, the recipe's `verify`, on the code being pushed. Red stops the push: fix it first, as a row of its own if it is a new defect. The Milestone log names that full check (green, and the commit it ran on) next to the push.
 
 ## Board
 

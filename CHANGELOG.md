@@ -6,6 +6,7 @@ All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace s
 
 ### Changed
 - **The production handover card is optional** (BB-304). A project's `bandit.yaml` can leave `handover.production` out: `/bandit-dev:sprint plan` then creates only the staging handover card, and `release` runs the production deploy, its watch and its version check through the recipe's own steps, logging each result. A sprint closed with its release deferred, and a release covering earlier sprints, write their note in the ledger instead of on a card. The deploy word and the backup confirmation are still required. A recipe that names a production card works as before.
+- **Debug fixes run their own tests** (BB-299). In `/bandit-dev:sprint debug` each fix runs the targeted tests of what it touched, code review and the UI check on the screens it changed; the full check runs once, right before each push to staging, and a red one stops the push. Checker rule DB1 keeps it that way.
 
 ## 0.12.1 · 2026-11-02
 

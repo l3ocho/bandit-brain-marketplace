@@ -10,7 +10,7 @@ One row per key the skills and scripts read (`recipe.py` `KEYS`; the checker hol
 
 | Key | Type | Used by | What it is |
 |---|---|---|---|
-| `verify` | command | `execute`, `run`, `debug` | The check a wave, a fix and a push must pass |
+| `verify` | command | `execute`, `run`, `debug` | The check a wave and a push must pass (a debug fix runs its targeted tests instead, `debug.md`) |
 | `branches.trunk` | branch | `execute`, `run`, `debug`, `testdata` | Where waves merge and what a wave pushes |
 | `branches.deploy` | branch | `release` | What a release fast-forwards; never touched outside `release` |
 | `release` | list of commands | `release` | The ordered release steps, run one by one, stopping on the first failure. `{version}` in a step is replaced by the version picked at release |

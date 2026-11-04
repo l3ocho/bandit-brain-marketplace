@@ -22,7 +22,7 @@ from pathlib import Path
 
 # Every key the bandit-dev skills read, and the command that reads it (references/bandit-yaml.md).
 KEYS = {
-    "verify": "execute, run, debug: the check a wave, a fix and a push must pass",
+    "verify": "execute, run, debug: the check a wave and a push must pass",
     "branches.trunk": "execute, run, debug, testdata: the branch waves merge into and push",
     "branches.deploy": "release: the branch a release fast-forwards",
     "release": "release: the ordered release steps",

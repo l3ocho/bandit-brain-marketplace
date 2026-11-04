@@ -115,8 +115,9 @@ blocker is open. `run` and `execute` refuse a sprint whose step 11 row is not do
 4. **Briefs and leftovers:** move every batch brief into the sprint folder (`Projects/{slug}/sprint-{name}/`) and archive every source the planning consumed (inbox drafts, spec notes, a superseded WBS draft; `references/homes.md` → Leftovers).
 5. **Create the handover cards** (unless the plan dropped them): one `create_tasks` call on the `handover.board` board, the staging card in `handover.staging.column` and, only when the recipe names one, the production card in `handover.production.column` (resolved live by name), titles and descriptions from `references/templates.md` → Handover cards, in their not-ready form; write `Staging handover: {short id}` in At a glance, and `Production handover: {short id}` when that card exists.
 6. **Seed the Execution board:** every batch card to `assigned` with `update_tasks { items: [{ taskId, executionState: "assigned" }, …] }`, reading `results` per card, so the user sees the whole sprint before work starts. **Verify by date, not by column:** `get_task` each batch card and compare its due date with this week's Sunday. On or before it: on the Execution board. After it, or none: not on the board yet. The step's row lists every card and where it stands; the sprint's columns alone never prove the board shows a card.
-7. **Draw the sprint map** (`references/templates.md` → Sprint map) and write it to the sprint folder.
-8. Run `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py` and paste its output into the Milestone log; only once it prints OK, mark step 12's row done ("committed, checker OK").
+7. **Create the debug card** (`references/templates.md` → Debug card): one `create_tasks` on the home board, assigned to the user, with the sprint date, then `manage_sprints { action: "add_cards" }` after the batch (in no wave) and `executionState: "assigned"` so it shows on the Execution board; write `Debug card: {short id}` in At a glance.
+8. **Draw the sprint map** (`references/templates.md` → Sprint map) and write it to the sprint folder.
+9. Run `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py` and paste its output into the Milestone log; only once it prints OK, mark step 12's row done ("committed, checker OK").
 
 ## Investigator brief
 

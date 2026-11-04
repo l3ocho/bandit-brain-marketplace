@@ -737,6 +737,20 @@ def check_sp12():
            if ok else f"SP12: Record → {good[0]} {good[1][-120:]!r}; MapBad → {bad[0]} {bad[1][-160:]!r}")
 
 
+# ── DK1 · the debug card: one home for its line shapes, and every step that uses it points there ─
+def check_debug_card():
+    s = PLUGINS / "bandit-dev" / "skills" / "sprint" / "references"
+    shape = "Expected: {screen} › {part} —"
+    homes = [p.name for p in s.glob("*.md") if shape in p.read_text(encoding="utf-8")]
+    bad = [] if homes == ["templates.md"] else [f"line shapes live in {homes or 'nowhere'} (one home: templates.md)"]
+    for name, words in (("plan.md", "Create the debug card"), ("execute.md", "`Expected:` line"),
+                        ("debug.md", "The debug card first"), ("close.md", "The debug card"), ("run.md", "debug card")):
+        if words not in (s / name).read_text(encoding="utf-8"):
+            bad.append(f"{name} lost '{words}'")
+    report("DK1", not bad, "; ".join(bad) or "debug card: line shapes in templates.md only; plan creates it, the wave "
+           "adds Expected lines, debug reads it first, close refuses an unticked line, run names it")
+
+
 # ── SM1 · the sprint map draws every card and link, routes no arrow through a card, follows the recipe ─
 def crosses(seg, box):
     (x1, y1), (x2, y2) = seg
@@ -1200,6 +1214,7 @@ def main(argv):
     check_design_handover()
     check_sprint_map()
     check_sp12()
+    check_debug_card()
     check_recipe()
     check_contract()
     check_credential_guard()

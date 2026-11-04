@@ -76,7 +76,7 @@ evidence in its row**; the checker (SP9, SP10) refuses a done row without it.
 | 9 | Definition of ready, per card | Each card checked; stage moved on; fix rows for failures |
 | 10 | Approval gate | The user's explicit approval, quoted in the ledger |
 | 11 | Independent plan review | The `plan-reviewer` agent's record in the sprint folder; majors applied; no blocker open (the only stop) |
-| 12 | Commit the sprint | Assignee, undated cards given the sprint date and checked against this week's Sunday, the sprint's expected date, Ready to execute, execution prompt, ledger with `Committed:` and its Waves table, the handover cards the recipe names, the sprint map |
+| 12 | Commit the sprint | Assignee, undated cards given the sprint date and checked against this week's Sunday, the sprint's expected date, Ready to execute, execution prompt, ledger with `Committed:` and its Waves table, the handover cards the recipe names, the debug card, the sprint map |
 
 ## 🔒 Hard rules
 
@@ -102,7 +102,7 @@ The full list is `references/gotchas.md`: read it once at the start of any comma
 - Ask which cards when no list was given
 - Mark a card complete or call anything approved, except `close` completing cards the user approved in that chat
 - Rewrite a locked Spec without showing old and new and getting a yes
-- Write to a card outside the batch and its handover cards (old way: and the sprint card), or to a sprint but this one; create columns, boards or tags
+- Write to a card outside the batch, its debug card and its handover cards (old way: and the sprint card), or to a sprint but this one; create columns, boards or tags
 - Merge into the deploy branch or deploy outside `release`; force-push, or push anything but the trunk (`references/execute.md` → Pushing)
 - Run two wave agents at once, two waves in one chat, a single card, or a wave out of order without the user's say-so
 - Move a card to Done by anything but `close`, or treat an urgency remark as approval

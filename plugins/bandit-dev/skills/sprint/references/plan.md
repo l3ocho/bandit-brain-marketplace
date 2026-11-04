@@ -36,6 +36,7 @@ For each card: `get_task`; find its brief (bandit:notes lookup by filename from 
 
 ## 3 · Close the open questions
 
+**Lessons from earlier sprints, before anything else.** Read the Lessons of the project's earlier wave reports (`Projects/{slug}/sprint-*/` and `_archive/Projects/{slug}/sprint-*/`). A lesson whose When matches a card puts its Do into that card's brief and its plan section, quoted with its sprint; a workflow or settings lesson seen more than once becomes a proposed change to the helper, the project's rules or the Claude settings, in the approval summary.
 0. **The project's own rules first.** Read the cards and the batch's intended approach against the project's settings and docs (its `CLAUDE.md`, its `.claude` folder, its docs; `references/homes.md` → Owners). A conflict is addressed in the plan; it is a question only when the Spec cannot be built as written. Nothing from them is copied into the plan: it names the doc.
 1. Collect the open questions the cards themselves list, and only those. None listed: the step's row says "none" and planning goes on without stopping. **Order:** conflicts first (between cards, and with what is already built), then each card's own, asked as Conventions says. What a check or an investigation finds is settled from the Spec, the card's decisions or how the product works today, and goes in the plan.
 2. **Investigate first, read-only, in parallel**: one investigator per card (brief below). One live-browser check at a time, only for what code cannot answer (touch behaviour, what the UI shows).

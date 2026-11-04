@@ -77,10 +77,10 @@ Waves in between move nothing. A `debug` round keeps it in `debugging`.
 1. All of the wave's cards in `standby`, or Blocked or paused with the reason on the card and in the ledger. A wave with a paused card is not finished: steps 2 to 6 wait for the answer.
 2. Mark the wave done in the ledger's Waves table (date and evidence: cards, how verified) only when every card in it is delivered and verified. A wave with a blocked card is not marked done.
 3. **Last wave only:** when every other wave is done and this wave's last card has reached `standby`, move the sprint to `debugging` (Sprint status), then read the board and show it. Any earlier wave: the sprint's status is not touched; read the board and confirm the next wave's cards are in `next` (The wave, step 7). They move to `doing` at the start of their own wave (one wave per chat), not earlier.
-4. Ledger: At a glance (next wave, next action), milestone log, report section. Then run `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py`; the wave is not finished until it prints OK.
+4. Ledger: At a glance (next wave, next action), milestone log, report section. **Wave report:** rebuild it (`references/templates.md` → Wave report), with this wave's Flow and Tokens blocks from `wave_flow.py`. Then run `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py`; the wave is not finished until it prints OK. The checker reads the synced vault copy, which can lag the WebDAV write: on a wave-report error right after writing it, re-read the local copy and wait for the sync before calling the wave failed.
 5. Ledger Status line: `Wave {n} of {total} delivered, awaiting the user's test; next: Wave {n+1}`. While a card is paused, its `Paused:` line stays the Status line. Ledger Status per card: `Delivered, awaiting the user's test`.
 6. Milestone log: `Wave {n} done: {cards}, {verified how}. Next: Wave {n+1} in a new chat.`
-7. Final message, ten lines at most: what the user can test, what moved, what needs them, and the exact paste for the next wave with its number (`/bandit-dev:sprint execute {sprint} wave {n+1}`), or after the last wave the paste for `debug`.
+7. Final message, ten lines at most: what the user can test, what moved, what needs them (every open call of the wave report, verbatim), the wave's time, full checks, gate rounds, tokens and peak context, and the exact paste for the next wave with its number (`/bandit-dev:sprint execute {sprint} wave {n+1}`), or after the last wave the paste for `debug`.
 
 ## Resume
 

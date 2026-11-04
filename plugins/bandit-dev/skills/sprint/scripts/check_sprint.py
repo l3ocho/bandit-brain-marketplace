@@ -17,6 +17,8 @@ Rules (each one a failure, not a warning):
   SP10 a committed sprint kept in the app has a ## Waves table, one row per wave in order; a wave marked done
        carries its evidence and follows only done waves; every card it names is in the Waves and cards table
        (an old-way ledger, with no `Sprint record:` line, is skipped by SP9 and SP10)
+  SP11 a committed sprint kept in the app has, for every wave marked done in its ## Waves table, a section
+       `## 🌊 Wave {n}` in {project}-sprint-{name}-wave-report.md holding a `#### ⏱️ Flow` and a `#### 🪙 Tokens` block
 
 Usage:
   check_sprint.py [--vault DIR] [--domain NAME]   (defaults: $MYNOTES_DIR or ~/Documents/MyNotes;
@@ -106,6 +108,30 @@ def check_record_ledger(rel_folder, text: str, table_cards: set) -> list[str]:
                 if missing:
                     errors.append(f"SP10 {rel_folder}: Wave {n} names {', '.join(sorted(missing))}, "
                                   "not in the Waves and cards table")
+    return errors
+
+
+def check_wave_report(rel_folder, ledger_text: str, report: Path) -> list[str]:
+    """SP11: every done wave has its section, Flow block and Tokens block in the wave report."""
+    if not COMMITTED.search(ledger_text):
+        return []
+    done = [n for n, _, d, _ in WAVE_ROW.findall(section(ledger_text, "Waves")) if d]
+    if not done:
+        return []
+    if not report.exists():
+        return [f"SP11 {rel_folder}: Wave {', '.join(done)} done but there is no {report.name} (the wave-end rebuild)"]
+    text = report.read_text(encoding="utf-8", errors="replace")
+    errors = []
+    for n in done:
+        m = re.search(rf"^##\s+\S*\s*Wave\s+{n}\b.*$", text, re.M)
+        if not m:
+            errors.append(f"SP11 {rel_folder}: Wave {n} is done but {report.name} has no `## 🌊 Wave {n}` section")
+            continue
+        nxt = re.search(r"^##\s", text[m.end():], re.M)
+        body = text[m.end(): m.end() + nxt.start() if nxt else None]
+        for block in ("Flow", "Tokens"):
+            if not re.search(rf"^####\s+\S*\s*{block}\s*$", body, re.M):
+                errors.append(f"SP11 {rel_folder}: Wave {n}'s section in {report.name} has no `{block}` block")
     return errors
 
 
@@ -216,6 +242,7 @@ def check(domain: Path) -> list[str]:
             table_cards = {i for m in CARD_ROW.finditer(section(ledger_text, "Waves and cards"))
                            for i in CARD_ID.findall(m.group(1))}
             errors.extend(check_record_ledger(rel_folder, ledger_text, table_cards))
+            errors.extend(check_wave_report(rel_folder, ledger_text, folder / f"{project}-sprint-{name}-wave-report.md"))
         cards = set()
         detached = set()
         for match in CARD_ROW.finditer(ledger.read_text(errors="replace")):
@@ -304,7 +331,7 @@ def main() -> int:
             return 0
     if not errors:
         if not args.hook:
-            print(f"OK: {domain} passes SP1-SP10 ({len(sprint_folders(domain))} sprint folders)")
+            print(f"OK: {domain} passes SP1-SP11 ({len(sprint_folders(domain))} sprint folders)")
         return 0
     out = sys.stderr if args.hook else sys.stdout
     print(f"bandit-dev:sprint check FAILED in {domain} ({len(errors)}). Fix these before finishing:", file=out)

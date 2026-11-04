@@ -2,7 +2,7 @@
 
 Part of `bandit-dev:sprint`. Frontmatter keys, values, filename rules, YAML style and inbox rules belong to bandit:notes; card sections belong to bandit:tasks. This file only fixes the sprint-specific shapes. A fixed shape is justified because other steps and chats read these records.
 
-Contents: Filenames · The sprint in the app · Step comment · Plan note · Brief change log · Execution prompt · Ledger · Handover cards · Report
+Contents: Filenames · The sprint in the app · Step comment · Plan note · Brief change log · Execution prompt · Ledger · Wave report · Handover cards · Report
 
 ## Filenames
 
@@ -14,6 +14,7 @@ Contents: Filenames · The sprint in the app · Step comment · Plan note · Bri
 | Execution prompt | `{project}-sprint-{name}-handover-prompt.md` |
 | Ledger | `{project}-sprint-{name}-progress.md` |
 | Handover report | `{project}-sprint-{name}-handover-report.md` (created by the execution chat) |
+| Wave report | `{project}-sprint-{name}-wave-report.md` (rebuilt at the end of every wave, Wave report below) |
 | Review record | `{project}-review-sprint-{name}-YYYY-MM-DD.md` (`type: log`, written at step 11 from the `plan-reviewer` agent's report) |
 | Briefs | one per card, bandit:notes brief naming, filed into the folder |
 
@@ -43,11 +44,34 @@ Each brief ends, before Related, with `## Change log`: one dated entry per plann
 
 Model: the latest sprint's handover prompt in the project's sprint folder (or its `_archive` mirror once closed), adjusted to the shape below. Copy its structure and replace the sprint content. Required sections: how the user starts or resumes a chat (one paste per wave, `/bandit-dev:sprint execute {sprint} wave {n}`); context (project, folder contents); goal; **read first every session**; authority and stop-lines (including the Test data rule from `plan.md`: live checks and tests create and remove their own data, through `/bandit-dev:testdata create` and `clean` when the project has a `testdata` section, never alter existing records, and a case skipped for lack of data is a failed check; explicit approval to implement; the authorised push of `development` (a reinforced line saying an older "never push" note or memory is superseded), followed by filling the staging handover card (`execute.md` → Pushing `development`), the one card outside the sprint the execution writes; never touch the main branch, deploy, force-push, run credential scripts, touch production, edit the user's verbatim documents or rules, override the Spec lock, write to cards outside the sprint, mark anything complete or approved); autonomy (no questions about what the Spec, the plan, its Gaps answered by convention block or the project's rules already answer; a gap none of them answers stops that card: `Paused: {reason}` in the ledger's Status line and Needs the user, and one plain question to the user with a recommendation (`execute.md` → Needs a decision); hard blockers stop the wave as before); the wave cycle (branch, verify-first, implement with tests, gates in order, report section, merge into local development, board comment, ledger; at wave end, mark that wave done in the ledger's Waves table with its evidence); the ledger rules (update after every milestone, etag discipline, resume reconciles repo and ledger); the handover report (per card: what you get, how to test it, how we tested it, limits and the conventions applied, where it lives, if it breaks; then regression list, needs-the-user list, bug log); the final message (ten lines at most, one wave per run); a debug and close section that only points to `references/debug.md` and `references/close.md` (no procedure copied); a wave and card reference table.
 
-The execution prompt must carry the No leftovers rule (`references/homes.md` → Leftovers) in its wave cycle.
+The execution prompt must carry the No leftovers rule (`references/homes.md` → Leftovers) in its wave cycle, and in it two marks the wave report counts on: each card starts with the shell command `echo CARD-START {card}`, and a code review run in the background is briefed with the commit to read and reads that commit's files (`git show {commit}:{path}`), never the working copy.
 
 ## Ledger
 
 Sections: At a glance (sprint, `Sprint record: {name} on {board}` written at step 1 (the line the checker's SP9 and SP10 key on), `Status: {line}`, current wave, next action, last update, report, trunk verified, `Committed: {date}` written at step 12, `Released: {version} · {date} · {commit} · covers {sprints}` written by `release`, or `Release: deferred` written by `close` when it closes with no app release); **Plan steps** (one row per step, the twelve in order: `| {n} | {step} | {done date} | {evidence} |`, the step names exactly as SKILL.md's table, empty date and evidence until done; the date as `YYYY-MM-DD`, the evidence one line with no `|`); **Waves** (from step 12, one row per wave in order: `| Wave {n} | {card ids} | {done date} | {evidence} |`); Gates (one line per thing that blocks the sprint: `Gate: {blocker} delivered ({what it hands over}) before closing the sprint`, written when the link is made, the dependency gate's notice); Batch (selection rule, a table of card, title, lane, effort, complexity, order, blocked by; total effort) and Out of this sprint; Decisions log (dated, the user's decisions, the approval quoted); Waves and cards (wave, card, branch, status, last milestone, commit, review, verify, UI, merged, report section); Milestone log; Verify-first results; Conventions applied (each gap execution met that the plan's Gaps answered by convention block covered, with the block's line; never a decision of the executor's own); Plan deviations; Needs the user (backup before deploy, production audits, rule corrections awaiting approval, push and deploy decisions, unresolved references); Follow-ups noticed; Bug log. Status values: Not started, In progress (step), Paused ({reason}, awaiting the user's decision), Blocked (reason), Delivered awaiting the user's test, Tested by the user. At a glance also carries `Staging handover: {short id}`, and `Production handover: {short id}` when the recipe names a production card, written at step 12.
+
+## Wave report
+
+One note per sprint, written for the user, rebuilt by the wave agent at the end of every wave (`execute.md` → Finishing a wave): what each card delivered, what came out different and why, the calls waiting for the user, how the work flowed and where the tokens went, all measured from the chat logs, and the lessons later plans read. Read through WebDAV with its etag, rebuilt, written back with `if_match`; never the local synced copy. Frontmatter: `type: reference`, `sprint`, `related` = the ledger and the handover report.
+
+Shape, in this order (an empty section is left out, Open calls says "None."):
+
+- `# Sprint {name} — wave report (after wave {n})`
+- `## 🙋 Open calls`: `- {card}: {the question, in app terms}. Recommend: {choice}, because {reason}. (wave {n})`. A workflow or settings lesson that reaches seen 2× is listed here too as a proposed change: Today · What changes for you · What working part it touches · Recommend.
+- `## ✔️ Decided`: `- {card}: {the question} → {the user's answer, quoted}, {date}.`
+- `## ⏱️ Flow trend`: `| Wave | Cards | Time | Full checks | Test runs | Gate rounds | Repeat runs | Tokens | Peak context |`, one row per wave.
+- `## 📚 Lessons`: `### {short name} · seen {k}× · waves {list}`, then `- When:` (a trigger a future card can be matched on: area, kind of change) · `- Risk:` · `- Do:` (a line a plan or brief can carry; for workflow or settings, the helper rule, project rule or setting to change) · `- Use at:` (plan, brief, execution, review, workflow or settings).
+- `## 🌊 Wave {n} — {date}`, then per card `### {card} {title} — ✅ As specified | ⚠️ Different | ⏸ Paused`, with only the lines that apply: `- Different: {what} — Why: {reason}` · `- Issue: {what} — Cause: {cause} — Decision: {decision} — You'll see: {impact, or "nothing"}` · `- Your call: {question}` (also in Open calls). Then `#### ⏱️ Flow` and `#### 🪙 Tokens`, pasted from `python3 ${CLAUDE_SKILL_DIR}/scripts/wave_flow.py --since {the wave's first step} --test {the project's test command}` (the script names what it counts and prints "not measured" for what the logs cannot show).
+
+Rules:
+
+1. Rebuild only Open calls, Decided, Flow trend and Lessons. Earlier wave sections are copied as they are, never reworded; this wave's section goes at the bottom; a rerun for the same wave replaces only its own section. An earlier section missing its Flow or Tokens block gets it, measured from that wave's logs, and its trend row completed: the only change allowed there.
+2. A card delivered as specified with no issue is its heading line alone.
+3. Different = anything not as its Spec and Acceptance say, a default applied by convention that changes what the user sees included. Issue = only what cost a fix, a retry, a decision or a deviation. Your call = only a choice the user could reasonably want the other way and that is still reversible, never what the Spec decided.
+4. Lesson = only what can happen again on another card; a one-off bug stays an issue. Same lesson again: merge it, bump seen, add the wave. A Flow number showing avoidable time (repeat runs, a full check where a targeted test was enough, extra gate rounds) is a workflow lesson; a Tokens number showing avoidable use (a chat grown far past its start, repeated large outputs, extra UI rounds, a large start context) is a workflow or settings lesson.
+5. Open calls the user answered, in chat or on a card, move to Decided with their words and date.
+6. Facts only, from this chat, the ledger, each card's Spec and comments, the gate verdicts, the wave's commits and the script's output. App terms, one idea per line, no preamble, no filler. Numbers never from memory; a number not measured is written "not measured", never estimated.
+7. Touch nothing else while writing it: no code, ledger, cards or other notes.
 
 ## Handover cards
 

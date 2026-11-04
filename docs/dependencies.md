@@ -54,13 +54,7 @@ These start outside, so no file here triggers them. Each has its own check.
 A place the done check lists as open, checked and found to need nothing for this release. One line
 each: the path as the map writes it, then why. `scripts/release.py --write` empties this list.
 
-- `README.md` — says nothing about handover cards or the release's deploy (wave 1, BB-304).
-- `plugins/bandit/skills/tasks/references/errors.md` — the design-card refusal is the skill's own gate, not an app error code (wave 3, BB-316).
-- `templates/instructions/*.md` — the templates carry no optional Project Context lines (none carries `finance:` either) (wave 3, BB-316).
-- `plugins/bandit/skills/project/assets/instructions/*.md` — same: no optional Project Context lines (wave 3, BB-316).
-- `CLAUDE.md` — this repo does not turn design cards on; its Project Context is unchanged (wave 3, BB-316).
-- `plugins/bandit/skills/finance/references/scope.md` — the `finance:` rule is unchanged; the new line sits after it (wave 3, BB-316).
-- `bandit.yaml` — the marketplace's own recipe has no `handover` section; nothing reads the new optional part here (wave 1, BB-304).
+- none yet
 
 ## ✅ Before saying done
 

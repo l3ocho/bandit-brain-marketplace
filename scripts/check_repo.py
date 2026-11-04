@@ -705,7 +705,7 @@ def check_sp11():
     vault = ROOT / "tests" / "fixture-vault"
     good = run_script(script, "--vault", str(vault), "--domain", "Record")
     bad = run_script(script, "--vault", str(vault), "--domain", "WaveBad")
-    ok = (good[0] == 0 and "SP1-SP11" in good[1] and bad[0] == 1 and bad[1].count("\n- ") == 1
+    ok = (good[0] == 0 and "SP1-SP12" in good[1] and bad[0] == 1 and bad[1].count("\n- ") == 1
           and "SP11" in bad[1] and "Tokens" in bad[1])
     report("SP11", ok, "check_sprint passes a done wave with its report section and refuses one without its Tokens block"
            if ok else f"SP11: Record → {good[0]} {good[1][-120:]!r}; WaveBad → {bad[0]} {bad[1][-160:]!r}")
@@ -724,6 +724,54 @@ def check_design_handover():
         bad.append("plan.md step 7's Verification row")
     report("DH1", not bad, "design comparison: the execution prompt, run's brief and the plan's Verification row "
            "name the design handover" if not bad else f"design comparison missing: {bad} (BB-317)")
+
+
+# ── SP12 · a done wave is drawn done in the sprint map (temporary, decisions RS16) ─
+def check_sp12():
+    script = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts" / "check_sprint.py"
+    vault = ROOT / "tests" / "fixture-vault"
+    good = run_script(script, "--vault", str(vault), "--domain", "Record")
+    bad = run_script(script, "--vault", str(vault), "--domain", "MapBad")
+    ok = good[0] == 0 and bad[0] == 1 and bad[1].count("\n- ") == 1 and "SP12" in bad[1]
+    report("SP12", ok, "check_sprint passes a map that lists the done waves and refuses one not redrawn after a wave"
+           if ok else f"SP12: Record → {good[0]} {good[1][-120:]!r}; MapBad → {bad[0]} {bad[1][-160:]!r}")
+
+
+# ── SM1 · the sprint map draws every card and link, routes no arrow through a card, follows the recipe ─
+def crosses(seg, box):
+    (x1, y1), (x2, y2) = seg
+    bx, by, bw, bh = box
+    lo_x, hi_x, lo_y, hi_y = min(x1, x2), max(x1, x2), min(y1, y2), max(y1, y2)
+    return lo_x < bx + bw - 0.5 and hi_x > bx + 0.5 and lo_y < by + bh - 0.5 and hi_y > by + 0.5
+
+
+def check_sprint_map():
+    script = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts" / "sprint_map.py"
+    data = ROOT / "tests" / "fixture-map" / "cosmetic-1.json"
+    app = ROOT / "tests" / "fixture-app"
+    spec = json.loads(data.read_text(encoding="utf-8"))
+    bad = []
+    got, out = run_script(script, str(data), "--geometry", cwd=ROOT)
+    geo = json.loads(out) if got == 0 else {"boxes": {}, "paths": []}
+    drawn = {c["id"] for c in spec["cards"] if c.get("wave")}
+    if set(geo["boxes"]) != drawn:
+        bad.append(f"cards drawn {sorted(geo['boxes'])} ≠ the cards with a wave")
+    if len(geo["paths"]) != len(spec["links"]) + len(spec["after"]):
+        bad.append(f"{len(geo['paths'])} arrows for {len(spec['links']) + len(spec['after'])} links")
+    for p in geo["paths"]:
+        pts = p["points"]
+        if any(a[0] != b[0] and a[1] != b[1] for a, b in zip(pts, pts[1:])):
+            bad.append(f"{p['from']}→{p['to']} has a slanted segment")
+        for cid, box in geo["boxes"].items():
+            if any(crosses(s, box) for s in zip(pts, pts[1:])):
+                bad.append(f"{p['from']}→{p['to']} crosses {cid}")
+    for recipe, want, not_want in (("bandit.yaml", "production card for you to fire", "release runs the deploy"),
+                                   ("bandit.no-production.yaml", "release runs the deploy", "production card")):
+        got, page = run_script(script, str(data), "--recipe", str(app / recipe), cwd=ROOT)
+        if got != 0 or want not in page or not_want in page or 'name="sprint-map-waves-done" content="1,2"' not in page:
+            bad.append(f"page with {recipe}: road or waves-done marker wrong")
+    report("SM1", not bad, "; ".join(bad[:4]) or f"sprint_map.py: {len(drawn)} cards, {len(geo['paths'])} arrows at right "
+           "angles, none through a card; the road follows the recipe; the waves-done marker is set")
 
 
 # ── WF1 · the wave report's Flow and Tokens blocks match a hand count of the fixture logs ─
@@ -1150,6 +1198,8 @@ def main(argv):
     check_wave_flow()
     check_sp11()
     check_design_handover()
+    check_sprint_map()
+    check_sp12()
     check_recipe()
     check_contract()
     check_credential_guard()

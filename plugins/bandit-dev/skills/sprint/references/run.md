@@ -89,7 +89,7 @@ Use `PushNotification` (it reaches the user's phone when Remote Control is conne
 
 ## Final report
 
-Ten lines at most per sprint: waves run, cards now in Stand By awaiting the user's test, any question waiting for them (a paused card), every open call of every wave's report in one list, anything else that needs them, and the paste for the next step: `/bandit-dev:sprint debug {sprint}` once they have tested. `run` never starts `debug` or `close`: both wait for the user's own test.
+Ten lines at most per sprint: waves run, cards now in Stand By awaiting the user's test, any question waiting for them (a paused card), every open call of every wave's report in one list, the link to the sprint map, anything else that needs them, and the paste for the next step: `/bandit-dev:sprint debug {sprint}` once they have tested. `run` never starts `debug` or `close`: both wait for the user's own test.
 
 ## Never
 

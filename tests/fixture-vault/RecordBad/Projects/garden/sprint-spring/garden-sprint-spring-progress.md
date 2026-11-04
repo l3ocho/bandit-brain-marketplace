@@ -15,7 +15,7 @@ sprint: spring
 
 - **Sprint record:** spring on Garden
 - **Status:** Wave 1 of 2 delivered
-- **Committed:** 2026-10-31
+- **Committed:** 2026-11-05
 
 ## Plan steps
 

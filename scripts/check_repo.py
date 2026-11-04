@@ -699,6 +699,38 @@ def check_design_card():
            "the Project Context lists the optional line")
 
 
+# ── SP11 · a done wave has its section, Flow and Tokens blocks in the wave report ─
+def check_sp11():
+    script = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts" / "check_sprint.py"
+    vault = ROOT / "tests" / "fixture-vault"
+    good = run_script(script, "--vault", str(vault), "--domain", "Record")
+    bad = run_script(script, "--vault", str(vault), "--domain", "WaveBad")
+    ok = (good[0] == 0 and "SP1-SP11" in good[1] and bad[0] == 1 and bad[1].count("\n- ") == 1
+          and "SP11" in bad[1] and "Tokens" in bad[1])
+    report("SP11", ok, "check_sprint passes a done wave with its report section and refuses one without its Tokens block"
+           if ok else f"SP11: Record → {good[0]} {good[1][-120:]!r}; WaveBad → {bad[0]} {bad[1][-160:]!r}")
+
+
+# ── WF1 · the wave report's Flow and Tokens blocks match a hand count of the fixture logs ─
+def check_wave_flow():
+    script = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts" / "wave_flow.py"
+    logs = ROOT / "tests" / "fixture-logs"
+    got, out = run_script(script, "--logs", str(logs), "--since", "2026-11-04T09:00:00Z", "--verify", "make verify",
+                          "--test", "^run-tests", cwd=ROOT)
+    want = ["- Time: 0:50 · per card: XY-1 0:35, XY-2 0:15",
+            "- Full checks: 4 runs, 30 min total (1 in the background: not measured), 1 failed (FAILED: 1 test)",
+            "- Test runs: 1 whole suite, 1 targeted", "- Gates: code review 1 rounds, UI check 0 rounds",
+            "- Repeat runs: 2 (make verify)", "- Total: 1.2 M re-read from cache · 30 K new · 2 K written",
+            "- Split: main chat 1.1 M (90%) · code-reviewer 121 K (10%)", "- Per card: XY-1 580 K, XY-2 642 K",
+            "- Main chat: 9 steps · start context 100 K · peak context 140 K"]
+    missing = [w for w in want if w not in out]
+    gone, quiet = run_script(script, "--logs", str(logs), "--since", "2027-01-01T00:00:00Z", "--verify", "x", cwd=ROOT)
+    ok = got == 0 and not missing and gone == 3
+    report("WF1", ok, f"wave_flow.py: {len(want)} Flow and Tokens lines match the hand count (steps deduped by "
+           "message id, background run not measured, repeats after no edit, per card from CARD-START)"
+           if ok else f"wave_flow.py → {got}, missing {missing}; empty window → {gone} (want 3)")
+
+
 # ── NA1 · the sprint helper never tells an executor to decide and continue without asking ─
 NO_ASK_RE = re.compile(r"conservative\s+reading|cautious\s+reading|do(?:n['’]t|\s+not)\s+ask(?:\s+any)?\s+questions"
                        r"|never\s+ask\s+the\s+user|decide\s+(?:and\s+(?:continue|proceed)|alone)", re.I)
@@ -1100,6 +1132,8 @@ def main(argv):
     check_execution_by_date()
     check_debug_push()
     check_design_card()
+    check_wave_flow()
+    check_sp11()
     check_recipe()
     check_contract()
     check_credential_guard()

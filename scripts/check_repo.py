@@ -668,6 +668,18 @@ def check_execution_by_date():
            f"Sunday default {'present' if sunday else 'missing'} (BB-282, decision RS9)")
 
 
+# ── DB1 · a debug fix runs its targeted tests; the full check runs once before each push ─
+def check_debug_push():
+    debug = (PLUGINS / "bandit-dev" / "skills" / "sprint" / "references" / "debug.md").read_text(encoding="utf-8")
+    loop = debug.split("## Fix loop", 1)[-1].split("\n## ", 1)[0]
+    push = debug.split("## Pushing", 1)[-1].split("\n## ", 1)[0] if "## Pushing" in debug else ""
+    fix_full = bool(re.search(r"\(code review, verify", loop)) or "No full check per fix" not in " ".join(loop.split())
+    push_ok = "`verify`" in push and "Red stops the push" in push
+    ok = not fix_full and push_ok
+    report("DB1", ok, "debug: a fix runs its targeted tests, the full check runs once before each push"
+           if ok else f"debug.md: fix loop asks for a full check per fix: {fix_full}; push step with verify: {push_ok} (BB-299)")
+
+
 # ── NA1 · the sprint helper never tells an executor to decide and continue without asking ─
 NO_ASK_RE = re.compile(r"conservative\s+reading|cautious\s+reading|do(?:n['’]t|\s+not)\s+ask(?:\s+any)?\s+questions"
                        r"|never\s+ask\s+the\s+user|decide\s+(?:and\s+(?:continue|proceed)|alone)", re.I)
@@ -1065,6 +1077,7 @@ def main(argv):
     check_sp9()
     check_no_decide_and_continue()
     check_execution_by_date()
+    check_debug_push()
     check_recipe()
     check_contract()
     check_credential_guard()

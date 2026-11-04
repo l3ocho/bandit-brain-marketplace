@@ -18,7 +18,9 @@ Rules (each one a failure, not a warning):
        carries its evidence and follows only done waves; every card it names is in the Waves and cards table
        (an old-way ledger, with no `Sprint record:` line, is skipped by SP9 and SP10)
   SP11 a committed sprint kept in the app has, for every wave marked done in its ## Waves table, a section
-       `## 🌊 Wave {n}` in {project}-sprint-{name}-wave-report.md holding a `#### ⏱️ Flow` and a `#### 🪙 Tokens` block
+       (sprints committed after 2026-11-04) `## 🌊 Wave {n}` in {project}-sprint-{name}-wave-report.md holding a `#### ⏱️ Flow` and a `#### 🪙 Tokens` block
+  SP12 a committed sprint kept in the app (committed after 2026-11-04) has {project}-sprint-{name}-map.html, redrawn after every wave: its
+       `sprint-map-waves-done` marker lists every wave marked done in the ## Waves table (temporary, decisions RS16)
 
 Usage:
   check_sprint.py [--vault DIR] [--domain NAME]   (defaults: $MYNOTES_DIR or ~/Documents/MyNotes;
@@ -48,6 +50,10 @@ STEPS = ("Select and freeze the batch", "Spec completeness check, per card", "Cl
 SPRINT_RECORD = re.compile(r"^\W*Sprint record:", re.M)
 STEP_ROW = re.compile(r"^\|\s*(\d{1,2})\s*\|\s*([^|]+?)\s*\|\s*([^|]*?)\s*\|\s*((?:[^|\\]|\\.)*?)\s*\|\s*$", re.M)
 DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+# SP11 and SP12 hold for sprints committed after the release that brought the wave report and the map;
+# an earlier sprint never had them.
+REPORTS_FROM = "2026-11-04"
+COMMITTED_ON = re.compile(r"^\W*Committed:\W*(\d{4}-\d{2}-\d{2})", re.M)
 WAVE_ROW = re.compile(r"^\|\s*Wave\s+(\d+)\s*\|\s*([^|]+?)\s*\|\s*([^|]*?)\s*\|\s*((?:[^|\\]|\\.)*?)\s*\|\s*$", re.M)
 
 
@@ -113,7 +119,8 @@ def check_record_ledger(rel_folder, text: str, table_cards: set) -> list[str]:
 
 def check_wave_report(rel_folder, ledger_text: str, report: Path) -> list[str]:
     """SP11: every done wave has its section, Flow block and Tokens block in the wave report."""
-    if not COMMITTED.search(ledger_text):
+    on = COMMITTED_ON.search(ledger_text)
+    if not on or on.group(1) <= REPORTS_FROM:
         return []
     done = [n for n, _, d, _ in WAVE_ROW.findall(section(ledger_text, "Waves")) if d]
     if not done:
@@ -133,6 +140,20 @@ def check_wave_report(rel_folder, ledger_text: str, report: Path) -> list[str]:
             if not re.search(rf"^####\s+\S*\s*{block}\s*$", body, re.M):
                 errors.append(f"SP11 {rel_folder}: Wave {n}'s section in {report.name} has no `{block}` block")
     return errors
+
+
+def check_map(rel_folder, ledger_text: str, page: Path) -> list[str]:
+    """SP12: the sprint map was redrawn after every done wave (its marker lists them)."""
+    on = COMMITTED_ON.search(ledger_text)
+    if not on or on.group(1) <= REPORTS_FROM:
+        return []
+    done = [n for n, _, d, _ in WAVE_ROW.findall(section(ledger_text, "Waves")) if d]
+    if not page.exists():
+        return [f"SP12 {rel_folder}: committed but there is no {page.name} (drawn at plan step 12, redrawn every wave)"]
+    m = re.search(r'name="sprint-map-waves-done"\s+content="([^"]*)"', page.read_text(encoding="utf-8", errors="replace"))
+    drawn = set((m.group(1) if m else "").replace(" ", "").split(",")) - {""}
+    missing = [n for n in done if n not in drawn]
+    return [f"SP12 {rel_folder}: Wave {', '.join(missing)} done but {page.name} was not redrawn after it"] if missing else []
 
 
 def records_due(ledger: Path) -> tuple:
@@ -243,6 +264,7 @@ def check(domain: Path) -> list[str]:
                            for i in CARD_ID.findall(m.group(1))}
             errors.extend(check_record_ledger(rel_folder, ledger_text, table_cards))
             errors.extend(check_wave_report(rel_folder, ledger_text, folder / f"{project}-sprint-{name}-wave-report.md"))
+            errors.extend(check_map(rel_folder, ledger_text, folder / f"{project}-sprint-{name}-map.html"))
         cards = set()
         detached = set()
         for match in CARD_ROW.finditer(ledger.read_text(errors="replace")):
@@ -331,7 +353,7 @@ def main() -> int:
             return 0
     if not errors:
         if not args.hook:
-            print(f"OK: {domain} passes SP1-SP11 ({len(sprint_folders(domain))} sprint folders)")
+            print(f"OK: {domain} passes SP1-SP12 ({len(sprint_folders(domain))} sprint folders)")
         return 0
     out = sys.stderr if args.hook else sys.stdout
     print(f"bandit-dev:sprint check FAILED in {domain} ({len(errors)}). Fix these before finishing:", file=out)

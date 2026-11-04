@@ -76,12 +76,12 @@ evidence in its row**; the checker (SP9, SP10) refuses a done row without it.
 | 9 | Definition of ready, per card | Each card checked; stage moved on; fix rows for failures |
 | 10 | Approval gate | The user's explicit approval, quoted in the ledger |
 | 11 | Independent plan review | The `plan-reviewer` agent's record in the sprint folder; majors applied; no blocker open (the only stop) |
-| 12 | Commit the sprint | Assignee, undated cards given the sprint date and checked against this week's Sunday, the sprint's expected date, Ready to execute, execution prompt, ledger with `Committed:` and its Waves table, the handover cards the recipe names |
+| 12 | Commit the sprint | Assignee, undated cards given the sprint date and checked against this week's Sunday, the sprint's expected date, Ready to execute, execution prompt, ledger with `Committed:` and its Waves table, the handover cards the recipe names, the sprint map |
 
 ## 🔒 Hard rules
 
 1. **The checker is the proof.** `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py` enforces the
-   vault rules (SP1–SP11). Step 12, every wave end, `run` and `close` run it and paste its output; a
+   vault rules (SP1–SP12). Step 12, every wave end, `run` and `close` run it and paste its output; a
    step with a failing check is not done. The plugin's Stop hook runs it too
 2. **Gates read the recipe, never guess it:** `scripts/recipe.py` reads the project's `bandit.yaml`; a
    missing key refuses by name. `development` and `main` in the references mean `branches.trunk` and

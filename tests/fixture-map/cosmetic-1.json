@@ -1,0 +1,178 @@
+{
+ "sprint": "cosmetic-1",
+ "project": "banditbrain",
+ "due": "2026-11-03",
+ "effort": 28,
+ "headline": "One identity, in seven waves",
+ "cards": [
+  {
+   "id": "BB-231",
+   "step": 1,
+   "wave": 1,
+   "area": "Board path",
+   "title": "V2 board header path at two sizes",
+   "size": "M · Medium",
+   "gets": "The V2 header path, and the small path the other cards use",
+   "state": "delivered",
+   "db": false
+  },
+  {
+   "id": "BB-283",
+   "step": 2,
+   "wave": 1,
+   "area": "Home Page",
+   "title": "Today ring count fits inside the ring",
+   "size": "S · Simple",
+   "gets": "The Today count never touches the ring",
+   "state": "delivered",
+   "db": false
+  },
+  {
+   "id": "BB-294",
+   "step": 3,
+   "wave": 2,
+   "area": "Home Page",
+   "title": "Workload path in the header style",
+   "size": "S · Simple",
+   "gets": "Home's Workload path in the header style, firmer tiles",
+   "state": "delivered",
+   "db": false
+  },
+  {
+   "id": "BB-296",
+   "step": 4,
+   "wave": 2,
+   "area": "Pinned drawer",
+   "title": "Pins kept on server, typing never lost",
+   "size": "M · Medium",
+   "gets": "Pins follow you; typed text survives leaving",
+   "state": "delivered",
+   "db": false
+  },
+  {
+   "id": "BB-300",
+   "step": 5,
+   "wave": 3,
+   "area": "Full check",
+   "title": "Faster full check, tests side by side",
+   "size": "S · Medium",
+   "gets": "Every later wave's checks run faster",
+   "state": "waiting",
+   "db": false
+  },
+  {
+   "id": "BB-91",
+   "step": 6,
+   "wave": 4,
+   "area": "Task cards",
+   "title": "Task card face on every page",
+   "size": "L · Medium",
+   "gets": "One card layout: spine, gutter, bottom row",
+   "state": "waiting",
+   "db": false
+  },
+  {
+   "id": "BB-295",
+   "step": 7,
+   "wave": 5,
+   "area": "Task cards",
+   "title": "Hold and let go actions on touch",
+   "size": "M · Complex",
+   "gets": "On touch, hold and release opens a card's actions",
+   "state": "waiting",
+   "db": false
+  },
+  {
+   "id": "BB-269",
+   "step": 8,
+   "wave": 5,
+   "area": "Pinned drawer",
+   "title": "Drawer fits, groups and drags",
+   "size": "M · Complex",
+   "gets": "Board groups, cards that fit, drag to sort or unpin",
+   "state": "waiting",
+   "db": false
+  },
+  {
+   "id": "BB-293",
+   "step": 9,
+   "wave": 6,
+   "area": "Task cards",
+   "title": "Kid cards, a picture per task",
+   "size": "M · Medium",
+   "gets": "Kid cards and a picture on each task",
+   "state": "waiting",
+   "db": true
+  },
+  {
+   "id": "BB-263",
+   "step": 10,
+   "wave": 7,
+   "area": "Board path",
+   "title": "Choose path style V2, V3 or V4",
+   "size": "M · Medium",
+   "gets": "Pick your path style; every path follows",
+   "state": "waiting",
+   "db": false
+  },
+  {
+   "id": "BB-999",
+   "title": "Debug: sprint cosmetic-1",
+   "area": "Board path",
+   "wave": null,
+   "state": "waiting"
+  }
+ ],
+ "links": [
+  [
+   "BB-231",
+   "BB-294"
+  ],
+  [
+   "BB-231",
+   "BB-91"
+  ],
+  [
+   "BB-231",
+   "BB-269"
+  ],
+  [
+   "BB-231",
+   "BB-263"
+  ],
+  [
+   "BB-296",
+   "BB-269"
+  ],
+  [
+   "BB-91",
+   "BB-295"
+  ],
+  [
+   "BB-91",
+   "BB-269"
+  ],
+  [
+   "BB-91",
+   "BB-293"
+  ],
+  [
+   "BB-295",
+   "BB-293"
+  ],
+  [
+   "BB-300",
+   "BB-91"
+  ]
+ ],
+ "after": [
+  [
+   "BB-283",
+   "BB-294"
+  ],
+  [
+   "BB-294",
+   "BB-263"
+  ]
+ ]
+}

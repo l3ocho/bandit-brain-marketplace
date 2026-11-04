@@ -711,6 +711,21 @@ def check_sp11():
            if ok else f"SP11: Record → {good[0]} {good[1][-120:]!r}; WaveBad → {bad[0]} {bad[1][-160:]!r}")
 
 
+# ── DH1 · a screen card's UI check compares the build with its design handover, once ─
+def check_design_handover():
+    s = PLUGINS / "bandit-dev" / "skills" / "sprint" / "references"
+    prompt = (s / "templates.md").read_text(encoding="utf-8").split("## Execution prompt", 1)[-1].split("\n## ", 1)[0]
+    flat = " ".join(prompt.split())
+    bad = [w for w in ("names the design handover", "one comparison inside the same UI-check launch",
+                       "matches the design handover", "no `Design:` line gets no comparison") if w not in flat]
+    if "design handover" not in (s / "run.md").read_text(encoding="utf-8"):
+        bad.append("run.md's UI-check brief")
+    if "matches the design handover" not in (s / "plan.md").read_text(encoding="utf-8"):
+        bad.append("plan.md step 7's Verification row")
+    report("DH1", not bad, "design comparison: the execution prompt, run's brief and the plan's Verification row "
+           "name the design handover" if not bad else f"design comparison missing: {bad} (BB-317)")
+
+
 # ── WF1 · the wave report's Flow and Tokens blocks match a hand count of the fixture logs ─
 def check_wave_flow():
     script = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts" / "wave_flow.py"
@@ -1134,6 +1149,7 @@ def main(argv):
     check_design_card()
     check_wave_flow()
     check_sp11()
+    check_design_handover()
     check_recipe()
     check_contract()
     check_credential_guard()

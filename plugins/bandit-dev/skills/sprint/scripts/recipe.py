@@ -33,8 +33,8 @@ KEYS = {
     "testdata.logic": "testdata: where the app enforces its rules",
     "testdata.databases": "testdata: one command per database that runs SQL from stdin",
     "handover.board": "plan, execute, release: the board the deployment handover cards go on",
-    "handover.production.column": "plan, release: the column of the production handover card",
-    "handover.production.runbook": "release: the production deploy steps (path#section)",
+    "handover.production.column": "plan, release: the column of the production handover card (optional part)",
+    "handover.production.runbook": "release: the production deploy steps (path#section) (optional part)",
     "handover.staging.column": "plan, execute: the column of the staging handover card",
     "handover.staging.runbook": "execute: the staging deploy steps (path#section)",
     "guard.credentials.block": "credential guard hook: regexes of commands no agent runs",
@@ -42,8 +42,20 @@ KEYS = {
     "stop.paths": "stop gate hook: the paths that count as implementation (git pathspecs)",
     "stop.close": "stop gate hook: the close step its message names",
 }
-# A repo without an optional section leaves it out; a section present is complete.
+# A repo without an optional section leaves it out; a section present is complete, except its
+# optional parts: a `handover` section without `production` has no production handover card.
 OPTIONAL = ("migrations", "staging", "testdata", "handover", "guard", "stop")
+OPTIONAL_PARTS = ("handover.production",)
+
+
+def absent(data, dotted):
+    """True when the section or part `dotted` is missing or empty."""
+    node = data
+    for part in dotted.split("."):
+        if not isinstance(node, dict) or node.get(part) in (None, "", {}):
+            return True
+        node = node[part]
+    return False
 
 
 class RecipeError(Exception):
@@ -131,7 +143,8 @@ def main(argv):
     elif cmd == "opt" and len(args) == 1:
         if args[0].split(".")[0] not in OPTIONAL:
             refuse(2, f"`{args[0]}` is not optional: use get")
-        if data.get(args[0].split(".")[0]) in (None, "", {}):
+        parts = [args[0].split(".")[0]] + [p for p in OPTIONAL_PARTS if args[0].startswith(p + ".")]
+        if any(absent(data, p) for p in parts):
             print("none")
         else:
             print(show(lookup(data, args[0])))

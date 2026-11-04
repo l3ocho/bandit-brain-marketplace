@@ -1,0 +1,9 @@
+# Test fixture: a recipe whose handover section has no production part (the release runs the deploy itself).
+verify: "true"
+branches: { trunk: development, deploy: main }
+release:
+  - "echo bump the version"
+  - "echo deploy, watch and confirm the running version"
+handover:
+  board: Fixture Ops
+  staging: { column: Fixture Lab, runbook: docs/staging-runbook.md#Deploy to staging }

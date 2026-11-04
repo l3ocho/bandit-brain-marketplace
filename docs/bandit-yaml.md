@@ -45,7 +45,7 @@ The `guard` lines are a proposal for the app (2026-10-24, from its own `.claude/
 
 The `stop` lines are a proposal for the app (2026-10-24, from its own `.claude/hooks/stop-gate.mjs`, which holds `src`, `drizzle`, `docs`, `package.json` and `compose.yaml` and names `/close-round`). `docs` is left out: a docs-only change no longer holds the chat. Until the app removes its own copy, that copy still holds docs-only and background-agent changes.
 
-The `handover` lines are a proposal for the app (2026-10-24, from the BC-24 deployment card: board and production column as used, deploy steps in the app's `docs/deployment.md` section "Deploy now"; staging runs on Bandit Port from `docs/staging-runbook.md`, whose section the app names).
+`handover.production` is optional: without it no production handover card is made and `release` runs the deploy itself through the `release` steps (BB-304, 2026-11-04). The `handover` lines are a proposal for the app (2026-10-24, from the BC-24 deployment card: board and production column as used, deploy steps in the app's `docs/deployment.md` section "Deploy now"; staging runs on Bandit Port from `docs/staging-runbook.md`, whose section the app names).
 
 The `testdata` lines are a proposal for the app (checked 2026-10-15: tables in `src/domains/*/schema.ts`, rules in the server actions, staging's database publishes no port, the test suite reads `DATABASE_URL` from the git-ignored `.env.test`). Development reads `DATABASE_URL` from the shell the skill runs in. The app commits its own `bandit.yaml` and adds `.testdata/` to its `.gitignore`.
 

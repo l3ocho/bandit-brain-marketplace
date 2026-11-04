@@ -141,6 +141,26 @@ Pipeline stage 4 (`docs/pipeline.md` in the marketplace): after `spec` writes th
    `Design:` line and the approval comment are both there. Missing → the card keeps its lane with no
    stage, and the report names the design step as owed.
 
+**Design card** (the project's Project Context has a `design:` line; bandit:project
+`references/project-context.md` owns it). The design gets a card of its own, and its handover
+unblocks the build:
+
+1. **Create it with the Spec.** Right after `spec` writes a screen-changing card, one `create_tasks`
+   call makes `Design: {build card title}` in the `design:` line's column (on the home board unless the
+   line names a board), with `dependencies.blocks: [the build card]` so the dependency gate names the
+   build card's gate line ("the design handover is linked and approved"). Its description: the build
+   card's short id, its brief's filename and its Spec's Outcome, as the design's input. A link made
+   later with `link_tasks` gets the gate's generic notice.
+2. **The design session's result is its handover.** Steps 2 and 3 above run on the design card. Its
+   handover's link goes on the design card as `<p>Handover: {link}</p>`, and the user's approval as the
+   comment `Design approved {date}: {link}`; then the design card is completed.
+3. **The build card follows.** Its Spec's Source block gets `<p>Design: {handover link}</p>` (a first
+   line in Source, no Spec override needed when the line is new), and its gate sub-task is ticked.
+4. **Gate.** `stage/spec` on the build card only once its design card is complete. Open → the build
+   card keeps its lane with no stage, and the report names the design card.
+
+Without a `design:` line, steps 1 to 5 above run on the build card itself, as before.
+
 ### `/bandit:tasks spec reconcile {card…}` — bring locked Specs in line with decisions
 
 For cards whose Spec is locked and has fallen behind decisions taken since (in comments, the brief,
@@ -201,7 +221,8 @@ Steps 1 and 5 are the **card-write rules** bandit-dev:sprint calls for a sprint'
 1. **Role:** `ready` is set only on the user's explicit approval, on either surface (or by the user by hand).
    Claude.ai sets nothing else. Claude Code sets `spec` and `planned` on its own judgement.
 2. `get_task` → refuse on a `lane/incident` card. **`spec`** on a screen-changing card: refuse without its
-   `Design:` line and approval comment (Design step, gate), and name the step owed.
+   `Design:` line and approval comment (Design step, gate), and name the step owed; with a `design:`
+   line in the Project Context, also refuse while its design card is open, and name that card.
 3. **`planned`:** its plan note must be filed (bandit:notes lookup of the filename in `Technical
    plan`), or, on a recurring card, a `Runbook:` line must name the runbook (**🗂️ Record homes**).
    A **shared sprint plan** counts: one filed plan note whose filename sits in the `Technical plan`

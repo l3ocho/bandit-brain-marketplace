@@ -680,6 +680,25 @@ def check_debug_push():
            if ok else f"debug.md: fix loop asks for a full check per fix: {fix_full}; push step with verify: {push_ok} (BB-299)")
 
 
+# ── DC1 · the design card rule has one home, and sprint planning points to it ─
+def check_design_card():
+    tasks = PLUGINS / "bandit" / "skills" / "tasks" / "references"
+    homes = [p.name for p in tasks.glob("*.md") if "**Design card**" in p.read_text(encoding="utf-8")]
+    plan = (PLUGINS / "bandit-dev" / "skills" / "sprint" / "references" / "plan.md").read_text(encoding="utf-8")
+    context = (PLUGINS / "bandit" / "skills" / "project" / "references" / "project-context.md").read_text(encoding="utf-8")
+    bad = []
+    if homes != ["dev-workflow.md"]:
+        bad.append(f"design card rule homes: {homes or 'none'} (one: dev-workflow.md)")
+    if "Design card" not in plan.split("## 2 · Spec completeness check", 1)[-1].split("\n## ", 1)[0]:
+        bad.append("plan step 2 does not flag an open design card")
+    if "| `design` *(optional)*" not in context:
+        bad.append("project-context.md lacks the optional design line")
+    if re.search(r"\bdesign\.(board|column)\b", " ".join(p.read_text(encoding="utf-8") for p in tasks.glob("*.md"))):
+        bad.append("bandit:tasks reads a bandit.yaml design key (core never reads bandit.yaml)")
+    report("DC1", not bad, "; ".join(bad) or "design card: one home (dev-workflow.md), planning flags an open one, "
+           "the Project Context lists the optional line")
+
+
 # ── NA1 · the sprint helper never tells an executor to decide and continue without asking ─
 NO_ASK_RE = re.compile(r"conservative\s+reading|cautious\s+reading|do(?:n['’]t|\s+not)\s+ask(?:\s+any)?\s+questions"
                        r"|never\s+ask\s+the\s+user|decide\s+(?:and\s+(?:continue|proceed)|alone)", re.I)
@@ -929,6 +948,8 @@ def check_dependency_gate():
         ("refused link", {**link, "tool_response": {"ok": False, "code": "CYCLE"}}, None),
         ("create blockedBy", create({"title": "New", "dependencies": {"blockedBy": ["AB-1"]}}), ["AB-1 now blocks XY-9"]),
         ("create blocks", create({"title": "New", "dependencies": {"blocks": ["AB-3"]}}), ["XY-9 now blocks AB-3"]),
+        ("create a design card", create({"title": "Design: New screen", "dependencies": {"blocks": ["AB-4"]}}),
+         ["XY-9 (a design card) now blocks AB-4", "the design handover is linked and approved", "before AB-4 gets stage/spec"]),
         ("create with its gate", create({"title": "New", "dependencies": {"blockedBy": ["AB-1"]},
                                          "subtasks": ["Build it", "Gate: AB-1 delivered (the API) before deploy"]}), None),
         ("sprint card", create({"title": "Sprint 2026-w01", "dependencies": {"blockedBy": ["AB-1", "AB-2"]}}), None),
@@ -1078,6 +1099,7 @@ def main(argv):
     check_no_decide_and_continue()
     check_execution_by_date()
     check_debug_push()
+    check_design_card()
     check_recipe()
     check_contract()
     check_credential_guard()

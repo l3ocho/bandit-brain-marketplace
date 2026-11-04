@@ -22,6 +22,7 @@ board: {board}
 prefix: {prefix}
 {dev: true — this line only when the project opted in}
 {finance: accounts "{name}", "{name}" — this line only when the project limits Finance to some accounts}
+{design: column "{name}" — this line only when the project turns design cards on}
 
 Read by every `bandit` skill.
 **Home board first. Read and write across the domain. Nothing outside it.**
@@ -37,18 +38,20 @@ Names only: skills resolve IDs live via `get_context`. No hardcoded IDs, ever.
 | `prefix` | 2–3 character filename prefix, or `none` | Phase 4 prefix. `none` when artifact-only |
 | `dev` *(optional)* | `true`, or the line is absent | Phase 1 dev question (`references/interview.md`). Only for technical development projects that use the dev card workflow (bandit:tasks, bandit:notes) and sprints (bandit-dev:sprint, Claude Code). Their home board is Technical: bandit:tasks' dev rules follow the board's profile, and this line marks the project for sprints and onboarding's dev board shape |
 | `finance` *(optional)* | `accounts "{name}", "{name}"`: Finance account names exactly as `finance_get_context` returns them, quoted, comma-separated; or the line is absent | Phase 1 Finance question (`references/interview.md`). Limits bandit:finance to those accounts; absent = every account the member can see (bandit:finance `references/scope.md` owns the rule) |
+| `design` *(optional)* | `column "{name}"`, or `column "{name}" on board "{board}"`: a column name exactly as `get_context` returns it, quoted; or the line is absent | Added when the user turns design cards on (an instructions update); onboarding does not ask. A screen-changing card then gets its own design card in that column, whose handover unblocks the build (bandit:tasks `references/dev-workflow.md` → Design card owns the rule) |
 
 **Format rules** (other skills parse this, so it is fixed): the heading text is `Project
 Context`; one `key: value` per line; these five required keys, lower-case, plus the optional
 `dev: true` line right after `prefix` (written only when the project opted in; otherwise
-omit the line, never `dev: false`) and the optional `finance:` line after it (written only when
-the project limits Finance; never empty, never `all`); nothing else inside the block except the closing lines. `domain`
+omit the line, never `dev: false`) the optional `finance:` line after it (written only when
+the project limits Finance; never empty, never `all`) and the optional `design:` line after that
+(written only when the project turns design cards on); nothing else inside the block except the closing lines. `domain`
 and `board` together set the board scope: the domain is the board's top-level folder of the same
 name, with its subfolders; the home board comes first, the rest of the domain is open to read and
 write, and nothing outside it is (bandit:tasks `references/scope.md` owns the rule).
 
 **How readers treat it:** a missing required key → ask; a missing `dev` line → not a dev project
-(never ask); a missing `finance` line → every visible account (never ask); a value that doesn't check out (the board name no
+(never ask); a missing `finance` line → every visible account (never ask); a missing `design` line → the design step runs on the build card itself (never ask); a value that doesn't check out (the board name no
 longer resolves, the domain isn't in `MyNotes`) → stop and say so, never guess at the nearest
 match. `board: none` or `pending` → bandit:tasks reads the domain and writes nothing (except
 `/bandit:tasks load` on `pending`).

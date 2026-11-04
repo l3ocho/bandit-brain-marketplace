@@ -14,6 +14,7 @@ sprint: spring
 ## At a glance
 
 - **Sprint record:** spring on Garden
+- **Debug card:** GA-9
 - **Status:** Wave 1 of 2 delivered
 - **Committed:** 2026-11-05
 

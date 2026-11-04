@@ -8,10 +8,10 @@ Contents: Command · Rules · Start · The wave · Sprint status · Board moves 
 
 `/bandit-dev:sprint execute {sprint} wave N` (for example `execute 2026-w42 wave 2`). **The wave is the unit; the sprint's name says which sprint it belongs to.** A sprint card id instead: `references/old-way.md`. Rules, checked before anything moves:
 
-1. **Only a sprint is accepted**: a real sprint on the home board, or an old-way sprint card. A batch card (any card of a sprint) is refused with: "That is a card inside {sprint}. Point me at {sprint} and a wave number." Nothing is run for a single card.
+1. **Only a sprint is accepted**: a real sprint on the home board, or an old-way sprint card. A batch card (any card of a sprint that sits in a wave; the sprint's debug card is in no wave) is refused with: "That is a card inside {sprint}. Point me at {sprint} and a wave number." Nothing is run for a single card.
 2. **Wave N is named or chosen, and said out loud.** `wave N` runs that wave. No number: run the first wave not done in the Waves table (old way: the first unticked wave sub-task), and state the choice in the opening line ("Running Wave 2: {ids}") before any move.
 3. **Waves run in order.** Wave N is refused while wave N-1 is not done in the ledger's Waves table, naming the open wave, unless the user says to skip it in this chat. Cards completed by hand count as delivered once the board and the ledger agree.
-4. **Only the cards in that wave's row are touched.** No card outside it is moved, worked or commented on.
+4. **Only the cards in that wave's row are touched.** No card outside it is moved, worked or commented on, with one exception: the sprint's debug card (`Debug card:` in the ledger) gets an `Expected:` line for an issue the wave could not solve (Finishing a wave). The debug card is never moved by a wave.
 
 ## Rules
 
@@ -30,7 +30,7 @@ Contents: Command · Rules · Start · The wave · Sprint status · Board moves 
 
 ## The wave
 
-1. **Seed the board (first run only).** Every card of the sprint to `assigned` with `update_tasks { items: [{ taskId, executionState: "assigned" }, …] }`, reading `results` per card. Cards that were never in Assigned stay as they are if the state is already right. Record it in the ledger.
+1. **Seed the board (first run only).** Every batch card of the sprint to `assigned` with `update_tasks { items: [{ taskId, executionState: "assigned" }, …] }`, reading `results` per card. Cards that were never in Assigned stay as they are if the state is already right. Record it in the ledger.
 2. **Set the board for this wave, at the start of EVERY wave, not only the first** (Board moves below). A later wave's cards arrive in `assigned` or `next`; this step is what puts them in `doing`. Procedure: read the sprint's columns (Board moves → Reading the board); for each card of this wave that you are about to work, `update_tasks { items: [{ taskId, executionState: "doing" }] }`; read the board again and show the columns in the wave's opening report. A card that is not in `doing` when you start working it is a failed step. The board never refuses a move to `next`, `doing` or `standby` because of a blocker; only completing a card waits for its blockers. A move that fails for any other reason: comment it on the card, write it under "Needs the user" in the ledger, and put it in the final message.
 3. **Migration tail, before any migration is written.** `python3 ${CLAUDE_SKILL_DIR}/scripts/recipe.py check-tail {tail}` with the tail the plan's Migration tail table names for this wave. Exit 4 (the tail differs) or 3 (a missing key): stop the wave, card Blocked with the output, the line under "Needs the user". A match: one ledger line `Migration tail {tail} matched`. Never pick the next free number. A plan that says "No migrations" checks `none`.
 4. **Work the cards as the plan and execution prompt say.** Tick each card's sub-tasks as each is done, one `manage_subtasks { action: "tick", subtaskId, completed: true }` per tick, not in a batch at the end.
@@ -67,7 +67,7 @@ Waves in between move nothing. A `debug` round keeps it in `debugging`.
 - **Cap.** Never more than five across Next + Doing. When the wave and the next wave together exceed it, Doing gets what is being worked, this wave's queued cards take the remaining Next slots, the rest wait in `assigned`. Report the overflow in the ledger and the wave comment; never trim silently.
 - **Blockers.** A blocker never stops a move between Execution columns. The plan's order still holds: a card chained behind another batch card is worked once that blocker is in `standby`. A blocker outside the batch that is not delivered: record it under "Needs the user" and move on to the next card, or stop if nothing is workable. Never complete a blocker to unblock a chain. Completing stays strict: a card cannot be completed while a blocker is incomplete, so `close` completes a blocker before the card it blocks.
 - **Done is never a move.** Only `close` completes cards.
-- Moves touch only the batch cards. Never a card outside the sprint.
+- Moves touch only the batch cards. Never a card outside the sprint, and never the debug card (it stays where `plan` seeded it until `close`).
 
 ## Finishing a wave
 
@@ -77,10 +77,10 @@ Waves in between move nothing. A `debug` round keeps it in `debugging`.
 1. All of the wave's cards in `standby`, or Blocked or paused with the reason on the card and in the ledger. A wave with a paused card is not finished: steps 2 to 6 wait for the answer.
 2. Mark the wave done in the ledger's Waves table (date and evidence: cards, how verified) only when every card in it is delivered and verified. A wave with a blocked card is not marked done.
 3. **Last wave only:** when every other wave is done and this wave's last card has reached `standby`, move the sprint to `debugging` (Sprint status), then read the board and show it. Any earlier wave: the sprint's status is not touched; read the board and confirm the next wave's cards are in `next` (The wave, step 7). They move to `doing` at the start of their own wave (one wave per chat), not earlier.
-4. Ledger: At a glance (next wave, next action), milestone log, report section. **Wave report:** rebuild it (`references/templates.md` → Wave report), with this wave's Flow and Tokens blocks from `wave_flow.py`. **Sprint map:** redraw it after the board moves (`references/templates.md` → Sprint map), with this wave drawn done. Then run `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py`; the wave is not finished until it prints OK. The checker reads the synced vault copy, which can lag the WebDAV write: on a wave-report error right after writing it, re-read the local copy and wait for the sync before calling the wave failed.
+4. Ledger: At a glance (next wave, next action), milestone log, report section. **Wave report:** rebuild it (`references/templates.md` → Wave report), with this wave's Flow and Tokens blocks from `wave_flow.py`. **Debug card:** each issue the wave could not solve and the user will meet in testing becomes one `Expected:` line on it (`references/templates.md` → Debug card), not only a sentence in the report. **Sprint map:** redraw it after the board moves (`references/templates.md` → Sprint map), with this wave drawn done. Then run `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py`; the wave is not finished until it prints OK. The checker reads the synced vault copy, which can lag the WebDAV write: on a wave-report error right after writing it, re-read the local copy and wait for the sync before calling the wave failed.
 5. Ledger Status line: `Wave {n} of {total} delivered, awaiting the user's test; next: Wave {n+1}`. While a card is paused, its `Paused:` line stays the Status line. Ledger Status per card: `Delivered, awaiting the user's test`.
 6. Milestone log: `Wave {n} done: {cards}, {verified how}. Next: Wave {n+1} in a new chat.`
-7. Final message, ten lines at most: what the user can test, what moved, what needs them (every open call of the wave report, verbatim), the wave's time, full checks, gate rounds, tokens and peak context, and the exact paste for the next wave with its number (`/bandit-dev:sprint execute {sprint} wave {n+1}`), or after the last wave the paste for `debug`.
+7. Final message, ten lines at most: what the user can test, what moved, what needs them (every open call of the wave report, verbatim), the wave's time, full checks, gate rounds, tokens and peak context, how many lines it added to the debug card (and its id), and the exact paste for the next wave with its number (`/bandit-dev:sprint execute {sprint} wave {n+1}`), or after the last wave the paste for `debug`.
 
 ## Resume
 

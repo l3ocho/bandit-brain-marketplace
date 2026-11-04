@@ -22,7 +22,7 @@ Contents: Rules · Read first · Intake · Combined test · Fix loop · Pushing 
 
 ## Intake
 
-1. The user gives adjustments in any form, questions included (a question that ends in a choice is an adjustment). Restate them in their own words as table rows, each tied to a card and to the document line, acceptance row or design point it breaks. One that breaks none is new: a card for a later sprint (Rules).
+1. **The debug card first.** Read the sprint's debug card (`Debug card:` in the ledger): its `Expected:` and `Found:` lines are the starting list. Every point the user raises in chat becomes a `Found:` line on it before it is worked (`references/templates.md` → Debug card). The user gives adjustments in any form, questions included (a question that ends in a choice is an adjustment). Restate them in their own words as table rows, each tied to a card and to the document line, acceptance row or design point it breaks. One that breaks none is new: a card for a later sprint (Rules).
 2. Investigate read-only first, in parallel where cards differ (the investigator brief in `plan.md`). A live check at this stage writes nothing on existing data; if a case needs data the database lacks, it creates it and removes it afterwards, through `/bandit-dev:testdata` when the project has a `testdata` section (Test data in `plan.md`).
 3. Present one list with a recommendation per row. Ask follow-ups only for what the answers raise.
 
@@ -43,7 +43,7 @@ Per approved row, in card order and wave order where they interact:
 1. Reproduce or confirm from the code. If it does not reproduce, say so and ask.
 2. Fix with a test that fails against the old behaviour. Then the fix's own gates, lighter than a wave's: the targeted tests of the files it touched, code review, and the UI check only on the screens the fix changed. No full check per fix: it runs once before each push (Pushing).
 3. Commit on the local development branch (or the card's branch if it is still open).
-4. Record in the ledger Bug log: row, card, cause, fix, commit, how verified (the targeted tests it ran, by name or pattern). Update the handover report's card section.
+4. Record in the ledger Bug log: row, card, the debug card line it fixes, cause, fix, commit, how verified (the targeted tests it ran, by name or pattern). Tick that line, or end it with its outcome (`templates.md` → Debug card). Update the handover report's card section.
 5. Comment on the card: what was adjusted and why. Reopen nothing; the card stays in Stand By.
 
 ## Pushing
@@ -60,7 +60,7 @@ Several fixes may share one push. Right before each push of `development` (the p
 **No leftovers.** Before this step ends, anything it used to make something else and no longer needs (a draft, a scratch file, a superseded copy, a test fixture, a temporary branch) is archived or deleted, only on proof that its successor exists (`references/homes.md` → Leftovers). A fix branch is deleted once merged; test data is removed.
 
 
-Every row fixed or declined with the user's word; anything new filed as a card. Ledger Status per card moves to `Tested by the user` for every card the user says they tested; the ledger's Status line becomes `Debug done, ready to release`, and At a glance says debug is done; Milestone log `Debug done: {n} adjustments, {n} new cards. Ready to release.` The sprint stays `debugging`; final message of ten lines at most with the paste for `release`.
+Every row fixed or declined with the user's word; anything new filed as a card. Ledger Status per card moves to `Tested by the user` for every card the user says they tested; every debug card line is ticked with its outcome and the wave report's Debug section counts them (`templates.md` → Debug card); the ledger's Status line becomes `Debug done, ready to release`, and At a glance says debug is done; Milestone log `Debug done: {n} adjustments, {n} new cards. Ready to release.` The sprint stays `debugging`; final message of ten lines at most with the paste for `release`.
 
 ## Never
 

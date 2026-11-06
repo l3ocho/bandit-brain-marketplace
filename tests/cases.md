@@ -53,6 +53,17 @@ the `bandit-staging` board only. `read` cases are checked by reading the shipped
 | C19 | P8 audit row | read | `references/audit.md` check 2 | untriaged parked cards come back as one fix row per project |
 | C20 | G4 structure | cli | `audit` on a staging project with a column named like a member | a fix row: make it a lane for that person (tag, lane, re-file, delete the empty column on confirm) |
 
+### 🗃️ Inbox groups (BB-338)
+
+| # | Item | Kind | Input | Expected |
+|---|---|---|---|---|
+| C87 | Groups seen | cli | a group made in the staging app with two cards in a board's Inbox, then `triage` | both cards counted and listed under the group's name, then the loose cards |
+| C88 | Dump into one group | cli | `capture` a three-line brain dump, no group named | one new group `Brain dump {date}` in the landing column, the three cards in it in the typed order, titles unchanged; the Inbox page shows them in that group |
+| C89 | Named group | cli | `capture` one card "into Groceries" with a Groceries group in that column; then with none | first: filed into the existing group; second: the group is made, then the card filed into it |
+| C90 | Group delete asks | cli | `triage`, ask to delete a group holding two cards | asks first, naming two cards; nothing deleted before the yes |
+| C91 | Grouped Untriaged count | read | `audit.md` check 1, `triage.md` → What the Inbox board is | the count adds every group's `items` to the loose `items` |
+
+
 ## 🧩 Clarify, notes, project
 
 | # | Item | Kind | Input | Expected |

@@ -158,12 +158,14 @@ back (`references/capture.md` → Subtasks).
 **Write freely. Confirm destructive.**
 
 🔴 Confirm before calling, for every entry: `delete_tasks` (kind `card` · `subtask` · `series` ·
-`occurrence`) · `delete_board_items` (kind `board` · `column` · `tag` · `folder`). A `delete_tasks`
+`occurrence`) · `delete_board_items` (kind `board` · `column` · `tag` · `folder`) · `manage_inbox_groups`
+(action `delete`). A `delete_tasks`
 entry of kind `link` removes only a dependency and needs no yes
 
 - kind `board` destroys every task inside it
 - kind `tag` strips it from every task carrying it — **retag first, confirm zero, then delete**
 - kind `series` destroys every occurrence, past and future
+- a group `delete` destroys every card in the group; an empty group simply goes
 
 **None are recoverable. Archive before you delete** — almost every "get rid of this" is an
 archive, and `manage_boards { action: "restore" }` puts it back exactly as it was.

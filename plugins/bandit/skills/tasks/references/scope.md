@@ -50,6 +50,7 @@ without a `boardId`, return **every board in the household**. Before a result is
 - **Keep** a card outside the domain only when it blocks, or is blocked by, a kept card: title,
   board and state, marked `outside the domain`
 - **Untriaged** stays only for the workflow project; every other project drops the column
+- **Inbox groups** go with their column, kept or dropped with it; they are the signed-in member's own, so another member's never show
 - A **recurring projection** (no task row) is kept by its series' project
 - The five-item cap and every count in a report are counted **after** the filter
 

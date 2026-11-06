@@ -1,7 +1,7 @@
 # ✍️ Capture
 
 **Command:** `/bandit:tasks capture`
-**Owns:** task creation · brain dumps · **the whole repeat-rule lifecycle**
+**Owns:** task creation · brain dumps · filing a new card into an inbox group · **the whole repeat-rule lifecycle**
 
 ---
 
@@ -29,6 +29,7 @@ A titled task in Untriaged is a success. An interrogation that ends with a perfe
 | `complexity` | Simple 1 · Medium 2 · Complex 3 |
 | `description` | Simple HTML for bold, headings, lists |
 | `tagIds` | See tags, below |
+| `inboxGroupId` | One of the member's inbox groups, in the Inbox column the card lands in (see Inbox groups, below) |
 
 **Placement:**
 
@@ -50,12 +51,38 @@ project, the home board's Inbox (parked), so the card stays in this project's si
 ## 🧠 Brain dumps
 
 1. One task per line, titles only
-2. One `create_tasks` call, one entry per line (split above 100)
-3. Land them in **Untriaged** unless the board is obvious from the line itself
-4. Report the count created, and every refused entry by title
-5. Offer `/bandit:tasks triage`. Do not start triaging
+2. **One group for the whole dump:** the group the user names, or else a new group called
+   `Brain dump {YYYY-MM-DD}`, in the Inbox column the dump lands in (Inbox groups, below)
+3. One `create_tasks` call, one entry per line (split above 100), each with that `inboxGroupId`
+4. Land them in **Untriaged** unless the board is obvious from the line itself. Lines bound for
+   different Inbox columns go into one group per column, same name
+5. Report the count created, the group's name, and every refused entry by title
+6. Offer `/bandit:tasks triage`. Do not start triaging
 
-⛔ Do not de-duplicate, re-order, re-word or merge lines during a dump. That is triage, and doing it here loses the user's own phrasing.
+⛔ Do not de-duplicate, re-order, re-word or merge lines during a dump, and never split it into topic groups. That is triage, and doing it here loses the user's own phrasing.
+
+---
+
+## 🗃️ Inbox groups
+
+Named groups of cards inside one Inbox column (a board's Inbox, or Untriaged): the member's own,
+the same groups the Inbox page shows. Nobody else sees them, the admin included.
+
+| Want | Call |
+|---|---|
+| See them | `list_tasks { view: "inbox" }`: each column's `groups` (newest first, each with `id`, `name`, `folded`, `items`), then `items`, the loose cards |
+| Make one | `manage_inbox_groups { action: "create", boardId, name }` (`boardId: null` for Untriaged); returns `group.id` |
+| File a new card into it | `create_tasks` entry with `inboxGroupId`: the card goes last in the group |
+
+- **The group must be in the column the card lands in:** no column and no due date, so a board's
+  Inbox or Untriaged. A dated card lands in the first column and cannot be grouped
+  (`INBOX_GROUP_OTHER_COLUMN`, `references/errors.md`)
+- **A named group** is matched by name, case ignored, in that column; no match → make it. Two of
+  the same name → the newest (first in the read), and the reply says so
+- **One card** goes into a group only when the user names one; otherwise it lands loose
+- **Untriaged groups** follow the Untriaged rule (`references/scope.md`): only the domain's
+  workflow project files into them
+- Renaming, deleting and refiling groups is triage's (`references/triage.md` → Inbox groups)
 
 ---
 

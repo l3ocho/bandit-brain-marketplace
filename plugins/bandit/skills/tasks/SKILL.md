@@ -55,8 +55,8 @@ On a Workflow board a Dev command says so and stops. Surface roles: `references/
    Names resolve live with `get_context`; no stored ID, ever. A name that doesn't resolve → stop
 7. 🏷️ **`update_tasks` `tagIds` replaces the whole set:** `get_task`, merge, then write (`references/board.md` → Tags)
 8. 📝 **Descriptions are block-tag HTML, read back after every write** (`references/board.md` → Card descriptions)
-9. 🛡️ **Write freely, confirm destructive.** Every `delete_tasks` / `delete_board_items` entry is
-   confirmed, a dependency link aside; archive before delete (`references/board.md` → Safety)
+9. 🛡️ **Write freely, confirm destructive.** Every `delete_tasks` / `delete_board_items` entry and
+   every inbox group delete is confirmed, a dependency link aside; archive before delete (`references/board.md` → Safety)
 
 ## ⚠️ Gotchas
 

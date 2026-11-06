@@ -23,7 +23,7 @@ first (boards, tags, members, sprints, lane templates), then work by id. Sprints
 
 | # | Check | How |
 |---|---|---|
-| 1 | **Untriaged pile** | `list_tasks { view: "inbox" }` → Untriaged count. Over ~15 is a triage backlog, not a hygiene problem |
+| 1 | **Untriaged pile** | `list_tasks { view: "inbox" }` → Untriaged count, cards in its groups included. Over ~15 is a triage backlog, not a hygiene problem |
 | 2 | **Untriaged parked cards** | `list_tasks { boardId, boardColumnId: null }` — on a board, in no column. Age via `list_events { taskId }`. Fires on the domain's ` - wkflw` board for any card older than a day (the daily sweep missed it), and on any board for a card older than ~30 days with no field answered. Fix row per board: run triage's **Leaving the inbox** for them (`references/triage.md`), or, on any other board, keep them parked as ideas with the user's yes |
 | 3 | **Stale overdue** | `list_tasks { view: "week" }` → Due column. Anything overdue by more than a month is a decision, not a date |
 | 4 | **Stand By rot** | `list_tasks { executionState: "standby", boardId }` per board. Nothing should sit there indefinitely. **Exempt:** cards in a sprint (a record or a `sprint/*` tag) and old-way sprint cards (`references/dev.md` → Sprint card): they wait there for the user's test |

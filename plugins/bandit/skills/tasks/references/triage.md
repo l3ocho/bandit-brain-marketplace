@@ -1,7 +1,7 @@
 # 📥 Triage
 
 **Commands:** `/bandit:tasks triage` `/bandit:tasks inbox`
-**Owns:** the Inbox board · moves (an `update_tasks` entry with `boardId` / `boardColumnId`) · right-sizing during review
+**Owns:** the Inbox board · moves (an `update_tasks` entry with `boardId` / `boardColumnId`) · refiling, renaming and deleting inbox groups · right-sizing during review
 
 ---
 
@@ -15,6 +15,11 @@
 | One column per board | That board's tasks **not yet filed into a column** — "parked" |
 
 🔴 Two different states, one board. **Untriaged** has no board. **Parked** has a board but no column.
+
+🗃️ **Each column holds `groups`, then `items`.** `groups` are the member's own inbox groups
+(newest first, each with `id`, `name`, `folded` and its own `items`); `items` are only the
+**loose** cards. A column's cards = every group's `items` plus the column's `items`: count and
+triage them all, never the loose ones alone.
 
 That is why triage is two stages, not one.
 
@@ -38,12 +43,12 @@ Never collapse them. Asking "which board and which column" about twenty untriage
 2. **Read the board.** `list_tasks { view: "inbox" }`, filtered to the domain (`references/scope.md` →
    Filtering). **Untriaged is the workflow project's:** from any other project, Stage 1 is skipped
    and only the domain's parked columns are triaged
-3. **Report counts first.** Untriaged count (workflow project only), then parked count per board of the domain. Do not start proposing until the size is stated
+3. **Report counts first.** Untriaged count (workflow project only), then parked count per board of the domain, grouped cards included. Do not start proposing until the size is stated. List each group by name with its cards, then the loose cards
 4. **Right-size** — see below. Propose only
 5. **Stage 1 — propose boards** for the untriaged items, as a list the user can correct in one message
 6. **Stage 2 — leave the inbox** (below) for the parked items the board's exit style lets out now
 7. **On confirmation**, write one `update_tasks` call, one entry per card (batches of ≤100):
-   `{ taskId, boardId, boardColumnId?, …fields, dueDate? }`. A move applies before fields, so
+   `{ taskId, boardId, boardColumnId?, …fields, inboxGroupId?, dueDate? }`. A move applies before fields, so
    the due date in the same entry still lands **last**. A refused entry changed nothing on that card
 8. **Report per-task results** from `results`. Refusals by task name with the reason
 
@@ -75,7 +80,7 @@ board's role, by name:
 | Board | The board inbox is | Cards leave |
 |---|---|---|
 | 🔁 The domain's workflow board (` - wkflw`, bandit:audit rulebook S3) | A place for the unforeseen things a process must handle | **Daily sweep:** every parked card leaves today, all fields answered. Nothing waits for a better time |
-| 🎯 Every other board | The **evaluation gate**, and the **idea list** | One question per card: does it make sense now? **Yes** → a chat about it, then `spec` on a Technical board (below) or the fields above · **Not yet** → stays parked, untouched (the board is the idea list: never a separate notes list) · **No** → archive the card (confirm) |
+| 🎯 Every other board | The **evaluation gate**, and the **idea list** | One question per card: does it make sense now? **Yes** → a chat about it, then `spec` on a Technical board (below) or the fields above · **Not yet** → stays parked, untouched but for an inbox group the user agrees to (the board is the idea list: never a separate notes list) · **No** → archive the card (confirm) |
 
 ### 🛠️ Technical boards: clarify or spec
 
@@ -85,6 +90,31 @@ filling fields here. Per item, offer one of:
 - **Fuzzy** (the outcome can't be stated in a sentence) → `/bandit:clarify` first; its Clarified
   Specification is `spec`'s input (`references/dev-workflow.md` → spec, Source: clarify)
 - **Clear** → `/bandit:tasks spec` now, which places it in its area column and writes its Spec
+
+## 🗃️ Inbox groups
+
+The member's own named groups inside an Inbox column (`references/capture.md` → Inbox groups for
+reading and making them). Triage sorts with them; capture only drops a dump into one.
+
+| Want | Call |
+|---|---|
+| Put a card in a group, or move it to another | `update_tasks` entry with `inboxGroupId` (it goes last in the group) |
+| Take it out | `inboxGroupId: null` |
+| Make a group for cards that stay | `manage_inbox_groups { action: "create", boardId, name }`, then the entries above |
+| Rename | `manage_inbox_groups { action: "rename", groupId, name }` |
+| Delete | `manage_inbox_groups { action: "delete", groupId }`: **deletes every card in it.** Confirm, naming how many cards go (`references/board.md` → Safety) |
+
+- **Propose, then write.** A group for a card is one more field in its proposal row (Stage 1 or
+  the cards that stay parked), and a new group is named in the same list. Nothing moves on a guess
+- **The group must be in the card's own Inbox column**: a group in another column is refused
+  (`INBOX_GROUP_OTHER_COLUMN`). Moving a card to another board's Inbox and into a group there is
+  one entry: the move applies first
+- **Leaving the inbox clears it by itself.** A card that gets a column, a due date or is completed
+  leaves its group; never send `inboxGroupId: null` for that
+- **A group delete is all or nothing:** one card the assistant may not delete (another member's,
+  a repeating card, another module's) refuses it whole and names the card. Report it; never
+  empty the group by hand to get past it
+- An empty group left after a sweep stays unless the user asks to delete it
 
 ## 🔀 Placement rules — memorise these
 

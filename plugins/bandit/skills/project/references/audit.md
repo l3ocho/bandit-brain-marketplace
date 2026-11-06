@@ -90,7 +90,7 @@ template section. Note:
   one: `get_context`, `list_tasks`, `get_task`, `add_comment`, `list_events`, `create_tasks`,
   `update_tasks`, `reopen_tasks`, `delete_tasks`, `manage_subtasks`, `manage_recurrence`,
   `link_tasks`, `manage_boards`, `manage_columns_lanes`, `manage_tags`, `manage_folders`,
-  `set_visibility`, `delete_board_items`, `manage_sprints`, `get_sprints`, and the Finance tools `finance_get_context`,
+  `set_visibility`, `delete_board_items`, `manage_sprints`, `get_sprints`, `manage_inbox_groups`, and the Finance tools `finance_get_context`,
   `finance_list_transactions`, `finance_get_budget`, `finance_list_schedules`, `finance_get_report`,
   `finance_list_rules`, `finance_get_account_history`, `finance_manage_accounts`,
   `finance_manage_transactions`, `finance_manage_budget`, `finance_manage_categories`,

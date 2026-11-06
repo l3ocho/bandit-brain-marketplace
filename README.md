@@ -68,7 +68,7 @@ Then `/plugin` → Marketplaces → `bandit-brain` → **Enable auto-update** (o
 
 | Connector | Used by | Needed |
 |---|---|---|
-| **Bandit Brain** MCP server (the task board), on the first app release after v0.37.0 or later: the one with sprints as records (`get_sprints`, `manage_sprints`) besides board profiles and tag view, serving the 20 assistant tools under their Board names (`get_context`, `list_tasks`, `create_tasks`, `update_tasks`, `manage_boards` …). For `finance`, app v0.31.0 or later (its 17 `finance_*` tools). After an app upgrade, reconnect the connector | `tasks`, `finance`, `audit`, `project`, `sprint`, `testdata`; card reads in `notes` and `plan`; saving a spec as a card in `clarify` | ✅ |
+| **Bandit Brain** MCP server (the task board), on app v0.41.0 or later: the one with inbox groups (`manage_inbox_groups`) besides sprints as records (`get_sprints`, `manage_sprints`), board profiles and tag view, serving the 21 assistant tools under their Board names (`get_context`, `list_tasks`, `create_tasks`, `update_tasks`, `manage_boards` …). For `finance`, app v0.31.0 or later (its 17 `finance_*` tools). After an app upgrade, reconnect the connector | `tasks`, `finance`, `audit`, `project`, `sprint`, `testdata`; card reads in `notes` and `plan`; saving a spec as a card in `clarify` | ✅ |
 | **Nextcloud** MCP server with WebDAV (the notes vault) | `notes`, `minutes`, `plan`, `project`, `audit`, `sprint`; saving a spec as a note in `clarify` | ✅ |
 | Gmail | `/bandit:tasks email` | Optional |
 | Code execution (Claude.ai: Settings → Capabilities) | Every skill on Claude.ai | ✅ |

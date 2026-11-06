@@ -323,11 +323,11 @@ def check_board_type():
 
 
 # ── AT1 · the tool lists above are the app's: the app clone's tools and its removed list ──
-# The 20 board tools the app serves today. The project audit's list must match it with FINANCE_TOOLS (AT2).
+# The 21 board tools the app serves today. The project audit's list must match it with FINANCE_TOOLS (AT2).
 CURRENT_TOOLS = (
     "get_context list_tasks get_task add_comment list_events create_tasks update_tasks reopen_tasks "
     "delete_tasks manage_subtasks manage_recurrence link_tasks manage_boards manage_columns_lanes "
-    "manage_tags manage_folders set_visibility delete_board_items manage_sprints get_sprints").split()
+    "manage_tags manage_folders set_visibility delete_board_items manage_sprints get_sprints manage_inbox_groups").split()
 # The 17 Finance tools (bandit:finance), from the app's finance descriptors.
 FINANCE_TOOLS = (
     "finance_get_context finance_list_transactions finance_get_budget finance_list_schedules finance_get_report "

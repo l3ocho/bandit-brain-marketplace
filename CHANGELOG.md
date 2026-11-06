@@ -2,6 +2,14 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
+## Unreleased
+
+### Added
+- **Capture and triage use your inbox groups** (BB-338). A brain dump through `/bandit:tasks capture` lands in one inbox group: the one you name, or a new group called "Brain dump {date}". A single card goes into a group when you name one. `/bandit:tasks triage` shows each group with its cards, counts grouped cards with the rest, and can suggest a group, or a new one, for cards that stay in the inbox, in the same list you correct before anything is written. Deleting a group deletes its cards, so it is confirmed like every delete. Needs app v0.41.0 or later (21 board tools, `manage_inbox_groups` the new one).
+
+### Fixed
+- **Triage and the audit's Untriaged count include cards in a group**: the Inbox view lists a grouped card under its group, not with the loose cards.
+
 ## 0.13.0 · 2026-11-03
 
 ### Changed

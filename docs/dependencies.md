@@ -54,9 +54,7 @@ These start outside, so no file here triggers them. Each has its own check.
 A place the done check lists as open, checked and found to need nothing for this release. One line
 each: the path as the map writes it, then why. `scripts/release.py --write` empties this list.
 
-- `plugins/bandit-dev/skills/sprint/references/*.md` — BB-338 changes only capture, triage and the inbox view; the sprint skill never reads the Inbox board or inbox groups
-- `docs/decisions.md` — the checker gained one tool name in `CURRENT_TOOLS`, no new rule; no decision names the tool count
-- `docs/dependencies.md` — the "app adds an assistant tool" row already covers this change; no row to add
+- none yet
 
 ## ✅ Before saying done
 

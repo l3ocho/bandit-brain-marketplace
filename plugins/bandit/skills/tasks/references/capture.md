@@ -54,7 +54,8 @@ project, the home board's Inbox (parked), so the card stays in this project's si
 2. **One group for the whole dump:** the group the user names, or else a new group called
    `Brain dump {YYYY-MM-DD}`, in the Inbox column the dump lands in (Inbox groups, below)
 3. One `create_tasks` call, one entry per line (split above 100), each with that `inboxGroupId`
-4. Land them in **Untriaged** unless the board is obvious from the line itself. Lines bound for
+4. Land them where **No board named** above says (Untriaged from the workflow project, else the
+   home board's Inbox), unless the board is obvious from the line itself. Lines bound for
    different Inbox columns go into one group per column, same name
 5. Report the count created, the group's name, and every refused entry by title
 6. Offer `/bandit:tasks triage`. Do not start triaging

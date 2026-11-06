@@ -10,7 +10,7 @@
 | Piece | Does |
 |---|---|
 | `Stop` command hook in `.claude/settings.json` | Runs the script each time Claude finishes a turn |
-| `.claude/hooks/mirror-check.py` | Hashes `CLAUDE.md` + every file under `.claude/` (except `settings.local.json`, the stamp and `worktrees/`, where Claude Code keeps whole worktree checkouts), compares with the stamp, and **copies the changed files itself** into the Nextcloud-synced vault folder |
+| `.claude/hooks/mirror-check.py` | Hashes `CLAUDE.md` + every file under `.claude/` (except `settings.local.json`, the stamp and `worktrees/`, where Claude Code keeps whole worktree checkouts: the walk never enters it), compares with the stamp, and **copies the changed files itself** into the Nextcloud-synced vault folder |
 | `.claude/mirror-stamp.json` (gitignored) | Per-file sha256 from the last mirror |
 
 - **The script copies, Claude doesn't.** No model call and no connector, so auto mode's check
@@ -81,17 +81,21 @@ from pathlib import Path
 ROOT = Path(os.environ.get("CLAUDE_PROJECT_DIR") or Path(__file__).resolve().parents[2])
 STAMP = ROOT / ".claude" / "mirror-stamp.json"
 SKIP = {".claude/settings.local.json", ".claude/mirror-stamp.json"}
-SKIP_DIRS = (".claude/worktrees/",)  # Claude Code worktrees: full repo checkouts, never settings
+SKIP_DIRS = {".claude/worktrees", "__pycache__"}  # worktrees: full repo checkouts, never settings
 
 
 def current():
     files = {}
     candidates = [ROOT / "CLAUDE.md"]
-    if (ROOT / ".claude").is_dir():
-        candidates += sorted(p for p in (ROOT / ".claude").rglob("*") if p.is_file())
+    for dirpath, dirnames, filenames in os.walk(ROOT / ".claude"):
+        here = Path(dirpath)
+        # Prune in place: os.walk never enters a skipped folder (a worktree holds a whole repo).
+        dirnames[:] = sorted(d for d in dirnames
+                             if d not in SKIP_DIRS and (here / d).relative_to(ROOT).as_posix() not in SKIP_DIRS)
+        candidates += [here / f for f in sorted(filenames)]
     for p in candidates:
         rel = p.relative_to(ROOT).as_posix()
-        if rel in SKIP or rel.startswith(SKIP_DIRS) or "__pycache__" in p.parts or not p.is_file():
+        if rel in SKIP or not p.is_file():
             continue
         files[rel] = hashlib.sha256(p.read_bytes()).hexdigest()
     return files
@@ -170,7 +174,8 @@ user settings (`~/.claude/settings.json`) runs it twice: remove that user-level 
 **4. First run:** no stamp yet, so the first Stop copies every file into `code-{slug}/`
 (bandit:notes creates the folder at onboarding) and stamps. Upgrading from the old script (the one
 that asked Claude to write through WebDAV): replace the file, delete `.claude/mirror-stamp.json` if
-there is one, and end a turn: the whole mirror is recopied.
+there is one, and end a turn: the whole mirror is recopied. Upgrading from the script that walked into `.claude/worktrees/` before skipping it: replace the
+file only; the stamp stays valid.
 
 ## ⚠️ Gotchas
 
@@ -180,3 +185,6 @@ there is one, and end a turn: the whole mirror is recopied.
 - **2026-09-30 · The script would have mirrored `.claude/worktrees/`.** Claude Code creates each
   worktree as a full checkout under `.claude/worktrees/`, and `rglob` walked into it. → `SKIP_DIRS`
   excludes it; any other non-settings folder Claude Code adds under `.claude/` goes there too.
+- **2026-11-06 · The skip still walked every worktree first.** `rglob` listed all of `.claude/worktrees/`
+  (19 GB, 394,553 files on one machine) before the prefix check dropped it: about 30 s at the end of
+  every turn. → `os.walk` prunes `SKIP_DIRS` in place, so a skipped folder is never entered.

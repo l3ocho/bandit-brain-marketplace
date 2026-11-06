@@ -18,17 +18,21 @@ from pathlib import Path
 ROOT = Path(os.environ.get("CLAUDE_PROJECT_DIR") or Path(__file__).resolve().parents[2])
 STAMP = ROOT / ".claude" / "mirror-stamp.json"
 SKIP = {".claude/settings.local.json", ".claude/mirror-stamp.json"}
-SKIP_DIRS = (".claude/worktrees/",)  # Claude Code worktrees: full repo checkouts, never settings
+SKIP_DIRS = {".claude/worktrees", "__pycache__"}  # worktrees: full repo checkouts, never settings
 
 
 def current():
     files = {}
     candidates = [ROOT / "CLAUDE.md"]
-    if (ROOT / ".claude").is_dir():
-        candidates += sorted(p for p in (ROOT / ".claude").rglob("*") if p.is_file())
+    for dirpath, dirnames, filenames in os.walk(ROOT / ".claude"):
+        here = Path(dirpath)
+        # Prune in place: os.walk never enters a skipped folder (a worktree holds a whole repo).
+        dirnames[:] = sorted(d for d in dirnames
+                             if d not in SKIP_DIRS and (here / d).relative_to(ROOT).as_posix() not in SKIP_DIRS)
+        candidates += [here / f for f in sorted(filenames)]
     for p in candidates:
         rel = p.relative_to(ROOT).as_posix()
-        if rel in SKIP or rel.startswith(SKIP_DIRS) or "__pycache__" in p.parts or not p.is_file():
+        if rel in SKIP or not p.is_file():
             continue
         files[rel] = hashlib.sha256(p.read_bytes()).hexdigest()
     return files

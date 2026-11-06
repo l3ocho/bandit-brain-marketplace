@@ -726,6 +726,46 @@ def check_design_handover():
            "name the design handover" if not bad else f"design comparison missing: {bad} (BB-317)")
 
 
+# ── GO1 · each card goes through its gates once: review, one UI check, one full check, merge ─
+GATE_ORDER = ("Per card, in this order: code review and every fix first; then one browser check (when UI changed); "
+              "then one full check, last, after the card's notes and status are committed; then merge. "
+              "A browser check never starts while code review is still open.")
+TRUNK_DONE = 'the trunk check counts as done when the project\'s full check prints "already passed"'
+
+
+def check_gate_order():
+    s = PLUGINS / "bandit-dev" / "skills" / "sprint" / "references"
+    prompt = " ".join((s / "templates.md").read_text(encoding="utf-8")
+                      .split("## Execution prompt", 1)[-1].split("\n## ", 1)[0].split())
+    run = " ".join((s / "run.md").read_text(encoding="utf-8")
+                   .split("## Gates the wave agent cannot run", 1)[-1].split("\n## ", 1)[0].split())
+    push = " ".join((s / "execute.md").read_text(encoding="utf-8").split("## Pushing", 1)[-1].split("\n## ", 1)[0].split())
+    bad = [w for w, ok in (("execution prompt: the gate order word for word", GATE_ORDER in prompt),
+                           ("execution prompt: the trunk check's \"already passed\"", TRUNK_DONE in prompt),
+                           ("execute.md Pushing: \"already passed\"", "already passed" in push),
+                           ("run.md fallback: UI check only once review is closed", "Only once review is closed" in run),
+                           ("run.md fallback: verify once, last", "runs `verify` (`bandit.yaml`) once, last" in run)) if not ok]
+    report("GO1", not bad, "; ".join(bad) + " (BB-373)" if bad else
+           "gate order: review and fixes, one UI check, one full check last, then merge; \"already passed\" ends the trunk check")
+
+
+# ── DM1 · the dev mirror prunes .claude/worktrees/, and this repo runs the reference copy ─
+def check_dev_mirror():
+    ref = (PLUGINS / "bandit" / "skills" / "project" / "references" / "dev-mirror.md").read_text(encoding="utf-8")
+    m = re.search(r"\*\*3\. `\.claude/hooks/mirror-check\.py`\*\*[^\n]*\n\n```python\n(.*?)\n```", ref, re.S)
+    code = m.group(1) if m else ""
+    bad = []
+    if not code:
+        bad.append("dev-mirror.md has no mirror-check.py block")
+    elif "rglob(" in code or "dirnames[:]" not in code or '".claude/worktrees"' not in code:
+        bad.append("the reference script walks .claude/ without pruning .claude/worktrees")
+    own = ROOT / ".claude" / "hooks" / "mirror-check.py"
+    if code and own.is_file() and own.read_text(encoding="utf-8").rstrip("\n") != code.rstrip("\n"):
+        bad.append(".claude/hooks/mirror-check.py differs from the dev-mirror.md copy")
+    report("DM1", not bad, "; ".join(bad) + " (BB-373)" if bad else
+           "dev mirror: the reference prunes .claude/worktrees, this repo runs the same copy")
+
+
 # ── SP12 · a done wave is drawn done in the sprint map (temporary, decisions RS16) ─
 def check_sp12():
     script = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts" / "check_sprint.py"
@@ -1212,6 +1252,8 @@ def main(argv):
     check_wave_flow()
     check_sp11()
     check_design_handover()
+    check_gate_order()
+    check_dev_mirror()
     check_sprint_map()
     check_sp12()
     check_debug_card()

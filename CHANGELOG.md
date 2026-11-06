@@ -2,6 +2,14 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
+## Unreleased
+
+### Changed
+- **Each sprint card goes through its gates once** (BB-373). The execution prompt now says, word for word: code review and every fix first; then one browser check (when the screen changed); then one full check, last, after the card's notes and status are committed; then merge. A browser check never starts while code review is open, so review fixes no longer force a second browser check, and a notes commit no longer forces a second full check. After the merge, a full check that prints "already passed" counts as the trunk check. The `run` fallback follows the same order. No gate is removed. Checker rule GO1.
+
+### Fixed
+- **The dev mirror no longer adds about 30 seconds to the end of every reply** (BB-373). The script listed every file inside `.claude/worktrees/` before skipping them; it now never enters that folder. On a test copy with 200,000 files in worktrees it went from 34.5 s to under 0.01 s. A repo that already has the mirror replaces `.claude/hooks/mirror-check.py` with the new copy from `/bandit:project`'s dev mirror reference; its stamp stays valid. Checker rule DM1.
+
 ## 0.14.0 · 2026-11-05
 
 ### Added

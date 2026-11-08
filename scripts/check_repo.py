@@ -1013,6 +1013,63 @@ def check_design_link():
            f"debug find the files through the Handover line; {len(mutants)} broken copies all fail")
 
 
+# ── DS1 · a design that changed the shared look ends by asking for design sync, and the design card records it ─
+def design_sync_problems(files):
+    """`files` maps a short file name to its text; dev-workflow.md is the one home."""
+    flat = {n: " ".join(x.split()) for n, x in files.items()}
+    dw = flat.get("dev-workflow.md", "")
+    step = dw.split("### Design step", 1)[-1].split("**Design card**", 1)[0]
+    card = dw.split("**Design card**", 1)[-1].split("### ", 1)[0]
+    bad = []
+    for w in ("**Closing step.**", "changed the shared look (colours, fonts, spacing, shared components)",
+              "asking the user to run `/design-sync`", "the helpers cannot run",
+              "<p>Design sync run {date}</p>", "<p>Design sync not needed: {reason}</p>"):
+        if w not in step:
+            bad.append(f"dev-workflow.md Design step lost '{w}'")
+    if "without one of the two design sync lines" not in card:
+        bad.append("dev-workflow.md Design card is completed without a design sync line")
+    homes = sorted(n for n, x in files.items() if "**Closing step.**" in x and "design-sync" in x)
+    if homes != ["dev-workflow.md"]:
+        bad.append(f"the design sync closing step lives in {homes or 'nowhere'} (one home: dev-workflow.md)")
+    for n in ("pipeline.md", "decisions.md"):
+        if "Design sync run {date}" not in flat.get(n, "") and "design-sync" not in flat.get(n, ""):
+            bad.append(f"{n} does not mention design sync")
+    if "Design sync not needed: {reason}" not in flat.get("pipeline.md", ""):
+        bad.append("pipeline.md stage 4 does not name the design sync lines")
+    if "RS25" not in flat.get("decisions.md", ""):
+        bad.append("decisions.md has no RS25 row")
+    return bad
+
+
+def check_design_sync():
+    names = {"dev-workflow.md": ("plugins", "bandit", "skills", "tasks", "references", "dev-workflow.md"),
+             "pipeline.md": ("docs", "pipeline.md"), "decisions.md": ("docs", "decisions.md"),
+             "plan.md": ("plugins", "bandit-dev", "skills", "sprint", "references", "plan.md")}
+    files = {n: ROOT.joinpath(*parts).read_text(encoding="utf-8") for n, parts in names.items()}
+    bad = design_sync_problems(files)
+
+    def without(name, old, new=""):
+        copy = dict(files)
+        assert old in copy[name], (name, old)
+        copy[name] = copy[name].replace(old, new)
+        return copy
+    mutants = [without("dev-workflow.md", "**Closing step.**", "**Last step.**"),
+               without("dev-workflow.md", "asking the user to run `/design-sync`", "asking the user"),
+               without("dev-workflow.md", "<p>Design sync run {date}</p>", "<p>Synced</p>"),
+               without("dev-workflow.md", "<p>Design sync not needed: {reason}</p>", "<p>No sync</p>"),
+               without("dev-workflow.md", "(colours, fonts, spacing, shared", "(colours"),
+               without("dev-workflow.md", "without one of the two design sync lines", "without the page link again"),
+               without("pipeline.md", "Design sync not needed: {reason}", "no sync line"),
+               without("decisions.md", "| RS25 |", "| RS99 |"),
+               {**files, "plan.md": files["plan.md"] + "\n**Closing step.** ask for `/design-sync`\n"}]
+    missed = [i for i, m in enumerate(mutants) if not design_sync_problems(m)]
+    if missed:
+        bad.append(f"the rule does not fail on every broken copy (missed {missed})")
+    report("DS1", not bad, "; ".join(bad) + " (BB-398)" if bad else
+           f"design sync: the closing step and the design card's sync line live in dev-workflow.md only; the design card is "
+           f"not completed without one; pipeline and decisions match; {len(mutants)} broken copies all fail")
+
+
 # ── TG1 · no helper forbids creating a tag or asks before creating one: the app's roles are the gate ─
 TAG_BANS = (re.compile(r"\b(?:create|add)\s+columns[^.\n]*\btags?\b", re.I),   # a Never line that lists tags with columns
             re.compile(r"Creating a tag[^\n]*ask first", re.I),
@@ -1571,6 +1628,7 @@ def main(argv):
     check_wave_order()
     check_debug_card()
     check_design_link()
+    check_design_sync()
     check_tag_creation()
     check_approval_line()
     check_recipe()

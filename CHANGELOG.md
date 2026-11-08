@@ -2,7 +2,7 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
-## Unreleased
+## 0.16.1 · 2026-11-08
 
 ### Fixed
 - **The wave report prints each card's id clean** (BB-407). When the `echo CARD-START {card}` mark shared a command line with another command (`echo CARD-START BB-403; git checkout …`), the per-card time and token lines printed the id as `BB-403;` and each wave needed a hand correction (waves 2, 5 and 8 of the last sprint). `wave_flow.py` now reads the id up to a space, quote, `;`, `&` or `|`. The fixture log's second mark shares its line with another command, so check WF1 fails on the old script.

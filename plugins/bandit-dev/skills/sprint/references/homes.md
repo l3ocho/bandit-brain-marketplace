@@ -9,6 +9,7 @@
 | The sprint | A real sprint on the home board: status and the batch in run order (`references/templates.md` → The sprint in the app) |
 | Sprint folder | `Projects/{slug}/sprint-{name}/` in the domain vault |
 | Plan, briefs, execution prompt, ledger (planning steps and wave progress), review record, handover report | The sprint folder; filenames in `references/templates.md` |
+| The project's sprint data file and its targets note | `Projects/{slug}/planning/`; shapes and the script in `references/templates.md` → Sprint data |
 | An old-way sprint's sprint card and tag | `references/old-way.md` |
 
 The sprint folder and its record types are owned by bandit:notes (conventions §1, Sprint folders, and §4 filenames). This skill follows them and restates none of them; `references/templates.md` mirrors the filenames only for convenience.

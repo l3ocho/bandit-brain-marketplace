@@ -29,6 +29,7 @@ Read the live state first (`get_sprints { sprintId }`, `get_task` for every card
    | Ledger | Plan steps, Waves | Every row done, each with its evidence |
    | Ledger | Status line | `Closed {date}: {n} of {n} cards delivered and tested by the user` |
    | The sprint | papers link | After step 3, the archived folder's path (`manage_sprints { action: "update", papersUrl }`: a Closed sprint still takes it) |
+   | The project's sprint data file | Rows of this sprint | Rebuilt from the sprint records before the archive (`references/templates.md` → Sprint data); the archive keeps the rows, only their `where` changes at the next rebuild |
    | Ledger | Decisions log | The user's quoted approval and date, what shipped, what carried over, where the report lives, lessons |
    | Ledger, At a glance | Current wave, Next action, Handover report, Last update | "Sprint closed", "none", FINAL, today |
    | Ledger, Waves and cards | Status per card | `Tested by the user` |

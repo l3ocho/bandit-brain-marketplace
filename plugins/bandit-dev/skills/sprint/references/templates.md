@@ -2,7 +2,7 @@
 
 Part of `bandit-dev:sprint`. Frontmatter keys, values, filename rules, YAML style and inbox rules belong to bandit:notes; card sections belong to bandit:tasks. This file only fixes the sprint-specific shapes. A fixed shape is justified because other steps and chats read these records.
 
-Contents: Filenames · The sprint in the app · Step comment · Plan note · Brief change log · Execution prompt · Ledger · Wave report · Sprint map · Debug card · Handover cards · Report
+Contents: Filenames · The sprint in the app · Step comment · Plan note · Brief change log · Execution prompt · Ledger · Wave report · Sprint map · Sprint data · Debug card · Handover cards · Report
 
 ## Filenames
 
@@ -17,6 +17,8 @@ Contents: Filenames · The sprint in the app · Step comment · Plan note · Bri
 | Wave report | `{project}-sprint-{name}-wave-report.md` (rebuilt at the end of every wave, Wave report below) |
 | Sprint map | `{project}-sprint-{name}-map.html` (drawn at plan step 12, redrawn at the end of every wave, Sprint map below) |
 | Review record | `{project}-review-sprint-{name}-YYYY-MM-DD.md` (`type: log`, written at step 11 from the `plan-reviewer` agent's report) |
+| Sprint data file | `{project}-sprint-data.csv`, one per project in `Projects/{slug}/planning/` (rebuilt at the end of every wave and at close, Sprint data below) |
+| Sprint targets note | `{project}-sprint-targets.md`, one per project in `Projects/{slug}/planning/` (the home of a project's targets, keyed by measure name; a project's own, so they change without a release) |
 | Briefs | one per card, bandit:notes brief naming, filed into the folder |
 
 ## The sprint in the app
@@ -82,6 +84,12 @@ Rules:
 ## Sprint map
 
 Temporary (decisions RS16): one HTML page per sprint, a live picture of the sprint for the user. `python3 ${CLAUDE_SKILL_DIR}/scripts/sprint_map.py {data.json} --out {page}` draws it; the page goes to the sprint folder through WebDAV (a new file, then the etag on each redraw). The data file is built fresh each time and never stored: `sprint`, `project`, `due` (the sprint date), `effort`, optional `headline` and `lede`; `cards` from the sprint's run order, each with `id`, `title`, `area` (its board column), `wave` (from the ledger's Waves table; a card in no wave is left out), `step` (its run number), `size` (effort and complexity), `state` (delivered when in Stand By or Done, doing, paused, or waiting), `db` (the card adds a migration, from the plan's Migration tail) and `gets` (the first sentence of its Outcome); `links` = the blocker links between sprint cards (`get_task` → `blockedBy`); `after` = the plan's "lands after" pairs from Cross-card items, empty when it names none. The road after the last wave comes from the recipe. Nothing is placed by hand: the script routes the arrows.
+
+## Sprint data
+
+One data file per project, built by `python3 ${CLAUDE_SKILL_DIR}/scripts/sprint_data.py --vault {vault} --domain {D} --project {slug}` from the project's sprint folders, live and `_archive`: one CSV row per wave (`sprint`, `where`, `wave`, then one column per measure). Numbers come only from the ledger and the wave report; a measure a record does not hold is an empty cell, never an estimate, and a ledger with no wave table is skipped with a note. **The measures list is the one place a measure lives**: one `Measure(name, source, reader)` line in the script's `MEASURES`, and a new measure is a new column with nothing else changed (`sprint_data.py --list` prints the names and where each is read). A project's targets are not in the script: they live in the targets note (Filenames), so they change without a release.
+
+Where there is no synced vault, make a local copy of the project's sprint folders through WebDAV (the ledger and wave report of each) and run the script on it. Write the CSV to `Projects/{slug}/planning/{project}-sprint-data.csv` through WebDAV: a new file the first time, then the etag, bare, on each rebuild (bandit:notes write rules; SP5 allows `planning/`). `execute.md` → Finishing a wave runs it after the wave report, and `close.md` runs it before the archive; a rebuild replaces the whole file.
 
 ## Debug card
 

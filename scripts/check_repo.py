@@ -1237,6 +1237,58 @@ def check_wave_flow():
                       f"{'' if regroup in regrouped else ', group names not taken from the arguments'}")
 
 
+# ── SD1 · the sprint data file: one row per wave from one measures list, empty where a record lacks a measure ─
+SPRINT_DATA_TEXT = (("execute.md", "**Sprint data:** rebuild the project's data file"),
+                    ("close.md", "The project's sprint data file"),
+                    ("templates.md", "`{project}-sprint-data.csv`"),
+                    ("templates.md", "`{project}-sprint-targets.md`"),
+                    ("templates.md", "**The measures list is the one place a measure lives**"),
+                    ("homes.md", "The project's sprint data file and its targets note"))
+
+
+def sprint_data_text_problems(files):
+    return [f"{name} lacks {want!r}" for name, want in SPRINT_DATA_TEXT if want not in files[name]]
+
+
+def sprint_data_cases(mod, vault, expected):
+    """Problems of the script on the fixture domain: the CSV against the hand-checked file, and a new measure as one column."""
+    waves, notes = mod.collect(vault / "SprintData", "garden")
+    got = mod.to_csv(waves)
+    bad = [] if got == expected else ["the fixture CSV differs from tests/fixture-expected/sprint-data.csv"]
+    if len(notes) != 1 or "sprint-broken" not in notes[0]:
+        bad.append(f"the ledger with no wave table is not skipped with one note: {notes}")
+    extra = mod.to_csv(waves, mod.MEASURES + [mod.Measure("probe", "test", lambda w: str(w.number))])
+    rows, rows0 = [r.split(",") for r in extra.splitlines()], [r.split(",") for r in got.splitlines()]
+    if not (rows[0][:-1] == rows0[0] and rows[0][-1] == "probe" and all(a[:-1] == b for a, b in zip(rows[1:], rows0[1:]))
+            and [r[-1] for r in rows[1:]] == [r[2] for r in rows0[1:]]):
+        bad.append("a measure added to the list is not exactly one new column")
+    return bad, got
+
+
+def check_sprint_data():
+    import importlib.util
+    s = PLUGINS / "bandit-dev" / "skills" / "sprint"
+    spec = importlib.util.spec_from_file_location("sprint_data", s / "scripts" / "sprint_data.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    vault = ROOT / "tests" / "fixture-vault"
+    expected = (ROOT / "tests" / "fixture-expected" / "sprint-data.csv").read_text(encoding="utf-8")
+    bad, got = sprint_data_cases(mod, vault, expected)
+    files = {n: (s / "references" / n).read_text(encoding="utf-8") for n in ("execute.md", "close.md", "templates.md", "homes.md")}
+    bad += sprint_data_text_problems(files)
+    # Both ways: a reader that guesses a count for a missing record, and a dropped measure, must each differ from the expected file.
+    guess = [mod.Measure(m.name, m.source, (lambda w: "0") if m.name == "debug_lines" else m.reader) for m in mod.MEASURES]
+    dropped = [m for m in mod.MEASURES if m.name != "effort"]
+    waves, _ = mod.collect(vault / "SprintData", "garden")
+    mutants = [mod.to_csv(waves, guess) == expected, mod.to_csv(waves, dropped) == expected]
+    mutants += [not sprint_data_text_problems({**files, n: files[n].replace(w, "")}) for n, w in SPRINT_DATA_TEXT]
+    ok = not bad and not any(mutants)
+    report("SD1", ok, f"sprint_data.py: {len(got.splitlines()) - 1} fixture rows match the hand-checked file (older records empty, a "
+           "ledger with no wave table skipped), one added measure is one added column, and the wave-end, close, filename and home text "
+           f"is present; {len(mutants)} broken copies (a guessed value, a dropped measure, each text missing) all fail"
+           if ok else f"{'; '.join(bad)}{'' if not any(mutants) else f'; a broken copy passed ({mutants})'}")
+
+
 # ── NA1 · the sprint helper never tells an executor to decide and continue without asking ─
 NO_ASK_RE = re.compile(r"conservative\s+reading|cautious\s+reading|do(?:n['’]t|\s+not)\s+ask(?:\s+any)?\s+questions"
                        r"|never\s+ask\s+the\s+user|decide\s+(?:and\s+(?:continue|proceed)|alone)", re.I)
@@ -1639,6 +1691,7 @@ def main(argv):
     check_debug_push()
     check_design_card()
     check_wave_flow()
+    check_sprint_data()
     check_sp11()
     check_design_handover()
     check_gate_order()

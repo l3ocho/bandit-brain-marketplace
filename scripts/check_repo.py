@@ -935,6 +935,84 @@ def check_debug_card():
            "debug reads it first, close refuses an unticked line, run names it")
 
 
+# ── DL1 · the design page link and the handover files' place ride on the card, and every reader finds the files through `Handover:` ─
+DESIGN_LINK_FILES = {"dev-workflow.md": ("plugins", "bandit", "skills", "tasks", "references", "dev-workflow.md"),
+                     "dev.md": ("plugins", "bandit", "skills", "tasks", "references", "dev.md"),
+                     "plan.md": ("plugins", "bandit-dev", "skills", "sprint", "references", "plan.md"),
+                     "templates.md": ("plugins", "bandit-dev", "skills", "sprint", "references", "templates.md"),
+                     "run.md": ("plugins", "bandit-dev", "skills", "sprint", "references", "run.md"),
+                     "debug.md": ("plugins", "bandit-dev", "skills", "sprint", "references", "debug.md"),
+                     "pipeline.md": ("docs", "pipeline.md")}
+
+
+def design_link_problems(files):
+    """`files` maps a short file name (DESIGN_LINK_FILES) to its text."""
+    flat = {n: " ".join(x.split()) for n, x in files.items()}
+    bad = []
+    dw = flat.get("dev-workflow.md", "")
+    design_step = dw.split("### Design step", 1)[-1].split("**Design card**", 1)[0]
+    design_card = dw.split("**Design card**", 1)[-1].split("### ", 1)[0]
+    for where, text, words in (
+            ("Design step", design_step, ("<p>Design: {page link}</p>", "full `https://` address",
+                                          "<p>Handover: {where the handover files live}</p>",
+                                          "The agent that lands the handover and writes the card's Spec adds both")),
+            ("Design card", design_card, ("<p>Design page: {page link}</p>", "<p>Handover: {where the handover files live}</p>",
+                                          "It is not completed without the page link", "<p>Design: {page link}</p>",
+                                          "found through the design card's `Handover:` line, reached through the build card's `blockedBy`",
+                                          "carries both `Design: {page link}` and `Handover: {where the handover files live}`"))):
+        for w in words:
+            if w not in text:
+                bad.append(f"dev-workflow.md {where} lost '{w}'")
+    if "{handover link}" in dw:
+        bad.append("dev-workflow.md still puts the handover link on the build card's Design line")
+    if "<p>Design: {page link}</p>" not in flat.get("dev.md", ""):
+        bad.append("dev.md's Source row does not name the page link")
+    if "is not a full web address" not in flat.get("plan.md", ""):
+        bad.append("plan.md step 2 has no fix row for a Design line that is missing or not a full web address")
+    for name in ("templates.md", "run.md", "debug.md"):
+        if "`Handover:` line" not in flat.get(name, ""):
+            bad.append(f"{name} does not send the reader to the `Handover:` line for the handover files")
+    if "`Handover:`" not in flat.get("pipeline.md", "") or "full web address" not in flat.get("pipeline.md", ""):
+        bad.append("pipeline.md stage 4 does not match (page link, Handover line)")
+    homes = sorted(n for n, x in files.items() if "<p>Design page: {page link}</p>" in x)
+    if homes != ["dev-workflow.md"]:
+        bad.append(f"the design card's page line lives in {homes or 'nowhere'} (one home: dev-workflow.md)")
+    return bad
+
+
+def check_design_link():
+    root = ROOT
+    files = {n: root.joinpath(*parts).read_text(encoding="utf-8") for n, parts in DESIGN_LINK_FILES.items()}
+    bad = design_link_problems(files)
+
+    def without(name, old, new=""):
+        copy = dict(files)
+        assert old in copy[name], (name, old)
+        copy[name] = copy[name].replace(old, new)
+        return copy
+    mutants = [without("dev-workflow.md", "<p>Design page: {page link}</p>", "<p>Design page: {link}</p>"),
+               without("dev-workflow.md", "It is not completed\n   without the page link.", "It is completed."),
+               without("dev-workflow.md", "full\n   `https://` address", "link"),
+               without("dev-workflow.md", "The agent that lands the handover and writes the card's Spec adds both", "Someone adds both"),
+               without("dev-workflow.md", "reached through the build card's `blockedBy`", "reached some way"),
+               without("dev-workflow.md", "carries both `Design: {page link}` and `Handover:", "carries `Design: {page link}` and `Files:"),
+               {**files, "dev-workflow.md": files["dev-workflow.md"] + "\nthe build card's `<p>Design: {handover link}</p>`\n"},
+               without("dev.md", "{page link}", "{link}"),
+               without("plan.md", "is not a full web address", "is odd"),
+               without("templates.md", "`Handover:` line", "`Design:` line"),
+               without("run.md", "`Handover:` line", "`Design:` line"),
+               without("debug.md", "`Handover:` line", "`Design:` line"),
+               without("pipeline.md", "(`Handover:`)", "(handover)"),
+               {**files, "run.md": files["run.md"] + "\n<p>Design page: {page link}</p>\n"}]
+    missed = [i for i, m in enumerate(mutants) if not design_link_problems(m)]
+    if missed:
+        bad.append(f"the rule does not fail on every broken copy (missed {missed})")
+    report("DL1", not bad, "; ".join(bad) + " (BB-377)" if bad else
+           f"design links: the page link and the Handover line live in dev-workflow.md only (design card and build card, "
+           f"with and without a design card); planning flags a missing or non-web Design line; the UI check, run and "
+           f"debug find the files through the Handover line; {len(mutants)} broken copies all fail")
+
+
 # ── TG1 · no helper forbids creating a tag or asks before creating one: the app's roles are the gate ─
 TAG_BANS = (re.compile(r"\b(?:create|add)\s+columns[^.\n]*\btags?\b", re.I),   # a Never line that lists tags with columns
             re.compile(r"Creating a tag[^\n]*ask first", re.I),
@@ -1492,6 +1570,7 @@ def main(argv):
     check_app_compat()
     check_wave_order()
     check_debug_card()
+    check_design_link()
     check_tag_creation()
     check_approval_line()
     check_recipe()

@@ -902,6 +902,65 @@ def check_tag_creation():
            "tags: no helper forbids creating one or asks first; board.md names the app's roles as the gate")
 
 
+# ── AP1 · the approval line: one home, no wave, run or debug step ticks it, close ticks it only on the user's yes ─
+APPROVAL_LINE = "Tested and approved by you"
+NEVER_TICKED = "the approval line is never ticked here"
+TICKS_IT = re.compile(r"\btick(?:s)?\s+(?:the|its|their)\s+approval\s+line", re.I)
+
+
+def approval_problems(files, claude):
+    """`files` maps a sprint reference name to its text (plus 'templates.md', 'close.md'); `claude` is the repo CLAUDE.md."""
+    flat = {n: " ".join(x.split()) for n, x in files.items()}
+    bad = []
+    homes = sorted(n for n, x in flat.items() if APPROVAL_LINE in x)
+    if homes != ["templates.md"]:
+        bad.append(f"the line's text lives in {homes or 'nowhere'} (one home: templates.md)")
+    if "## Approval line" not in files.get("templates.md", ""):
+        bad.append("templates.md lost its Approval line section")
+    for name, n in (("execute.md", 1), ("run.md", 2), ("debug.md", 1)):
+        if flat.get(name, "").count(NEVER_TICKED) < n:
+            bad.append(f"{name} lost '{NEVER_TICKED}' (needs {n})")
+    for name in ("plan.md", "execute.md", "run.md", "debug.md", "release.md"):
+        if TICKS_IT.search(flat.get(name, "")):
+            bad.append(f"{name} has a step that ticks the approval line")
+    if "templates.md` → Approval line" not in flat.get("plan.md", ""):
+        bad.append("plan.md does not add the approval line (step 7) or check it (step 9)")
+    close = flat.get("close.md", "")
+    if "Tick the approval line" not in close or "approval line is open" not in close or \
+            close.find("Tick the approval line") > close.find("`update_tasks { items: [{ taskId, complete: true }"):
+        bad.append("close.md must tick the approval line on the quoted approval before it completes, and refuse an open one")
+    c = " ".join(claude.split())
+    if "stay in Stand By" not in c or "approval line" not in c or "Only then close the card" in c:
+        bad.append("CLAUDE.md 'Done means released' must leave the cards in Stand By until Leo's yes")
+    return bad
+
+
+def check_approval_line():
+    s = PLUGINS / "bandit-dev" / "skills" / "sprint" / "references"
+    files = {n: (s / n).read_text(encoding="utf-8") for n in ("plan.md", "execute.md", "run.md", "debug.md", "close.md",
+                                                               "release.md", "templates.md")}
+    claude = (ROOT / "CLAUDE.md").read_text(encoding="utf-8")
+    bad = approval_problems(files, claude)
+    # The rule must fail on a copy without each part, and pass on the real text.
+    def without(name, old, new=""):
+        copy = dict(files)
+        copy[name] = copy[name].replace(old, new)
+        return copy
+    mutants = [without("execute.md", NEVER_TICKED), without("run.md", NEVER_TICKED),
+               without("debug.md", NEVER_TICKED),
+               without("execute.md", NEVER_TICKED, "so tick the approval line"),
+               without("plan.md", "templates.md` → Approval line"),
+               without("close.md", "Tick the approval line"),
+               without("templates.md", "## Approval line", "## Other"),
+               {**files, "plan.md": files["plan.md"] + f"\n{APPROVAL_LINE}\n"}]
+    missed = [i for i, m in enumerate(mutants) if not approval_problems(m, claude)]
+    if missed or not approval_problems(files, claude.replace("stay in Stand By", "close the card")):
+        bad.append(f"the rule does not fail on every broken copy (missed {missed})")
+    report("AP1", not bad, "; ".join(bad) + " (BB-378)" if bad else
+           "approval line: one home in templates.md; execute, run and debug never tick it; plan adds and checks it; close "
+           "ticks it on the quoted approval and refuses an open one; the repo CLAUDE.md leaves cards in Stand By until Leo's yes")
+
+
 # ── SM1 · the sprint map draws every card and link, routes no arrow through a card, follows the recipe ─
 def crosses(seg, box):
     (x1, y1), (x2, y2) = seg
@@ -1372,6 +1431,7 @@ def main(argv):
     check_wave_order()
     check_debug_card()
     check_tag_creation()
+    check_approval_line()
     check_recipe()
     check_contract()
     check_credential_guard()

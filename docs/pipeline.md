@@ -18,7 +18,7 @@ This file is the single definition (decision S1). Skills point here; app repos h
 | 8 | **Test** on staging | The person | The project's staging recipe (`bandit.yaml` `staging`); with Marketplace cards, the new helpers from the repo in a test session against staging, tested together with the app | Ledger "tested" lines | `release` precondition |
 | 9 | **Debug** | Claude Code | `/bandit-dev:sprint debug` | Bug log of defects (against the card or the approved design); anything new becomes a card for a later sprint; each fix runs its targeted tests, one full check before each push; the shared debug card holds every Expected and Found line, each ticked with its outcome | DB1 · DK1 |
 | 10 | **Release** on the person's word, optional | Claude Code | `/bandit-dev:sprint release` | Version, release line in the ledger naming every sprint it covers (this one and the deferred ones before it); plugin bump when Marketplace cards ship; one production handover card filled (`bandit.yaml` `handover`), or, when the recipe names no production card, the deploy run by the recipe's own steps | Release gates unchanged; a sprint that changed the helpers is not closed before their release |
-| 11 | **Close** | Claude Code | `/bandit-dev:sprint close` | Cards complete, the sprint Closed, sprint folder archived; `Release: deferred` when it closes with no app release; an old-way sprint brought into the app first | Existing checks |
+| 11 | **Close** | Claude Code | `/bandit-dev:sprint close` | Each approved card's approval sub-task ticked and the card complete, the sprint Closed, sprint folder archived; `Release: deferred` when it closes with no app release; an old-way sprint brought into the app first | Existing checks |
 
 ## 🧭 Surfaces
 

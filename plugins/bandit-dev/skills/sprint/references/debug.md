@@ -22,9 +22,13 @@ Contents: Rules · Read first · Intake · Combined test · Fix loop · Pushing 
 
 ## Intake
 
-1. **The debug card first.** Read the sprint's debug card (`Debug card:` in the ledger): its `Expected:` and `Found:` lines are the starting list. Every point the user raises in chat becomes a `Found:` line on it before it is worked (`references/templates.md` → Debug card). The user gives adjustments in any form, questions included (a question that ends in a choice is an adjustment). Restate them in their own words as table rows, each tied to a card and to the document line, acceptance row or design point it breaks. One that breaks none is new: a card for a later sprint (Rules).
+1. **The debug card first.** Move the sprint's debug card (`Debug card:` in the ledger) to `doing` (`update_tasks`, read back; a refused move is a Process line and a line under "Needs the user", never a stop). Read it: its `Expected:`, `Found:` and `Process:` lines are the starting list. Every point the user raises in chat becomes a `Found:` line on it before it is worked (`references/templates.md` → Debug card). The user gives adjustments in any form, questions included (a question that ends in a choice is an adjustment). Restate them in their own words as table rows, each tied to a card and to the document line, acceptance row or design point it breaks. One that breaks none is new: a card for a later sprint (Rules).
 2. Investigate read-only first, in parallel where cards differ (the investigator brief in `plan.md`). A live check at this stage writes nothing on existing data; if a case needs data the database lacks, it creates it and removes it afterwards, through `/bandit-dev:testdata` when the project has a `testdata` section (Test data in `plan.md`).
 3. Present one list with a recommendation per row. Ask follow-ups only for what the answers raise.
+
+## Process lines
+
+A build, check, push, gate, board move or run of this command that stalls or fails writes its Process line on the debug card at once (`references/templates.md` → Debug card, Process lines); the fix or the lesson ticks it.
 
 ## Combined test
 
@@ -60,7 +64,7 @@ Several fixes may share one push. Right before each push of `development` (the p
 **No leftovers.** Before this step ends, anything it used to make something else and no longer needs (a draft, a scratch file, a superseded copy, a test fixture, a temporary branch) is archived or deleted, only on proof that its successor exists (`references/homes.md` → Leftovers). A fix branch is deleted once merged; test data is removed.
 
 
-Every row fixed or declined with the user's word; anything new filed as a card. Ledger Status per card moves to `Tested by the user` for every card the user says they tested; every debug card line is ticked with its outcome and the wave report's Debug section counts them (`templates.md` → Debug card); the ledger's Status line becomes `Debug done, ready to release`, and At a glance says debug is done; Milestone log `Debug done: {n} adjustments, {n} new cards. Ready to release.` The sprint stays `debugging`; final message of ten lines at most with the paste for `release`.
+Every row fixed or declined with the user's word; anything new filed as a card. Ledger Status per card moves to `Tested by the user` for every card the user says they tested; every debug card line (a Process line too: fixed, or its lesson recorded) is ticked with its outcome and the wave report's Debug section counts them (`templates.md` → Debug card); the ledger's Status line becomes `Debug done, ready to release`, and At a glance says debug is done; Milestone log `Debug done: {n} adjustments, {n} new cards. Ready to release.` The sprint stays `debugging`; final message of ten lines at most with the paste for `release`.
 
 ## Never
 

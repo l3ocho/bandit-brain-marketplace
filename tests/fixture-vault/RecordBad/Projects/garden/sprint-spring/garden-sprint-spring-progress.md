@@ -34,6 +34,14 @@ sprint: spring
 | 11 | Independent plan review | 2026-10-31 | Step 11 evidence. |
 | 12 | Commit the sprint | 2026-10-31 | Step 12 evidence. |
 
+## Batch
+
+| Card | Title | Blocked by |
+|---|---|---|
+| GA-1 | Dig | — |
+| GA-2 | Plant | GA-1 |
+| GA-3 | Water | — |
+
 ## Waves
 
 | Wave | Cards | Done | Evidence |

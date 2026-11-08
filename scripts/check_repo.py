@@ -798,6 +798,45 @@ def check_sp13():
            f"Record → {earlier[0]}; plan.md lost {words} (BB-374)")
 
 
+# ── WO1 · a card waits for its own blockers, not for the wave before it; the cap counts the sprint's cards ─
+OLD_ORDER = re.compile(r"refused\s+while\s+wave\s+N-1|strictly\s+in\s+sequence|Waves\s+run\s+in\s+order|Last\s+wave\s+only"
+                       r"|move\s+the\s+next\s+wave['’]s\s+cards|list_tasks\(\{\s*executionState:\s*'next'", re.I)
+
+
+def old_order_hits(text):
+    return [m.group(0) for m in OLD_ORDER.finditer(" ".join(text.split()))]
+
+
+def check_wave_order():
+    s = PLUGINS / "bandit-dev" / "skills" / "sprint"
+    files = [s / "SKILL.md", *sorted((s / "references").glob("*.md"))]
+    files = [f for f in files if f.name not in ("gotchas.md", "old-way.md")]   # history lines quote the old wording
+    hits = [f"{f.relative_to(ROOT)}: {h!r}" for f in files for h in old_order_hits(f.read_text(encoding="utf-8"))]
+    cases = [("Wave N is refused while wave N-1 is not done", 1), ("Strictly\nin sequence.", 1), ("Waves run in order.", 1),
+             ("**Last wave only:** when", 1), ("move the next wave's cards to `next`", 1),
+             ("`list_tasks({ executionState: 'next' })`", 1),
+             ("`list_tasks({ sprintId, executionState: 'next' })`: this sprint's cards only", 0),
+             ("A wave waits for what it depends on, not for the wave before it.", 0)]
+    bad_cases = [c for c, n in cases if len(old_order_hits(c)) != n]
+    execute = " ".join((s / "references" / "execute.md").read_text(encoding="utf-8").split())
+    run = " ".join((s / "references" / "run.md").read_text(encoding="utf-8").split())
+    words = [w for w, src in (("A wave waits for what it depends on, not for the wave before it", execute),
+                              ("`list_tasks({ sprintId, executionState: 'next' })`", execute),
+                              ("counted over this sprint's own cards", execute),
+                              ("a wave whose dependencies are delivered runs even while an earlier wave holds a paused "
+                               "or blocked card", run)) if w not in src]
+    script = s / "scripts" / "check_sprint.py"
+    vault = ROOT / "tests" / "fixture-vault"
+    free = run_script(script, "--vault", str(vault), "--domain", "WavesFree")   # a later independent wave done early
+    dep = run_script(script, "--vault", str(vault), "--domain", "WavesDep")     # dependent waves done early
+    fx = free[0] == 0 and dep[0] == 1 and dep[1].count("\n- ") == 2 and "which it depends on" in dep[1]
+    ok = not hits and not bad_cases and not words and fx
+    report("WO1", ok, f"wave order: no strict-order wording in {len(files)} sprint files ({len(cases)} self-test cases); the cap "
+           "counts the sprint's cards; SP10 passes a later independent wave done early and refuses a dependent one"
+           if ok else f"old wave-order wording {hits + bad_cases}; lost {words}; fixtures: WavesFree → {free[0]} "
+           f"{free[1][-100:]!r}, WavesDep → {dep[0]} {dep[1][-160:]!r} (BB-397)")
+
+
 # ── AC1 · README and install guide say which Bandit Brain app version the marketplace version needs ─
 def compat_has_row(text, version):
     """True when the `### Works with Bandit Brain` table has a row for `version`."""
@@ -954,13 +993,13 @@ def check_sp9():
     good = run_script(script, "--vault", str(vault), "--domain", "Record")
     bad = run_script(script, "--vault", str(vault), "--domain", "RecordBad")
     want = ("step 3 (Close the open questions) is marked done with no evidence",
-            "Wave 2 is done while an earlier wave is not", "Wave 2 names GA-3",
+            "Wave 2 is done while Wave 1, which it depends on, is not", "Wave 2 names GA-3",
             "missing garden-sprint-summer-plan.md")
     # Record also holds a sprint still in planning (no plan or prompt yet), which must pass;
     # RecordBad's planning sprint has step 7 done with no plan, which must fail SP1.
     ok = good[0] == 0 and bad[0] == 1 and all(w in bad[1] for w in want) and bad[1].count("\n- ") == 4
     report("SP9", ok, "check_sprint passes a record sprint's steps and waves, refuses a step with no evidence, "
-           "a wave out of order, a card outside the table, and a plan missing after step 7; a sprint still in planning passes (SP1, SP9, SP10)"
+           "a wave done before a wave it depends on, a card outside the table, and a plan missing after step 7; a sprint still in planning passes (SP1, SP9, SP10)"
            if ok else f"fixtures: good → {good[0]} {good[1][-120:]!r}; bad → {bad[0]} {bad[1][-200:]!r}")
 
 
@@ -1330,6 +1369,7 @@ def main(argv):
     check_sp12()
     check_sp13()
     check_app_compat()
+    check_wave_order()
     check_debug_card()
     check_tag_creation()
     check_recipe()

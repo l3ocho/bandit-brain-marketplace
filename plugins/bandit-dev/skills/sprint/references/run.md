@@ -6,7 +6,7 @@ Contents: Command · Rules · Before the first wave · The loop · Paced mode ·
 
 ## Command
 
-`/bandit-dev:sprint run {sprint}` runs every wave not done in its ledger, in order. `/bandit-dev:sprint run {sprint A} {sprint B}` runs the sprints in the order given, all of the first before any of the second.
+`/bandit-dev:sprint run {sprint}` runs every wave not done in its ledger, in plan order, each once the cards it depends on are delivered (`execute.md` → Command, rule 3). `/bandit-dev:sprint run {sprint A} {sprint B}` runs the sprints in the order given, all of the first before any of the second.
 
 1. **Only sprints are accepted** (a real sprint, or an old-way sprint card: `references/old-way.md`). A batch card is refused, as in `execute`.
 2. **Each sprint must be committed**: its ledger's 12 Plan steps done. A sprint still in planning is named and skipped; the others still run.
@@ -18,7 +18,7 @@ Contents: Command · Rules · Before the first wave · The loop · Paced mode ·
 ## Rules
 
 - **One wave, one agent.** Each wave is executed by one new subagent. The orchestrator never implements, never edits code and never reads diffs. It reads the board, the ledgers and the agents' reports.
-- **Strictly in sequence.** One wave at a time, waves in order, sprints in the order given. Never two wave agents at once: they share one working tree, the local `development` branch and the migration numbers, so parallel waves would collide.
+- **One wave at a time.** Waves in plan order, sprints in the order given; a wave whose dependencies are delivered runs even while an earlier wave holds a paused or blocked card. Never two wave agents at once: they share one working tree, the local `development` branch and the migration numbers, so parallel waves would collide.
 - **The orchestrator checks every wave before the next starts.** No wave starts on a report alone.
 - **The wave agent follows `execute` exactly.** Same rules, same board choreography, same ledger, same stop-lines. Nothing is relaxed because there is no human in the chat.
 - **Context stays small.** Agent reports have a fixed short shape (below). Ask for nothing longer.
@@ -36,15 +36,15 @@ For each wave, in order:
 
 1. **Launch one subagent** (the Agent tool, type `general-purpose`) and wait for its result before doing anything else. Its prompt, filled in:
 
-   > You are the execution chat for Wave {n} of Sprint {name} on the {board} board. Working directory: {repo path}. Run `/bandit-dev:sprint execute {name} wave {n}`: read `${CLAUDE_SKILL_DIR}/SKILL.md` and `${CLAUDE_SKILL_DIR}/references/execute.md`, then the handover prompt in the sprint folder ({folder}), and follow them exactly for this one wave only. Move the cards on the Execution board exactly as `execute.md` → Board moves says: your wave's cards to `doing` while you work them, the next wave's to `next` the moment your wave's last card reaches `standby`, later waves left in `assigned`, each finished card to `standby`, and tick each card's sub-tasks as you go. Leave no leftovers: archive or delete what you used and no longer need, on proof only. You run unattended: what the Spec, the plan, its Gaps answered by convention block and the project's rules answer, do; a question none of them answers is never decided by you: pause that card as `execute.md` → The wave, step 4a says, and report `NEEDS DECISION` with the question in the user's terms and your recommendation. If you cannot launch the code-reviewer or ui-verifier agents yourself, stop before merging, keep the branch, and report `GATES NEEDED` with the branch name. Report in at most 15 lines, in this shape: BOARD at start (the Execution columns of your wave's cards right after you set the board); STATUS (DONE / GATES NEEDED / NEEDS DECISION / BLOCKED); WAVE; CARDS with their column now; BRANCHES and merge commits; VERIFY result on `development`; GATES (review verdict, UI verdict); CONVENTIONS applied from the plan's Gaps answered by convention block (one line each); QUESTION for the user (with NEEDS DECISION); BLOCKER (if any, and what only the user can supply); FLOW: the wave's time, full checks, gate rounds, tokens and peak context from the wave report; OPEN CALLS from the wave report, verbatim.
+   > You are the execution chat for Wave {n} of Sprint {name} on the {board} board. Working directory: {repo path}. Run `/bandit-dev:sprint execute {name} wave {n}`: read `${CLAUDE_SKILL_DIR}/SKILL.md` and `${CLAUDE_SKILL_DIR}/references/execute.md`, then the handover prompt in the sprint folder ({folder}), and follow them exactly for this one wave only. Move the cards on the Execution board exactly as `execute.md` → Board moves says: your wave's cards to `doing` while you work them, every later card whose dependencies are all delivered to `next` the moment a card reaches `standby`, cards that depend on an undelivered card left in `assigned`, each finished card to `standby`, and tick each card's sub-tasks as you go. Leave no leftovers: archive or delete what you used and no longer need, on proof only. You run unattended: what the Spec, the plan, its Gaps answered by convention block and the project's rules answer, do; a question none of them answers is never decided by you: pause that card as `execute.md` → The wave, step 4a says, and report `NEEDS DECISION` with the question in the user's terms and your recommendation. If you cannot launch the code-reviewer or ui-verifier agents yourself, stop before merging, keep the branch, and report `GATES NEEDED` with the branch name. Report in at most 15 lines, in this shape: BOARD at start (the Execution columns of your wave's cards right after you set the board); STATUS (DONE / GATES NEEDED / NEEDS DECISION / BLOCKED); WAVE; CARDS with their column now; BRANCHES and merge commits; VERIFY result on `development`; GATES (review verdict, UI verdict); CONVENTIONS applied from the plan's Gaps answered by convention block (one line each); QUESTION for the user (with NEEDS DECISION); BLOCKER (if any, and what only the user can supply); FLOW: the wave's time, full checks, gate rounds, tokens and peak context from the wave report; OPEN CALLS from the wave report, verbatim.
 
-2. **Set the board first, whatever the wave reported** (DONE, BLOCKED, GATES NEEDED, NEEDS DECISION, or no report at all, as when the wave agent was cut off by a usage limit): read the sprint's columns (`execute.md` → Board moves → Reading the board), move every batch card (the debug card is not one and stays put) to the column `execute.md` → Board moves requires (this wave's delivered cards in `standby`, a paused card left in `doing`, the next wave's in `next` only once this wave is finished, later waves in `assigned`), read the board back and note any move in the ledger's Milestone log. Only then check the rest.
+2. **Set the board first, whatever the wave reported** (DONE, BLOCKED, GATES NEEDED, NEEDS DECISION, or no report at all, as when the wave agent was cut off by a usage limit): read the sprint's columns (`execute.md` → Board moves → Reading the board), move every batch card (the debug card is not one and stays put) to the column `execute.md` → Board moves requires (this wave's delivered cards in `standby`, a paused card left in `doing`, every later card whose dependencies are all delivered in `next`, the rest in `assigned`), read the board back and note any move in the ledger's Milestone log. Only then check the rest.
 3. **Check the wave** against live state, not the report:
    - the ledger's Waves row for wave n is done, with its evidence;
    - the sprint's status (`get_sprints { sprintId }`) is `executing` while waves remain (never move it yourself), and `debugging` after the last wave;
-   - a paused card (NEEDS DECISION) is not a failed check: put its question to the user and stop the run there;
+   - a paused card (NEEDS DECISION) is not a failed check: put its question to the user; the run goes on with a wave that does not depend on the paused card, and stops when no wave is workable;
    - the cards the wave worked are in `standby` now, and during the wave they were in `doing`: read the wave agent's report line "BOARD at start" (the columns it showed after setting the board). A card that was worked from `assigned` or `next` is a failed wave: stop;
-   - the sprint's columns (`execute.md` → Reading the board) show exactly what `execute.md` → Board moves requires: this wave's cards in `standby` (or Blocked with the reason on the card), the next wave's cards in `next` where the five-card cap allows, every later wave's cards in `assigned` (step 2 already corrected any card in the wrong column);
+   - the sprint's columns (`execute.md` → Reading the board) show exactly what `execute.md` → Board moves requires: this wave's cards in `standby` (or Blocked with the reason on the card), every later card whose dependencies are delivered in `next` where the sprint's five-card cap allows, every card that depends on an undelivered card in `assigned` (step 2 already corrected any card in the wrong column);
    - every card of the wave has its sub-tasks ticked;
    - the ledger's "At a glance" names the next wave, and the wave's migration-tail line (`execute.md` → The wave, step 3) shows the tail matched;
    - the ledger's Status line reads `Wave {n} of {total} delivered…` for this wave: a stale line fails the wave;
@@ -53,7 +53,7 @@ For each wave, in order:
    - `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py` prints OK.
    Any mismatch: treat the wave as not done and stop (see below).
 4. **Add one line to the ledger's Milestone log**: `Run: Wave {n} done by agent, checked ({what was checked}). Next: Wave {n+1}` or the next sprint.
-5. Next wave. After a sprint's last wave, move on to the next sprint's first open wave.
+5. Next workable wave. After a sprint's last wave, move on to the next sprint's first open wave.
 
 ## Paced mode
 
@@ -77,7 +77,7 @@ The order is the execution prompt's Gate order (`templates.md`): review and its 
 
 ## Stop and resume
 
-**Stop the whole run** on: a `BLOCKED` or `NEEDS DECISION` report (put the question to the user as it came, in their terms), a wave that fails the check, a red `verify` on `development`, or a gate the agent cannot pass after one fix round. The current wave stays as it is. Later waves and later sprints do not start. Report what stopped it and what only the user can supply.
+**Stop the whole run** on: a wave that fails the check, a red `verify` on `development`, or a gate the agent cannot pass after one fix round; and on a `BLOCKED` or `NEEDS DECISION` report once no wave is workable (put the question to the user as it came, in their terms). The current wave stays as it is. A later wave that depends on the held card does not start; one that does not depend on it still runs. Later sprints do not start while any wave of the sprint is open. Report what stopped it and what only the user can supply.
 
 **Resume** is the same command: `run` starts from the first wave not done in each sprint's ledger and skips what is done. After a NEEDS DECISION stop, the user's answer goes into the ledger's Decisions log first (the orchestrator writes it, quoted); the new wave agent reads it at Start and resumes the paused card.
 
@@ -95,7 +95,7 @@ Ten lines at most per sprint: waves run, cards now in Stand By awaiting the user
 
 ## Never
 
-- Run two wave agents at once, or a wave before the previous one is checked.
+- Run two wave agents at once, or a wave before the previous one is checked, or a wave before the cards it depends on are delivered.
 - Implement, review or read diffs in the orchestrator.
 - Start `debug` or `close`, complete a card, merge into `main`, deploy or force-push. The orchestrator itself never pushes; the wave agent pushes `development` as `execute.md` says.
 - Continue past a stop condition, or tick a wave the check did not confirm.

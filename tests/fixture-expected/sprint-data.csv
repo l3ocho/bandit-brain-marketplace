@@ -1,0 +1,9 @@
+sprint,where,wave,done,cards,card_ids,effort,plan_deviations,time_min,full_check_runs,full_check_min,full_check_failed,test_runs,code_review_rounds,ui_check_rounds,repeat_runs,tokens_reread_k,tokens_new_k,tokens_written_k,peak_context_k,est_cost_usd,hook_runs,debug_lines
+summer,live,1,,1,GA-20,,,,,,,,,,,,,,,,,
+summer,live,2,,2,GA-21 GA-22,,,,,,,,,,,,,,,,,
+winter,live,1,2026-09-03,1,GA-10,,,,,,,,,,,,,,,,,
+winter,live,2,2026-09-05,2,GA-11 GA-12,,,,,,,,,,,,,,,,,
+spring,live,1,2026-11-06,2,GA-4 GA-5,5,3,65,3,12,1,5,2,1,1,5300,169,3,1200,5.16,143,
+spring,live,2,,1,GA-6,5,1,,,,,,,,,,,,,,,
+autumn,archived,1,2026-10-02,1,GA-1,4,0,20,1,2,0,,0,0,0,,,,,,,3
+autumn,archived,2,2026-10-03,2,GA-2 GA-3,3,0,10,2,3,0,,1,0,0,,,,,,,2

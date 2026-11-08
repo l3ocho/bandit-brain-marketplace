@@ -17,9 +17,20 @@ Counting:
   gate round   one Agent launch, counted by its type
   repeat run   a full check or test run whose exact command ran before with no file edit in between
   duration     from the call to its result; a call started in the background is "not measured"
+  source       one step is counted once, by the first label Claude Code recorded on it, in this order:
+               connector (attributionMcpServer, tool) · skill (attributionSkill) · plugin (attributionPlugin)
+               · helper agent (attributionAgent, or the agent file's type); no label = "unlabelled", always shown
+  group        marketplace (its plugins, or a skill named plugin:skill) · Bandit Brain connectors (servers named as
+               Claude Code records them, exact case) · everything else; the names come from --marketplace-plugins and
+               --connectors, defaults below
+  hooks        time from the hook_success attachments and the stop_hook_summary rows; size = characters in the
+               hook_additional_context attachments (Claude Code records no tokens for hooks)
+  cost         an estimate: each step's usage at the per-million price of its `message.model` (PRICES, checked on
+               PRICES_CHECKED); cache writes at the 5-minute rate; a model with no price is listed, never guessed
 
 Usage:
   wave_flow.py --since ISO [--until ISO] [--logs DIR | --repo PATH] [--verify CMD] [--test REGEX]
+               [--marketplace-plugins a,b,c] [--connectors "server one,server two"]
   (--verify defaults to `recipe.py get verify` in the current project; without it full checks are "not measured")
 Exit codes: 0 ok · 2 usage · 3 no logs in the window.
 """
@@ -34,6 +45,17 @@ from pathlib import Path
 
 EDITS = {"Edit", "Write", "MultiEdit", "NotebookEdit"}
 NM = "not measured"
+MARKETPLACE_PLUGINS = ("bandit", "bandit-dev", "bandit-maker")
+CONNECTORS = ("claude.ai BanditBrain", "claude.ai BanditCloud")
+# Estimated cost: US dollars per million tokens (input, output, cache read, cache write 5 minutes).
+# Source: the Claude API reference's model table (cached 2026-09-25) and its prompt-caching economics
+# (reads 0.1x input unless the table gives the price, writes 1.25x); checked on PRICES_CHECKED.
+PRICES_CHECKED = "2026-11-08"
+PRICES = {
+    "claude-opus-5-5": (4.00, 20.00, 0.20, 5.00),
+    "claude-sonnet-5-5": (2.00, 10.00, 0.20, 2.50),
+    "claude-haiku-4-5": (1.00, 5.00, 0.10, 1.25),
+}
 
 
 def when(text):
@@ -97,8 +119,30 @@ def big(n):
     return f"{n / 1e6:.1f} M" if n >= 1e6 else f"{round(n / 1e3)} K"
 
 
+def whole(value):
+    try:
+        return int(float(value))
+    except (TypeError, ValueError):
+        return 0
+
+
+def hook_rows(row, t):
+    """(time, event, ms, chars, is a run) for the hook records one log row carries."""
+    a = row.get("attachment") if row.get("type") == "attachment" else None
+    if isinstance(a, dict) and a.get("type") == "hook_success":
+        return [(t, a.get("hookEvent") or "other", whole(a.get("durationMs")), 0, True)]
+    if isinstance(a, dict) and a.get("type") == "hook_additional_context":
+        c = a.get("content")
+        return [(t, a.get("hookEvent") or "other", 0, sum(len(str(x)) for x in c) if isinstance(c, list) else len(str(c or "")), False)]
+    if row.get("type") == "system" and row.get("subtype") == "stop_hook_summary":
+        return [(t, "Stop", whole(i.get("durationMs")), 0, True) for i in row.get("hookInfos") or [] if isinstance(i, dict)]
+    return []
+
+
 def measure(logs, since, until):
     steps = {}            # (part, message id) → (time, usage)
+    info = {}             # (part, message id) → the model and the labels Claude Code recorded on the step
+    hooks = []            # (time, event, milliseconds, characters added to the chat, a hook run?)
     calls = {}            # tool_use id → dict(name, input, time, part)
     results = {}          # tool_use id → (time, text, is_error)
     marks = []            # (time, card)
@@ -111,6 +155,11 @@ def measure(logs, since, until):
             msg = row.get("message") or {}
             if row.get("type") == "assistant" and msg.get("id"):
                 steps.setdefault((part, msg["id"]), (t, msg.get("usage") or {}))
+                info.setdefault((part, msg["id"]), {
+                    "model": msg.get("model"), "skill": row.get("attributionSkill"),
+                    "plugin": row.get("attributionPlugin"), "server": row.get("attributionMcpServer"),
+                    "tool": row.get("attributionMcpTool"), "agent": row.get("attributionAgent")})
+            hooks += hook_rows(row, t)
             for b in blocks(row):
                 if b.get("type") == "tool_use":
                     calls[b.get("id")] = {"name": b.get("name"), "input": b.get("input") or {}, "time": t, "part": part}
@@ -122,10 +171,10 @@ def measure(logs, since, until):
                         edits.append(t)
                 elif b.get("type") == "tool_result":
                     results[b.get("tool_use_id")] = (t, result_text(b), bool(b.get("is_error")))
-    return steps, calls, results, sorted(marks), sorted(edits)
+    return steps, calls, results, sorted(marks), sorted(edits), {"info": info, "hooks": hooks}
 
 
-def report(steps, calls, results, marks, edits, verify, test, since, until):
+def report(steps, calls, results, marks, edits, extra, verify, test, since, until, cfg):
     if not steps:
         return None
     times = sorted(t for t, _ in steps.values())
@@ -218,7 +267,79 @@ def report(steps, calls, results, marks, edits, verify, test, since, until):
             sizes[calls[cid]["name"]] += len(text)
     top = " · ".join(f"{i + 1}. {k} {round(v / 1e3)} K chars" for i, (k, v) in enumerate(sizes.most_common(3)))
     lines.append(f"- Biggest tool outputs: {top or NM}")
+    lines += by_source(steps, extra, allt, cfg)
     return "\n".join(lines)
+
+
+def source_of(label, part, cfg):
+    """(group, item) for a step, or None when Claude Code recorded no label on it."""
+    market = set(cfg["marketplace"])
+    plugin, skill, server = label.get("plugin"), label.get("skill"), label.get("server")
+    if server:
+        group = "connectors" if server in cfg["connectors"] else "marketplace" if plugin in market else "other"
+        return group, f"{server} › {label['tool']}" if label.get("tool") else server
+    if skill:
+        return ("marketplace" if plugin in market or skill.split(":")[0] in market else "other"), skill
+    if plugin:
+        return ("marketplace" if plugin in market else "other"), f"plugin {plugin}"
+    agent = label.get("agent") or (part if part != "main chat" else None)
+    return ("other", f"agent {agent}") if agent else None
+
+
+def step_cost(model, u):
+    """Dollars for one step, or None when the model has no price in PRICES."""
+    price = PRICES.get(re.sub(r"-\d{8}$", "", model or ""))
+    if price is None:
+        return None
+    n = (u.get("input_tokens") or 0, u.get("output_tokens") or 0, u.get("cache_read_input_tokens") or 0,
+         u.get("cache_creation_input_tokens") or 0)
+    return (n[0] * price[0] + n[1] * price[1] + n[2] * price[2] + n[3] * price[3]) / 1e6
+
+
+def by_source(steps, extra, total, cfg):
+    names = {"marketplace": "marketplace", "connectors": "Bandit Brain connectors", "other": "everything else"}
+    items = {g: defaultdict(lambda: [0, 0]) for g in names}
+    unlabelled, agents = [0, 0], defaultdict(lambda: [0, 0])
+    cost, unpriced = defaultdict(float), defaultdict(int)
+    for key, (t, u) in steps.items():
+        part = key[0]
+        label = extra["info"].get(key, {})
+        n = sum((u.get(k) or 0) for k in ("input_tokens", "cache_read_input_tokens", "cache_creation_input_tokens", "output_tokens"))
+        src = source_of(label, part, cfg)
+        slot = unlabelled if src is None else items[src[0]][src[1]]
+        slot[0] += n; slot[1] += 1
+        if part != "main chat":
+            agents[part][0] += n; agents[part][1] += 1
+        c = step_cost(label.get("model"), u)
+        if c is None:
+            unpriced[re.sub(r"-\d{8}$", "", label.get("model") or "unknown model")] += n
+        else:
+            cost[re.sub(r"-\d{8}$", "", label["model"])] += c
+    share = lambda n: f"{big(n)} ({round(100 * n / total)}%)"  # noqa: E731
+    sums = {g: sum(v[0] for v in items[g].values()) for g in names}
+    out = ["- By source: " + " · ".join(f"{names[g]} {share(sums[g])}" for g in names) + f" · unlabelled {share(unlabelled[0])}"]
+    for g in names:
+        top = sorted(items[g].items(), key=lambda kv: (-kv[1][0], kv[0]))[:5]
+        out.append(f"- Top in {names[g]}: " + (" · ".join(f"{i + 1}. {k} {big(v[0])} ({v[1]} step{"" if v[1] == 1 else "s"})" for i, (k, v) in enumerate(top)) or "none"))
+    out.append(f"- Unlabelled steps (no label recorded): {unlabelled[1]} steps, {big(unlabelled[0])}")
+    out.append("- Helper agents by type: " + (" · ".join(f"{k} {share(v[0])}, {v[1]} step{"" if v[1] == 1 else "s"}" for k, v in sorted(agents.items())) or "none"))
+    hooks = extra["hooks"]
+    if hooks:
+        by = defaultdict(lambda: [0, 0])
+        for _, event, ms, _, run in hooks:
+            by[event][0] += run; by[event][1] += ms
+        out.append(f"- Hooks: {sum(h[4] for h in hooks)} runs, {sum(h[2] for h in hooks)} ms total"
+                   f" · added to the chat: {sum(h[3] for h in hooks)} chars (no tokens recorded) · by event: "
+                   + " · ".join(f"{k} {v[0]}× {v[1]} ms" for k, v in sorted(by.items(), key=lambda kv: (-kv[1][1], kv[0]))))
+    else:
+        out.append("- Hooks: none recorded in the window")
+    if cost:
+        parts = " · ".join(f"{m} ${c:.2f}" for m, c in sorted(cost.items()))
+        miss = "".join(f" · no price for {m}: {big(n)}, not counted" for m, n in sorted(unpriced.items()))
+        out.append(f"- Estimated cost: ${sum(cost.values()):.2f} (estimate, not billing; prices checked {PRICES_CHECKED}) · {parts}{miss}")
+    else:
+        out.append(f"- Estimated cost: {NM} (no step with a priced model)")
+    return out
 
 
 def default_verify():
@@ -235,6 +356,8 @@ def main(argv):
     ap.add_argument("--repo")
     ap.add_argument("--verify")
     ap.add_argument("--test")
+    ap.add_argument("--marketplace-plugins", default=",".join(MARKETPLACE_PLUGINS))
+    ap.add_argument("--connectors", default=",".join(CONNECTORS))
     a = ap.parse_args(argv)
     since, until = when(a.since), when(a.until) if a.until else None
     if since is None or (a.until and until is None):
@@ -244,7 +367,9 @@ def main(argv):
     logs = Path(a.logs) if a.logs else Path.home() / ".claude" / "projects" / re.sub(r"[/.]", "-", str(repo))
     verify = a.verify if a.verify is not None else default_verify()
     data = measure(logs, since, until)
-    text = report(*data, verify, a.test, since, until)
+    cfg = {"marketplace": [x.strip() for x in a.marketplace_plugins.split(",") if x.strip()],
+           "connectors": [x.strip() for x in a.connectors.split(",") if x.strip()]}
+    text = report(*data, verify, a.test, since, until, cfg)
     if text is None:
         print(f"wave_flow: no logged steps in {logs} for that window", file=sys.stderr)
         return 3

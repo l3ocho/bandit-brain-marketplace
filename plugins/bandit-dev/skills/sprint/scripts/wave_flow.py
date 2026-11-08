@@ -20,6 +20,8 @@ Counting:
   source       one step is counted once, by the first label Claude Code recorded on it, in this order:
                connector (attributionMcpServer, tool) · skill (attributionSkill) · plugin (attributionPlugin)
                · helper agent (attributionAgent, or the agent file's type); no label = "unlabelled", always shown
+               The label is read as recorded: on real logs a step's attributionMcpTool can name a different tool from
+               the one the step calls, so a connector's tool items show what Claude Code labelled, not what ran.
   group        marketplace (its plugins, or a skill named plugin:skill) · Bandit Brain connectors (servers named as
                Claude Code records them, exact case) · everything else; the names come from --marketplace-plugins and
                --connectors, defaults below

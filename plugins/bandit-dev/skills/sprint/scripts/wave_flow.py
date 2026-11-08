@@ -166,7 +166,7 @@ def measure(logs, since, until):
                 if b.get("type") == "tool_use":
                     calls[b.get("id")] = {"name": b.get("name"), "input": b.get("input") or {}, "time": t, "part": part}
                     cmd = str((b.get("input") or {}).get("command", ""))
-                    m = re.search(r"echo\s+['\"]?CARD-START\s+([^\s'\"]+)", cmd)
+                    m = re.search(r"echo\s+['\"]?CARD-START\s+([^\s'\";&|]+)", cmd)
                     if m:
                         marks.append((t, m.group(1)))
                     if b.get("name") in EDITS:

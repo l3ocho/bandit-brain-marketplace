@@ -58,7 +58,8 @@ These start outside, so no file here triggers them. Each has its own check.
 A place the done check lists as open, checked and found to need nothing for this release. One line
 each: the path as the map writes it, then why. `scripts/release.py --write` empties this list.
 
-- none yet
+- `plugins/bandit-dev/skills/sprint/references/templates.md` — it names the mark `echo CARD-START {card}`, which is unchanged; only how the script reads the id after it changed (BB-407)
+- `docs/decisions.md` — RS14 names the mark the same way; no rule or wording changes, the script just stops carrying a trailing `;` into the id (BB-407)
 
 ## ✅ Before saying done
 

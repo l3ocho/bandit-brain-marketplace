@@ -16,6 +16,7 @@
 
 | Marketplace | Bandit Brain app, at least | Finance, at least |
 |---|---|---|
+| 0.16.0 | v0.41.0 | same |
 | 0.15.0 | v0.41.0 | same |
 | 0.14.0 | v0.41.0 | same |
 | 0.13.0 | v0.38.0 | same |

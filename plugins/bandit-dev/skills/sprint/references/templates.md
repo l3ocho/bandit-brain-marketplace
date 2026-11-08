@@ -31,7 +31,7 @@ cross-card notes, risks and decisions live in the plan and the ledger. An old-wa
 
 ## Step comment
 
-The step's row in the ledger's **Plan steps** table: the done date and the evidence, `{what was found and decided, with ids}. {Fix rows applied or open.}` A few lines' worth in one cell; longer findings go in the Milestone log, and the cell names them. Step 9's cell also holds each Batch card's build-step count, `{card id}: {n} steps` (planning's sub-tasks, `Gate:` lines not counted); the checker's SP13 reads it.
+The step's row in the ledger's **Plan steps** table: the done date and the evidence, `{what was found and decided, with ids}. {Fix rows applied or open.}` A few lines' worth in one cell; longer findings go in the Milestone log, and the cell names them. Step 9's cell also holds each Batch card's build-step count, `{card id}: {n} steps` (planning's sub-tasks; `Gate:` lines and the approval line not counted); the checker's SP13 reads it.
 
 ## Plan note
 
@@ -90,6 +90,10 @@ One card per sprint, the single shared list of what to fix in debug, assigned to
 - **Line shapes** (checklist lines, one idea each, no codes, details in a comment): `Expected: {screen} › {part} — {what is wrong, in app terms} ({card})` for one Claude raises; `Found: {screen} › {part} — {what is wrong} ({card})` for one the user finds. `{screen} › {part}` is the area as the user sees it; `{card}` is the sprint card it belongs to, or `new`.
 - **Outcomes:** a fixed line is ticked; a declined one ends `(declined: {reason})` and is ticked; one that is new work ends `(new card {id})` and is ticked.
 - **Wave report, Debug section** (written when debug ends, after Lessons; rebuilt like Open calls and Lessons, rule 1; SP11 does not read it): `## 🐞 Debug`, then `| Card | Expected | Found | Fixed | Declined | New card |`, one row per card and a total row, counted from the card's lines. A card kind that keeps producing Found lines is a lesson.
+
+## Approval line
+
+The one home of this rule. Every batch card of a sprint planned with this rule ends with one sub-task titled exactly `Tested and approved by you`, **last**, after the build steps and any `Gate:` lines, open. It shows that a card whose build steps are all ticked still waits for the user. Only `close` ticks it, once per card the user approved in that chat, with the approval quoted in the ledger (`close.md` → Steps); a wave, `run` and `debug` never do. `close` completes no card whose approval line is open. Not a tag, not a feature of the app: the app lets a card be completed with open sub-tasks, so the helpers hold the line. The debug card has none. A card from a sprint planned before this rule has no such line and closes as before; an old-way sprint keeps its own flow (`old-way.md`).
 
 ## Handover cards
 

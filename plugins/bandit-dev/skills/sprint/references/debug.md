@@ -53,7 +53,7 @@ Several fixes may share one push. Right before each push of `development` (the p
 ## Board
 
 - A card with an adjustment moves `standby` → `doing` while being fixed, back to `standby` when done. The cap applies as in `execute.md`; a blocker never stops the move.
-- Nothing is completed here. The user's approval and `close` do that.
+- Nothing is completed here, and the approval line is never ticked here (`templates.md` → Approval line). The user's approval and `close` do that.
 
 ## Finishing
 

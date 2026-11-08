@@ -100,7 +100,7 @@ The full list is `references/gotchas.md`: read it once at the start of any comma
 
 - Run any command on a project without `dev: true`, or from Claude.ai
 - Ask which cards when no list was given
-- Mark a card complete or call anything approved, except `close` completing cards the user approved in that chat
+- Mark a card complete, tick its approval line or call anything approved, except `close` doing so for cards the user approved in that chat
 - Rewrite a locked Spec without showing old and new and getting a yes
 - Write to a card outside the batch, its debug card and its handover cards (old way: and the sprint card), or to a sprint but this one; create columns or boards
 - Merge into the deploy branch or deploy outside `release`; force-push, or push anything but the trunk (`references/execute.md` → Pushing)

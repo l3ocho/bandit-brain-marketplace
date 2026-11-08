@@ -102,7 +102,7 @@ The full list is `references/gotchas.md`: read it once at the start of any comma
 - Ask which cards when no list was given
 - Mark a card complete or call anything approved, except `close` completing cards the user approved in that chat
 - Rewrite a locked Spec without showing old and new and getting a yes
-- Write to a card outside the batch, its debug card and its handover cards (old way: and the sprint card), or to a sprint but this one; create columns, boards or tags
+- Write to a card outside the batch, its debug card and its handover cards (old way: and the sprint card), or to a sprint but this one; create columns or boards
 - Merge into the deploy branch or deploy outside `release`; force-push, or push anything but the trunk (`references/execute.md` → Pushing)
 - Run two wave agents at once, two waves in one chat, a single card, or a wave out of order without the user's say-so
 - Move a card to Done by anything but `close`, or treat an urgency remark as approval

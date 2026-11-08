@@ -60,7 +60,7 @@ proposal, then tells the user the `board:` line to set through bandit:project.
 
 ## 🚫 Never
 
-- Add columns, lanes, tasks or tags. The board's shape comes later: `/bandit:tasks load` from a
+- Add columns, lanes or tasks. The board's shape comes later: `/bandit:tasks load` from a
   WBS, or the design conversation. **Exception:** the dev board shape rows (tags, lanes and the
   `PM` column) for a `dev: true` project
 - Create a folder on the board. If the domain's folder doesn't exist, report it (structure rule

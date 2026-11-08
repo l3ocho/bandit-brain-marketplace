@@ -81,7 +81,10 @@ is expressed by the `lane/*` tag; `feature · issue · chore` stay valid everywh
 hidden: card reads and tag filters leave it out, every save keeps it, adding it is refused
 (`TAG_HIDDEN_ON_BOARD`). Board and System tags have no view.
 
-**Creating a tag** (a write needs one that doesn't exist; ask first): the view follows the board
+**Creating a tag** (a write needs one that doesn't exist): create it, no ask-first and no ban. The app's
+roles are the only gate: a Board tag by anyone who may edit that board's cards, an App tag by the admin only,
+`stage/` and `sprint/` names reserved. A refusal (`REQUIRES_ADMIN`, `TAG_NAME_TAKEN`, `TAG_NAME_RESERVED`) is
+reported as the app's answer, and no way around it is tried. The view follows the board
 profile. An App tag (the admin's to create) for one board's cards: `manage_tags { action: "create", name, view }` with that
 board's profile; meant for both kinds of board: `view: "both"` (also the app's default). A Board tag
 (`scope: "board"`, `boardId`) takes no view. Changing a view is `manage_tags { action: "update",

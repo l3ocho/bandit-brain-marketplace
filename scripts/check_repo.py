@@ -791,6 +791,35 @@ def check_debug_card():
            "adds Expected lines, debug reads it first, close refuses an unticked line, run names it")
 
 
+# ── TG1 · no helper forbids creating a tag or asks before creating one: the app's roles are the gate ─
+TAG_BANS = (re.compile(r"\b(?:create|add)\s+columns[^.\n]*\btags?\b", re.I),   # a Never line that lists tags with columns
+            re.compile(r"Creating a tag[^\n]*ask first", re.I),
+            re.compile(r"TAG_NAME_TAKEN[^\n]*the user picks"))
+
+
+def tag_ban_hits(text):
+    return [m.group(0)[:60] for rx in TAG_BANS for m in rx.finditer(text)]
+
+
+def check_tag_creation():
+    hits = []
+    for p in sorted(PLUGINS.rglob("*.md")):
+        hits += [f"{p.relative_to(ROOT)}: {h}" for h in tag_ban_hits(p.read_text(encoding="utf-8"))]
+    board = (PLUGINS / "bandit" / "skills" / "tasks" / "references" / "board.md").read_text(encoding="utf-8")
+    if "REQUIRES_ADMIN" not in board.split("**Creating a tag**", 1)[-1].split("\n\n", 1)[0]:
+        hits.append("board.md Creating a tag does not name the app's roles and refusals")
+    # The rule must fail on the old lines and pass on the new ones.
+    old = ("create columns, boards or tags", "- Add columns, lanes, tasks or tags.",
+           "**Creating a tag** (a write needs one that doesn't exist; ask first)",
+           "`TAG_NAME_TAKEN` · `TAG_NAME_RESERVED` | x | Offer another name; the user picks")
+    new = ("create columns or boards", "- Add columns, lanes or tasks.", "**Creating a tag** (a write needs one that doesn't exist)")
+    proof = all(tag_ban_hits(o) for o in old) and not any(tag_ban_hits(n) for n in new)
+    if not proof:
+        hits.append("the rule does not fail on the old ban lines and pass on the new ones")
+    report("TG1", not hits, "; ".join(hits[:6]) + " (BB-396)" if hits else
+           "tags: no helper forbids creating one or asks first; board.md names the app's roles as the gate")
+
+
 # ── SM1 · the sprint map draws every card and link, routes no arrow through a card, follows the recipe ─
 def crosses(seg, box):
     (x1, y1), (x2, y2) = seg
@@ -1257,6 +1286,7 @@ def main(argv):
     check_sprint_map()
     check_sp12()
     check_debug_card()
+    check_tag_creation()
     check_recipe()
     check_contract()
     check_credential_guard()

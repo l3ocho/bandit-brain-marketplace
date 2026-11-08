@@ -1206,13 +1206,35 @@ def check_wave_flow():
             "- Test runs: 1 whole suite, 1 targeted", "- Gates: code review 1 rounds, UI check 0 rounds",
             "- Repeat runs: 2 (make verify)", "- Total: 1.2 M re-read from cache · 30 K new · 2 K written",
             "- Split: main chat 1.1 M (90%) · code-reviewer 121 K (10%)", "- Per card: XY-1 580 K, XY-2 642 K",
-            "- Main chat: 9 steps · start context 100 K · peak context 140 K"]
+            "- Main chat: 9 steps · start context 100 K · peak context 140 K",
+            # by source: hand count of the labelled fixture steps (marketplace 2 steps, connectors 3, everything else
+            # 2 main steps and the 2 agent steps, 2 unlabelled), hooks (5 runs, 1000 ms, 1000 chars) and the priced cost
+            "- By source: marketplace 220 K (18%) · Bandit Brain connectors 360 K (29%) · everything else 391 K (32%) "
+            "· unlabelled 250 K (20%)",
+            "- Top in marketplace: 1. bandit-dev:sprint 220 K (2 steps)",
+            "- Top in Bandit Brain connectors: 1. claude.ai BanditBrain › get_task 120 K (1 step) · "
+            "2. claude.ai BanditBrain › update_tasks 120 K (1 step) · 3. claude.ai BanditCloud › nc_webdav_read_file 120 K (1 step)",
+            "- Top in everything else: 1. other-server › ping 140 K (1 step) · 2. other-plugin:lint 130 K (1 step) · "
+            "3. agent code-reviewer 121 K (2 steps)",
+            "- Unlabelled steps (no label recorded): 2 steps, 250 K",
+            "- Helper agents by type: code-reviewer 121 K (10%), 2 steps",
+            "- Hooks: 5 runs, 1000 ms total · added to the chat: 1000 chars (no tokens recorded) · by event: "
+            "Stop 2× 500 ms · PreToolUse 2× 400 ms · SessionStart 1× 100 ms",
+            "- Estimated cost: $0.33 (estimate, not billing; prices checked 2026-11-08) · claude-haiku-4-5 $0.03 · "
+            "claude-opus-5-5 $0.28 · claude-sonnet-5-5 $0.03 · no price for claude-future-1: 140 K, not counted"]
     missing = [w for w in want if w not in out]
     gone, quiet = run_script(script, "--logs", str(logs), "--since", "2027-01-01T00:00:00Z", "--verify", "x", cwd=ROOT)
-    ok = got == 0 and not missing and gone == 3
+    # the groups follow the names given on the command line: one connector and one plugin renamed move the totals
+    moved, regrouped = run_script(script, "--logs", str(logs), "--since", "2026-11-04T09:00:00Z", "--verify", "x",
+                                  "--connectors", "claude.ai BanditBrain", "--marketplace-plugins", "other-plugin", cwd=ROOT)
+    regroup = "- By source: marketplace 130 K (11%) · Bandit Brain connectors 240 K (20%) · everything else 602 K (49%)"
+    ok = got == 0 and not missing and gone == 3 and moved == 0 and regroup in regrouped
     report("WF1", ok, f"wave_flow.py: {len(want)} Flow and Tokens lines match the hand count (steps deduped by "
-           "message id, background run not measured, repeats after no edit, per card from CARD-START)"
-           if ok else f"wave_flow.py → {got}, missing {missing}; empty window → {gone} (want 3)")
+           "message id, background run not measured, repeats after no edit, per card from CARD-START; tokens by source "
+           "in three groups with the unlabelled line, helper agents, hooks by time and size, the estimated cost with its "
+           "price date; the group names follow the arguments)"
+           if ok else f"wave_flow.py → {got}, missing {missing}; empty window → {gone} (want 3); regrouped run → {moved}"
+                      f"{'' if regroup in regrouped else ', group names not taken from the arguments'}")
 
 
 # ── NA1 · the sprint helper never tells an executor to decide and continue without asking ─

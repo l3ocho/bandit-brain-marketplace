@@ -18,7 +18,7 @@ the `bandit-staging` board only. `read` cases are checked by reading the shipped
 | C34 | Optional sections | auto (Y1) | `recipe.py --file bandit.no-migrations.yaml tail`, `check-tail none`, `opt staging.refresh` | exit 0; prints `none`; matches |
 | C35 | Hook scope | auto (SP8) | `check_sprint.py --hook` on the Bad vault, transcript naming `Projects/home-reno/` vs another project | exit 2 with SP7 vs exit 0 with a `systemMessage` warning |
 | C5 | P1 SP7 | auto (SP7) | `check_sprint.py --vault tests/fixture-vault --domain Bad` (committed, no review record) | exit 1, exactly one error, SP7 |
-| C6 | P1 SP7 | auto (SP7) | `check_sprint.py … --domain Good` (committed, review record present) | exit 0, "passes SP1-SP12" |
+| C6 | P1 SP7 | auto (SP7) | `check_sprint.py … --domain Good` (committed, review record present) | exit 0, "passes SP1-SP13" |
 | C7 | P1 review gate | cli | `run` on a staging sprint card whose step 11 sub-task is unticked | refused, names "Independent plan review" (step 11); no wave agent launched |
 | C8 | P3 order gate | cli | `run` on a staging sprint card blocked by an open sprint card | refused, names the blocking sprint card; no wave agent launched |
 | C9 | P3 order at plan | read | `references/plan.md` step 4 (Sprint order) | the new sprint card is blocked by the previous open sprint card (`link_tasks { blockerTaskId, blockedTaskId }`) |

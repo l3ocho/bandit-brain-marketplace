@@ -67,7 +67,7 @@ no description pre-fills the same text.
 
 | `<h3>` | Holds | From the template? |
 |---|---|---|
-| Source | `<p>Claude.ai</p>` or `<p>Claude Code</p>`, then `<p>Brief: {filename}</p>`: filename only, never a folder; a screen-changing card adds `<p>Design: {link}</p>` (`dev-workflow.md` → Design step) | Added |
+| Source | `<p>Claude.ai</p>` or `<p>Claude Code</p>`, then `<p>Brief: {filename}</p>`: filename only, never a folder; a screen-changing card adds `<p>Design: {page link}</p>`, a full web address (`dev-workflow.md` → Design step) | Added |
 | Outcome | What is true when done, one or two sentences | ✅ |
 | Lane | The `lane/*` value | ✅ |
 | Problem | **`lane/issue` only:** the wrong behaviour and where it comes from | Added |

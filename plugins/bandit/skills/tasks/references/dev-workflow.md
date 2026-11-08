@@ -134,9 +134,11 @@ Pipeline stage 4 (`docs/pipeline.md` in the marketplace): after `spec` writes th
    standalone design site are not used (the site closes 2026-12-14); nothing there is deleted.
 3. **Trap check before linking.** Check the design against the project's recorded traps (its
    `CLAUDE.md` and the docs it names). A design that hits one is changed before it is linked.
-4. **Link and approval.** The design's link goes in the Spec's Source block, `<p>Design: {link}</p>`
-   beside `Brief:`. The user approves it explicitly; record `Design approved {date}: {link}` as a card
-   comment. Neither is assumed.
+4. **Link and approval.** The design page link (the Claude.ai page the user approves on, a full
+   `https://` address) goes in the Spec's Source block, `<p>Design: {page link}</p>` beside `Brief:`,
+   and where the handover files live goes beside it, `<p>Handover: {where the handover files live}</p>`.
+   The agent that lands the handover and writes the card's Spec adds both. The user approves the page
+   explicitly; record `Design approved {date}: {page link}` as a card comment. Neither is assumed.
 5. **Gate.** On a screen-changing card, `spec` and `stage … spec` write `stage/spec` only when the
    `Design:` line and the approval comment are both there. Missing → the card keeps its lane with no
    stage, and the report names the design step as owed.
@@ -151,15 +153,22 @@ unblocks the build:
    build card's gate line ("the design handover is linked and approved"). Its description: the build
    card's short id, its brief's filename and its Spec's Outcome, as the design's input. A link made
    later with `link_tasks` gets the gate's generic notice.
-2. **The design session's result is its handover.** Steps 2 and 3 above run on the design card. Its
-   handover's link goes on the design card as `<p>Handover: {link}</p>`, and the user's approval as the
-   comment `Design approved {date}: {link}`; then the design card is completed.
-3. **The build card follows.** Its Spec's Source block gets `<p>Design: {handover link}</p>` (a first
-   line in Source, no Spec override needed when the line is new), and its gate sub-task is ticked.
+2. **The design session's result is its handover.** Steps 2 and 3 above run on the design card. Once
+   the handover lands, the design card carries `<p>Design page: {page link}</p>` (the Claude.ai page
+   the user approves on, a full `https://` address) and `<p>Handover: {where the handover files live}</p>`.
+   The agent that lands the handover adds both, the user's approval goes on as the comment
+   `Design approved {date}: {page link}`, and then the design card is completed. It is not completed
+   without the page link.
+3. **The build card follows.** Its Spec's Source block gets `<p>Design: {page link}</p>`, the same full
+   web address as the design card's (a first line in Source, no Spec override needed when the line is
+   new), and its gate sub-task is ticked. The handover files are found through the design card's
+   `Handover:` line, reached through the build card's `blockedBy`.
 4. **Gate.** `stage/spec` on the build card only once its design card is complete. Open → the build
    card keeps its lane with no stage, and the report names the design card.
 
-Without a `design:` line, steps 1 to 5 above run on the build card itself, as before.
+Without a `design:` line, steps 1 to 5 above run on the build card itself, as before: its Source
+carries both `Design: {page link}` and `Handover: {where the handover files live}`, and the handover
+files are found through that `Handover:` line.
 
 ### `/bandit:tasks spec reconcile {card…}` — bring locked Specs in line with decisions
 

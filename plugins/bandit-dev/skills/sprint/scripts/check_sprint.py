@@ -15,7 +15,8 @@ Rules (each one a failure, not a warning):
   SP9  a sprint kept in the app (its ledger has a `Sprint record:` line) lists the 12 plan steps in order in
        its ## Plan steps table; a step marked done carries a YYYY-MM-DD date and its evidence; a committed ledger has steps 1 to 11 done
   SP10 a committed sprint kept in the app has a ## Waves table, one row per wave in order; a wave marked done
-       carries its evidence and follows only done waves; every card it names is in the Waves and cards table
+       carries its evidence and needs only the waves it depends on to be done (a card under `Blocked by` in the
+       ## Batch table, or a pair on the plan's `Lands after:` line); every card it names is in the Waves and cards table
        (an old-way ledger, with no `Sprint record:` line, is skipped by SP9 and SP10)
   SP11 a committed sprint kept in the app has, for every wave marked done in its ## Waves table, a section
        (sprints committed after 2026-11-04) `## 🌊 Wave {n}` in {project}-sprint-{name}-wave-report.md holding a `#### ⏱️ Flow` and a `#### 🪙 Tokens` block
@@ -59,6 +60,8 @@ REPORTS_FROM = "2026-11-04"
 STEPS_FROM = "2026-11-08"
 BATCH_CARD = re.compile(r"^\|\s*([A-Z]+-\d+)\s*\|", re.M)
 COMMITTED_ON = re.compile(r"^\W*Committed:\W*(\d{4}-\d{2}-\d{2})", re.M)
+LANDS_AFTER = re.compile(r"^\W*Lands after:\s*(.+)$", re.M)
+LANDS_PAIR = re.compile(r"^\s*([A-Z]+-\d+)\s+after\s+(.+?)\s*\.?\s*$")
 WAVE_ROW = re.compile(r"^\|\s*Wave\s+(\d+)\s*\|\s*([^|]+?)\s*\|\s*([^|]*?)\s*\|\s*((?:[^|\\]|\\.)*?)\s*\|\s*$", re.M)
 
 
@@ -84,7 +87,27 @@ def section(text: str, heading: str) -> str:
     return text[m.end(): m.end() + nxt.start() if nxt else None]
 
 
-def check_record_ledger(rel_folder, text: str, table_cards: set) -> list[str]:
+def card_dependencies(text: str, plan_text: str) -> dict:
+    """card -> the cards it depends on: the Batch table's `Blocked by` column and the plan's `Lands after:` pairs."""
+    deps = defaultdict(set)
+    rows = [r for r in section(text, "Batch").splitlines() if r.startswith("|")]
+    if rows:
+        head = [c.strip().lower() for c in rows[0].strip().strip("|").split("|")]
+        if "blocked by" in head:
+            col = head.index("blocked by")
+            for row in rows[2:]:
+                cells = [c.strip() for c in row.strip().strip("|").split("|")]
+                if len(cells) > col and BATCH_CARD.match(row):
+                    deps[CARD_ID.findall(cells[0])[0]].update(CARD_ID.findall(cells[col]))
+    for line in LANDS_AFTER.findall(plan_text):
+        for pair in line.split(";"):
+            m = LANDS_PAIR.match(pair)
+            if m:
+                deps[m.group(1)].update(CARD_ID.findall(m.group(2)))
+    return deps
+
+
+def check_record_ledger(rel_folder, text: str, table_cards: set, plan_text: str = "") -> list[str]:
     """SP9 and SP10: a sprint kept as a record in the app tracks its steps and waves in the ledger."""
     errors = []
     steps = [(int(n), name, done, ev) for n, name, done, ev in STEP_ROW.findall(section(text, "Plan steps"))]
@@ -106,15 +129,19 @@ def check_record_ledger(rel_folder, text: str, table_cards: set) -> list[str]:
             errors.append(f"SP10 {rel_folder}: a committed sprint's ledger has a ## Waves table, one row per wave "
                           "in order: | Wave n | card ids | done date | evidence |")
         else:
-            open_seen = False
+            wave_of = {c: int(n) for n, ids, *_ in waves for c in CARD_ID.findall(ids)}
+            open_waves = {int(n) for n, _, done, _ in waves if not done}
+            deps = card_dependencies(text, plan_text)
             for n, ids, done, ev in waves:
                 if done and not DATE.match(done):
                     errors.append(f"SP10 {rel_folder}: Wave {n} has `{done}` as its done date, not YYYY-MM-DD")
-                if done and open_seen:
-                    errors.append(f"SP10 {rel_folder}: Wave {n} is done while an earlier wave is not")
+                if done:
+                    # Only the waves a card depends on must be done; where no dependency is written, no order is checked.
+                    needs = {wave_of[d] for c in CARD_ID.findall(ids) for d in deps.get(c, ()) if d in wave_of} - {int(n)}
+                    for m in sorted(needs & open_waves):
+                        errors.append(f"SP10 {rel_folder}: Wave {n} is done while Wave {m}, which it depends on, is not")
                 if done and not ev:
                     errors.append(f"SP10 {rel_folder}: Wave {n} is marked done with no evidence")
-                open_seen = open_seen or not done
                 missing = set(CARD_ID.findall(ids)) - table_cards
                 if missing:
                     errors.append(f"SP10 {rel_folder}: Wave {n} names {', '.join(sorted(missing))}, "
@@ -281,7 +308,9 @@ def check(domain: Path) -> list[str]:
         if SPRINT_RECORD.search(ledger_text):
             table_cards = {i for m in CARD_ROW.finditer(section(ledger_text, "Waves and cards"))
                            for i in CARD_ID.findall(m.group(1))}
-            errors.extend(check_record_ledger(rel_folder, ledger_text, table_cards))
+            plan_file = folder / f"{project}-sprint-{name}-plan.md"
+            plan_text = plan_file.read_text(errors="replace") if plan_file.exists() else ""
+            errors.extend(check_record_ledger(rel_folder, ledger_text, table_cards, plan_text))
             errors.extend(check_build_steps(rel_folder, ledger_text))
             errors.extend(check_wave_report(rel_folder, ledger_text, folder / f"{project}-sprint-{name}-wave-report.md"))
             errors.extend(check_map(rel_folder, ledger_text, folder / f"{project}-sprint-{name}-map.html"))

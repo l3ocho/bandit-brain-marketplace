@@ -336,7 +336,9 @@ FINANCE_TOOLS = (
     "finance_import_transactions finance_manage_reconciliation finance_manage_rules finance_delete_items").split()
 # The app clone on this host (read-only) and the branch the skills are built against.
 APP_REPO = Path(os.environ.get("BANDIT_APP_REPO") or ROOT.parent / "bandit_brain")
-APP_REF = os.environ.get("BANDIT_APP_REF") or "origin/development"
+# Held on the app commit before finance_manage_settlements (Leo, 2026-11-08, sprint mktplce-refining);
+# the new Finance tool gets its own card, which moves this back to origin/development.
+APP_REF = os.environ.get("BANDIT_APP_REF") or "639bdc44"
 
 
 def app_file(path):
@@ -794,6 +796,28 @@ def check_sp13():
            "card at 0 steps, leaves earlier sprints alone; plan.md steps 7 and 9 name the sub-tasks and the count"
            if ok else f"SP13: StepsGood → {good[0]} {good[1][-120:]!r}; StepsBad → {bad[0]} {bad[1][-160:]!r}; "
            f"Record → {earlier[0]}; plan.md lost {words} (BB-374)")
+
+
+# ── AC1 · README and install guide say which Bandit Brain app version the marketplace version needs ─
+def compat_has_row(text, version):
+    """True when the `### Works with Bandit Brain` table has a row for `version`."""
+    table = text.split("### Works with Bandit Brain", 1)[-1].split("\n### ", 1)[0].split("\n## ", 1)[0] \
+        if "### Works with Bandit Brain" in text else ""
+    return re.search(rf"^\|\s*{re.escape(version)}\s*\|\s*\S[^|]*\|\s*\S[^|]*\|\s*$", table, re.M) is not None
+
+
+def check_app_compat():
+    market, _ = load_json(ROOT / ".claude-plugin" / "marketplace.json")
+    version = ((market or {}).get("metadata") or {}).get("version") or ""
+    docs = {name: (ROOT / name).read_text(encoding="utf-8") for name in ("README.md", "docs/install.md")}
+    bad = [f"{name} has no `Works with Bandit Brain` row for {version}" for name, text in docs.items()
+           if not compat_has_row(text, version)]
+    # The rule must fail on a table without the current row and pass on one with it.
+    sample = "### Works with Bandit Brain\n\n| Marketplace | App | Finance |\n|---|---|---|\n| 9.9.9 | v1.0.0 | same |\n"
+    if compat_has_row(sample, "9.9.8") or not compat_has_row(sample, "9.9.9"):
+        bad.append("the rule does not fail on a missing row and pass on a present one")
+    report("AC1", not bad, "; ".join(bad) + " (BB-401)" if bad else
+           f"app compatibility: README and install guide each have a row for {version}; a version with no row fails")
 
 
 # ── DK1 · the debug card: one home for its line shapes, and every step that uses it points there ─
@@ -1305,6 +1329,7 @@ def main(argv):
     check_sprint_map()
     check_sp12()
     check_sp13()
+    check_app_compat()
     check_debug_card()
     check_tag_creation()
     check_recipe()

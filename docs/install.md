@@ -12,6 +12,34 @@
 | A **Nextcloud** MCP server with WebDAV connected | The notes vault: `notes`, `minutes`, `plan`, `project`, `audit`, `sprint`; saving a spec as a note in `clarify` |
 | Gmail connected (optional) | `/bandit:tasks email` |
 
+### Works with Bandit Brain
+
+| Marketplace | Bandit Brain app, at least | Finance, at least |
+|---|---|---|
+| 0.15.0 | v0.41.0 | same |
+| 0.14.0 | v0.41.0 | same |
+| 0.13.0 | v0.38.0 | same |
+| 0.12.1 | v0.38.0 | same |
+| 0.12.0 | v0.38.0 | same |
+| 0.11.0 | v0.38.0 | same |
+| 0.10.0 | v0.37.0 | same |
+| 0.9.0 | v0.36.0 | same |
+| 0.8.0 | not recorded | v0.31.0 |
+| 0.7.0 | not recorded | v0.31.0 |
+| 0.6.0 | not recorded | no Finance skill |
+| 0.5.2 | not recorded | no Finance skill |
+| 0.5.1 | not recorded | no Finance skill |
+| 0.5.0 | not recorded | no Finance skill |
+| 0.4.0 | not recorded | no Finance skill |
+| 0.3.2 | not recorded | no Finance skill |
+| 0.3.1 | not recorded | no Finance skill |
+| 0.3.0 | not recorded | no Finance skill |
+| 0.2.0 | not recorded | no Finance skill |
+| 0.1.1 | not recorded | no Finance skill |
+| 0.1.0 | not recorded | no Finance skill |
+
+Each row takes the app need its CHANGELOG entry names; a version that names none keeps the row below it. "Not recorded" means the CHANGELOG names no app version for it. The minimums are the app's release tags. Every release adds its row before it ships; the checker refuses a release without one (`scripts/check_repo.py`, rule AC1).
+
 ## 2. Claude.ai (web, desktop, mobile)
 
 1. Customize → Plugins → **Add → Add marketplace** → `l3ocho/bandit-brain-marketplace`.

@@ -21,6 +21,8 @@ Rules (each one a failure, not a warning):
        (sprints committed after 2026-11-04) `## 🌊 Wave {n}` in {project}-sprint-{name}-wave-report.md holding a `#### ⏱️ Flow` and a `#### 🪙 Tokens` block
   SP12 a committed sprint kept in the app (committed after 2026-11-04) has {project}-sprint-{name}-map.html, redrawn after every wave: its
        `sprint-map-waves-done` marker lists every wave marked done in the ## Waves table (temporary, decisions RS16)
+  SP13 a committed sprint kept in the app (committed after 2026-11-08) has, in its step 9 evidence, `{card}: {n} steps`
+       (n at least 1, build steps only) for every card in its ## Batch table: every planned card carries its build steps as sub-tasks
 
 Usage:
   check_sprint.py [--vault DIR] [--domain NAME]   (defaults: $MYNOTES_DIR or ~/Documents/MyNotes;
@@ -53,6 +55,9 @@ DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 # SP11 and SP12 hold for sprints committed after the release that brought the wave report and the map;
 # an earlier sprint never had them.
 REPORTS_FROM = "2026-11-04"
+# SP13 holds for sprints committed after the release that brought the build-step count; an earlier sprint never had it.
+STEPS_FROM = "2026-11-08"
+BATCH_CARD = re.compile(r"^\|\s*([A-Z]+-\d+)\s*\|", re.M)
 COMMITTED_ON = re.compile(r"^\W*Committed:\W*(\d{4}-\d{2}-\d{2})", re.M)
 WAVE_ROW = re.compile(r"^\|\s*Wave\s+(\d+)\s*\|\s*([^|]+?)\s*\|\s*([^|]*?)\s*\|\s*((?:[^|\\]|\\.)*?)\s*\|\s*$", re.M)
 
@@ -115,6 +120,20 @@ def check_record_ledger(rel_folder, text: str, table_cards: set) -> list[str]:
                     errors.append(f"SP10 {rel_folder}: Wave {n} names {', '.join(sorted(missing))}, "
                                   "not in the Waves and cards table")
     return errors
+
+
+def check_build_steps(rel_folder, text: str) -> list[str]:
+    """SP13: step 9's evidence gives every Batch card its build-step count (the sub-tasks planning wrote)."""
+    on = COMMITTED_ON.search(text)
+    if not on or on.group(1) <= STEPS_FROM:
+        return []
+    cards = BATCH_CARD.findall(section(text, "Batch"))
+    if not cards:
+        return [f"SP13 {rel_folder}: the ledger has no ## Batch table to hold step 9's build-step counts against"]
+    row = next((ev for n, _, _, ev in STEP_ROW.findall(section(text, "Plan steps")) if n == "9"), "")
+    return [f"SP13 {rel_folder}: step 9's evidence has no `{c}: {{n}} steps` (n at least 1): every planned card "
+            "carries its build steps as sub-tasks" for c in cards
+            if not any(int(n) >= 1 for n in re.findall(rf"\b{re.escape(c)}:\s*(\d+)\s+steps?\b", row))]
 
 
 def check_wave_report(rel_folder, ledger_text: str, report: Path) -> list[str]:
@@ -263,6 +282,7 @@ def check(domain: Path) -> list[str]:
             table_cards = {i for m in CARD_ROW.finditer(section(ledger_text, "Waves and cards"))
                            for i in CARD_ID.findall(m.group(1))}
             errors.extend(check_record_ledger(rel_folder, ledger_text, table_cards))
+            errors.extend(check_build_steps(rel_folder, ledger_text))
             errors.extend(check_wave_report(rel_folder, ledger_text, folder / f"{project}-sprint-{name}-wave-report.md"))
             errors.extend(check_map(rel_folder, ledger_text, folder / f"{project}-sprint-{name}-map.html"))
         cards = set()
@@ -353,7 +373,7 @@ def main() -> int:
             return 0
     if not errors:
         if not args.hook:
-            print(f"OK: {domain} passes SP1-SP12 ({len(sprint_folders(domain))} sprint folders)")
+            print(f"OK: {domain} passes SP1-SP13 ({len(sprint_folders(domain))} sprint folders)")
         return 0
     out = sys.stderr if args.hook else sys.stdout
     print(f"bandit-dev:sprint check FAILED in {domain} ({len(errors)}). Fix these before finishing:", file=out)

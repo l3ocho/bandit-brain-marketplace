@@ -705,7 +705,7 @@ def check_sp11():
     vault = ROOT / "tests" / "fixture-vault"
     good = run_script(script, "--vault", str(vault), "--domain", "Record")
     bad = run_script(script, "--vault", str(vault), "--domain", "WaveBad")
-    ok = (good[0] == 0 and "SP1-SP12" in good[1] and bad[0] == 1 and bad[1].count("\n- ") == 1
+    ok = (good[0] == 0 and "SP1-SP13" in good[1] and bad[0] == 1 and bad[1].count("\n- ") == 1
           and "SP11" in bad[1] and "Tokens" in bad[1])
     report("SP11", ok, "check_sprint passes a done wave with its report section and refuses one without its Tokens block"
            if ok else f"SP11: Record → {good[0]} {good[1][-120:]!r}; WaveBad → {bad[0]} {bad[1][-160:]!r}")
@@ -775,6 +775,25 @@ def check_sp12():
     ok = good[0] == 0 and bad[0] == 1 and bad[1].count("\n- ") == 1 and "SP12" in bad[1]
     report("SP12", ok, "check_sprint passes a map that lists the done waves and refuses one not redrawn after a wave"
            if ok else f"SP12: Record → {good[0]} {good[1][-120:]!r}; MapBad → {bad[0]} {bad[1][-160:]!r}")
+
+
+# ── SP13 · a sprint committed after 2026-11-08 gives every batch card its build-step count in step 9 (fixtures) ─
+def check_sp13():
+    script = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts" / "check_sprint.py"
+    vault = ROOT / "tests" / "fixture-vault"
+    good = run_script(script, "--vault", str(vault), "--domain", "StepsGood")
+    bad = run_script(script, "--vault", str(vault), "--domain", "StepsBad")
+    earlier = run_script(script, "--vault", str(vault), "--domain", "Record")   # committed before the cut-off: exempt
+    plan = (PLUGINS / "bandit-dev" / "skills" / "sprint" / "references" / "plan.md").read_text(encoding="utf-8")
+    plan = " ".join(plan.split())
+    words = [w for w in ("write the card's **build steps** from its plan section as ordered sub-tasks",
+                         "A card with no build sub-tasks fails readiness", "`{card id}: {n} steps`") if w not in plan]
+    ok = (good[0] == 0 and "SP1-SP13" in good[1] and bad[0] == 1 and bad[1].count("\n- ") == 1 and "SP13" in bad[1]
+          and "GA-2" in bad[1] and earlier[0] == 0 and not words)
+    report("SP13", ok, "check_sprint passes a sprint whose step 9 counts every batch card's build steps, refuses one with a "
+           "card at 0 steps, leaves earlier sprints alone; plan.md steps 7 and 9 name the sub-tasks and the count"
+           if ok else f"SP13: StepsGood → {good[0]} {good[1][-120:]!r}; StepsBad → {bad[0]} {bad[1][-160:]!r}; "
+           f"Record → {earlier[0]}; plan.md lost {words} (BB-374)")
 
 
 # ── DK1 · the debug card: one home for its line shapes, and every step that uses it points there ─
@@ -1285,6 +1304,7 @@ def main(argv):
     check_dev_mirror()
     check_sprint_map()
     check_sp12()
+    check_sp13()
     check_debug_card()
     check_tag_creation()
     check_recipe()

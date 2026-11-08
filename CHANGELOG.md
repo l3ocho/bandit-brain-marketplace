@@ -5,6 +5,7 @@ All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace s
 ## Unreleased
 
 ### Fixed
+- **Sprint planning gives every card its build steps as sub-tasks, and the check enforces it** (BB-374). Planning step 7 now writes each card's build steps from the plan as ordered sub-tasks (design lines first, gate lines last); step 9 fails a card that has none and records each card's count (`{card}: 6 steps`). The sprint checker has a new rule, SP13: a sprint committed after 2026-11-08 whose step 9 evidence lacks a count of at least 1 for a card in its Batch table is refused. Earlier sprints still pass.
 - **The helpers create tags whenever the app allows it** (BB-396). The sprint helper's "never create tags" line and the tasks helper's "ask first" are gone. A helper now creates the tag it needs within your role in the app (a board tag if you may edit the board's cards, an app-wide tag only as admin; `stage/` and `sprint/` names stay reserved) and reports the app's refusal as it is, with no way around it. Checker rule TG1.
 
 ## 0.15.0 · 2026-11-06

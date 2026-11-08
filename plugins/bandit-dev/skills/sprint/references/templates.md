@@ -31,7 +31,7 @@ cross-card notes, risks and decisions live in the plan and the ledger. An old-wa
 
 ## Step comment
 
-The step's row in the ledger's **Plan steps** table: the done date and the evidence, `{what was found and decided, with ids}. {Fix rows applied or open.}` A few lines' worth in one cell; longer findings go in the Milestone log, and the cell names them.
+The step's row in the ledger's **Plan steps** table: the done date and the evidence, `{what was found and decided, with ids}. {Fix rows applied or open.}` A few lines' worth in one cell; longer findings go in the Milestone log, and the cell names them. Step 9's cell also holds each Batch card's build-step count, `{card id}: {n} steps` (planning's sub-tasks, `Gate:` lines not counted); the checker's SP13 reads it.
 
 ## Plan note
 

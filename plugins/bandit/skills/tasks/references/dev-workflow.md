@@ -132,6 +132,10 @@ Pipeline stage 4 (`docs/pipeline.md` in the marketplace): after `spec` writes th
    **Once per project**, `/design-sync` loads the design system from the code; run it again when the
    theme changes. Then `/design` makes the card's design. The design system copies on the old
    standalone design site are not used (the site closes 2026-12-14); nothing there is deleted.
+   **Closing step.** When the design changed the shared look (colours, fonts, spacing, shared
+   components), the session ends by asking the user to run `/design-sync`, a Claude Design command the
+   helpers cannot run, and writes the answer on the design card: `<p>Design sync run {date}</p>` or
+   `<p>Design sync not needed: {reason}</p>` (on the build card when there is no design card).
 3. **Trap check before linking.** Check the design against the project's recorded traps (its
    `CLAUDE.md` and the docs it names). A design that hits one is changed before it is linked.
 4. **Link and approval.** The design page link (the Claude.ai page the user approves on, a full
@@ -158,7 +162,8 @@ unblocks the build:
    the user approves on, a full `https://` address) and `<p>Handover: {where the handover files live}</p>`.
    The agent that lands the handover adds both, the user's approval goes on as the comment
    `Design approved {date}: {page link}`, and then the design card is completed. It is not completed
-   without the page link.
+   without the page link. It is not completed either without one of the two design sync lines (the
+   closing step of the Design step, item 2).
 3. **The build card follows.** Its Spec's Source block gets `<p>Design: {page link}</p>`, the same full
    web address as the design card's (a first line in Source, no Spec override needed when the line is
    new), and its gate sub-task is ticked. The handover files are found through the design card's

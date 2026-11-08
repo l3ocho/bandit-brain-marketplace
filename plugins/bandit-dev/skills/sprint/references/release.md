@@ -28,7 +28,7 @@ Check all before anything runs. Each miss is refused by name, with what would sa
 
 ## Steps
 
-1. **Run the recipe.** `recipe.py get release` lists the steps. Run them one at a time, in order,
+1. **Debug card to Stand By, then run the recipe.** Before the first recipe step (on the marketplace repo, before `release.py --write`), move the sprint's debug card (`Debug card:` in the ledger) to `standby` with `update_tasks`, read back; `close` completes it. A release step that stalls or fails writes a Process line on it at once (`references/templates.md` → Debug card, Process lines). `recipe.py get release` lists the steps. Run them one at a time, in order,
    showing each command and its result. `{version}` in a step is the version picked by Semantic
    Versioning (Marketplace cards, step 1). A failing step stops the release: nothing after it runs,
    the output goes under "Needs the user", and the ledger says which step failed.

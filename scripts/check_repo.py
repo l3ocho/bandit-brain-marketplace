@@ -859,18 +859,80 @@ def check_app_compat():
            f"app compatibility: README and install guide each have a row for {version}; a version with no row fails")
 
 
-# ── DK1 · the debug card: one home for its line shapes, and every step that uses it points there ─
+# ── DK1 · the debug card: one home for its three line shapes and its moves, and every step that uses it points there ─
+PROCESS_SHAPE = "Process: {step} —"
+DEBUG_NEEDLES = (("plan.md", "Create the debug card"), ("execute.md", "`Expected:` line"),
+                 ("debug.md", "The debug card first"), ("close.md", "The debug card"), ("run.md", "debug card"))
+DEBUG_OLD = ("stays where `plan` seeded it until `close`", "and never the debug card", "is not one and stays put",
+             "two line shapes", "The debug card is never moved by a wave.")
+
+
+def debug_card_problems(files):
+    """`files` maps a sprint reference name to its text."""
+    flat = {n: " ".join(x.split()) for n, x in files.items()}
+    bad = []
+    for shape in ("Expected: {screen} › {part} —", PROCESS_SHAPE):
+        homes = sorted(n for n, x in files.items() if shape in x)
+        if homes != ["templates.md"]:
+            bad.append(f"line shape '{shape}' lives in {homes or 'nowhere'} (one home: templates.md)")
+    for name, words in DEBUG_NEEDLES:
+        if words not in files.get(name, ""):
+            bad.append(f"{name} lost '{words}'")
+    t = flat.get("templates.md", "")
+    if "three line shapes" not in t or "| Card | Expected | Found | Process | Fixed |" not in t:
+        bad.append("templates.md must name three line shapes and a Process column in the Debug table")
+    if "Process lines** (the one home" not in t or "**Moves.**" not in t or "ticked once it is fixed or its lesson" not in t:
+        bad.append("templates.md lost the Process lines rule, the Moves rule or the Process outcome")
+    if "`doing` when `debug` starts" not in t or "`standby` when `release` starts" not in t:
+        bad.append("templates.md must say the debug card goes to doing at debug and standby at release")
+    if not re.search(r"Move the sprint's debug card .{0,80}to `doing`", flat.get("debug.md", "")):
+        bad.append("debug.md Intake 1 must move the debug card to doing")
+    if not re.search(r"move the sprint's debug card .{0,80}to `standby`", flat.get("release.md", "")):
+        bad.append("release.md step 1 must move the debug card to standby before the recipe")
+    for name, words in (("execute.md", "writes its Process line on the debug card"), ("run.md", "gets a Process line on the debug card"),
+                        ("debug.md", "writes its Process line on the debug card"), ("release.md", "writes a Process line on it")):
+        if words not in flat.get(name, ""):
+            bad.append(f"{name} does not say a stalled step writes a Process line ('{words}')")
+    if "Process lines" not in flat.get("close.md", ""):
+        bad.append("close.md's report must name the Process lines")
+    for name, x in flat.items():
+        for old in DEBUG_OLD:
+            if old in x:
+                bad.append(f"{name} still says '{old}'")
+    return bad
+
+
 def check_debug_card():
     s = PLUGINS / "bandit-dev" / "skills" / "sprint" / "references"
-    shape = "Expected: {screen} › {part} —"
-    homes = [p.name for p in s.glob("*.md") if shape in p.read_text(encoding="utf-8")]
-    bad = [] if homes == ["templates.md"] else [f"line shapes live in {homes or 'nowhere'} (one home: templates.md)"]
-    for name, words in (("plan.md", "Create the debug card"), ("execute.md", "`Expected:` line"),
-                        ("debug.md", "The debug card first"), ("close.md", "The debug card"), ("run.md", "debug card")):
-        if words not in (s / name).read_text(encoding="utf-8"):
-            bad.append(f"{name} lost '{words}'")
-    report("DK1", not bad, "; ".join(bad) or "debug card: line shapes in templates.md only; plan creates it, the wave "
-           "adds Expected lines, debug reads it first, close refuses an unticked line, run names it")
+    files = {p.name: p.read_text(encoding="utf-8") for p in s.glob("*.md")}
+    bad = debug_card_problems(files)
+
+    def without(name, old, new=""):
+        copy = dict(files)
+        assert old in copy[name], (name, old)
+        copy[name] = copy[name].replace(old, new)
+        return copy
+    mutants = [without("templates.md", "Process lines** (the one home", "Other lines** (the one home"),
+               without("templates.md", "`doing` when `debug` starts", "`doing` when it starts"),
+               without("templates.md", "| Found | Process | Fixed |", "| Found | Fixed |"),
+               without("templates.md", "three line shapes", "two line shapes"),
+               without("debug.md", "to `doing` (`update_tasks`", "to `assigned` (`update_tasks`"),
+               without("release.md", "to `standby` with `update_tasks`", "to `done` with `update_tasks`"),
+               without("execute.md", "writes its Process line", "writes its note"),
+               without("run.md", "gets a Process line", "gets a note"),
+               without("debug.md", "writes its Process line", "writes its note"),
+               without("release.md", "writes a Process line", "writes a note"),
+               without("close.md", "Process lines", "notes"),
+               without("close.md", "The debug card", "The bug card"),
+               {**files, "execute.md": files["execute.md"] + "\nthe debug card stays where `plan` seeded it until `close`\n"},
+               {**files, "debug.md": files["debug.md"] + f"\n`{PROCESS_SHAPE}` again\n"}]
+    missed = [i for i, m in enumerate(mutants) if not debug_card_problems(m)]
+    if missed:
+        bad.append(f"the rule does not fail on every broken copy (missed {missed})")
+    report("DK1", not bad, "; ".join(bad) + " (BB-381)" if bad else
+           "debug card: three line shapes in templates.md only; plan creates it, debug moves it to doing, release to "
+           "standby, close completes it; every step points to the Process line rule; the wave adds Expected lines, "
+           "debug reads it first, close refuses an unticked line, run names it")
 
 
 # ── TG1 · no helper forbids creating a tag or asks before creating one: the app's roles are the gate ─

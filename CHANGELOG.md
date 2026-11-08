@@ -2,7 +2,7 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
-## Unreleased
+## 0.16.0 · 2026-11-08
 
 ### Added
 - **A design session that changed the shared look now ends by asking you to run design sync** (BB-398). The Design step has a closing step: when the design changed colours, fonts, spacing or shared components, the session asks you to run `/design-sync` (the helpers cannot run it themselves), and the design card records `Design sync run {date}` or `Design sync not needed: {reason}`. The design card is not completed without one of the two lines. Checker rule DS1.

@@ -58,10 +58,7 @@ These start outside, so no file here triggers them. Each has its own check.
 A place the done check lists as open, checked and found to need nothing for this release. One line
 each: the path as the map writes it, then why. `scripts/release.py --write` empties this list.
 
-- `docs/cheat-sheet.md` — BB-396 (no command added or renamed; the cheat sheet says nothing about tag creation)
-- `README.md` — BB-396 (no command added or renamed)
-- `docs/pipeline.md` — BB-396 (no stage text mentions creating tags)
-- `docs/dependencies.md` — BB-396 (new rule TG1 needs no new map row; it reads files the map already names)
+- none yet
 
 ## ✅ Before saying done
 

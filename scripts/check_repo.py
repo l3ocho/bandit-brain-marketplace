@@ -1289,6 +1289,70 @@ def check_sprint_data():
            if ok else f"{'; '.join(bad)}{'' if not any(mutants) else f'; a broken copy passed ({mutants})'}")
 
 
+# ── KP1 · sprint targets: used only once approved, met or missed per measure, a miss is a lesson, seen twice a proposal ─
+SPRINT_TARGETS_TEXT = (("templates.md", "## Sprint targets"),
+                       ("templates.md", "**A target is used only once approved**"),
+                       ("templates.md", "`#### 🎯 Targets`"),
+                       ("templates.md", "missed its target"),
+                       ("execute.md", "**Targets:** when the project has approved targets"),
+                       ("close.md", "| Handover report | Targets section |"))
+
+
+def sprint_targets_text_problems(files):
+    return [f"{name} lacks {want!r}" for name, want in SPRINT_TARGETS_TEXT if want not in files[name]]
+
+
+def sprint_targets_outputs(data, targ, vault, rows, waves):
+    """The four outputs the script gives on the fixture: autumn wave 2, the whole of autumn, spring wave 1, the proposals."""
+    return {"wave": targ.render(waves, rows, "autumn", 2), "sprint": targ.render(waves, rows, "autumn"),
+            "spring-wave": targ.render(waves, rows, "spring", 1), "propose": targ.propose(waves, rows)}
+
+
+def check_sprint_targets():
+    import importlib.util
+    s = PLUGINS / "bandit-dev" / "skills" / "sprint"
+    sys.path.insert(0, str(s / "scripts"))
+    spec = importlib.util.spec_from_file_location("sprint_targets", s / "scripts" / "sprint_targets.py")
+    targ = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(targ)
+    data = targ.sprint_data
+    vault = ROOT / "tests" / "fixture-vault"
+    note = (vault / "SprintData" / "Projects" / "garden" / "planning" / "garden-sprint-targets.md").read_text(encoding="utf-8")
+    rows, problems = targ.parse_targets(note)
+    waves, _ = data.collect(vault / "SprintData", "garden")
+    got = sprint_targets_outputs(data, targ, vault, rows, waves)
+    bad = list(problems)
+    for name, text in got.items():
+        want = (ROOT / "tests" / "fixture-expected" / f"sprint-targets-{name}.md").read_text(encoding="utf-8")
+        if text != want:
+            bad.append(f"the {name} output differs from tests/fixture-expected/sprint-targets-{name}.md")
+    if "full_check_runs" in got["wave"] + got["sprint"] or "tokens_new_k" in got["wave"] + got["sprint"]:
+        bad.append("a proposed target, or one approved with no date and words, was used")
+    if "seen 2×" not in got["sprint"] or "Seen twice" not in got["sprint"]:
+        bad.append("the same miss in two waves is not a lesson seen twice with a proposed change")
+    if "seen 1×" not in got["spring-wave"] or "Seen twice" in got["spring-wave"]:
+        bad.append("a single miss is not a lesson seen once")
+    unusable = targ.parse_targets(note.replace("| time_min | 30 | at most |", "| time_min | 30 | sideways |"))[1]
+    unknown = targ.parse_targets(note.replace("| time_min |", "| not_a_measure |"))[1]
+    fixed = targ.parse_targets(note.replace("| debug_lines |", "| cards |"))[1]
+    if not (unusable and unknown and fixed):
+        bad.append("a row with a wrong direction, an unknown measure or a measure that cannot carry a target is accepted")
+    files = {n: (s / "references" / n).read_text(encoding="utf-8") for n in ("execute.md", "close.md", "templates.md")}
+    bad += sprint_targets_text_problems(files)
+    # Both ways: a script that uses a proposed target, or an approved one with no words, must differ from the expected outputs.
+    loose = [{**r, "status": "approved", "approved": "2026-11-08", "words": "x"} if r["status"] == "proposed" else r for r in rows]
+    unworded = [{**r, "words": ""} if r["measure"] == "time_min" else r for r in rows]
+    flipped = [{**r, "direction": "at least"} if r["measure"] == "time_min" else r for r in rows]
+    mutants = [sprint_targets_outputs(data, targ, vault, m, waves) == got for m in (loose, unworded, flipped)]
+    mutants += [not sprint_targets_text_problems({**files, n: files[n].replace(w, "")}) for n, w in SPRINT_TARGETS_TEXT]
+    ok = not bad and not any(mutants)
+    report("KP1", ok, "sprint_targets.py: the wave block, the sprint table, the single-wave block and the proposals match the hand-checked "
+           "files; a proposed target and an approved one without date and words are never used; the same miss in two waves is a lesson seen "
+           f"twice with a proposed change; a wrong row is refused; the text is present; {len(mutants)} broken copies (a proposed target "
+           "used, an approved one with no words, a flipped direction, each text missing) all fail"
+           if ok else f"{'; '.join(bad)}{'' if not any(mutants) else f'; a broken copy passed ({mutants})'}")
+
+
 # ── NA1 · the sprint helper never tells an executor to decide and continue without asking ─
 NO_ASK_RE = re.compile(r"conservative\s+reading|cautious\s+reading|do(?:n['’]t|\s+not)\s+ask(?:\s+any)?\s+questions"
                        r"|never\s+ask\s+the\s+user|decide\s+(?:and\s+(?:continue|proceed)|alone)", re.I)
@@ -1692,6 +1756,7 @@ def main(argv):
     check_design_card()
     check_wave_flow()
     check_sprint_data()
+    check_sprint_targets()
     check_sp11()
     check_design_handover()
     check_gate_order()

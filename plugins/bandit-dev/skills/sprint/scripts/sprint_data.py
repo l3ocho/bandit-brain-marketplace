@@ -119,38 +119,40 @@ class Measure:
     name: str
     source: str
     reader: Callable[[Wave], str]
+    direction: str = ""  # `at most` or `at least`: the way better runs, so a target can sit on this measure; "" = no target
 
 
-# One line per measure. A new measure is one more line here.
+# One line per measure. A new measure is one more line here; give it `direction="at most"` or `"at least"` to let a project set a
+# target on it (sprint_targets.py); a measure with none only describes the wave.
 MEASURES = [
     Measure("done", "ledger Waves table: the wave's done date", lambda w: w.done),
     Measure("cards", "ledger Waves table: how many cards the wave holds", lambda w: str(len(w.cards))),
     Measure("card_ids", "ledger Waves table: the card ids", lambda w: " ".join(w.cards)),
     Measure("effort", "ledger Batch table: the cards' effort summed (XS=1 S=2 M=3 L=4 XL=5)", _effort),
-    Measure("plan_deviations", "ledger Plan deviations: lines that name one of the wave's cards (empty when a line names no card)", _deviations),
-    Measure("time_min", "wave report Flow: `- Time`, in minutes", _time),
+    Measure("plan_deviations", "ledger Plan deviations: lines that name one of the wave's cards (empty when a line names no card)", _deviations, direction="at most"),
+    Measure("time_min", "wave report Flow: `- Time`, in minutes", _time, direction="at most"),
     Measure("full_check_runs", "wave report Flow: `- Full checks`, runs",
-            lambda w: _group(w, r"^- Full checks: (\d+) runs?", 1)),
+            lambda w: _group(w, r"^- Full checks: (\d+) runs?", 1), direction="at most"),
     Measure("full_check_min", "wave report Flow: `- Full checks`, total minutes",
-            lambda w: _group(w, r"^- Full checks: \d+ runs?, (\d+) min", 1)),
+            lambda w: _group(w, r"^- Full checks: \d+ runs?, (\d+) min", 1), direction="at most"),
     Measure("full_check_failed", "wave report Flow: `- Full checks`, failed",
-            lambda w: _group(w, r"^- Full checks: .*?(\d+) failed", 1)),
+            lambda w: _group(w, r"^- Full checks: .*?(\d+) failed", 1), direction="at most"),
     Measure("test_runs", "wave report Flow: `- Test runs`, when measured",
             lambda w: str(sum(int(n) for n in re.findall(r"(\d+) (?:whole suite|targeted)", _group(w, r"^- Test runs: (.*)$", 1))))
-            if _group(w, r"^- Test runs: (?!not measured)(.*)$", 1) else ""),
+            if _group(w, r"^- Test runs: (?!not measured)(.*)$", 1) else "", direction="at most"),
     Measure("code_review_rounds", "wave report Flow: `- Gates`, code review rounds",
-            lambda w: _group(w, r"^- Gates: code review (\d+) rounds?", 1)),
+            lambda w: _group(w, r"^- Gates: code review (\d+) rounds?", 1), direction="at most"),
     Measure("ui_check_rounds", "wave report Flow: `- Gates`, UI check rounds",
-            lambda w: _group(w, r"^- Gates: .*UI check (\d+) rounds?", 1)),
-    Measure("repeat_runs", "wave report Flow: `- Repeat runs`", lambda w: _group(w, r"^- Repeat runs: (\d+)", 1)),
-    Measure("tokens_reread_k", "wave report Tokens: `- Total`, re-read from cache, in thousands", lambda w: _tokens(w, 1)),
-    Measure("tokens_new_k", "wave report Tokens: `- Total`, new, in thousands", lambda w: _tokens(w, 2)),
-    Measure("tokens_written_k", "wave report Tokens: `- Total`, written, in thousands", lambda w: _tokens(w, 3)),
-    Measure("peak_context_k", "wave report Tokens: `- Main chat`, peak context, in thousands", _peak),
+            lambda w: _group(w, r"^- Gates: .*UI check (\d+) rounds?", 1), direction="at most"),
+    Measure("repeat_runs", "wave report Flow: `- Repeat runs`", lambda w: _group(w, r"^- Repeat runs: (\d+)", 1), direction="at most"),
+    Measure("tokens_reread_k", "wave report Tokens: `- Total`, re-read from cache, in thousands", lambda w: _tokens(w, 1), direction="at most"),
+    Measure("tokens_new_k", "wave report Tokens: `- Total`, new, in thousands", lambda w: _tokens(w, 2), direction="at most"),
+    Measure("tokens_written_k", "wave report Tokens: `- Total`, written, in thousands", lambda w: _tokens(w, 3), direction="at most"),
+    Measure("peak_context_k", "wave report Tokens: `- Main chat`, peak context, in thousands", _peak, direction="at most"),
     Measure("est_cost_usd", "wave report Tokens: `- Estimated cost` (an estimate the report itself marks)",
-            lambda w: _group(w, r"^- Estimated cost: \$([\d.]+)", 1)),
+            lambda w: _group(w, r"^- Estimated cost: \$([\d.]+)", 1), direction="at most"),
     Measure("hook_runs", "wave report Tokens: `- Hooks`, runs", lambda w: _group(w, r"^- Hooks: (\d+) runs?", 1)),
-    Measure("debug_lines", "wave report Debug table: Expected + Found + Process of the wave's cards", _debug),
+    Measure("debug_lines", "wave report Debug table: Expected + Found + Process of the wave's cards", _debug, direction="at most"),
 ]
 
 

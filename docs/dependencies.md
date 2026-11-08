@@ -30,7 +30,7 @@ The third is the rule that enforces it, if one does.
 | `docs/bandit-yaml.md` | `plugins/bandit-dev/skills/sprint/references/bandit-yaml.md` · `bandit.yaml` | — |
 | `plugins/bandit-dev/hooks/hooks.json` | `README.md` · `docs/decisions.md` | — |
 | `plugins/bandit-dev/skills/sprint/scripts/dependency_gate.py` | `docs/decisions.md` · `README.md` | 🔒 DG1 |
-| `plugins/bandit-dev/skills/sprint/scripts/wave_flow.py` | `tests/fixture-logs/**` · `plugins/bandit-dev/skills/sprint/references/templates.md` (the wave report's Flow and Tokens blocks) · `docs/decisions.md` | 🔒 WF1 |
+| `plugins/bandit-dev/skills/sprint/scripts/wave_flow.py` | `tests/fixture-logs/**` · `plugins/bandit-dev/skills/sprint/references/templates.md` (the wave report's Flow and Tokens blocks, including tokens by source, hooks and the estimated cost with its price date) · `docs/decisions.md` (RS14, RS26) | 🔒 WF1 |
 | `plugins/bandit-dev/skills/sprint/scripts/sprint_map.py` | `tests/fixture-map/**` · `plugins/bandit-dev/skills/sprint/references/templates.md` (the Sprint map's data) · `docs/decisions.md` | 🔒 SM1 · SP12 |
 | `plugins/bandit-dev/skills/sprint/scripts/check_sprint.py` | `tests/fixture-vault/**` · `plugins/bandit-dev/skills/sprint/references/templates.md` (the ledger and wave report shapes) · `docs/decisions.md` | 🔒 SP7 · SP9 · SP11 · SP12 |
 | `plugins/bandit-dev/skills/sprint/scripts/stop_gate.py` | `plugins/bandit-dev/skills/sprint/references/bandit-yaml.md` · `docs/bandit-yaml.md` · `docs/decisions.md` | 🔒 SG1 |

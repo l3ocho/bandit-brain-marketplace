@@ -1,0 +1,10 @@
+| plan_deviations | 0.5 | at most | proposed | | |
+| full_check_min | 3 | at most | proposed | | |
+| full_check_failed | 0 | at most | proposed | | |
+| code_review_rounds | 1 | at most | proposed | | |
+| ui_check_rounds | 0 | at most | proposed | | |
+| repeat_runs | 0 | at most | proposed | | |
+| tokens_reread_k | 5300 | at most | proposed | | |
+| tokens_written_k | 3 | at most | proposed | | |
+| peak_context_k | 1200 | at most | proposed | | |
+| est_cost_usd | 5.16 | at most | proposed | | |

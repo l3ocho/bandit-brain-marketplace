@@ -1819,6 +1819,54 @@ def check_subtask_gate():
            "step or not read; gate and approval lines and refused adds do not count; debug and completed cards skipped)")
 
 
+# ── DF1 · a card description is HTML the app shows formatted, never raw tags (BB-464) ─
+def check_description_gate():
+    script = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts" / "description_gate.py"
+    bad = []
+    hooks = json.loads((PLUGINS / "bandit-dev" / "hooks" / "hooks.json").read_text(encoding="utf-8"))
+    pre = [(e.get("matcher", ""), h.get("command", "")) for e in hooks["hooks"].get("PreToolUse", [])
+           for h in e.get("hooks", [])]
+    if not any("description_gate.py" in c and all(t in m for t in ("create_tasks", "update_tasks")) for m, c in pre):
+        bad.append("hooks.json: no PreToolUse hook runs description_gate.py on create_tasks and update_tasks")
+    board = " ".join((PLUGINS / "bandit" / "skills" / "tasks" / "references" / "board.md").read_text(encoding="utf-8").split())
+    if "`<pre>`" not in board or "never first or last" not in board:
+        bad.append("tasks board.md → Card descriptions: no `<pre>` row saying never first or last")
+    handover = " ".join((PLUGINS / "bandit-dev" / "skills" / "sprint" / "references" / "templates.md")
+                        .read_text(encoding="utf-8").split())
+    if "never the last block" not in handover:
+        bad.append("sprint templates.md → Handover cards: the `<pre>` is not said to be never the last block")
+    pre_last = "<h2>Why</h2><p>x</p><h2>Prompt for the CTO agent</h2><pre>Card: a\n\n- step\n**b**</pre>"
+    cases = [  # (label, tool, description, refused, text in the refusal)
+        ("a prompt block last (sprint doors' CTO cards)", "update_tasks", pre_last, True, "raw text"),
+        ("the same closed by a Source paragraph", "update_tasks", pre_last + "<h2>Source</h2><p>Project, sprint.</p>",
+         False, ""),
+        ("plain text", "create_tasks", "Buy milk", True, "raw text"),
+        ("an inline tag first", "create_tasks", "<b>Hi</b><p>x</p>", True, "raw text"),
+        ("escaped markup", "update_tasks", "<p>a&lt;br/&gt;b</p>", True, "escaped markup"),
+        ("a <br> tag", "update_tasks", "<p>a<br/>b</p>", True, "<br>"),
+        ("markdown bold", "create_tasks", "<p>**bold**</p>", True, "markdown bold"),
+        ("a markdown list line", "create_tasks", "<p>- one</p>", True, "markdown list"),
+        ("a markdown link", "create_tasks", "<p>see [x](http://a.b)</p>", True, "markdown link"),
+        ("code holding ** and an escaped tag", "create_tasks", "<p>run <code>f(**kw)</code>, <code>&lt;pre&gt;</code></p>",
+         False, ""),
+        ("the lane template", "create_tasks", "<h2>Spec</h2><h3>Outcome</h3><p>What.</p><ul><li>Included.</li></ul>",
+         False, ""),
+        ("an empty description", "update_tasks", "", False, ""),
+        ("no description", "update_tasks", None, False, ""),
+        ("another tool", "get_task", "Buy milk", False, ""),
+    ]
+    for label, tool, description, refuse, text in cases:
+        item = {"taskId": "AB-1"} if description is None else {"taskId": "AB-1", "description": description}
+        payload = {"tool_name": f"mcp__board__{tool}", "tool_input": {"items": [item]}}
+        r = subprocess.run([sys.executable, "-B", str(script)], input=json.dumps(payload), capture_output=True, text=True)
+        if r.returncode != (2 if refuse else 0) or (refuse and (text not in r.stderr or "AB-1" not in r.stderr)):
+            bad.append(f"{label} → exit {r.returncode} {r.stderr[-100:]!r}")
+    report("DF1", not bad, "; ".join(bad) or f"description gate: registered on create_tasks and update_tasks, the tasks "
+           f"and sprint rules allow a prompt block only between two blocks, {len(cases)} descriptions (a prompt block "
+           "last, plain text, an inline tag first, escaped markup, <br> and markdown refused; the app's lane template, "
+           "code spans and a closed prompt block pass)")
+
+
 # ── TD1 · the testdata guard refuses every unsafe database and removes only what it created (fixtures) ─
 def check_testdata():
     import shutil as sh
@@ -1959,6 +2007,7 @@ def main(argv):
     check_stop_gate()
     check_dependency_gate()
     check_subtask_gate()
+    check_description_gate()
     check_code_changed()
     check_testdata()
     check_l5()

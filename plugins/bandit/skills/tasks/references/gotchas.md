@@ -41,3 +41,7 @@ One line per real failure: what went wrong → what to do instead. Read once at 
   and written under Decisions (the check for other settings goes in Scope in). Open questions hold
   only real forks that change scope, each with options and a recommendation, or `None`. Every
   `spec` step runs, the brief (step 6) included: never skip a required step and offer it after.
+- **2026-11-10 · Five CTO cards showed raw tags.** Sprint doors' CTO cards ended with their prompt in a
+  `<pre>` block; the app shows a description as formatted text only when it ends with a `<p>`, heading, list
+  or quote, and the read-back did not stop it. → A `<pre>` sits only between two blocks; `bandit-dev`'s
+  description gate refuses the write in Claude Code (`references/board.md` → Card descriptions).

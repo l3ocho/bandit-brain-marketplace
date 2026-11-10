@@ -31,6 +31,7 @@ The third is the rule that enforces it, if one does.
 | `plugins/bandit-dev/hooks/hooks.json` | `README.md` · `docs/decisions.md` | — |
 | `plugins/bandit-dev/skills/sprint/scripts/dependency_gate.py` | `docs/decisions.md` · `README.md` | 🔒 DG1 |
 | `plugins/bandit-dev/skills/sprint/scripts/subtask_gate.py` | `plugins/bandit-dev/hooks/hooks.json` · `plugins/bandit-dev/skills/sprint/references/plan.md` (steps 7 and 12) · `plugins/bandit/skills/tasks/references/dev-workflow.md` (plan-tech) · `README.md` · `docs/decisions.md` (RS29) | 🔒 SB1 |
+| `plugins/bandit-dev/skills/sprint/scripts/description_gate.py` | `plugins/bandit-dev/hooks/hooks.json` · `plugins/bandit/skills/tasks/references/board.md` (Card descriptions) · `plugins/bandit-dev/skills/sprint/references/templates.md` (Handover cards) · `README.md` · `docs/decisions.md` (HK4) | 🔒 DF1 |
 | `plugins/bandit-dev/skills/sprint/scripts/code_changed.py` | `plugins/bandit-dev/skills/sprint/references/templates.md` (Gate order) · `plugins/bandit-dev/skills/sprint/references/debug.md` · `plugins/bandit-dev/skills/sprint/references/release.md` · `plugins/bandit-dev/skills/sprint/references/run.md` · `plugins/bandit-dev/skills/sprint/references/execute.md` · `docs/decisions.md` (RS30) | 🔒 FC1 · GO1 |
 | `plugins/bandit-dev/skills/sprint/scripts/wave_flow.py` | `tests/fixture-logs/**` · `plugins/bandit-dev/skills/sprint/references/templates.md` (the wave report's Flow and Tokens blocks, including tokens by source, hooks and the estimated cost with its price date) · `docs/decisions.md` (RS14, RS26) | 🔒 WF1 |
 | `plugins/bandit-dev/skills/sprint/scripts/sprint_data.py` | `tests/fixture-vault/SprintData/**` · `tests/fixture-expected/sprint-data.csv` · `plugins/bandit-dev/skills/sprint/references/templates.md` (the Sprint data section and the Filenames rows) · `plugins/bandit-dev/skills/sprint/references/homes.md` · `plugins/bandit-dev/skills/sprint/references/execute.md` · `plugins/bandit-dev/skills/sprint/references/close.md` · `docs/decisions.md` (RS27) | 🔒 SD1 |
@@ -60,7 +61,8 @@ These start outside, so no file here triggers them. Each has its own check.
 A place the done check lists as open, checked and found to need nothing for this release. One line
 each: the path as the map writes it, then why. `scripts/release.py --write` empties this list.
 
-- none yet
+- `plugins/bandit/skills/tasks/references/errors.md` — the description gate is a hook refusal, not an app refusal code; the app's codes are unchanged.
+- `CLAUDE.md` — the repo's rules, layout and verify commands are unchanged; the new script sits in a folder it already names.
 
 ## ✅ Before saying done
 

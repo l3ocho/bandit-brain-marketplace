@@ -35,7 +35,7 @@
 | Plugin | For | Contents | Runs on |
 |---|---|---|---|
 | **`bandit`** | Everyone | 9 skills: `tasks` · `notes` · `project` · `audit` · `clarify` · `rewrite` · `plan` · `minutes` · `finance` | Claude.ai + Claude Code |
-| **`bandit-dev`** | Developers | Skills `sprint` and `testdata` · agent `plan-reviewer` · hooks: sprint checker (Stop), credential guard (PreToolUse, on with a `guard` section in `bandit.yaml`), stop gate (Stop, on with a `stop` section), dependency gate (PostToolUse on board links, always on), sub-task gate (PreToolUse on the sprint commit and Technical plans, always on). Needs `bandit` | Claude Code |
+| **`bandit-dev`** | Developers | Skills `sprint` and `testdata` · agent `plan-reviewer` · hooks: sprint checker (Stop), credential guard (PreToolUse, on with a `guard` section in `bandit.yaml`), stop gate (Stop, on with a `stop` section), dependency gate (PostToolUse on board links, always on), sub-task gate (PreToolUse on the sprint commit and Technical plans, always on), description gate (PreToolUse on card writes, always on). Needs `bandit` | Claude Code |
 | **`bandit-maker`** | Maintainers | Skill `skill`: create, evaluate and lint skills to the house standard | Claude Code |
 
 Every skill is called by plugin and area, with the verb as argument:
@@ -80,6 +80,7 @@ Then `/plugin` → Marketplaces → `bandit-brain` → **Enable auto-update** (o
 | 0.16.0 | v0.41.0 | same |
 | 0.16.1 | v0.41.0 | same |
 | 0.17.0 | v0.41.0 | same |
+| 0.18.0 | v0.41.0 | same |
 | 0.15.0 | v0.41.0 | same |
 | 0.14.0 | v0.41.0 | same |
 | 0.13.0 | v0.38.0 | same |

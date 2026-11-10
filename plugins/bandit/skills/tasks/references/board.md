@@ -132,6 +132,7 @@ splits, and bandit-dev:sprint's sprint card.
 | `<h3>…</h3>` | Headings inside a section. The app's lane templates (`get_context` → `laneTemplates`) use them; keep them as the template writes them |
 | `<ul>` / `<ol>` + `<li><p>…</p></li>` | Lists |
 | `<b>…</b>` · `<code>…</code>` | Bold, inline code: **only inside** a `<p>`, `<li>` or heading, never at the top level |
+| `<pre>…</pre>` | A block of literal text, such as a prompt for another agent: **only between two blocks**, never first or last. A card that ends with one gets a closing `<h2>Source</h2><p>…</p>` |
 
 🚫 **Never:** a value that starts or ends outside a block tag · `<br>` / `<br/>` (a new line is a
 new `<p>`) · escaped markup (`&lt;br/&gt;`, `&lt;p&gt;`) · markdown (`**`, `- `, `#`,
@@ -145,6 +146,9 @@ with `</p>`, `</h1-6>`, `</ul>`, `</ol>` or `</blockquote>` · **2** no escaped 
 (`&lt;` followed by `br`, `p`, `b`, `ul`, `ol`, `li` or `h1-6`) · **3** no `**`, and no line
 starting `- ` or `#`. Any fails → rewrite the same content in the tags above and `update_tasks`
 once more. Still wrong after that → tell the user which card; never leave it.
+
+In Claude Code, `bandit-dev`'s description gate refuses the write itself when a description fails
+the first three checks or holds `<br>` (markdown inside a `<pre>` or `<code>` is literal text and passes).
 
 ---
 

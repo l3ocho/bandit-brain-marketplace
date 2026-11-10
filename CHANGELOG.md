@@ -2,7 +2,7 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
-## Unreleased
+## 0.17.0 · 2026-11-09
 
 ### Added
 - **A sprint cannot be committed until every card has its sub-tasks** (BB-451). The rule from 0.16.0 only checked a line of text in the ledger after the commit, so sprints tight and guards were planned with no sub-tasks at all and nothing stopped them. A new hook in `bandit-dev` now refuses the call itself: the sprint's move to Ready to execute while any of its cards has no build step, and a card's Technical plan written before its build steps. It reads the cards as the app returned them in the chat, names each card that has none, and names the read to do for a card the chat has not read. Planning writes the build steps first, then the Technical plan; `/bandit:tasks plan-tech` does the same. Checker rule SB1.

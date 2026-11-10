@@ -60,9 +60,7 @@ These start outside, so no file here triggers them. Each has its own check.
 A place the done check lists as open, checked and found to need nothing for this release. One line
 each: the path as the map writes it, then why. `scripts/release.py --write` empties this list.
 
-- `plugins/bandit/skills/tasks/references/errors.md` — plan-tech's order changed; the app has no new refusal code.
-- `CLAUDE.md` — the repo's rules, layout and verify commands are unchanged; the new scripts sit in folders it already names.
-- `docs/install.md` — README changed only the bandit-dev hooks line, not the requirements table.
+- none yet
 
 ## ✅ Before saying done
 

@@ -30,6 +30,8 @@ The third is the rule that enforces it, if one does.
 | `docs/bandit-yaml.md` | `plugins/bandit-dev/skills/sprint/references/bandit-yaml.md` · `bandit.yaml` | — |
 | `plugins/bandit-dev/hooks/hooks.json` | `README.md` · `docs/decisions.md` | — |
 | `plugins/bandit-dev/skills/sprint/scripts/dependency_gate.py` | `docs/decisions.md` · `README.md` | 🔒 DG1 |
+| `plugins/bandit-dev/skills/sprint/scripts/subtask_gate.py` | `plugins/bandit-dev/hooks/hooks.json` · `plugins/bandit-dev/skills/sprint/references/plan.md` (steps 7 and 12) · `plugins/bandit/skills/tasks/references/dev-workflow.md` (plan-tech) · `README.md` · `docs/decisions.md` (RS29) | 🔒 SB1 |
+| `plugins/bandit-dev/skills/sprint/scripts/code_changed.py` | `plugins/bandit-dev/skills/sprint/references/templates.md` (Gate order) · `plugins/bandit-dev/skills/sprint/references/debug.md` · `plugins/bandit-dev/skills/sprint/references/release.md` · `plugins/bandit-dev/skills/sprint/references/run.md` · `plugins/bandit-dev/skills/sprint/references/execute.md` · `docs/decisions.md` (RS30) | 🔒 FC1 · GO1 |
 | `plugins/bandit-dev/skills/sprint/scripts/wave_flow.py` | `tests/fixture-logs/**` · `plugins/bandit-dev/skills/sprint/references/templates.md` (the wave report's Flow and Tokens blocks, including tokens by source, hooks and the estimated cost with its price date) · `docs/decisions.md` (RS14, RS26) | 🔒 WF1 |
 | `plugins/bandit-dev/skills/sprint/scripts/sprint_data.py` | `tests/fixture-vault/SprintData/**` · `tests/fixture-expected/sprint-data.csv` · `plugins/bandit-dev/skills/sprint/references/templates.md` (the Sprint data section and the Filenames rows) · `plugins/bandit-dev/skills/sprint/references/homes.md` · `plugins/bandit-dev/skills/sprint/references/execute.md` · `plugins/bandit-dev/skills/sprint/references/close.md` · `docs/decisions.md` (RS27) | 🔒 SD1 |
 | `plugins/bandit-dev/skills/sprint/scripts/sprint_targets.py` | `tests/fixture-vault/SprintData/**` (the targets note) · `tests/fixture-expected/sprint-targets-*.md` · `plugins/bandit-dev/skills/sprint/scripts/sprint_data.py` (its measures list and their directions) · `plugins/bandit-dev/skills/sprint/references/templates.md` (Sprint targets, the Targets block, Lessons) · `plugins/bandit-dev/skills/sprint/references/execute.md` · `plugins/bandit-dev/skills/sprint/references/close.md` · `docs/decisions.md` (RS28) | 🔒 KP1 |
@@ -58,7 +60,9 @@ These start outside, so no file here triggers them. Each has its own check.
 A place the done check lists as open, checked and found to need nothing for this release. One line
 each: the path as the map writes it, then why. `scripts/release.py --write` empties this list.
 
-- none yet
+- `plugins/bandit/skills/tasks/references/errors.md` — plan-tech's order changed; the app has no new refusal code.
+- `CLAUDE.md` — the repo's rules, layout and verify commands are unchanged; the new scripts sit in folders it already names.
+- `docs/install.md` — README changed only the bandit-dev hooks line, not the requirements table.
 
 ## ✅ Before saying done
 

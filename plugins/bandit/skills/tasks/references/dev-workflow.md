@@ -222,12 +222,13 @@ Steps 1 and 5 are the **card-write rules** bandit-dev:sprint calls for a sprint'
 3. The user picks a card → technical discussion.
 4. **Plan note** through bandit:notes: a new `plan` note in `_inbox/` (type, filename and keys are
    bandit:notes' rules), `board-task` = this card's id.
-5. **Card:** `get_task` → read the current `Technical plan` first (rulebook R14). Write only the
+5. **Card:** `get_task` → read the current `Technical plan` first (rulebook R14). **The build steps
+   go on first**: as sub-tasks, ordered and read back (`references/board.md` → Sub-tasks); bandit-dev's
+   sub-task gate refuses a Technical plan written before them. Then write only the
    lines that are missing (plan-note filename, branch, size, summary). A line already there with a
    different value (above all the branch, the merge commit or the PR URL) → show both and ask the user;
    never replace it silently. Every other line stays. → one `update_tasks` entry with the description and `effort` ≤ L (XL →
-   propose the split, B7); a Claude.ai estimate that differs → show both and ask → the build steps
-   as sub-tasks, ordered and read back (`references/board.md` → Sub-tasks).
+   propose the split, B7); a Claude.ai estimate that differs → show both and ask.
 6. **The card stays `stage/spec`.** It moves only after the user files the note (`/bandit:notes file`).
 
 ### `/bandit:tasks stage {card} {spec|planned|ready}` — the only stage writer

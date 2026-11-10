@@ -25,11 +25,17 @@ Check all before anything runs. Each miss is refused by name, with what would sa
 6. **Recipe present.** `recipe.py require release branches.trunk branches.deploy`. A missing key is
    refused by its name. `migrations` and `staging` are optional sections (`references/bandit-yaml.md`).
 7. **Clean trunk.** `git status --short` empty, branch `branches.trunk`, level with origin after a fetch.
+8. **Nothing owed to the repository.** `check_sprint.py` is green (SP14: the plan leaves no item for the close, the release
+   or after the sprint), and the ledger's Follow-ups noticed and Needs the user name no change to the repository still to
+   do for this sprint. Each one is refused by name: it is done now as a debug row, before the release, or becomes a card
+   for a later sprint. The release ships all of the sprint's work; nothing reaches the trunk after it.
 
 ## Steps
 
 1. **Debug card to Stand By, then run the recipe.** Before the first recipe step (on the marketplace repo, before `release.py --write`), move the sprint's debug card (`Debug card:` in the ledger) to `standby` with `update_tasks`, read back; `close` completes it. A release step that stalls or fails writes a Process line on it at once (`references/templates.md` → Debug card, Process lines). `recipe.py get release` lists the steps. Run them one at a time, in order,
-   showing each command and its result. `{version}` in a step is the version picked by Semantic
+   showing each command and its result. A step that runs the recipe's `verify` runs only when
+   `python3 ${CLAUDE_SKILL_DIR}/scripts/code_changed.py --since {the commit of the last green full check, from the Milestone log}`
+   says "full check: needed"; "not needed" (only docs, notes or comments) → the step is skipped and its line shown instead. `{version}` in a step is the version picked by Semantic
    Versioning (Marketplace cards, step 1). A failing step stops the release: nothing after it runs,
    the output goes under "Needs the user", and the ledger says which step failed.
 2. **Marketplace cards** (below), when the sprint carries any.

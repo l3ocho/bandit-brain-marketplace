@@ -24,10 +24,19 @@ Rules (each one a failure, not a warning):
        `sprint-map-waves-done` marker lists every wave marked done in the ## Waves table (temporary, decisions RS16)
   SP13 a committed sprint kept in the app (committed after 2026-11-08) has, in its step 9 evidence, `{card}: {n} steps`
        (n at least 1, build steps only) for every card in its ## Batch table: every planned card carries its build steps as sub-tasks
+  SP14 a live sprint's plan (outside _archive/) leaves nothing for after debug: its `Items to register` section
+       schedules no item for the close, the release or after the sprint (`trigger: sprint close`, `at close`,
+       `after the release`, `after the sprint`); a repository change is done in a wave or in debug, before the release
+  SP15 a closed sprint keeps neither its folder nor its WBS outside _archive/: a folder under Projects/{slug}/
+       whose ledger records the close (`Status: Closed …`, `Current wave: Sprint closed`), or a sprint named in
+       `--closed` (closed in the app), fails; so does `{project}-sprint-{name}-wbs.md` in Projects/{slug}/planning/
+       (or Projects/{slug}/) of a closed or archived sprint
 
 Usage:
-  check_sprint.py [--vault DIR] [--domain NAME]   (defaults: $MYNOTES_DIR or ~/Documents/MyNotes;
-                                                the `domain:` of the repo CLAUDE.md Project Context)
+  check_sprint.py [--vault DIR] [--domain NAME] [--closed NAME[,NAME…]]
+                                               (defaults: $MYNOTES_DIR or ~/Documents/MyNotes;
+                                                the `domain:` of the repo CLAUDE.md Project Context;
+                                                --closed: sprints closed in the app, from get_sprints)
   check_sprint.py --hook   (Stop hook: reads the hook JSON on stdin, checks only when the
                             session touched the vault; blocks the stop once with exit 2 only on
                             errors in a project the session named (`Projects/{slug}/` in its
@@ -62,6 +71,9 @@ BATCH_CARD = re.compile(r"^\|\s*([A-Z]+-\d+)\s*\|", re.M)
 COMMITTED_ON = re.compile(r"^\W*Committed:\W*(\d{4}-\d{2}-\d{2})", re.M)
 LANDS_AFTER = re.compile(r"^\W*Lands after:\s*(.+)$", re.M)
 LANDS_PAIR = re.compile(r"^\s*([A-Z]+-\d+)\s+after\s+(.+?)\s*\.?\s*$")
+CLOSED = re.compile(r"^\W*(?:Status:\W*Closed\b|Current wave:\W*Sprint closed\b)", re.M | re.I)
+OWED = re.compile(r"trigger\s*:[^)\n]*\b(?:close|closing|release)\b|\b(?:at|on|during|after)\s+(?:the\s+)?(?:sprint\s+)?"
+                  r"(?:close|closing|release)\b|\bafter the sprint\b", re.I)
 WAVE_ROW = re.compile(r"^\|\s*Wave\s+(\d+)\s*\|\s*([^|]+?)\s*\|\s*([^|]*?)\s*\|\s*((?:[^|\\]|\\.)*?)\s*\|\s*$", re.M)
 
 
@@ -202,6 +214,41 @@ def check_map(rel_folder, ledger_text: str, page: Path) -> list[str]:
     return [f"SP12 {rel_folder}: Wave {', '.join(missing)} done but {page.name} was not redrawn after it"] if missing else []
 
 
+def check_owed(rel_folder, plan_text: str) -> list[str]:
+    """SP14: the plan's Items to register leaves no item for the close, the release or after the sprint."""
+    m = re.search(r"^#+[^\n]*Items to register[^\n]*$", plan_text, re.M)
+    if not m:
+        return []
+    nxt = re.search(r"^#{1,%d}\s" % len(re.match(r"#+", m.group(0)).group(0)), plan_text[m.end():], re.M)
+    body = plan_text[m.end(): m.end() + nxt.start() if nxt else None]
+    return [f"SP14 {rel_folder}: Items to register leaves this for after debug: \"{line.strip()[:120]}\". "
+            "A repository change is done in a wave or in debug (trigger: wave n or debug), never at close or after the release"
+            for line in body.splitlines() if line.strip() and OWED.search(line)]
+
+
+def check_closed(domain: Path, closed_in_app: set) -> list[str]:
+    """SP15: a closed sprint's folder and WBS are in _archive/, nowhere else."""
+    errors = []
+    archive = domain / "_archive"
+    for project, folder in sprint_folders(domain):
+        name = folder.name[len("sprint-"):]
+        archived = archive in folder.parents
+        ledger = folder / f"{project}-sprint-{name}-progress.md"
+        closed = archived or name in closed_in_app or (
+            ledger.exists() and bool(CLOSED.search(ledger.read_text(errors="replace"))))
+        if not closed:
+            continue
+        if not archived:
+            errors.append(f"SP15 {folder.relative_to(domain)}: sprint {name} is closed but its folder is outside _archive/ "
+                          f"(close step 3 moves it to _archive/Projects/{project}/{folder.name}/)")
+        for wbs in (domain / "Projects" / project / "planning" / f"{project}-sprint-{name}-wbs.md",
+                    domain / "Projects" / project / f"{project}-sprint-{name}-wbs.md"):
+            if wbs.exists():
+                errors.append(f"SP15 {wbs.relative_to(domain)}: the WBS of closed sprint {name} is outside _archive/ "
+                              "(close step 3 archives it in the same proposal as the folder)")
+    return sorted(set(errors))
+
+
 def records_due(ledger: Path) -> tuple:
     """SP1: a sprint kept in the app writes its ledger at plan step 1, its plan at step 7 and its
     execution prompt at step 12, so a folder still in planning holds only what is due so far."""
@@ -231,7 +278,7 @@ def sprint_folders(domain: Path) -> list[tuple[str, Path]]:
     return found
 
 
-def check(domain: Path) -> list[str]:
+def check(domain: Path, closed_in_app: set = frozenset()) -> list[str]:
     errors: list[str] = []
     md_files = [p for p in domain.rglob("*.md") if not any(part.startswith(".") for part in p.relative_to(domain).parts)]
     # Settings mirrors (Claude/, its archive), templates (Templater syntax) and the retired skill
@@ -314,6 +361,9 @@ def check(domain: Path) -> list[str]:
             errors.extend(check_build_steps(rel_folder, ledger_text))
             errors.extend(check_wave_report(rel_folder, ledger_text, folder / f"{project}-sprint-{name}-wave-report.md"))
             errors.extend(check_map(rel_folder, ledger_text, folder / f"{project}-sprint-{name}-map.html"))
+        if (domain / "_archive") not in folder.parents:
+            plan_file = folder / f"{project}-sprint-{name}-plan.md"
+            errors.extend(check_owed(rel_folder, plan_file.read_text(errors="replace") if plan_file.exists() else ""))
         cards = set()
         detached = set()
         for match in CARD_ROW.finditer(ledger.read_text(errors="replace")):
@@ -328,6 +378,7 @@ def check(domain: Path) -> list[str]:
             for brief in briefs_by_card.get(card, []):
                 if brief.parent != rel_folder:
                     errors.append(f"SP2 brief for {card} is outside its sprint: {brief} (belongs in {rel_folder}/)")
+    errors.extend(check_closed(domain, closed_in_app))
     return errors
 
 
@@ -369,6 +420,7 @@ def main() -> int:
     ap.add_argument("--vault", default=os.environ.get("MYNOTES_DIR") or os.path.expanduser("~/Documents/MyNotes"))
     ap.add_argument("--domain", default=None)
     ap.add_argument("--hook", action="store_true")
+    ap.add_argument("--closed", default="", help="comma-separated names of sprints closed in the app")
     args = ap.parse_args()
 
     if args.hook:
@@ -391,7 +443,7 @@ def main() -> int:
         print(f"check_sprint: no domain folder at {domain}", file=sys.stderr)
         return 0 if args.hook else 1
 
-    errors = check(domain)
+    errors = check(domain, {n.strip() for n in args.closed.split(",") if n.strip()})
     if args.hook and errors:
         projects = touched_projects(text)
         others = [e for e in errors if not own_error(e, projects)]
@@ -402,7 +454,7 @@ def main() -> int:
             return 0
     if not errors:
         if not args.hook:
-            print(f"OK: {domain} passes SP1-SP13 ({len(sprint_folders(domain))} sprint folders)")
+            print(f"OK: {domain} passes SP1-SP15 ({len(sprint_folders(domain))} sprint folders)")
         return 0
     out = sys.stderr if args.hook else sys.stdout
     print(f"bandit-dev:sprint check FAILED in {domain} ({len(errors)}). Fix these before finishing:", file=out)

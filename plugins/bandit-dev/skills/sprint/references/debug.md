@@ -52,7 +52,7 @@ Per approved row, in card order and wave order where they interact:
 
 ## Pushing
 
-Several fixes may share one push. Right before each push of `development` (the push that refills the staging handover card, Rules): one full check, the recipe's `verify`, on the code being pushed. Red stops the push: fix it first, as a row of its own if it is a new defect. The Milestone log names that full check (green, and the commit it ran on) next to the push.
+Several fixes may share one push. Right before each push of `development` (the push that refills the staging handover card, Rules): one full check, the recipe's `verify`, on the code being pushed, only when `python3 ${CLAUDE_SKILL_DIR}/scripts/code_changed.py` says "full check: needed" (on `development` it compares with `origin/development`, what the push sends). "Not needed" (only docs, notes or comments) → no full check, and the Milestone log carries its line next to the push. Red stops the push: fix it first, as a row of its own if it is a new defect. The Milestone log names that full check (green, and the commit it ran on) next to the push.
 
 ## Board
 

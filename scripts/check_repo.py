@@ -707,7 +707,7 @@ def check_sp11():
     vault = ROOT / "tests" / "fixture-vault"
     good = run_script(script, "--vault", str(vault), "--domain", "Record")
     bad = run_script(script, "--vault", str(vault), "--domain", "WaveBad")
-    ok = (good[0] == 0 and "SP1-SP13" in good[1] and bad[0] == 1 and bad[1].count("\n- ") == 1
+    ok = (good[0] == 0 and "SP1-SP15" in good[1] and bad[0] == 1 and bad[1].count("\n- ") == 1
           and "SP11" in bad[1] and "Tokens" in bad[1])
     report("SP11", ok, "check_sprint passes a done wave with its report section and refuses one without its Tokens block"
            if ok else f"SP11: Record → {good[0]} {good[1][-120:]!r}; WaveBad → {bad[0]} {bad[1][-160:]!r}")
@@ -730,7 +730,8 @@ def check_design_handover():
 
 # ── GO1 · each card goes through its gates once: review, one UI check, one full check, merge ─
 GATE_ORDER = ("Per card, in this order: code review and every fix first; then one browser check (when UI changed); "
-              "then one full check, last, after the card's notes and status are committed; then merge. "
+              "then one full check, last, after the card's notes and status are committed, only when `code_changed.py` says "
+              "\"full check: needed\"; then merge. "
               "A browser check never starts while code review is still open.")
 TRUNK_DONE = 'the trunk check counts as done when the project\'s full check prints "already passed"'
 
@@ -749,6 +750,61 @@ def check_gate_order():
                            ("run.md fallback: verify once, last", "runs `verify` (`bandit.yaml`) once, last" in run)) if not ok]
     report("GO1", not bad, "; ".join(bad) + " (BB-373)" if bad else
            "gate order: review and fixes, one UI check, one full check last, then merge; \"already passed\" ends the trunk check")
+
+
+# ── FC1 · a full check runs only when code changed: docs, notes and comments need none (BB-452) ─
+def check_code_changed():
+    import tempfile
+    s = PLUGINS / "bandit-dev" / "skills" / "sprint"
+    script = s / "scripts" / "code_changed.py"
+    bad = []
+    homes = {"templates.md": "A change of only docs, notes or comments runs no full check",
+             "debug.md": "only when `python3 ${CLAUDE_SKILL_DIR}/scripts/code_changed.py` says \"full check: needed\"",
+             "release.md": "A step that runs the recipe's `verify` runs only when",
+             "run.md": "one full check (only when `code_changed.py` says needed)",
+             "execute.md": "printing \"full check: not needed\""}
+    bad += [f"{n}: missing \"{w}\"" for n, w in homes.items()
+            if w not in " ".join((s / "references" / n).read_text(encoding="utf-8").split())]
+    with tempfile.TemporaryDirectory() as d:
+        repo = Path(d)
+        git = lambda *a: subprocess.run(["git", "-C", str(repo), "-c", "user.email=t@t", "-c", "user.name=t", *a],  # noqa: E731
+                                        capture_output=True, text=True, check=True, env=clean_env())
+        (repo / "src").mkdir()
+        (repo / "docs").mkdir()
+        (repo / "bandit.yaml").write_text("branches:\n  trunk: development\nstop:\n  paths: [src]\n  close: x\n")
+        (repo / "src" / "a.ts").write_text("export function a() {\n  return 1;\n}\n")
+        (repo / "src" / "b.py").write_text("x = 1\n")
+        (repo / "src" / "notes.md").write_text("# shipped with the app\n")
+        (repo / "docs" / "x.md").write_text("# doc\n")
+        git("init", "-q", "-b", "development")
+        git("add", "-A")
+        git("commit", "-qm", "start")
+        git("checkout", "-qb", "feature/x")
+
+        def case(label, want, *args):
+            r = subprocess.run([sys.executable, "-B", str(script), *args], capture_output=True, text=True,
+                               env=clean_env(CLAUDE_PROJECT_DIR=str(repo)))
+            if r.returncode != 0 or not r.stdout.startswith(want):
+                bad.append(f"{label} → {r.returncode} {(r.stdout + r.stderr).strip()[:100]!r}")
+
+        (repo / "docs" / "x.md").write_text("# doc\nOne number fixed.\n")
+        git("commit", "-qam", "docs")
+        case("docs-only commit", "full check: not needed")
+        (repo / "src" / "a.ts").write_text("// why\nexport function a() {\n  /* still 1 */\n  return 1;\n}\n")
+        (repo / "src" / "b.py").write_text("# about x\nx = 1\n")
+        git("commit", "-qam", "comments")
+        case("comment-only commit", "full check: not needed")
+        (repo / "src" / "notes.md").write_text("# shipped with the app\nchanged\n")
+        case("a doc inside the implementation paths", "full check: needed")
+        git("checkout", "-q", "src/notes.md")
+        (repo / "src" / "a.ts").write_text("// why\nexport function a() {\n  /* still 1 */\n  return 2;\n}\n")
+        case("one line of code, uncommitted", "full check: needed")
+        git("commit", "-qam", "code")
+        case("--since the code commit", "full check: not needed", "--since", "HEAD")
+        case("an unknown base", "full check: needed", "--since", "no-such-ref")
+    report("FC1", not bad, "; ".join(bad) or "full check only on code: debug, release, run and execute and the gate order "
+           "say so; code_changed.py on a scratch repo (docs-only and comment-only say not needed; a doc inside the "
+           "implementation paths, a code line and an unknown base say needed)")
 
 
 # ── DM1 · the dev mirror prunes .claude/worktrees/, and this repo runs the reference copy ─
@@ -788,9 +844,9 @@ def check_sp13():
     earlier = run_script(script, "--vault", str(vault), "--domain", "Record")   # committed before the cut-off: exempt
     plan = (PLUGINS / "bandit-dev" / "skills" / "sprint" / "references" / "plan.md").read_text(encoding="utf-8")
     plan = " ".join(plan.split())
-    words = [w for w in ("write the card's **build steps** from its plan section as ordered sub-tasks",
+    words = [w for w in ("write its **build steps** from its plan section as ordered sub-tasks",
                          "A card with no build sub-tasks fails readiness", "`{card id}: {n} steps`") if w not in plan]
-    ok = (good[0] == 0 and "SP1-SP13" in good[1] and bad[0] == 1 and bad[1].count("\n- ") == 1 and "SP13" in bad[1]
+    ok = (good[0] == 0 and "SP1-SP15" in good[1] and bad[0] == 1 and bad[1].count("\n- ") == 1 and "SP13" in bad[1]
           and "GA-2" in bad[1] and earlier[0] == 0 and not words)
     report("SP13", ok, "check_sprint passes a sprint whose step 9 counts every batch card's build steps, refuses one with a "
            "card at 0 steps, leaves earlier sprints alone; plan.md steps 7 and 9 name the sub-tasks and the count"
@@ -805,6 +861,49 @@ OLD_ORDER = re.compile(r"refused\s+while\s+wave\s+N-1|strictly\s+in\s+sequence|W
 
 def old_order_hits(text):
     return [m.group(0) for m in OLD_ORDER.finditer(" ".join(text.split()))]
+
+
+# ── SP14 · a sprint leaves no repository change for the close or after the release (BB-450) ─
+def check_sp14():
+    s = PLUGINS / "bandit-dev" / "skills" / "sprint"
+    script = s / "scripts" / "check_sprint.py"
+    vault = ROOT / "tests" / "fixture-vault"
+    good = run_script(script, "--vault", str(vault), "--domain", "StepsGood")
+    bad = run_script(script, "--vault", str(vault), "--domain", "OwedBad")
+    text = {n: " ".join((s / "references" / n).read_text(encoding="utf-8").split())
+            for n in ("templates.md", "release.md", "close.md")}
+    words = [f"{n}: {w}" for n, w in (
+        ("templates.md", "a change to the repository is never left for the close, the release or after the sprint"),
+        ("release.md", "**Nothing owed to the repository.** `check_sprint.py` is green (SP14"),
+        ("close.md", "**Close makes no commit.**"),
+        ("close.md", "`git rev-list --count origin/{branches.deploy}..origin/{branches.trunk}`"),
+        ("close.md", "- Commit to the repository:")) if w not in text[n]]
+    ok = (good[0] == 0 and bad[0] == 1 and bad[1].count("\n- ") == 1 and "SP14" in bad[1] and "trigger: sprint close" in bad[1]
+          and not words)
+    report("SP14", ok, "check_sprint refuses a plan that leaves a repository change for the close and passes one whose items "
+           "run in debug; release refuses while the sprint owes the repository; close makes no commit"
+           if ok else f"SP14: StepsGood → {good[0]} {good[1][-120:]!r}; OwedBad → {bad[0]} {bad[1][-160:]!r}; "
+           f"missing {words} (BB-450)")
+
+
+# ── SP15 · a closed sprint keeps neither its folder nor its WBS outside _archive/ (BB-437) ─
+def check_sp15():
+    s = PLUGINS / "bandit-dev" / "skills" / "sprint"
+    script = s / "scripts" / "check_sprint.py"
+    vault = ROOT / "tests" / "fixture-vault"
+    left = run_script(script, "--vault", str(vault), "--domain", "ClosedLeft")
+    wbs = run_script(script, "--vault", str(vault), "--domain", "ClosedArchived")
+    app = run_script(script, "--vault", str(vault), "--domain", "StepsGood", "--closed", "spring")
+    close = " ".join((s / "references" / "close.md").read_text(encoding="utf-8").split())
+    words = [w for w in ("and the sprint's WBS (`Projects/{slug}/planning/{project}-sprint-{name}-wbs.md`)",
+                         "check_sprint.py --closed {name}") if w not in close]
+    ok = (left[0] == 1 and left[1].count("SP15") == 2 and "folder is outside _archive/" in left[1]
+          and wbs[0] == 1 and wbs[1].count("SP15") == 1 and "garden-sprint-spring-wbs.md" in wbs[1]
+          and app[0] == 1 and app[1].count("SP15") == 1 and not words)
+    report("SP15", ok, "check_sprint refuses a closed sprint's folder or WBS outside _archive/ (closed in the ledger or "
+           "named by --closed); close archives the WBS with the folder and runs the check with --closed"
+           if ok else f"SP15: ClosedLeft → {left[0]} {left[1][-160:]!r}; ClosedArchived → {wbs[0]} {wbs[1][-120:]!r}; "
+           f"--closed → {app[0]} {app[1][-120:]!r}; close.md missing {words} (BB-437)")
 
 
 def check_wave_order():
@@ -1639,6 +1738,87 @@ def check_dependency_gate():
            "with its gate, sprint cards and other tools)")
 
 
+# ── SB1 · a sprint card gets its build steps before its Technical plan and before the commit (BB-451) ─
+def check_subtask_gate():
+    import tempfile
+    sprint = PLUGINS / "bandit-dev" / "skills" / "sprint"
+    script = sprint / "scripts" / "subtask_gate.py"
+    bad = []
+    hooks = json.loads((PLUGINS / "bandit-dev" / "hooks" / "hooks.json").read_text(encoding="utf-8"))
+    pre = [(e.get("matcher", ""), h.get("command", "")) for e in hooks["hooks"].get("PreToolUse", [])
+           for h in e.get("hooks", [])]
+    if not any("subtask_gate.py" in c and all(t in m for t in ("manage_sprints", "update_tasks", "create_tasks"))
+               for m, c in pre):
+        bad.append("hooks.json: no PreToolUse hook runs subtask_gate.py on manage_sprints, update_tasks and create_tasks")
+    plan = " ".join((sprint / "references" / "plan.md").read_text(encoding="utf-8").split())
+    if not re.search(r"\*\*first\*\* write its \*\*build steps\*\*.*?\*\*Only then\*\* fill the card's `Technical plan`", plan):
+        bad.append("plan.md step 7: the build steps are not written before the Technical plan")
+
+    def card(short, uid, subtasks=(), title="Build it", completed=False):
+        return {"id": uid, "shortId": short, "title": title, "completed": completed,
+                "subtasks": [{"id": f"s{i}", "title": t, "completed": False} for i, t in enumerate(subtasks)]}
+
+    def chat(name, *calls):
+        """A recorded chat: each call is (tool, input, answer)."""
+        lines = []
+        for i, (tool, given, answer) in enumerate(calls):
+            lines.append({"type": "assistant", "message": {"content": [
+                {"type": "tool_use", "id": f"t{i}", "name": f"mcp__board__{tool}", "input": given}]}})
+            lines.append({"type": "user", "message": {"content": [
+                {"type": "tool_result", "tool_use_id": f"t{i}", "content": [{"type": "text", "text": json.dumps(answer)}]}]}})
+        path = Path(d) / f"{name}.jsonl"
+        path.write_text("".join(json.dumps(x) + "\n" for x in lines))
+        return str(path)
+
+    read_sprint = ("get_sprints", {"sprintId": "sp-1"}, {"id": "sp-1", "cards": [
+        {"id": "u-1", "shortId": "AB-1", "title": "Build it", "completed": False},
+        {"id": "u-2", "shortId": "AB-2", "title": "Debug: sprint one", "completed": False},
+        {"id": "u-3", "shortId": "AB-3", "title": "Old one", "completed": True}]})
+    bare = ("get_task", {"taskId": "AB-1"}, card("AB-1", "u-1"))
+    add = lambda title, ok=True: ("manage_subtasks", {"action": "add", "taskId": "u-1", "title": title},  # noqa: E731
+                                  {"ok": ok} if ok else {"ok": False, "code": "NOT_FOUND"})
+    commit = {"tool_name": "mcp__board__manage_sprints",
+              "tool_input": {"action": "move", "sprintId": "sp-1", "status": "ready_to_execute"}}
+    filled = "<h2>Spec</h2><p>x</p><h2>Technical plan</h2><p>Plan note: p.md. Branch: fix/a.</p>"
+    plan_write = lambda ref, desc=filled: {"tool_name": "mcp__board__update_tasks",  # noqa: E731
+                                           "tool_input": {"items": [{"taskId": ref, "description": desc}]}}
+    create = lambda **item: {"tool_name": "mcp__board__create_tasks",  # noqa: E731
+                             "tool_input": {"items": [{"title": "New", "description": filled, **item}]}}
+    with tempfile.TemporaryDirectory() as d:
+        cases = [
+            ("commit, a card with no sub-task", 2, "AB-1: no build step", commit, chat("c1", read_sprint, bare)),
+            ("commit after a build step was added", 0, "", commit, chat("c2", read_sprint, bare, add("Write the query"))),
+            ("commit with only a gate and the approval line", 2, "AB-1: no build step", commit,
+             chat("c3", read_sprint, bare, add("Tested and approved by you"), add("Gate: AB-9 delivered before deploy"))),
+            ("commit, a refused add does not count", 2, "AB-1: no build step", commit,
+             chat("c4", read_sprint, bare, add("Write the query", ok=False))),
+            ("commit, a card not read", 2, "get_task AB-1", commit, chat("c5", read_sprint)),
+            ("commit, the sprint not read", 2, "get_sprints", commit, chat("c6", bare)),
+            ("commit, card read with its steps (debug and completed cards skipped)", 0, "", commit,
+             chat("c7", read_sprint, ("get_task", {"taskId": "u-1"}, card("AB-1", "u-1", ["Write the query"])))),
+            ("commit, a card added after the read", 2, "get_task AB-4", commit,
+             chat("c8", read_sprint, bare, add("Write it"), ("manage_sprints", {"action": "add_cards", "sprintId": "sp-1",
+                                                                                "taskIds": ["AB-4"]}, {"ok": True}))),
+            ("Technical plan for a card with no build step", 2, "its Technical plan is written only once",
+             plan_write("AB-1"), chat("c9", bare)),
+            ("Technical plan by uuid, steps known by short id", 0, "", plan_write("u-1"),
+             chat("c10", ("get_task", {"taskId": "AB-1"}, card("AB-1", "u-1", ["Write the query"])))),
+            ("Technical plan placeholder", 0, "", plan_write("AB-1", "<h2>Technical plan</h2><p>How it will be built — "
+                                                                     "written once the Spec is agreed.</p>"), chat("c11", bare)),
+            ("created with a Technical plan and no sub-task", 2, "New: no build step", create(), chat("c12")),
+            ("created with a Technical plan and its build steps", 0, "",
+             create(subtasks=["Write the query", "Tested and approved by you"]), chat("c13")),
+            ("another move", 0, "", {**commit, "tool_input": {**commit["tool_input"], "status": "executing"}}, chat("c14", bare)),
+        ]
+        for label, code, text, payload, transcript in cases:
+            got, out = run_hook(script, {**payload, "transcript_path": transcript}, ROOT)
+            if got != code or text not in out:
+                bad.append(f"{label} → {got} {out[-100:]!r}")
+    report("SB1", not bad, "; ".join(bad) or f"sub-task gate: registered on the board writes, plan step 7 puts the build "
+           f"steps first, {len(cases)} recorded chats (commit and Technical plan refused naming the card without a build "
+           "step or not read; gate and approval lines and refused adds do not count; debug and completed cards skipped)")
+
+
 # ── TD1 · the testdata guard refuses every unsafe database and removes only what it created (fixtures) ─
 def check_testdata():
     import shutil as sh
@@ -1764,6 +1944,8 @@ def main(argv):
     check_sprint_map()
     check_sp12()
     check_sp13()
+    check_sp14()
+    check_sp15()
     check_app_compat()
     check_wave_order()
     check_debug_card()
@@ -1776,6 +1958,8 @@ def main(argv):
     check_credential_guard()
     check_stop_gate()
     check_dependency_gate()
+    check_subtask_gate()
+    check_code_changed()
     check_testdata()
     check_l5()
     for rule, ok, msg in results:

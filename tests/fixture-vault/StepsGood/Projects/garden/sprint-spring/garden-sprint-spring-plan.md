@@ -10,3 +10,8 @@ sprint: spring
 ---
 
 # Fixture
+
+## 📝 Items to register
+
+- Open item: drop the old seed helper once GA-2 lands (trigger: debug).
+- Release: this sprint changes no screen; a release is the user's option.

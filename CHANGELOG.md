@@ -2,6 +2,18 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
+## Unreleased
+
+### Added
+- **A sprint cannot be committed until every card has its sub-tasks** (BB-451). The rule from 0.16.0 only checked a line of text in the ledger after the commit, so sprints tight and guards were planned with no sub-tasks at all and nothing stopped them. A new hook in `bandit-dev` now refuses the call itself: the sprint's move to Ready to execute while any of its cards has no build step, and a card's Technical plan written before its build steps. It reads the cards as the app returned them in the chat, names each card that has none, and names the read to do for a card the chat has not read. Planning writes the build steps first, then the Technical plan; `/bandit:tasks plan-tech` does the same. Checker rule SB1.
+
+### Changed
+- **No full check when only docs, notes or comments changed** (BB-452). A script, `code_changed.py`, compares the change with where it started and answers "full check: needed" or "not needed": docs and notes outside the app's own folders, and code files whose changed lines are all comments or blank, need none. Each card's gates, debug's check before a push and the release's check run the full check only when it says needed, and record its line otherwise. Code changes keep every gate. Checker rule FC1; GO1 follows the new wording.
+
+### Fixed
+- **A sprint never leaves a code change for after its release** (BB-450). The plan's Items to register names each item's trigger, a wave or debug, never the close or after the release. The sprint checker refuses a plan that leaves one for later (SP14); release refuses while the sprint still owes the repository a change, naming it; close makes no commit and refuses while the trunk is ahead of the released branch. So no code review or commit happens after a deploy.
+- **A closed sprint's folder and WBS no longer stay outside the archive** (BB-437). The sprint checker fails while a sprint whose ledger records the close, or one named with `--closed`, still has its folder under `Projects/`, and while the WBS of a closed or archived sprint is still in `planning/` (SP15). Close archives the WBS with the folder in the same proposal and runs the check with `--closed {name}`.
+
 ## 0.16.1 · 2026-11-08
 
 ### Fixed

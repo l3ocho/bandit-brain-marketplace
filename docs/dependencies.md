@@ -61,8 +61,7 @@ These start outside, so no file here triggers them. Each has its own check.
 A place the done check lists as open, checked and found to need nothing for this release. One line
 each: the path as the map writes it, then why. `scripts/release.py --write` empties this list.
 
-- `plugins/bandit/skills/tasks/references/errors.md` — the description gate is a hook refusal, not an app refusal code; the app's codes are unchanged.
-- `CLAUDE.md` — the repo's rules, layout and verify commands are unchanged; the new script sits in a folder it already names.
+- none yet
 
 ## ✅ Before saying done
 

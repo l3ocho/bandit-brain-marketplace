@@ -79,6 +79,7 @@ Then `/plugin` → Marketplaces → `bandit-brain` → **Enable auto-update** (o
 |---|---|---|
 | 0.16.0 | v0.41.0 | same |
 | 0.16.1 | v0.41.0 | same |
+| 0.17.0 | v0.41.0 | same |
 | 0.15.0 | v0.41.0 | same |
 | 0.14.0 | v0.41.0 | same |
 | 0.13.0 | v0.38.0 | same |

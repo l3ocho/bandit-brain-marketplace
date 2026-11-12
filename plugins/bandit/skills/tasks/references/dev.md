@@ -127,7 +127,7 @@ Every dev card is written **complete**, in one `create_tasks` entry, then read b
 | `effort` | Always set. Claude.ai's is a first estimate; `plan-tech` confirms it. Max L (B7, `references/dev-workflow.md`) |
 | `assignedTo` | The user: the signed-in member, resolved live (`get_context → members`), never a stored id |
 | `dueDate` | Empty. Only `pick-ready` dates cards, and a sprint's commit dates its batch cards that have none (with the sprint date); a card with its own date keeps it. Incident: today |
-| Execution state | Left as created. The midnight run moves it when due; `pick-ready` sets Assigned for a card picked for today; a sprint plan may seed its whole batch to Assigned. Incident: `assigned` straight away |
+| Execution state | Left as created. The midnight run moves it when due; `pick-ready` sets To Do for a card picked for today; a sprint plan may seed its whole batch to To Do. Incident: `assigned` straight away |
 | `dependencies` | `blockedBy` / `blocks` for every known link, in the same entry |
 | `subtasks` | Claude Code only: the build steps, when it writes the card or at `plan-tech`. Claude.ai writes none. Order as `references/board.md` → Sub-tasks |
 | `description` | **🃏 Card sections**, written per `references/board.md` → Card descriptions |

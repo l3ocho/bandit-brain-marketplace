@@ -167,7 +167,7 @@ def waves_of(folder: Path, where: str) -> tuple[list, str]:
     if not rows:
         # An older ledger has only `## Waves and cards` (wave, card, ...): the cards are known, the done date is not.
         by_wave = {}
-        for m in re.finditer(r"^\|\s*(\d+)\s*\|\s*([A-Z]+-\d+)\s*\|", section(ledger, "Waves and cards"), re.M):
+        for m in re.finditer(r"^\|\s*(\d+)\s*\|\s*([A-Z]+-T?\d+)\s*\|", section(ledger, "Waves and cards"), re.M):
             by_wave.setdefault(int(m.group(1)), []).append(m.group(2))
         rows = [(str(n), " ".join(ids), "", "") for n, ids in sorted(by_wave.items())]
     if not rows:

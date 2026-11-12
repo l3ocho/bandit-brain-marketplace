@@ -11,9 +11,9 @@ One line per real failure: what went wrong → what to do instead. Read once at 
   rewrite", and shape problems were reported with no fix. → Findings come fixed: every audit
   finding is a numbered fix row with the exact call, approved in one answer (`references/audit.md`).
 - **2026-09-30 · Onboarding a real dev repo found `dev.md` out of step with it.** B1 said "one PR"
-  where the repo lands by merge, an incident waited for the midnight run to reach Assigned, no
+  where the repo lands by merge, an incident waited for the midnight run to reach To Do, no
   record had a home, and `plan-tech` could overwrite a recorded branch. → Landing, not PR (B1);
-  Assigned set explicitly; homes read from the repo (`references/dev-workflow.md` → Record homes);
+  To Do set explicitly; homes read from the repo (`references/dev-workflow.md` → Record homes);
   `plan-tech` reads first.
 - **2026-10-05 · Card descriptions came out unreadable.** Three cards held escaped
   `&lt;br/&gt;`, shown as literal text; the skill only said "simple HTML". → Write only the tags in

@@ -12,11 +12,13 @@
 | # | Column | Settable via `update_tasks` `executionState`? |
 |---|---|---|
 | 1 | **Backlog** | ✅ `backlog` |
-| 2 | **Assigned** | ✅ `assigned` |
+| 2 | **To Do** | ✅ `assigned` (the stored value keeps its old name) |
 | 3 | **Next** | ✅ `next` |
 | 4 | **Doing** | ✅ `doing` |
 | 5 | **Stand By** | ✅ `standby` |
 | 6 | **Done** | 🔴 **Not settable.** A task reaches Done by being completed |
+
+🗣️ **The column is To Do.** A person who says "To Do" means `executionState: "assigned"`; say To Do back, never the column's old name.
 
 🗣️ **This is the Execution Backlog.** Never say bare "backlog" — the board Backlog column is a different thing entirely.
 
@@ -30,7 +32,7 @@ a move to Next, Doing or Stand By (checked on the app 2026-10-20): a chained car
 while its blocker waits for the user's test.
 
 **Any column but Done can be set explicitly**, from any column. A sprint plan may seed its whole
-batch to Assigned in one `update_tasks` call, one entry per card.
+batch to To Do in one `update_tasks` call, one entry per card.
 
 ⛔ When the gate refuses: **name the blocking task**, do not retry, do not route around it. `relatedId` in the refusal is the blocker — resolve it to a title before reporting. Codes: `references/errors.md`.
 
@@ -46,7 +48,7 @@ Tasks that are **assigned to a board** and either:
 
 📌 Tasks with no board never appear here. They are in Untriaged — that is Triage's problem, not Execution's.
 
-📌 **The midnight job** (`actor: system`) already moved anything due today or overdue into **Assigned**. `/bandit:tasks today` reads that result. **Do not synthesise a today-list** — the board is the list.
+📌 **The midnight job** (`actor: system`) already moved anything due today or overdue into **To Do**. `/bandit:tasks today` reads that result. **Do not synthesise a today-list** — the board is the list.
 
 ---
 
@@ -54,7 +56,7 @@ Tasks that are **assigned to a board** and either:
 
 More than five items live across **Next + Doing** is the signal to stop and say so.
 
-Report the breach. Propose what moves back to Assigned or Stand By. **Do not silently trim.**
+Report the breach. Propose what moves back to To Do or Stand By. **Do not silently trim.**
 
 ---
 
@@ -63,7 +65,7 @@ Report the breach. Propose what moves back to Assigned or Stand By. **Do not sil
 ### `/bandit:tasks today`
 
 1. `list_tasks({ executionState, boardId })` for `doing`, `next`, `assigned` and `standby`, one call per board of the domain (`references/scope.md` → Filtering)
-2. Report **Doing** first, then **Next**, then Assigned; inside each, the home board first, then
+2. Report **Doing** first, then **Next**, then To Do; inside each, the home board first, then
    the rest of the domain by board
 3. Flag: cap breach · anything overdue · anything in Stand By older than a week, **except** a
    card in a sprint (a record or a `sprint/*` tag, `references/board.md` → Tags) or an old-way sprint card

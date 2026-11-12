@@ -21,6 +21,24 @@ the creator from `get_context → boards → createdBy` and `members`, never ret
 
 ---
 
+## 🆔 Card IDs
+
+A card's short id is its board's prefix and a number, `{prefix}-{n}`. It follows the card's place:
+
+| Where the card is | Its id |
+|---|---|
+| A board's Inbox (on the board, in no column) | A temporary id, `{prefix}-T{n}` |
+| Filed into a column | The board's next proper id; the temporary one becomes a former id |
+| Filed into a column of another board | That board's next proper id; the old one becomes a former id |
+| Moved within its board, or back to Untriaged | Unchanged |
+
+**Every id a card ever had still finds it**: `get_task`, `update_tasks` and every tool that takes a
+`taskId` accept a temporary, proper or former id. The card shows only its current id (`shortId`).
+So an id already written in a sprint's papers, a note, a commit or a chat is never rewritten; keep
+using it. Report a card by the `shortId` its latest read returned.
+
+---
+
 ## ✂️ Right-sizing
 
 | It's a **task** if it needs | It's a **subtask** if |

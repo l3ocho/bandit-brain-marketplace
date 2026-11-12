@@ -567,7 +567,7 @@ def check_t1():
 # ── L4 · no project details in skills: project names, stack tools, card ids, UUIDs ───────
 L4_TERMS = re.compile(
     r"\b(BanditLabs|Summitt|cs-notes|CS Notes|bandit-labs|banditbrain|BanditBrains|drizzle|npm|npx)\b"
-    r"|\b(?!WBS-|UTF-|SHA-)[A-Z]{2,4}-\d+\b"
+    r"|\b(?!WBS-|UTF-|SHA-)[A-Z]{2,4}-T?\d+\b"
     r"|\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b")
 # The house standards are data the owner approves, not skill procedure: their examples stay.
 L4_EXEMPT = {"structure-rulebook.md", "structure-rules.yaml", "rulebook.md"}
@@ -1809,6 +1809,10 @@ def check_subtask_gate():
             ("created with a Technical plan and its build steps", 0, "",
              create(subtasks=["Write the query", "Tested and approved by you"]), chat("c13")),
             ("another move", 0, "", {**commit, "tool_input": {**commit["tool_input"], "status": "executing"}}, chat("c14", bare)),
+            ("Technical plan by a former id (BB-482)", 0, "", plan_write("AB-T7"),
+             chat("c15", ("get_task", {"taskId": "ab-t7"}, card("AB-12", "u-1", ["Write the query"])))),
+            ("Technical plan by a temporary id, no build step", 2, "AB-T7: no build step", plan_write("ab-t7"),
+             chat("c16", ("get_task", {"taskId": "AB-T7"}, card("AB-T7", "u-1")))),
         ]
         for label, code, text, payload, transcript in cases:
             got, out = run_hook(script, {**payload, "transcript_path": transcript}, ROOT)
@@ -1817,6 +1821,69 @@ def check_subtask_gate():
     report("SB1", not bad, "; ".join(bad) or f"sub-task gate: registered on the board writes, plan step 7 puts the build "
            f"steps first, {len(cases)} recorded chats (commit and Technical plan refused naming the card without a build "
            "step or not read; gate and approval lines and refused adds do not count; debug and completed cards skipped)")
+
+
+# ── TC1 · the Execution column is called To Do; the stored value stays `assigned` (BB-481) ─
+TODO_ROW = "| 2 | **To Do** | ✅ `assigned`"
+TODO_SAID = 'A person who says "To Do" means `executionState: "assigned"`'
+OLD_COLUMN = re.compile(r"\bAssigned\b(?! to\b)")
+
+
+def todo_problems(files):
+    """files: {path relative to plugins: text}. The column's old name anywhere, or the mapping missing."""
+    bad = [f"{name}:{n} calls the column Assigned" for name, text in files.items()
+           for n, line in enumerate(text.splitlines(), 1) if OLD_COLUMN.search(line)]
+    execution = files.get("bandit/skills/tasks/references/execution.md", "")
+    bad += [f"execution.md: missing {w!r}" for w in (TODO_ROW, TODO_SAID) if w not in execution]
+    return bad
+
+
+def check_todo_name():
+    files = {str(f.relative_to(PLUGINS)): f.read_text(encoding="utf-8") for f in sorted(PLUGINS.rglob("*.md"))
+             if "finance" not in f.parts}
+    bad = todo_problems(files)
+    ex = "bandit/skills/tasks/references/execution.md"
+    mutants = [{**files, ex: files[ex].replace(TODO_ROW, "| 2 | **Assigned** | ✅ `assigned`")},
+               {**files, ex: files[ex].replace(TODO_SAID, "")},
+               {**files, ex: files[ex] + "\nMove it back to Assigned.\n"}]
+    if any(not todo_problems(m) for m in mutants) or todo_problems({**files, ex: files[ex] + "\nAssigned to the user.\n"}):
+        bad.append("the rule does not fail on every broken copy, or flags the person on a card")
+    report("TC1", not bad, "; ".join(bad[:8]) or "the Execution column is To Do in every helper (Finance aside); "
+           "execution.md maps To Do to the stored value `assigned`; \"Assigned to\" (the person) is left alone")
+
+
+# ── ID1 · every card id pattern reads a temporary id (AB-T7) too; board.md says ids change and old ones find the card (BB-482) ─
+def check_card_ids():
+    import importlib.util
+    scripts = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts"
+    sys.path.insert(0, str(scripts))
+    bad = []
+    try:
+        mods = {}
+        for name in ("check_sprint", "subtask_gate", "sprint_data"):
+            spec = importlib.util.spec_from_file_location(name, scripts / f"{name}.py")
+            mods[name] = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mods[name])
+    finally:
+        sys.path.remove(str(scripts))
+    cs, sg = mods["check_sprint"], mods["subtask_gate"]
+    if cs.CARD_ID.findall("AB-12, AB-T7") != ["AB-12", "AB-T7"]:
+        bad.append("check_sprint CARD_ID")
+    for name, rx, line in (("CARD_ROW", cs.CARD_ROW, "| Wave 1 | AB-T7, AB-12 |"), ("BATCH_CARD", cs.BATCH_CARD, "| AB-T7 |"),
+                           ("LANDS_PAIR", cs.LANDS_PAIR, "AB-T7 after AB-12")):
+        if not rx.search(line):
+            bad.append(f"check_sprint {name}")
+    if not (sg.SHORT.match("ab-t7") and sg.SHORT.match("AB-12")):
+        bad.append("subtask_gate SHORT")
+    if "[A-Z]+-T?\\d+" not in (scripts / "sprint_data.py").read_text(encoding="utf-8"):
+        bad.append("sprint_data.py: the older ledger's card pattern")
+    if not L4_TERMS.search("see AB-T7"):
+        bad.append("L4 does not catch a temporary id in a skill")
+    board = (PLUGINS / "bandit" / "skills" / "tasks" / "references" / "board.md").read_text(encoding="utf-8")
+    bad += [f"board.md → Card IDs: missing {w!r}" for w in ("## 🆔 Card IDs", "`{prefix}-T{n}`", "Every id a card ever had still finds it")
+            if w not in board]
+    report("ID1", not bad, "; ".join(bad) or "the sprint checker, sub-task gate, sprint data and L4 read a temporary id "
+           "(AB-T7); board.md → Card IDs says an id follows its board and every former id still finds the card")
 
 
 # ── DF1 · a card description is HTML the app shows formatted, never raw tags (BB-464) ─
@@ -2008,6 +2075,8 @@ def main(argv):
     check_dependency_gate()
     check_subtask_gate()
     check_description_gate()
+    check_todo_name()
+    check_card_ids()
     check_code_changed()
     check_testdata()
     check_l5()

@@ -2,6 +2,15 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
+## Unreleased
+
+### Changed
+- **The helpers call the Execution column To Do** (BB-481), the name the app shows after BB-331. Column lists read Backlog, To Do, Next, Doing, Stand By, Done, and a person who says "To Do" gets the card moved there; the value the helpers pass to the app stays `assigned`. "Assigned to" a person and Finance are unchanged. Checker rule TC1.
+- **The helpers understand card ids that change** (BB-482), the app's BB-279. A card in a board's Inbox has a temporary id like `{prefix}-T7`, gets its proper id when filed, and a new one when filed on another board; any id it had before still finds it, so ids already written in sprint papers, notes and commits stay as they are. The tasks skill's board rules carry this in a new Card IDs section, and the notes rule no longer says an id never changes.
+
+### Fixed
+- **No sprint check skips or refuses a temporary or former card id** (BB-482). The sprint checker and the sprint data script now read `{prefix}-T{n}` in the ledger's tables, and the sub-task gate recognises a card asked for by a former or temporary id once `get_task` has answered with its current one; before, it refused the write and asked for a read that could never satisfy it. Checker rule ID1; SB1 has the two new cases.
+
 ## 0.18.0 · 2026-11-10
 
 ### Added

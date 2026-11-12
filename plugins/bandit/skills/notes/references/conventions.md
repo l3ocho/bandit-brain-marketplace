@@ -472,7 +472,8 @@ rules wherever `file` or `lint` meet it. The card workflow itself is bandit:task
   (YYYY-MM-DD)` (each with where it was checked: a file, a tool result) · `## Open questions` ·
   `## Change log` (optional: one dated line per change to the brief and why) · `## Related`.
   **No card state in the body** (column, lane, stage): the card holds it, so a copy goes stale. A
-  `Card: {short id}` line under the summary is fine; the short id never changes. A sprint's card
+  `Card: {short id}` line under the summary is fine; it stays as written even when the card later
+  gets a new id, since a former id still finds the card (bandit:tasks `references/board.md` → Card IDs). A sprint's card
   briefs live in its sprint folder (§1).
 - **WBS card links.** `{slug}-wbs.md` (in `Projects/{slug}/`, or its `planning/` on a project with
   sprint folders, §1) carries a `## 🔗 Card links` table (format owned by bandit:plan: WBS id ·

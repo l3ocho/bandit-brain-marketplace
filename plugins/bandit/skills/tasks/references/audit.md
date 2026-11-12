@@ -78,7 +78,7 @@ Rules in `references/dev.md` and `references/dev-workflow.md`. Every finding is 
 | `mcp` | A client — this |
 | `system` | The nightly job |
 
-Use it to answer *what changed and who changed it*. A task that "moved on its own" is almost always `system`: the midnight job pulling due-or-overdue work into Assigned.
+Use it to answer *what changed and who changed it*. A task that "moved on its own" is almost always `system`: the midnight job pulling due-or-overdue work into To Do.
 
 📌 Events record the task title **as it was at the time**. A renamed task will show its old name in old events. That is correct, not a bug.
 

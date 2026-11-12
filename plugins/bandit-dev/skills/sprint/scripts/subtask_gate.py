@@ -12,7 +12,8 @@ A build step is a sub-task that is neither a `Gate:` line nor the approval line 
 The hook cannot read the board, so it reads the chat's own record (`transcript_path`), oldest first: each
 `get_task` answer sets a card's sub-tasks as the app returned them; each accepted `manage_subtasks` add, and
 each created card's `subtasks`, adds to them; `get_sprints { sprintId }` answers, `add_cards` and cards created
-in a sprint give a sprint's cards. Short ids and uuids are matched through the answers that carry both.
+in a sprint give a sprint's cards. Short ids and uuids are matched through the answers that carry both,
+and an id `get_task` was asked for that the card no longer carries (a former or temporary id) through its answer.
 A card the record has not read is refused too, with the read that settles it (`get_task`), so a card that
 already has its build steps passes on the next try.
 
@@ -34,7 +35,7 @@ PLAN = re.compile(r"<h2[^>]*>\s*Technical plan\s*</h2>(.*?)(?=<h2|\Z)", re.S | r
 PLACEHOLDER = "how it will be built"
 HTML = re.compile(r"<[^>]+>|&nbsp;")
 SKIP = ("Debug:", "Sprint ")
-SHORT = re.compile(r"^[A-Za-z]+-\d+$")
+SHORT = re.compile(r"^[A-Za-z]+-[Tt]?\d+$")  # a proper id ({prefix}-{n}) or a temporary one ({prefix}-T{n})
 
 
 def plan_filled(description):
@@ -86,6 +87,9 @@ class Record:
         given = given if isinstance(given, dict) else {}
         if tool == "get_task" and isinstance(answer, dict):
             key = self.learn(answer.get("id"), answer.get("shortId"), answer.get("title"))
+            asked = given.get("taskId")
+            if key and isinstance(asked, str) and asked.strip() and self.key(asked) != key:
+                self.alias[asked.strip().upper() if SHORT.match(asked.strip()) else asked.strip()] = key  # a former id
             if key:
                 self.steps[key] = [s.get("title") for s in answer.get("subtasks") or [] if isinstance(s, dict)]
                 (self.done.add if answer.get("completed") else self.done.discard)(key)

@@ -53,8 +53,8 @@ from pathlib import Path
 import yaml
 
 RECORDS = ("plan", "handover-prompt", "progress")
-CARD_ROW = re.compile(r"^\|\s*[^|]+\|\s*((?:[A-Z]+-\d+)(?:\s*,\s*[A-Z]+-\d+)*)\s*\|", re.M)
-CARD_ID = re.compile(r"[A-Z]+-\d+")
+CARD_ROW = re.compile(r"^\|\s*[^|]+\|\s*((?:[A-Z]+-T?\d+)(?:\s*,\s*[A-Z]+-T?\d+)*)\s*\|", re.M)
+CARD_ID = re.compile(r"[A-Z]+-T?\d+")  # a proper id ({prefix}-{n}) or a temporary one ({prefix}-T{n})
 COMMITTED = re.compile(r"^\W*Committed:", re.M)
 STEPS = ("Select and freeze the batch", "Spec completeness check, per card", "Close the open questions",
          "Size and classify", "Cross-card analysis", "Sequence", "Write the one technical plan", "Risk and rollback",
@@ -67,10 +67,10 @@ DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 REPORTS_FROM = "2026-11-04"
 # SP13 holds for sprints committed after the release that brought the build-step count; an earlier sprint never had it.
 STEPS_FROM = "2026-11-08"
-BATCH_CARD = re.compile(r"^\|\s*([A-Z]+-\d+)\s*\|", re.M)
+BATCH_CARD = re.compile(r"^\|\s*([A-Z]+-T?\d+)\s*\|", re.M)
 COMMITTED_ON = re.compile(r"^\W*Committed:\W*(\d{4}-\d{2}-\d{2})", re.M)
 LANDS_AFTER = re.compile(r"^\W*Lands after:\s*(.+)$", re.M)
-LANDS_PAIR = re.compile(r"^\s*([A-Z]+-\d+)\s+after\s+(.+?)\s*\.?\s*$")
+LANDS_PAIR = re.compile(r"^\s*([A-Z]+-T?\d+)\s+after\s+(.+?)\s*\.?\s*$")
 CLOSED = re.compile(r"^\W*(?:Status:\W*Closed\b|Current wave:\W*Sprint closed\b)", re.M | re.I)
 OWED = re.compile(r"trigger\s*:[^)\n]*\b(?:close|closing|release)\b|\b(?:at|on|during|after)\s+(?:the\s+)?(?:sprint\s+)?"
                   r"(?:close|closing|release)\b|\bafter the sprint\b", re.I)

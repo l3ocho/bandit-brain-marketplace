@@ -13,7 +13,7 @@ commands never reuse a command word of this skill (rulebook R15): a repo triage 
 named after `/bandit:tasks triage`.
 
 **Sprints are bandit-dev:sprint's** (Claude Code): its 12 planning steps, the sprint in the app (its
-cards, run order, expected date and status), seeding the batch to Assigned, and the ledger's steps and
+cards, run order, expected date and status), seeding the batch to To Do, and the ledger's steps and
 waves. A sprint gives its date only to cards with no due date, at commit; a card with its own date keeps it. It uses the `plan-tech` card-write rules (drift check, read
 before writing, show old and new before replacing) from its own steps instead of restating them, and
 edits no Spec or brief unless the user asks (`spec reconcile` runs only on the user's word).
@@ -192,7 +192,7 @@ the sprint's ledger or an old-way sprint card). Run only when the user asks; spr
 
 **Incident** (`/incident` in the repo → `spec` with `lane/incident`, Claude Code): no stage tag, no
 merge check, `dueDate` today, created in its area column, then `update_tasks { items: [{ taskId, executionState: "assigned" }] }`
-straight away. A card due today reaches Assigned on its own only at the next midnight run,
+straight away. A card due today reaches To Do on its own only at the next midnight run,
 too late for an incident. The postmortem cites the card title and lives where the repo's Record homes
 table says (**🗂️ Record homes**).
 
@@ -252,7 +252,7 @@ Steps 1 and 5 are the **card-write rules** bandit-dev:sprint calls for a sprint'
 
 Runs **Dating the week** (`/bandit:tasks week`, `references/week.md`) with its `stage/ready` filter, and adds nothing: a
 weekly pick of approved cards, not sprint planning. Picked cards get due dates only; the midnight
-job moves them into Assigned when due. A card picked for today → its `update_tasks` entry also carries
+job moves them into To Do when due. A card picked for today → its `update_tasks` entry also carries
 `executionState: "assigned"`, since the midnight run has already passed. Cards already in a sprint (a record or a `sprint/*` tag, `references/board.md` → Tags)
 are the sprint's work: they are not candidates.
 

@@ -62,18 +62,7 @@ These start outside, so no file here triggers them. Each has its own check.
 A place the done check lists as open, checked and found to need nothing for this release. One line
 each: the path as the map writes it, then why. `scripts/release.py --write` empties this list.
 
-- `plugins/bandit/skills/tasks/references/errors.md` — no refusal changed: an id the app cannot resolve is still `NOT_FOUND`
-- `docs/pipeline.md` — no pipeline step changed, only the column's name and the id patterns
-- `CLAUDE.md` — no rule changed; it never names the column
-- `plugins/bandit-dev/hooks/hooks.json` — the sub-task gate runs on the same calls
-- `plugins/bandit-dev/skills/sprint/references/plan.md` — steps 7 and 12 unchanged; it names the stored value `assigned` only
-- `README.md` — the hooks list is unchanged; the Works with row comes with the release
-- `tests/fixture-vault/**` — ID1 tests the patterns on temporary ids directly; the fixtures stay valid
-- `tests/fixture-vault/SprintData/**` — the older-ledger pattern only widened; SD1's expected rows are unchanged and green
-- `tests/fixture-expected/sprint-data.csv` — same rows, SD1 green
-- `plugins/bandit-dev/skills/sprint/references/templates.md` — the ledger shapes are unchanged
-- `plugins/bandit-dev/skills/sprint/references/homes.md` — no home changed
-- `plugins/bandit-dev/skills/sprint/references/close.md` — no close step changed
+- none yet
 
 ## ✅ Before saying done
 

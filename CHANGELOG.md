@@ -2,7 +2,7 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
-## Unreleased
+## 0.19.0 · 2026-11-12
 
 ### Changed
 - **The helpers call the Execution column To Do** (BB-481), the name the app shows after BB-331. Column lists read Backlog, To Do, Next, Doing, Stand By, Done, and a person who says "To Do" gets the card moved there; the value the helpers pass to the app stays `assigned`. "Assigned to" a person and Finance are unchanged. Checker rule TC1.

@@ -1553,6 +1553,47 @@ def check_sp9():
            if ok else f"fixtures: good → {good[0]} {good[1][-120:]!r}; bad → {bad[0]} {bad[1][-200:]!r}")
 
 
+# ── GW1 · the gate wait: a wave cannot end while its code review or browser check is still running ─
+def check_gate_wait():
+    s = PLUGINS / "bandit-dev" / "skills" / "sprint"
+    script = s / "scripts" / "gate_wait.py"
+    fx = ROOT / "tests" / "fixture-gate"
+    bad = []
+    running = {"id": "t", "type": "subagent", "status": "running", "agent_type": "ui-verifier"}
+    other = {"id": "u", "type": "subagent", "status": "running", "agent_type": "general-purpose"}
+    cases = [
+        ("a background code review with no notice (transcript)", 2,
+         {"hook_event_name": "Stop", "transcript_path": str(fx / "gate-running.jsonl")}),
+        ("the same review after its notice", 0, {"hook_event_name": "Stop", "transcript_path": str(fx / "gate-done.jsonl")}),
+        ("a wave agent's own transcript on SubagentStop", 2,
+         {"hook_event_name": "SubagentStop", "agent_type": "general-purpose",
+          "agent_transcript_path": str(fx / "gate-running.jsonl"), "transcript_path": str(fx / "gate-done.jsonl")}),
+        ("a gate agent's own stop", 0,
+         {"hook_event_name": "SubagentStop", "agent_type": "code-reviewer", "agent_transcript_path": str(fx / "gate-running.jsonl")}),
+        ("a running browser check in background_tasks", 2, {"hook_event_name": "Stop", "background_tasks": [running, other]}),
+        ("only a non-gate agent running (background_tasks wins over the transcript)", 0,
+         {"hook_event_name": "Stop", "background_tasks": [dict(running, status="completed"), other],
+          "transcript_path": str(fx / "gate-running.jsonl")}),
+        ("no input", 0, None),
+    ]
+    for label, want, payload in cases:
+        r = subprocess.run([sys.executable, "-B", str(script)], input="" if payload is None else json.dumps(payload),
+                           capture_output=True, text=True)
+        if r.returncode != want or (want == 2 and "step 4b" not in r.stderr):
+            bad.append(f"{label} → {r.returncode}")
+    hooks = json.loads((PLUGINS / "bandit-dev" / "hooks" / "hooks.json").read_text(encoding="utf-8"))["hooks"]
+    for event in ("Stop", "SubagentStop"):
+        if not any("gate_wait.py" in h.get("command", "") for m in hooks.get(event, []) for h in m.get("hooks", [])):
+            bad.append(f"gate_wait.py not registered on {event}")
+    ex = " ".join((s / "references" / "execute.md").read_text(encoding="utf-8").split())
+    bad += [f"execute.md lacks {w!r}" for w in ("**Wait for every gate's verdict.**", "**Right after its merge**")
+            if w not in ex]
+    report("GW1", not bad, "; ".join(bad[:4]) + " (BB-493)" if bad else
+           f"gate wait: {len(cases)} cases (a running gate holds a wave chat or wave agent, from background_tasks or the "
+           "transcript; a finished gate, a gate's own stop and a non-gate agent pass); registered on Stop and "
+           "SubagentStop; execute waits for every verdict and writes the ledger line right after each merge")
+
+
 # ── RG1 · the release guard: notes before the bump, nothing after the tag, a green CI run before deploy ─
 def check_release_guard():
     s = PLUGINS / "bandit-dev" / "skills" / "sprint"
@@ -2219,6 +2260,7 @@ def main(argv):
     check_recipe()
     check_contract()
     check_release_guard()
+    check_gate_wait()
     check_credential_guard()
     check_stop_gate()
     check_dependency_gate()

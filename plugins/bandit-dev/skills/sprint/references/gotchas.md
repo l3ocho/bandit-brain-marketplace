@@ -96,6 +96,8 @@ Written before the first real run; correct them with what happens.
 
 - A planned push was refused or left undone because the skill, an older prompt or a memory said "never push" → the user lifted that rule on 2026-10-10 (it dated from when testing and staging did not exist). `development` is pushed as `execute.md` → Pushing `development` says; `main` and deploy stay the user's. Execution prompts restate this so an old note cannot block it.
 
+- Sprint clean-house-2, waves 2 and 5: the wave agent ended its turn while its code review or browser re-check was still running in the background, so the card was built and reviewed but not merged and the ledger not written, and the wave had to be resumed → wait for every gate's verdict before ending (`execute.md` → The wave, step 4b); the gate wait hook refuses the stop while a gate agent runs, and the ledger line is written right after each merge.
+
 - Release v0.45.0: the recipe said to add the release notes after the version bump, so What's new still showed the old version, the notes landed after the tag and CI refused the first build; the server pull then ran before CI was green → `release_guard.py lint` refuses a recipe whose notes step comes after the bump, `before` stops if the trunk moves after the bump's tag and waits for a green CI run once the deploy branch is pushed (`release.md` → Steps).
 
 - Sprint 2026-w44-e: the execution prompt said "do not ask, take the conservative reading and continue", so gaps were decided during execution and only logged; several were things the user wanted to decide → gaps are answered by convention in the plan, shown at approval; anything else stops that card and asks (`execute.md` → Needs a decision). The checker fails if "decide and continue" comes back.

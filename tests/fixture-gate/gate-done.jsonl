@@ -1,0 +1,5 @@
+{"type": "assistant", "message": {"content": [{"type": "tool_use", "name": "Agent", "id": "toolu_gate1", "input": {"description": "review BB-1", "subagent_type": "code-reviewer", "prompt": "\u2026"}}]}}
+{"type": "user", "message": {"content": [{"type": "tool_result", "tool_use_id": "toolu_gate1", "content": [{"type": "text", "text": "Async agent launched successfully."}]}]}, "toolUseResult": {"isAsync": true, "status": "async_launched", "agentId": "a1"}}
+{"type": "assistant", "message": {"content": [{"type": "tool_use", "name": "Agent", "id": "toolu_other", "input": {"description": "read ledgers", "subagent_type": "general-purpose", "prompt": "\u2026"}}]}}
+{"type": "user", "message": {"content": [{"type": "tool_result", "tool_use_id": "toolu_other", "content": "Async agent launched successfully."}]}, "toolUseResult": {"isAsync": true, "status": "async_launched", "agentId": "a2"}}
+{"type": "attachment", "attachment": {"type": "queued_command", "prompt": "<task-notification>\n<task-id>a1</task-id>\n<tool-use-id>toolu_gate1</tool-use-id>\n<status>completed</status>\n</task-notification>"}}

@@ -14,6 +14,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -1306,6 +1307,50 @@ def check_sprint_map():
            "angles, none through a card; the road follows the recipe; the waves-done marker is set")
 
 
+# ── ES1 · the pre-sprint report: the map's per-wave estimate comes from past waves, none from too few ─
+def check_estimate():
+    s = PLUGINS / "bandit-dev" / "skills" / "sprint"
+    data_script, map_script = s / "scripts" / "sprint_data.py", s / "scripts" / "sprint_map.py"
+    fixture = ROOT / "tests" / "fixture-map"
+    bad = []
+    got, out = run_script(data_script, "--estimate", str(fixture / "estimate.csv"), "--effort", "3,5", cwd=ROOT)
+    est = json.loads(out) if got == 0 else {}
+    # hand count: ratios 20, 15, 30, 20, 30 (rows without time or effort skipped) → median 20, quartiles 17.5 and 30
+    if (est.get("waves_used"), est.get("rate"), est.get("low"), est.get("high")) != (5, 20.0, 17.5, 30.0) or \
+            [e.get("min") for e in est.get("estimates", [])] != [60, 100]:
+        bad.append(f"estimate on estimate.csv → {out[:160]}")
+    got, out = run_script(data_script, "--estimate", str(ROOT / "tests" / "fixture-expected" / "sprint-data.csv"), cwd=ROOT)
+    if got != 0 or json.loads(out).get("rate") is not None:
+        bad.append("fewer than 5 timed waves still gave an estimate")
+    spec = json.loads((fixture / "cosmetic-1.json").read_text(encoding="utf-8"))
+    waves = sorted({c["wave"] for c in spec["cards"] if c.get("wave")})
+    spec["estimate"] = {"waves_used": 5, "waves": {str(w): {"min": 60, "low": 40, "high": 90,
+                                                           "measured": 55 if w == 1 else None} for w in waves}}
+    with tempfile.TemporaryDirectory() as tmp:
+        f = Path(tmp) / "map.json"
+        f.write_text(json.dumps(spec), encoding="utf-8")
+        got, page = run_script(map_script, str(f), cwd=ROOT)
+        geo_got, geo = run_script(map_script, str(f), "--geometry", cwd=ROOT)
+    if got != 0 or page.count("≈ 1 h 00 (40 min–1 h 30)") != len(waves) or "took 55 min" not in page \
+            or f"Estimated <b>{len(waves)} h 00</b>" not in page:
+        bad.append("the map with an estimate does not show each wave's estimate, the measured time and the total")
+    _, plain = run_script(map_script, str(fixture / "cosmetic-1.json"), cwd=ROOT)
+    if plain.count("no estimate yet") != len(waves) or "No time estimate yet" not in plain:
+        bad.append("a map without an estimate does not say no estimate yet")
+    if geo_got != 0 or not json.loads(geo)["paths"]:
+        bad.append("geometry broke with an estimate")
+    texts = {"plan.md": ("**Draw the sprint map, the pre-sprint report**", "**First line: the pre-sprint report**"),
+             "templates.md": ("**The pre-sprint report.**", "never goes into the ledger or the wave report's measured numbers"),
+             "execute.md": ("its measured time next to its estimate",)}
+    for name, words in texts.items():
+        body = (s / "references" / name).read_text(encoding="utf-8")
+        bad += [f"{name} lacks {w!r}" for w in words if w not in body]
+    report("ES1", not bad, "; ".join(bad[:4]) + " (BB-402)" if bad else
+           "pre-sprint report: the estimate matches the hand count (median minutes per effort point, middle half as the "
+           "range), none under 5 timed waves; the map shows each wave's estimate, a done wave's time and the total, "
+           "and says no estimate yet without one; plan names the map first")
+
+
 # ── WF1 · the wave report's Flow and Tokens blocks match a hand count of the fixture logs ─
 def check_wave_flow():
     script = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts" / "wave_flow.py"
@@ -2063,6 +2108,7 @@ def main(argv):
     check_design_card()
     check_wave_flow()
     check_sprint_data()
+    check_estimate()
     check_sprint_targets()
     check_sp11()
     check_design_handover()

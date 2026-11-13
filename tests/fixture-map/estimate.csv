@@ -1,0 +1,8 @@
+sprint,where,wave,effort,time_min
+spring,live,1,5,100
+spring,live,2,4,60
+spring,live,3,3,90
+autumn,archived,1,2,40
+autumn,archived,2,6,180
+autumn,archived,3,4,
+summer,live,1,,50

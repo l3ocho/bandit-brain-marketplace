@@ -4,6 +4,9 @@ All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace s
 
 ## Unreleased
 
+### Added
+- **A pre-sprint report before each sprint starts** (BB-402). The sprint map drawn at planning is the report: each wave now shows its estimated time with a low-to-high range, and the header shows the sprint's total. The estimate comes from the project's own past waves (`sprint_data.py --estimate`: the median minutes per effort point, with the middle half as the range); with fewer than 5 timed waves the map says "no estimate yet". Each redraw after a wave puts its measured time next to its estimate. The plan's final message names the map first. Checker rule ES1.
+
 ### Fixed
 - **Closed sprints' notes leave the project folder, checked against the vault itself** (BB-494). Three closed sprints still had their folders in the project folders: two were closed in the app without the close steps, one left the archive as an open item, and the check only ever read a synced copy of the vault that Bandit Port does not have, so it passed in silence. The sprint checker now reads a WebDAV listing of the vault (`--listing`) for the closed-sprint rule and says when it could not read the vault instead of passing. Close checks the archive on a fresh listing before it reports the sprint closed, and planning a new sprint first archives any closed sprint left behind. Checker rule SP15 has the new cases.
 

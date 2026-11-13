@@ -7,7 +7,10 @@ angles, through the gaps between waves and between areas, so none crosses a card
 Input, a JSON file:
   {"sprint": name, "project": slug, "due": date, "headline": text (optional), "lede": text (optional),
    "cards": [{"id", "title", "area", "wave", "step", "size", "state", "db", "gets"}],
-   "links": [[blocker, blocked]], "after": [[first, then]]}
+   "links": [[blocker, blocked]], "after": [[first, then]],
+   "estimate": {"waves_used": n, "waves": {"1": {"min", "low", "high", "measured"}, ...}} (optional)}
+  estimate: from `sprint_data.py --estimate` (minutes); `measured` is a done wave's time from its wave report.
+  waves_used under 5 (or no wave figures): the map says "no estimate yet".
   state: delivered · doing · paused · waiting. A card with no wave (a sprint's debug card) is left out.
   The road after the last wave comes from the project's recipe (`recipe.py`): the staging card when the
   recipe names one, the production card or the release's own deploy.
@@ -30,6 +33,26 @@ PALETTE = [("#4d8a0f", "#e7f3d6", "#8fcf4a", "#1f2d14"), ("#1f6fb8", "#dcebf8", 
            ("#b4690e", "#f8ead3", "#f0a94a", "#33240f"), ("#7048c2", "#ebe3f8", "#b39af0", "#251d38"),
            ("#0f766e", "#d5f0ec", "#4fd1c5", "#10302d"), ("#b4235a", "#f9dfe8", "#f07aa8", "#3a1424")]
 STATE = {"delivered": "✓ Delivered", "doing": "In progress", "paused": "⏸ Paused", "waiting": ""}
+
+
+def hours(minutes):
+    """90 → "1 h 30", 45 → "45 min"."""
+    m = int(round(float(minutes)))
+    return f"{m // 60} h {m % 60:02d}" if m >= 60 else f"{m} min"
+
+
+def wave_times(data):
+    """{wave: (estimate line, measured line)} and the header's total, from `estimate`; empty when there is none."""
+    est = data.get("estimate") or {}
+    figures = {int(k): v for k, v in (est.get("waves") or {}).items()}
+    lines, total = {}, None
+    if est.get("waves_used", 0) >= 5 and figures and all(f.get("min") is not None for f in figures.values()):
+        for w, f in figures.items():
+            lines[w] = (f"≈ {hours(f['min'])} ({hours(f['low'])}–{hours(f['high'])})",
+                        f"took {hours(f['measured'])}" if f.get("measured") not in (None, "") else "")
+        total = (sum(f["min"] for f in figures.values()), sum(f["low"] for f in figures.values()),
+                 sum(f["high"] for f in figures.values()), est["waves_used"])
+    return lines, total
 
 
 def layout(data):
@@ -120,12 +143,17 @@ def page(data, recipe):
         h = 2 * PAD + rows[i] * SLOT - (SLOT - NH)
         svg.append(f'<rect x="0" y="{tops[i] + 4}" width="{width}" height="{h - 8}" rx="10" class="lane l{i}"/>'
                    f'<text x="14" y="{tops[i] + h / 2}" class="lane-label">{e(a)}</text>')
+    times, total = wave_times(data)
     for w in range(1, waves + 1):
         x = LEFT + (w - 1) * COLW
         if w > 1:
             svg.append(f'<line x1="{x}" y1="{TOP - 10}" x2="{x}" y2="{height - 20}" class="gridline"/>')
-        svg.append(f'<text x="{x + COLW / 2}" y="{TOP - 22}" text-anchor="middle" class="wave-label{" done" if w in done else ""}">'
+        svg.append(f'<text x="{x + COLW / 2}" y="{TOP - 34}" text-anchor="middle" class="wave-label{" done" if w in done else ""}">'
                    f'WAVE {w}{" · DONE" if w in done else ""}</text>')
+        est, took = times.get(w, ("no estimate yet" if not total else "", ""))
+        if est or took:
+            svg.append(f'<text x="{x + COLW / 2}" y="{TOP - 18}" text-anchor="middle" class="wave-time">'
+                       f'{e(est)}{" · " + e(took) if took else ""}</text>')
     for kind, a, b, pts in paths:
         d = "M" + " L".join(f"{x:.1f},{y:.1f}" for x, y in pts)
         word = "blocks" if kind == "block" else "lands before"
@@ -174,6 +202,8 @@ def page(data, recipe):
     facts = [f"<b>{len(cards)}</b> cards", f"<b>{waves}</b> waves", f"<b>{len(done)}</b> waves delivered",
              f"<b>{len(data.get('links', []))}</b> blocker links",
              f"<b>{sum(1 for c in cards if c.get('db'))}</b> database changes"] + ([f"Effort <b>{e(str(effort))}</b>"] if effort else [])
+    facts.append(f"Estimated <b>{hours(total[0])}</b> ({hours(total[1])}–{hours(total[2])}), from {total[3]} past waves"
+                 if total else "No time estimate yet: fewer than 5 past waves measured")
     return TEMPLATE.format(
         title=e(f"Sprint {data.get('sprint', '')} map"), eyebrow=e(f"{data.get('project', '')} · Sprint {data.get('sprint', '')}"
                                                                    + (f" · due {data['due']}" if data.get("due") else "")),
@@ -200,7 +230,7 @@ h1{{margin:0;font-size:clamp(26px,4vw,36px);line-height:1.15}} h2{{margin:0;font
 .panel{{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}}
 .legend{{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--muted)}} .legend span{{display:inline-flex;align-items:center;gap:6px}}
 .sw{{width:12px;height:12px;border-radius:3px;display:inline-block}} .scroll{{overflow-x:auto}} svg{{display:block;min-width:{width}px;width:100%;height:auto}}
-.lane{{opacity:.55}} .lane-label{{font-size:13px;font-weight:600;fill:var(--ink)}} .wave-label{{font:600 12px ui-monospace,monospace;fill:var(--muted);letter-spacing:.06em}} .wave-label.done{{fill:var(--done)}}
+.lane{{opacity:.55}} .lane-label{{font-size:13px;font-weight:600;fill:var(--ink)}} .wave-label{{font:600 12px ui-monospace,monospace;fill:var(--muted);letter-spacing:.06em}} .wave-label.done{{fill:var(--done)}} .wave-time{{font-size:11px;fill:var(--muted)}}
 .gridline{{stroke:var(--grid)}} .edge{{fill:none;stroke:var(--edge);stroke-width:1.6}} .edge.order{{stroke-dasharray:5 5}}
 .box{{fill:var(--panel);stroke-width:1.5}} .id{{font:600 12px ui-monospace,monospace}} .ttl{{font-size:12.5px;font-weight:600;fill:var(--ink)}} .ttl.sub{{font-weight:500}}
 .meta{{font-size:11px;fill:var(--muted)}} .db{{fill:#c2410c;font-weight:600}} .mark{{font-size:11px;font-weight:600;fill:var(--done)}} .step{{font:600 11px ui-monospace,monospace;fill:var(--panel)}}

@@ -13,14 +13,18 @@ cell text, or "" when the record does not hold it. The new measure is one new co
 Usage:
   sprint_data.py [--vault DIR] --domain NAME --project SLUG [--out FILE]   CSV to stdout, or to FILE
   sprint_data.py --list                                                    the measures and their sources
+  sprint_data.py --estimate FILE.csv [--effort 3,5,4]                     minutes per effort point from the data file's
+                                                                           past waves, and each listed wave's estimate (JSON)
   (--vault defaults to $MYNOTES_DIR or ~/Documents/MyNotes)
 Exit codes: 0 ok · 2 usage (no such project folder).
 """
 import argparse
 import csv
 import io
+import json
 import os
 import re
+import statistics
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -31,6 +35,7 @@ from check_sprint import CARD_ID, COMMITTED_ON, WAVE_ROW, section  # noqa: E402 
 
 EFFORT = {"XS": 1, "S": 2, "M": 3, "L": 4, "XL": 5}
 FIXED = ("sprint", "where", "wave")
+MIN_WAVES = 5  # fewer measured waves than this: no estimate
 
 
 @dataclass
@@ -203,6 +208,27 @@ def to_csv(waves: list, measures: list = None) -> str:
     return out.getvalue()
 
 
+def estimate(text: str, efforts: list) -> dict:
+    """Minutes per effort point over the past waves that hold both `time_min` and `effort`: the median, with the
+    middle half (25th to 75th percentile) as the range. A wave's estimate is its effort times each. Fewer than
+    MIN_WAVES such waves: no estimate (`rate` null), never a made-up number."""
+    ratios = []
+    for row in csv.DictReader(io.StringIO(text)):
+        try:
+            minutes, effort = float(row.get("time_min") or ""), float(row.get("effort") or "")
+        except ValueError:
+            continue
+        if effort > 0:
+            ratios.append(minutes / effort)
+    if len(ratios) < MIN_WAVES:
+        return {"waves_used": len(ratios), "rate": None, "low": None, "high": None, "estimates": []}
+    low, _, high = statistics.quantiles(ratios, n=4)
+    rate = statistics.median(ratios)
+    return {"waves_used": len(ratios), "rate": round(rate, 1), "low": round(low, 1), "high": round(high, 1),
+            "estimates": [{"effort": e, "min": round(e * rate), "low": round(e * low), "high": round(e * high)}
+                          for e in efforts]}
+
+
 def main(argv) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--vault", default=os.environ.get("MYNOTES_DIR") or os.path.expanduser("~/Documents/MyNotes"))
@@ -210,7 +236,18 @@ def main(argv) -> int:
     ap.add_argument("--project")
     ap.add_argument("--out")
     ap.add_argument("--list", action="store_true")
+    ap.add_argument("--estimate", metavar="FILE.csv")
+    ap.add_argument("--effort", default="", help="with --estimate: the waves' efforts, comma-separated")
     args = ap.parse_args(argv)
+    if args.estimate:
+        try:
+            text = Path(args.estimate).read_text(encoding="utf-8")
+            efforts = [int(e) for e in args.effort.split(",") if e.strip()]
+        except (OSError, ValueError) as exc:
+            print(f"sprint_data: cannot estimate: {exc}", file=sys.stderr)
+            return 2
+        print(json.dumps(estimate(text, efforts)))
+        return 0
     if args.list:
         for m in MEASURES:
             print(f"{m.name}\t{m.source}")

@@ -60,7 +60,9 @@ data, and the data each card's acceptance lines need to be tested. The app build
 3. **The app's rules hold.** Data follows what `map` read: constraints, enums, links, and the rules
    the code enforces. A rule the data cannot meet is reported, not bypassed
 4. **Remove only what was created.** `clean` deletes the ids in a run record and nothing else. Rows
-   the app made on top of them during a check are reported, never deleted silently
+   the app made on top of them during a check are reported, never deleted silently. One exception: a made-up
+   Account the record created is removed whole, the app's rows in it included, by the project's own command
+   (`testdata.owner`), never by a delete the guard writes
 5. **Records stay local.** Run records live in `.testdata/` at the app repo root, git-ignored, never
    committed or copied to the vault
 
@@ -74,7 +76,9 @@ data, and the data each card's acceptance lines need to be tested. The app build
 - The app's own test suite may wipe the test database mid-run → `clean` treats rows already gone as
   clean; run `fill test` again when the set is needed
 - `clean` blocked by rows the app added during a check (a comment, a log line on a made-up card) →
-  stop, report the table and count, and ask the user; never widen the delete
+  stop, report the table and count, and ask the user; never widen the delete. When the check signed in to a
+  made-up Account, create that Account in the record and name the project's removal command in
+  `testdata.owner`: the clean then removes the whole Account in one step
 - Signing in as a made-up user may need the app's own password tool → use the tool `map` found, or
   leave the login unset and tell the user the command; never write a password hash by hand
 - First run on a new app: the rules can be misread → show the `map` to the user before the first

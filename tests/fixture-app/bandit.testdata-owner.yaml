@@ -1,0 +1,40 @@
+# bandit.yaml plus testdata.owner: a made-up Account (a teams row) is removed whole (BB-492).
+# Test fixture: a complete recipe (contract: plugins/bandit-dev/skills/sprint/references/bandit-yaml.md). The sprint gates run against it.
+verify: "true"
+branches: { trunk: development, deploy: main }
+release:
+  - "echo bump the version"
+  - "echo push the trunk"
+  - "echo fast-forward the deploy branch"
+migrations:
+  dir: migrations
+  check: "ls migrations | sort | tail -n 1 | cut -d_ -f1"
+staging:
+  up: "echo staging up"
+  refresh: "echo staging refresh"
+  down: "echo staging down"
+  where: test-host
+testdata:
+  schema: [schema.sql]
+  logic: [src/]
+  databases:
+    development: 'python3 fake_db.py "$FIXTURE_DB_URL"'
+    test: 'python3 fake_db.py "$FIXTURE_DB_URL"'
+    staging: "sh -c 'python3 fake_db.py'"
+  owner:
+    table: teams
+    dry_run:
+      development: python3 fake_remove.py {id}
+    remove:
+      development: python3 fake_remove.py {id} --confirm
+handover:
+  board: Fixture Ops
+  production: { column: Fixture Host, runbook: docs/deployment.md#Deploy now }
+  staging: { column: Fixture Lab, runbook: docs/staging-runbook.md#Deploy to staging }
+guard:
+  credentials:
+    block: ['\bscripts/set-password\.py\b', '(?i)\bpassword_hash\b\s*=']
+    allow: ['python3 scripts/set-dev-passwords\.py( .*)?']
+stop:
+  paths: [src, schema.sql]
+  close: the fixture's close step

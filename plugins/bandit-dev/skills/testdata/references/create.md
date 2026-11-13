@@ -28,7 +28,13 @@ Contents: create · clean · Records · In a sprint
 3. `dbguard.py clean {db} {record} [--yes]`. It deletes the record's ids, children first, in one
    transaction, then counts them again; a row left fails the run. Rows already gone are clean. The
    record moves to `.testdata/{db}/cleaned/`.
-4. **Blocked** by a row the record does not name (the app added it during the check, and the link
+4. **A made-up Account.** A record holding a row of `testdata.owner.table` (the recipe's Account table) has
+   that Account removed whole: the guard runs the project's `testdata.owner.dry_run.{db}` and then
+   `testdata.owner.remove.{db}` with the Account's id, checks its row is gone, then deletes the record's other
+   rows as above. Every row the app made inside that Account during the check (sign-ins, settings, links) goes
+   with it. A failing command stops the clean with nothing more removed and the record left open. No such
+   command for the database: the clean runs as above and says the command is missing.
+5. **Blocked** by a row the record does not name (the app added it during the check, and the link
    restricts deletes): the transaction rolled back, nothing was removed. Report the table and the
    count to the user and stop; never widen the delete.
 
@@ -45,4 +51,6 @@ folder is git-ignored (the guard refuses writes until it is) and never leaves th
 The wave that runs a card's live check: `make` for the card on the code as built, `create` on the
 database the check runs against, the check, then `clean {db} card {label}` before the card leaves
 Doing, pass or fail. The ledger line for the check names the label and says "created and removed".
+A check that signs in to a made-up Account creates that Account in the card's record, so the clean removes
+it whole with every row the app made in it (step 4 of clean).
 A `create` that cannot be made to pass is a failed check with its reason, never a skipped one.

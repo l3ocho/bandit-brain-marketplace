@@ -32,6 +32,9 @@ KEYS = {
     "testdata.schema": "testdata: where the tables are defined",
     "testdata.logic": "testdata: where the app enforces its rules",
     "testdata.databases": "testdata: one command per database that runs SQL from stdin",
+    "testdata.owner.table": "testdata: the table whose row is a made-up Account the clean removes whole (optional part)",
+    "testdata.owner.dry_run": "testdata: per database, the project's dry run of removing that Account, taking {id}",
+    "testdata.owner.remove": "testdata: per database, the project's command that removes that Account whole, taking {id}",
     "handover.board": "plan, execute, release: the board the deployment handover cards go on",
     "handover.production.column": "plan, release: the column of the production handover card (optional part)",
     "handover.production.runbook": "release: the production deploy steps (path#section) (optional part)",
@@ -50,7 +53,7 @@ KEYS = {
 # optional parts: a `handover` section without `production` has no production handover card, and
 # each `release_checks` command may be left out on its own.
 OPTIONAL = ("migrations", "staging", "testdata", "handover", "guard", "stop", "release_checks")
-OPTIONAL_PARTS = ("handover.production", "release_checks.gate", "release_checks.ci", "release_checks.version",
+OPTIONAL_PARTS = ("handover.production", "testdata.owner", "release_checks.gate", "release_checks.ci", "release_checks.version",
                   "release_checks.whats_new")
 
 

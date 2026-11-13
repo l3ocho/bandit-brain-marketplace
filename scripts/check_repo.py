@@ -2107,6 +2107,23 @@ def check_testdata():
              "DELETE FROM members WHERE id::text IN ('fake-2');\nDELETE FROM teams WHERE id::text IN ('fake-1');"),
             (lambda: guarded("clean", "development", "card", "c1"), 0, "none left"),
             (lambda: guarded("records"), 0, "no open record"),
+            # BB-492: a record holding a made-up Account (a `testdata.owner.table` row) is removed whole by the
+            # project's own command; without the command the clean says so; a failing command stops the clean
+            (lambda: guarded("create", "development", "--kind", "card", "--label", "c2", stdin=insert), 0, "created 2 rows"),
+            (lambda: guarded("clean", "development", "card", "c2"), 0, "names no removal command for a made-up Account"),
+            (lambda: guarded("--file", "bandit.testdata-owner.yaml", "create", "development", "--kind", "card",
+                             "--label", "a1", stdin=insert), 0, "created 2 rows"),
+            (lambda: guarded("--file", "bandit.testdata-owner.yaml", "clean", "development", "card", "a1", "--dry-run"), 0,
+             "-- the made-up Account fake-1 (teams) is removed whole by `testdata.owner.remove.development`\n"
+             "DELETE FROM members WHERE id::text IN ('fake-2');"),
+            (lambda: guarded("--file", "bandit.testdata-owner.yaml", "clean", "development", "card", "a1"), 0,
+             "1 made-up Account(s) removed whole with the rows the app made in them; none left"),
+            (lambda: (app / "bandit.owner-fails.yaml").write_text((app / "bandit.testdata-owner.yaml").read_text()
+                      .replace("fake_remove.py {id} --confirm", "fake_remove.py fail --confirm")) and
+             guarded("--file", "bandit.owner-fails.yaml", "create", "development", "--kind", "card", "--label", "a2",
+                     stdin=insert), 0, "created 2 rows"),
+            (lambda: guarded("--file", "bandit.owner-fails.yaml", "clean", "development", "card", "a2"), 5,
+             "removal for the made-up Account fake-1 failed"),
         ]
         for n, (call, code, text) in enumerate(cases, 1):
             got, out = call()
@@ -2115,7 +2132,8 @@ def check_testdata():
             if got != code or text not in out:
                 bad.append(f"case {n} → {got} {out[-120:]!r}")
     report("TD1", not bad, "; ".join(bad) or f"testdata: {len(cases)} fixture cases (recipe section, refusals, "
-           "INSERT-only create, staging yes, clean removes only the record's rows)")
+           "INSERT-only create, staging yes, clean removes only the record's rows, a made-up Account removed whole by "
+           "the project's command, its absence said, its failure stops the clean)")
 
 
 # ── L5 · project instructions templates are one page, and the project skill ships them as-is ─

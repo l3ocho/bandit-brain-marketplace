@@ -14,7 +14,10 @@ Usage:
   dbguard.py [--file PATH] records [DB]                   lists open run records
 
 DB is development, test or staging, each named under `testdata.databases`. Its command reads SQL
-on stdin (psql): it names env vars, never an address or password. Staging writes need --yes,
+on stdin (psql): it names env vars, never an address or password. A record that created a made-up Account
+(a row of `testdata.owner.table`) is cleaned by the project's own removal command for that database
+(`testdata.owner.dry_run` then `testdata.owner.remove`, each taking the id as {id}), which removes the Account
+and every row the app made in it; the record's other rows are then deleted as usual. Staging writes need --yes,
 given only after the user's yes in the chat. Records live in `.testdata/{DB}/` at the repo root,
 which must be git-ignored.
 
@@ -38,6 +41,7 @@ ASK_EVERY_RUN = ("staging",)
 SECRET = re.compile(r"\w+://|passw(or)?d\s*=|PGPASSWORD\s*=", re.I)
 ENV_REF = re.compile(r"\$\{?([A-Za-z_]\w*)")
 IDENT = re.compile(r"^[A-Za-z_][\w.]*$")
+OWNER_ID = re.compile(r"^[\w-]{1,80}$")
 RETURNING = re.compile(r"RETURNING\s+'testdata'\s*,\s*'([\w.]+)'\s*,\s*'(\w+)'\s*,\s*(\w+)(::text)?\s*$", re.I | re.S)
 INSERT = re.compile(r"^INSERT\s+INTO\s+\"?([\w.]+)\"?", re.I)
 REDACT = [(re.compile(r"\w+://\S+"), "[address]"), (re.compile(r"(passw(or)?d\s*=\s*)\S+", re.I), r"\1[hidden]")]
@@ -72,6 +76,19 @@ def section(path):
     return dbs
 
 
+def safe(cmd, what):
+    """A recipe command, refused when it holds an address or password or names an unset env var."""
+    cmd = str(cmd)
+    if SECRET.search(cmd):
+        refuse(6, f"the {what} command holds an address or password: name an env var instead "
+                  "(\"$DATABASE_URL\") or run inside the database container with its own login")
+    host_part = re.sub(r"'[^']*'", "", cmd)  # single-quoted parts expand inside the command, not here
+    unset = [v for v in ENV_REF.findall(host_part) if not os.environ.get(v)]
+    if unset:
+        refuse(6, f"env var {', '.join(f'`{v}`' for v in unset)} is not set: the {what} command reads it")
+    return cmd
+
+
 def command(path, db, write):
     """The database's command, after every guard: allowed name, no literal secret, env vars set,
     records folder git-ignored (writes only). The command itself is never printed."""
@@ -80,14 +97,7 @@ def command(path, db, write):
     dbs = section(path)
     if db not in dbs or not dbs[db]:
         refuse(3, f"missing key `testdata.databases.{db}`")
-    cmd = str(dbs[db])
-    if SECRET.search(cmd):
-        refuse(6, f"the `{db}` command holds an address or password: name an env var instead "
-                  "(\"$DATABASE_URL\") or run inside the database container with its own login")
-    host_part = re.sub(r"'[^']*'", "", cmd)  # single-quoted parts expand inside the command, not here
-    unset = [v for v in ENV_REF.findall(host_part) if not os.environ.get(v)]
-    if unset:
-        refuse(6, f"env var {', '.join(f'`{v}`' for v in unset)} is not set: the `{db}` address is read from it")
+    cmd = safe(dbs[db], f"`{db}`")
     if write:
         root = path.parent
         r = subprocess.run(["git", "-C", str(root), "check-ignore", "-q", ".testdata/x"], capture_output=True)
@@ -199,6 +209,39 @@ def delete_sql(rows):
     return deletes, left
 
 
+def owner(path, db):
+    """(table, dry_run, remove) of `testdata.owner` for this database, or None when the recipe names none."""
+    sect = recipe.load(path).get("testdata") or {}
+    own = sect.get("owner") if isinstance(sect, dict) else None
+    if not isinstance(own, dict) or not own.get("table") or not isinstance(own.get("remove"), dict) \
+            or not own["remove"].get(db):
+        return None
+    if not IDENT.match(str(own["table"])):
+        refuse(6, f"`testdata.owner.table` is `{own['table']}`: not a plain identifier")
+    dry_run = (own.get("dry_run") or {}).get(db) if isinstance(own.get("dry_run"), dict) else None
+    return (str(own["table"]), safe(dry_run, f"`testdata.owner.dry_run.{db}`") if dry_run else None,
+            safe(own["remove"][db], f"`testdata.owner.remove.{db}`"))
+
+
+def remove_owner(path, db, cmd, table, key, rid, dry_run, remove):
+    """Removes one made-up Account whole through the project's own command, then checks its row is gone."""
+    if not OWNER_ID.match(rid):
+        refuse(6, f"record id `{rid}` for `{table}` is not a plain id: the removal command is not run")
+    for label, template in (("dry run", dry_run), ("removal", remove)):
+        if not template:
+            continue
+        r = subprocess.run(template.replace("{id}", rid), shell=True, cwd=path.parent, capture_output=True, text=True)
+        out = redact((r.stdout + r.stderr).strip())
+        if r.returncode != 0:
+            refuse(5, f"the project's {label} for the made-up Account {rid} failed ({r.returncode}); nothing more was "
+                      f"removed: {out[-400:]}")
+        print(f"testdata: {label} of the made-up Account {rid}: " + " | ".join(out.splitlines()[-6:]))
+    q = f"SELECT 'left', '{table}', count(*) FROM {table} WHERE {key}::text = '{rid}'"
+    out = run(path, cmd, "BEGIN READ ONLY;\n" + q + ";\nROLLBACK;\n")
+    if any(l.startswith("left|") and not l.endswith("|0") for l in out.splitlines()):
+        refuse(5, f"the made-up Account {rid} is still in `{table}` after the project's removal command")
+
+
 def cmd_clean(path, db, record, yes, dry):
     rec_path = Path(record)
     if not rec_path.is_absolute():
@@ -209,12 +252,27 @@ def cmd_clean(path, db, record, yes, dry):
         refuse(2, f"cannot read the record {record}: {e}")
     if rec.get("db") != db:
         refuse(6, f"the record was made on `{rec.get('db')}`, not `{db}`: clean it there")
-    deletes, left = delete_sql(rec.get("rows", []))
+    rows = rec.get("rows", [])
+    own = owner(path, db)
+    owned = [r for r in rows if own and r[0] == own[0]]
+    tables = {r[0] for r in rows}
+    named = ((recipe.load(path).get("testdata") or {}).get("owner") or {})
+    if not own and isinstance(named, dict) and named.get("table") in tables:
+        print(f"testdata: the recipe names no removal command for a made-up Account on `{db}` "
+              f"(`testdata.owner.remove.{db}`): rows the app made inside it can block this clean")
+    elif not own and rec.get("kind") == "card":
+        print("testdata: the recipe names no removal command for a made-up Account (`testdata.owner`): "
+              "rows the app made inside one can block this clean")
+    deletes, left = delete_sql([r for r in rows if r not in owned])
     if dry:
-        print(";\n".join(deletes) + ";" if deletes else "-- nothing to delete")
+        for t_, k_, rid in owned:
+            print(f"-- the made-up Account {rid} ({t_}) is removed whole by `testdata.owner.remove.{db}`")
+        print(";\n".join(deletes) + ";" if deletes else "-- nothing else to delete")
         return
     cmd = command(path, db, write=True)
     ask_every_run(db, yes)
+    for t_, k_, rid in owned:
+        remove_owner(path, db, cmd, t_, k_, rid, own[1], own[2])
     if deletes:
         run(path, cmd, "BEGIN;\n" + ";\n".join(deletes) + ";\nCOMMIT;\n")
         out = run(path, cmd, "BEGIN READ ONLY;\n" + ";\n".join(left) + ";\nROLLBACK;\n")
@@ -224,7 +282,8 @@ def cmd_clean(path, db, record, yes, dry):
     done = rec_path.parent / "cleaned"
     done.mkdir(exist_ok=True)
     rec_path.rename(done / rec_path.name)
-    print(f"testdata: removed the {len(rec.get('rows', []))} rows of {rec_path.name} from {db}; none left")
+    whole = f"; {len(owned)} made-up Account(s) removed whole with the rows the app made in them" if owned else ""
+    print(f"testdata: removed the {len(rows)} rows of {rec_path.name} from {db}{whole}; none left")
 
 
 def cmd_read(path, db):

@@ -47,6 +47,7 @@ the chat; the guard cuts long output and says so.
 | Only the three database names; no secret in a command; env vars set | Choose the database the check runs against |
 | `create`: INSERTs only, each with `RETURNING 'testdata', …`, one transaction | Write data that follows the rules |
 | Every created id recorded; `clean` deletes only those | Clean after every check |
+| A made-up Account in the record is removed only by the project's `testdata.owner.remove` command, with its id checked as a plain id and the command under the same secret and env-var guards | Create the Account in the record when a check signs in to it |
 | Staging writes need `--yes` | Ask and quote the yes first |
 | `.testdata/` git-ignored before any write | Say so when the app's `.gitignore` lacks it; the app adds it |
 | `read` in a read-only transaction, output cut at 200 lines | Ask for counts, not rows |

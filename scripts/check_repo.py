@@ -1553,6 +1553,78 @@ def check_sp9():
            if ok else f"fixtures: good → {good[0]} {good[1][-120:]!r}; bad → {bad[0]} {bad[1][-200:]!r}")
 
 
+# ── RG1 · the release guard: notes before the bump, nothing after the tag, a green CI run before deploy ─
+def check_release_guard():
+    s = PLUGINS / "bandit-dev" / "skills" / "sprint"
+    script = s / "scripts" / "release_guard.py"
+    app = ROOT / "tests" / "fixture-app"
+    bad = []
+    got, out = run_script(script, "--file", str(app / "bandit.notes-after-bump.yaml"), "lint", cwd=ROOT)
+    if got != 4 or "step 2 writes the release notes after the bump (step 1)" not in out:
+        bad.append(f"notes after the bump → {got} {out[-120:]!r}")
+    got, out = run_script(script, "--file", str(ROOT / "bandit.yaml"), "lint", cwd=ROOT)
+    if got != 0:
+        bad.append(f"this repo's own recipe refused: {out[-120:]!r}")
+    with tempfile.TemporaryDirectory() as d:
+        base = Path(d)
+        env = clean_env()
+        g = lambda repo, *a: subprocess.run(["git", "-C", str(repo), "-c", "user.email=t@t", "-c", "user.name=t", *a],  # noqa: E731
+                                            capture_output=True, text=True, check=True, env=env)
+        remote, repo = base / "origin.git", base / "app"
+        subprocess.run(["git", "init", "-q", "--bare", "-b", "main", str(remote)], check=True, capture_output=True)
+        repo.mkdir()
+        g(repo, "init", "-q", "-b", "development")
+        (repo / "ci-ok").write_text("1")
+        (repo / "bandit.yaml").write_text(
+            "verify: 'true'\nbranches: { trunk: development, deploy: main }\nrelease: [git tag v1.0.0, push]\n"
+            "release_checks:\n  ci: test -f ci-ok\n  version: echo running 1.0.0\n")
+        g(repo, "add", "-A")
+        g(repo, "commit", "-qm", "start")
+        g(repo, "remote", "add", "origin", str(remote))
+        g(repo, "push", "-q", "origin", "development:main")
+        state = base / "state.json"
+        rg = lambda *a: run_script(script, "--file", str(repo / "bandit.yaml"), "--state", str(state), *a, cwd=repo)  # noqa: E731
+        steps = [("start",), ("before", "1")]
+        results = [rg(*a) for a in steps]
+        (repo / "VERSION").write_text("1.0.0")          # step 1: the bump commits and tags, as npm version does
+        g(repo, "add", "-A")
+        g(repo, "commit", "-qm", "1.0.0")
+        g(repo, "tag", "v1.0.0")
+        results.append(rg("after", "1"))
+        (repo / "late.md").write_text("notes after the tag")
+        g(repo, "add", "-A")
+        g(repo, "commit", "-qm", "late notes")
+        moved = rg("before", "2")
+        g(repo, "reset", "-q", "--hard", "v1.0.0")
+        level = rg("before", "2")
+        g(repo, "push", "-q", "origin", "development:main")   # step 2: the deploy push
+        results.append(rg("after", "2"))
+        (repo / "ci-ok").unlink()
+        red = rg("before", "3")
+        (repo / "ci-ok").write_text("1")
+        green = rg("before", "3")
+        final = rg("final", "1.0.0")
+        wrong = rg("final", "2.0.0")
+    if any(r[0] != 0 for r in results):
+        bad.append(f"start/after refused: {[r[1][-80:] for r in results if r[0]]}")
+    if moved[0] != 4 or "late notes" not in moved[1]:
+        bad.append(f"a commit after the tag → {moved[0]} {moved[1][-100:]!r}")
+    if level[0] != 0:
+        bad.append(f"the trunk at the tag → {level[0]} {level[1][-100:]!r}")
+    if red[0] != 5:
+        bad.append(f"a red CI run after the push → {red[0]} {red[1][-100:]!r}")
+    if green[0] != 0 or final[0] != 0 or wrong[0] != 5:
+        bad.append(f"green CI → {green[0]}; final 1.0.0 → {final[0]}; final 2.0.0 → {wrong[0]}")
+    rel = " ".join((s / "references" / "release.md").read_text(encoding="utf-8").split())
+    bad += [f"release.md lacks {w!r}" for w in ("release_guard.py lint", "release_guard.py --state {file} start",
+                                                "so no deploy step runs before a green build",
+                                                "release_guard.py --state {file} final {version}") if w not in rel]
+    report("RG1", not bad, "; ".join(bad[:4]) + " (BB-465)" if bad else
+           "release guard: notes after the bump refused by name, this repo's recipe passes; on a scratch repo a commit "
+           "after the tag stops the release, a red CI run after the deploy push stops it, a green one lets it go on, "
+           "and the running version is checked; release.md runs it around every step")
+
+
 # ── Y1 · the recipe reader refuses a missing key and a wrong migration tail (fixtures) ────
 def check_recipe():
     script = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts" / "recipe.py"
@@ -1593,7 +1665,7 @@ def check_recipe():
 def y2_errors(keys, contract, readers):
     """keys: recipe.py KEYS · contract: the contract file's text · readers: {name: text} of plugin files."""
     section = contract.split("## 🗝️ Keys", 1)[-1].split("\n## ", 1)[0]
-    listed = [m.group(1) for m in re.finditer(r"^\| `([a-z]+(?:\.[a-z]+)*)` \|", section, re.M)]
+    listed = [m.group(1) for m in re.finditer(r"^\| `([a-z_]+(?:\.[a-z_]+)*)` \|", section, re.M)]
     errors = [f"`{k}` listed {listed.count(k)}×" for k in sorted(set(listed)) if listed.count(k) > 1]
     errors += [f"`{k}` in KEYS, not in the contract" for k in sorted(set(keys) - set(listed))]
     errors += [f"`{k}` in the contract, not in KEYS" for k in sorted(set(listed) - set(keys))]
@@ -1601,10 +1673,10 @@ def y2_errors(keys, contract, readers):
     read = set()
     for name, text in readers.items():
         if name.endswith(".md"):
-            for m in re.finditer(r"recipe\.py (?:--file \S+ )?(?:get|opt|require) ([a-z. ]+)", text):
+            for m in re.finditer(r"recipe\.py (?:--file \S+ )?(?:get|opt|require) ([a-z_. ]+)", text):
                 read |= {(name, k) for k in m.group(1).split() if "." in k or k in tops}
         else:
-            read |= {(name, m.group(1)) for m in re.finditer(r"[\"']([a-z]+(?:\.[a-z]+)+)[\"']", text)
+            read |= {(name, m.group(1)) for m in re.finditer(r"[\"']([a-z_]+(?:\.[a-z_]+)+)[\"']", text)
                      if m.group(1).split(".")[0] in tops}
     errors += [f"{n} reads `{k}`, not in KEYS" for n, k in sorted(read) if k not in keys]
     return errors
@@ -2128,6 +2200,7 @@ def main(argv):
     check_approval_line()
     check_recipe()
     check_contract()
+    check_release_guard()
     check_credential_guard()
     check_stop_gate()
     check_dependency_gate()

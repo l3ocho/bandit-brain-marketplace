@@ -1,0 +1,7 @@
+# The v0.45.0 order (BB-465): the notes step after the bump. release_guard.py lint refuses it.
+verify: "true"
+branches: { trunk: development, deploy: main }
+release:
+  - npm version minor
+  - Add the release notes and update the user manual
+  - git push origin development:main --follow-tags

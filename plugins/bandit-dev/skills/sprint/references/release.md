@@ -29,11 +29,18 @@ Check all before anything runs. Each miss is refused by name, with what would sa
    or after the sprint), and the ledger's Follow-ups noticed and Needs the user name no change to the repository still to
    do for this sprint. Each one is refused by name: it is done now as a debug row, before the release, or becomes a card
    for a later sprint. The release ships all of the sprint's work; nothing reaches the trunk after it.
+9. **Release order and the project's gate.** `python3 ${CLAUDE_SKILL_DIR}/scripts/release_guard.py lint` (a recipe whose step that writes the release notes comes after the step that runs the bump is refused, naming both: fix the order in `bandit.yaml` first, through the project), then `release_guard.py gate` (the project's `release_checks.gate`, when it names one; a refusal stops the release, shown as it is).
 
 ## Steps
 
 1. **Debug card to Stand By, then run the recipe.** Before the first recipe step (on the marketplace repo, before `release.py --write`), move the sprint's debug card (`Debug card:` in the ledger) to `standby` with `update_tasks`, read back; `close` completes it. A release step that stalls or fails writes a Process line on it at once (`references/templates.md` → Debug card, Process lines). `recipe.py get release` lists the steps. Run them one at a time, in order,
-   showing each command and its result. A step that runs the recipe's `verify` runs only when
+   showing each command and its result, each wrapped by the release guard with a state file in the session's scratch
+   folder: `release_guard.py --state {file} start` before the first step, `before {n}` before step n and `after {n}`
+   after it. `before` refuses when the trunk moved after the bump's tag (nothing is committed between the bump and the
+   deploy branch's push), and once the deploy branch is pushed it runs `release_checks.ci` and stops on red, so no
+   deploy step runs before a green build; with no `ci` named it stops until the user confirms the CI run is green, quoted.
+   After the last step, `release_guard.py --state {file} final {version}` checks `release_checks.version` (and
+   `whats_new`) print the released version; a recipe that names neither gets one line saying so. A step that runs the recipe's `verify` runs only when
    `python3 ${CLAUDE_SKILL_DIR}/scripts/code_changed.py --since {the commit of the last green full check, from the Milestone log}`
    says "full check: needed"; "not needed" (only docs, notes or comments) → the step is skipped and its line shown instead. `{version}` in a step is the version picked by Semantic
    Versioning (Marketplace cards, step 1). A failing step stops the release: nothing after it runs,

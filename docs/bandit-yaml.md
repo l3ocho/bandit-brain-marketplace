@@ -39,11 +39,16 @@ guard:
 stop:
   paths: [src, drizzle, package.json, compose.yaml]
   close: /close-round (code review, npm run verify, the UI check when the UI changed, then commit; never push)
+release_checks:
+  gate: node scripts/check-release-docs.mjs
+  ci: gh run watch "$(gh run list --branch main --workflow Deploy --limit 1 --json databaseId -q '.[0].databaseId')" --exit-status
 ```
 
 The `guard` lines are a proposal for the app (2026-10-24, from its own `.claude/hooks/block-credential-writes.mjs`: the two interactive credential scripts and any raw write to `identity_users.password_hash` are refused; `scripts/set-dev-passwords.mjs`, the dev-only fixed login pattern, is allowed). The app keeps its own hook until the plugin one is proven.
 
 The `stop` lines are a proposal for the app (2026-10-24, from its own `.claude/hooks/stop-gate.mjs`, which holds `src`, `drizzle`, `docs`, `package.json` and `compose.yaml` and names `/close-round`). `docs` is left out: a docs-only change no longer holds the chat. Until the app removes its own copy, that copy still holds docs-only and background-agent changes.
+
+The `release_checks` lines are a proposal for the app (BB-465, 2026-11-13: its release gate `scripts/check-release-docs.mjs` and the CI Deploy run on `main` its recipe already waits for; the workflow name is the app's to confirm). `version` and `whats_new` are left out until the app has a command that prints them.
 
 `handover.production` is optional: without it no production handover card is made and `release` runs the deploy itself through the `release` steps (BB-304, 2026-11-04). The `handover` lines are a proposal for the app (2026-10-24, from the BC-24 deployment card: board and production column as used, deploy steps in the app's `docs/deployment.md` section "Deploy now"; staging runs on Bandit Port from `docs/staging-runbook.md`, whose section the app names).
 

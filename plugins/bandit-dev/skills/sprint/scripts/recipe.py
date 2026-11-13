@@ -41,11 +41,17 @@ KEYS = {
     "guard.credentials.allow": "credential guard hook: regexes of the project's allowed dev-login commands",
     "stop.paths": "stop gate hook: the paths that count as implementation (git pathspecs)",
     "stop.close": "stop gate hook: the close step its message names",
+    "release_checks.gate": "release: the project's own release gate, run before the first step",
+    "release_checks.ci": "release: waits for the deploy branch's CI run, non-zero on red",
+    "release_checks.version": "release: prints the version production runs",
+    "release_checks.whats_new": "release: prints the version the app's What's new shows",
 }
 # A repo without an optional section leaves it out; a section present is complete, except its
-# optional parts: a `handover` section without `production` has no production handover card.
-OPTIONAL = ("migrations", "staging", "testdata", "handover", "guard", "stop")
-OPTIONAL_PARTS = ("handover.production",)
+# optional parts: a `handover` section without `production` has no production handover card, and
+# each `release_checks` command may be left out on its own.
+OPTIONAL = ("migrations", "staging", "testdata", "handover", "guard", "stop", "release_checks")
+OPTIONAL_PARTS = ("handover.production", "release_checks.gate", "release_checks.ci", "release_checks.version",
+                  "release_checks.whats_new")
 
 
 def absent(data, dotted):
@@ -143,7 +149,7 @@ def main(argv):
     elif cmd == "opt" and len(args) == 1:
         if args[0].split(".")[0] not in OPTIONAL:
             refuse(2, f"`{args[0]}` is not optional: use get")
-        parts = [args[0].split(".")[0]] + [p for p in OPTIONAL_PARTS if args[0].startswith(p + ".")]
+        parts = [args[0].split(".")[0]] + [p for p in OPTIONAL_PARTS if args[0] == p or args[0].startswith(p + ".")]
         if any(absent(data, p) for p in parts):
             print("none")
         else:

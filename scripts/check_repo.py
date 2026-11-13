@@ -894,16 +894,28 @@ def check_sp15():
     left = run_script(script, "--vault", str(vault), "--domain", "ClosedLeft")
     wbs = run_script(script, "--vault", str(vault), "--domain", "ClosedArchived")
     app = run_script(script, "--vault", str(vault), "--domain", "StepsGood", "--closed", "spring")
+    listing = ROOT / "tests" / "fixture-listing"
+    l_left = run_script(script, "--listing", str(listing / "left.json"), "--closed", "spring,winter", "--domain", "Garden")
+    l_done = run_script(script, "--listing", str(listing / "archived.json"), "--closed", "spring,winter", "--domain", "Garden")
+    novault = run_script(script, "--vault", str(vault / "no-such-vault"), "--domain", "Garden")
     close = " ".join((s / "references" / "close.md").read_text(encoding="utf-8").split())
+    plan = " ".join((s / "references" / "plan.md").read_text(encoding="utf-8").split())
     words = [w for w in ("and the sprint's WBS (`Projects/{slug}/planning/{project}-sprint-{name}-wbs.md`)",
-                         "check_sprint.py --closed {name}") if w not in close]
+                         "check_sprint.py --closed {name}", "with `--listing` on a fresh WebDAV listing",
+                         "the sprint is not reported closed") if w not in close]
+    words += [w for w in ("**Closed sprints left behind, first.**", "**Vault check**",
+                          "\"Could not read the vault\" is a failed check, never a pass") if w not in plan]
     ok = (left[0] == 1 and left[1].count("SP15") == 2 and "folder is outside _archive/" in left[1]
           and wbs[0] == 1 and wbs[1].count("SP15") == 1 and "garden-sprint-spring-wbs.md" in wbs[1]
-          and app[0] == 1 and app[1].count("SP15") == 1 and not words)
-    report("SP15", ok, "check_sprint refuses a closed sprint's folder or WBS outside _archive/ (closed in the ledger or "
-           "named by --closed); close archives the WBS with the folder and runs the check with --closed"
+          and app[0] == 1 and app[1].count("SP15") == 1
+          and l_left[0] == 1 and l_left[1].count("SP15") == 2 and "sprint-summer" not in l_left[1]
+          and l_done[0] == 0 and novault[0] == 1 and "could not read the vault" in novault[1] and not words)
+    report("SP15", ok, "check_sprint refuses a closed sprint's folder or WBS outside _archive/ (closed in the ledger, "
+           "named by --closed, or on a WebDAV --listing) and says when it could not read the vault; close checks the "
+           "archive before saying closed, and planning archives closed sprints left behind before it starts"
            if ok else f"SP15: ClosedLeft → {left[0]} {left[1][-160:]!r}; ClosedArchived → {wbs[0]} {wbs[1][-120:]!r}; "
-           f"--closed → {app[0]} {app[1][-120:]!r}; close.md missing {words} (BB-437)")
+           f"--closed → {app[0]} {app[1][-120:]!r}; listing left → {l_left[0]} {l_left[1][-160:]!r}; listing archived → "
+           f"{l_done[0]}; no vault → {novault[0]} {novault[1][-120:]!r}; missing {words} (BB-437, BB-494)")
 
 
 def check_wave_order():

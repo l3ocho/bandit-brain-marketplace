@@ -30,13 +30,20 @@ Rules (each one a failure, not a warning):
   SP15 a closed sprint keeps neither its folder nor its WBS outside _archive/: a folder under Projects/{slug}/
        whose ledger records the close (`Status: Closed …`, `Current wave: Sprint closed`), or a sprint named in
        `--closed` (closed in the app), fails; so does `{project}-sprint-{name}-wbs.md` in Projects/{slug}/planning/
-       (or Projects/{slug}/) of a closed or archived sprint
+       (or Projects/{slug}/) of a closed or archived sprint. With `--listing` (a WebDAV listing of the vault, for a
+       machine with no synced copy) SP15 alone runs on that listing, for the sprints named in `--closed`
 
 Usage:
   check_sprint.py [--vault DIR] [--domain NAME] [--closed NAME[,NAME…]]
                                                (defaults: $MYNOTES_DIR or ~/Documents/MyNotes;
                                                 the `domain:` of the repo CLAUDE.md Project Context;
                                                 --closed: sprints closed in the app, from get_sprints)
+  check_sprint.py --listing FILE.json --closed NAME[,NAME…] [--domain NAME]
+                           (SP15 only, on a listing of the vault read through WebDAV: a JSON list of paths
+                            relative to the domain folder, folders ending in `/`, from Projects/{slug}/,
+                            Projects/{slug}/planning/ and _archive/Projects/{slug}/; used by close step 4
+                            and plan's start gate where no synced vault exists)
+  No synced vault and no --listing: says the vault could not be read (exit 1; the hook prints a notice).
   check_sprint.py --hook   (Stop hook: reads the hook JSON on stdin, checks only when the
                             session touched the vault; blocks the stop once with exit 2 only on
                             errors in a project the session named (`Projects/{slug}/` in its
@@ -278,6 +285,25 @@ def sprint_folders(domain: Path) -> list[tuple[str, Path]]:
     return found
 
 
+def check_listing(paths: list, closed_in_app: set) -> list[str]:
+    """SP15 on a WebDAV listing: a sprint closed in the app keeps no folder and no WBS outside _archive/."""
+    errors = []
+    for raw in paths:
+        path = str(raw).strip("/")
+        parts = path.split("/")
+        if parts[0] != "Projects" or len(parts) < 3:
+            continue
+        project = parts[1]
+        if len(parts) == 3 and parts[2].startswith("sprint-") and parts[2][len("sprint-"):] in closed_in_app:
+            errors.append(f"SP15 {path}/: sprint {parts[2][len('sprint-'):]} is closed but its folder is outside _archive/ "
+                          f"(close step 3 moves it to _archive/Projects/{project}/{parts[2]}/)")
+        for name in closed_in_app:
+            if parts[-1] == f"{project}-sprint-{name}-wbs.md":
+                errors.append(f"SP15 {path}: the WBS of closed sprint {name} is outside _archive/ "
+                              "(close step 3 archives it in the same proposal as the folder)")
+    return sorted(set(errors))
+
+
 def check(domain: Path, closed_in_app: set = frozenset()) -> list[str]:
     errors: list[str] = []
     md_files = [p for p in domain.rglob("*.md") if not any(part.startswith(".") for part in p.relative_to(domain).parts)]
@@ -421,7 +447,27 @@ def main() -> int:
     ap.add_argument("--domain", default=None)
     ap.add_argument("--hook", action="store_true")
     ap.add_argument("--closed", default="", help="comma-separated names of sprints closed in the app")
+    ap.add_argument("--listing", help="a WebDAV listing of the vault (JSON list of paths): SP15 only")
     args = ap.parse_args()
+    closed = {n.strip() for n in args.closed.split(",") if n.strip()}
+
+    if args.listing:
+        try:
+            paths = json.loads(Path(args.listing).read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            print(f"check_sprint: cannot read the listing {args.listing}: {exc}", file=sys.stderr)
+            return 1
+        if not closed:
+            print("check_sprint: --listing needs --closed (the sprints closed in the app, from get_sprints)", file=sys.stderr)
+            return 1
+        errors = check_listing(paths if isinstance(paths, list) else [], closed)
+        if not errors:
+            print(f"OK: the listing passes SP15 ({len(closed)} closed sprints, none outside _archive/)")
+            return 0
+        print(f"bandit-dev:sprint check FAILED on the listing ({len(errors)}). Archive these first:")
+        for line in errors:
+            print(f"- {line}")
+        return 1
 
     if args.hook:
         try:
@@ -440,10 +486,15 @@ def main() -> int:
         return 1
     domain = Path(args.vault).expanduser() / name
     if not domain.is_dir():
-        print(f"check_sprint: no domain folder at {domain}", file=sys.stderr)
-        return 0 if args.hook else 1
+        if args.hook:
+            print(json.dumps({"systemMessage": f"bandit-dev:sprint check: could not read the vault (no synced copy at "
+                              f"{domain}); nothing was checked. Close and plan run it with --listing."}))
+            return 0
+        print(f"check_sprint: could not read the vault: no domain folder at {domain}. Run with --listing "
+              "(a WebDAV listing) or set MYNOTES_DIR", file=sys.stderr)
+        return 1
 
-    errors = check(domain, {n.strip() for n in args.closed.split(",") if n.strip()})
+    errors = check(domain, closed)
     if args.hook and errors:
         projects = touched_projects(text)
         others = [e for e in errors if not own_error(e, projects)]

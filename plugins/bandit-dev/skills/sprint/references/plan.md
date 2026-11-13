@@ -18,12 +18,15 @@ Contents: Conventions · Steps 1 to 12 · Investigator brief · Handover
 
 ## 1 · Select and freeze the batch
 
+0. **Closed sprints left behind, first.** List the home board's closed sprints (`get_sprints { boardId }`, status `closed`) and run the archive check on them (Vault check, below). Any SP15 line → one archive proposal through bandit:notes for those folders and WBS files (the same move as `close.md` step 3), applied on the user's yes, then the check again. Planning goes on only once it prints OK; a declined proposal stops planning here, named.
 1. Resolve the selection (SKILL.md). Open cards only, not archived, in no sprint: none held by a real sprint (`list_tasks { noSprint: true }`) and none carrying a `sprint/*` tag while the tags exist (bandit:tasks `references/board.md` → Tags). Cards already in a sprint are excluded with a fix row. A card on the Inbox cannot join (`SPRINT_CARD_ON_INBOX`): a fix row to file it first.
 2. For every card read `blockedBy` and `blocks`. Report cards **outside** the batch that it blocks or is blocked by; none of them need links, but the ledger records them under "Out of this sprint".
 3. **Create the sprint** on the home board: `manage_sprints { action: "create", boardId, name, papersUrl }` (name given, else the ISO week, `2026-w42`, kebab-case; `papersUrl` = the sprint folder's path), then `manage_sprints { action: "add_cards", sprintId, taskIds }` with the batch, all or none (a refusal names the card and why: a fix row). Read it back with `get_sprints { sprintId }`.
 4. **Write the ledger** in the new sprint folder (`references/templates.md` → Ledger), through bandit:notes: At a glance with `Sprint record: {name} on {board}` and the Status line, the twelve-row **Plan steps** table, the Batch table and Out of this sprint.
 5. **Sprint order.** The previous open sprint on the board (`get_sprints { boardId }`, status not `closed`), or an open old-way sprint card (`references/old-way.md`). One exists → `link_tasks { blockerSprintId (or blockerTaskId for a sprint card), blockedSprintId }` so the new sprint is **blocked by** it. `run` and `execute` refuse a sprint that an open sprint blocks, so sprints ship in order.
 6. Step 1's row: selection rule, count, ids, the sprint it waits for; open Urgent cards listed as not selected.
+
+**Vault check** (here and `close.md` step 4). With a synced vault: `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py --closed {names}`. Without one: list `Projects/{slug}/`, `Projects/{slug}/planning/` and `_archive/Projects/{slug}/` through WebDAV, save the paths (relative to the domain folder, folders ending in `/`) as a JSON list in the session's scratch folder, and run `check_sprint.py --listing {file} --closed {names}`. "Could not read the vault" is a failed check, never a pass.
 
 **Done when** `get_sprints { sprintId }` shows the batch as its cards and the previous open sprint in
 `blockedBy` when there is one, and the ledger holds the Plan steps table.

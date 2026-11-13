@@ -2,6 +2,11 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
+## Unreleased
+
+### Fixed
+- **Closed sprints' notes leave the project folder, checked against the vault itself** (BB-494). Three closed sprints still had their folders in the project folders: two were closed in the app without the close steps, one left the archive as an open item, and the check only ever read a synced copy of the vault that Bandit Port does not have, so it passed in silence. The sprint checker now reads a WebDAV listing of the vault (`--listing`) for the closed-sprint rule and says when it could not read the vault instead of passing. Close checks the archive on a fresh listing before it reports the sprint closed, and planning a new sprint first archives any closed sprint left behind. Checker rule SP15 has the new cases.
+
 ## 0.19.0 · 2026-11-12
 
 ### Changed

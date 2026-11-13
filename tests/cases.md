@@ -62,6 +62,11 @@ the `bandit-staging` board only. `read` cases are checked by reading the shipped
 | C89 | Named group | cli | `capture` one card "into Groceries" with a Groceries group in that column; then with none | first: filed into the existing group; second: the group is made, then the card filed into it |
 | C90 | Group delete asks | cli | `triage`, ask to delete a group holding two cards | asks first, naming two cards; nothing deleted before the yes |
 | C91 | Grouped Untriaged count | read | `audit.md` check 1, `triage.md` → What the Inbox board is | the count adds every group's `items` to the loose `items` |
+| C95 | Pre-sprint report | auto (ES1) + read | `plan.md` step 12 and its final message on a project with 5 or more timed waves | the map shows each wave's estimate and range and the sprint total; the final message names the map first; fewer than 5 timed waves: "no estimate yet" (BB-402) |
+| C96 | Closed sprints left behind | auto (SP15) + read | `plan.md` step 1 on a project with a sprint closed in the app whose folder is under `Projects/`, no synced vault | the WebDAV listing check fails; one archive proposal comes before planning goes on; "could not read the vault" never passes (BB-494) |
+| C97 | Release order | auto (RG1) | `release_guard.py` on a recipe with the notes step after the bump, a commit after the tag, a red CI run | refused before the bump naming the step; stopped before the push naming the commit; stopped before any deploy step (BB-465) |
+| C98 | Made-up Account cleaned whole | auto (TD1) + staging | a browser check signed in to a made-up Account on a project with `testdata.owner` | one clean run removes the Account through the project's command, no row of it left, no Process line; without the command the clean says it is missing (BB-492) |
+| C99 | A wave waits for its gates | auto (GW1) + staging | a wave whose browser check outlasts the rest of its work | the wave does not end while the check runs; the card ends merged, in Stand By and in the ledger, with no resume (BB-493) |
 
 
 ## 🧩 Clarify, notes, project
@@ -73,6 +78,9 @@ the `bandit-staging` board only. `read` cases are checked by reading the shipped
 | C23 | P11 + C templates | auto (L5) | `templates/instructions/*.md` | three templates, each ≤ one page, with Project Context, stage → command map and modes; shipped byte for byte in `project/assets/instructions/` |
 | C24 | P11 dev agent stops at spec | read | `templates/instructions/dev.md` → Role | "It stops at spec"; stages 4–10 are Claude Code |
 | C25 | P11 generation | read | `project/references/instructions.md` | instructions are generated from the template for the project's type, through one proposal |
+| C92 | Claude.ai review reads the Claude Code settings | read | `project/references/code-settings.md`, a `dev: true` project whose `Claude/code-{slug}/CLAUDE.md` renamed a board tool after the Claude.ai instructions' Last Updated date | the full audit says which copy and date it read and proposes the rename as one row, worded for Claude.ai (BB-491) |
+| C93 | A Claude Code–only change gets no row | read | same, the copy adds a hook and a release step | no row for either; at most one pointer line when the instructions have none |
+| C94 | No Claude Code settings copy | read | same, `code-{slug}/` missing | one line saying no copy was found; the audit carries on |
 
 ## 🔧 Assistant tools and dependencies (BB-204, BB-205)
 

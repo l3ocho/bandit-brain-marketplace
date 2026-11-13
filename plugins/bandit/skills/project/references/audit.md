@@ -86,6 +86,9 @@ template section. Note:
   `references/project-context.md` (who reads it, the scope line, the names-only line). Any other
   wording (old skill names, an old scope line, an old lookup tool) → ⚠️ **Legacy context lines**:
   the updated version carries the current three lines.
+- **Claude Code settings** (`dev: true` projects) — read `references/code-settings.md` and follow it:
+  the Claude Code settings copy in the vault is read, and each new tool or architecture change that
+  fits Claude.ai's job becomes a row in this proposal; Claude Code–only features get none.
 - **Legacy tool names** — every Bandit Brain tool the instructions name, anywhere, must be a current
   one: `get_context`, `list_tasks`, `get_task`, `add_comment`, `list_events`, `create_tasks`,
   `update_tasks`, `reopen_tasks`, `delete_tasks`, `manage_subtasks`, `manage_recurrence`,

@@ -5,6 +5,7 @@ All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace s
 ## Unreleased
 
 ### Added
+- **The Claude.ai settings review brings over tool and architecture changes from the Claude Code settings** (BB-491). On a dev project, a full audit or a targeted update of the Claude.ai instructions now reads the project's Claude Code settings copy in the vault, says which copy and date it read, and turns each newer change to the board and vault tools, connectors, the app's modules and record homes, skill names or Project Context into a row in the same proposal, worded for Claude.ai. Features only Claude Code uses (sprints, builds, tests, releases, deploys, hooks, agents) get no row, at most a pointer, because the two surfaces have different jobs. Where the two disagree, the row shows both and says which wins. New reference `project/references/code-settings.md`.
 - **A pre-sprint report before each sprint starts** (BB-402). The sprint map drawn at planning is the report: each wave now shows its estimated time with a low-to-high range, and the header shows the sprint's total. The estimate comes from the project's own past waves (`sprint_data.py --estimate`: the median minutes per effort point, with the middle half as the range); with fewer than 5 timed waves the map says "no estimate yet". Each redraw after a wave puts its measured time next to its estimate. The plan's final message names the map first. Checker rule ES1.
 
 ### Fixed

@@ -26,6 +26,7 @@ restates them.
 | `references/reference-template.md` | **Before anything else**: every section, its audit criteria, the metadata block, the token budget |
 | `references/project-context.md` | The Project Context block: keys, format, repo copy, dev mirror, Claude Code twin |
 | `references/dev-mirror.md` | Onboarding or auditing a `dev: true` project |
+| `references/code-settings.md` | Auditing or updating a `dev: true` project's Claude.ai instructions: what to bring over from its Claude Code settings |
 | `references/workdir.md` | A Claude Code twin: onboarding, a twin version change, an S12 row |
 | `references/gotchas.md` | Once, before onboarding or an audit |
 

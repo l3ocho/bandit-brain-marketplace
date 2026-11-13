@@ -64,7 +64,13 @@ These start outside, so no file here triggers them. Each has its own check.
 A place the done check lists as open, checked and found to need nothing for this release. One line
 each: the path as the map writes it, then why. `scripts/release.py --write` empties this list.
 
-- none yet
+- `CLAUDE.md` — the "Done means released" rule and the approval line are unchanged by this release.
+- `bandit.yaml` — the repo's own release is `release.py`, which already holds its gate; it needs no `release_checks` and has no `testdata`.
+- `tests/fixture-vault/SprintData/**` — `sprint_data.py`'s CSV output is unchanged; the new `--estimate` mode has its own fixture (`tests/fixture-map/estimate.csv`).
+- `tests/fixture-expected/sprint-data.csv` — same reason: no measure added or changed.
+- `plugins/bandit-dev/skills/sprint/references/homes.md` — the sprint data file's home is unchanged.
+- `tests/fixture-vault/**` — the new listing check has its own fixtures (`tests/fixture-listing/`); the vault fixtures still pass unchanged.
+- `docs/install.md` — no new requirement: the new hook ships inside `bandit-dev`, and the requirements table lists plugins, not hooks.
 
 ## ✅ Before saying done
 

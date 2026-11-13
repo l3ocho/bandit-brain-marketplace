@@ -14,6 +14,8 @@ folder and ask, never assume the highest `v{N}`), and the exact change.
 
 1. **Read** the production instructions file raw, and keep its etag. Missing or unreadable → stop
    and report; nothing is written.
+1b. **A `dev: true` project:** also read its Claude Code settings copy as `references/code-settings.md`
+   says. New tool or architecture changes that fit Claude.ai's job go back as extra fix rows (step 2).
 2. **Apply only the requested change** to this version. No audit, no reformatting. Anything else
    noticed goes back as an **extra fix row** (target + exact change) in the same hand-over, for
    the caller's proposal: never folded in silently, never just mentioned. Check the new value

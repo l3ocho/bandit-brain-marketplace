@@ -2,7 +2,7 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
-## Unreleased
+## 0.20.0 · 2026-11-13
 
 ### Added
 - **The Claude.ai settings review brings over tool and architecture changes from the Claude Code settings** (BB-491). On a dev project, a full audit or a targeted update of the Claude.ai instructions now reads the project's Claude Code settings copy in the vault, says which copy and date it read, and turns each newer change to the board and vault tools, connectors, the app's modules and record homes, skill names or Project Context into a row in the same proposal, worded for Claude.ai. Features only Claude Code uses (sprints, builds, tests, releases, deploys, hooks, agents) get no row, at most a pointer, because the two surfaces have different jobs. Where the two disagree, the row shows both and says which wins. New reference `project/references/code-settings.md`.

@@ -109,8 +109,13 @@ the `bandit-staging` board only. `read` cases are checked by reading the shipped
 | C60 | Bills | cli | a hand-paid made-up bill | `create` with `needsHumanAction: true`; no `create_tasks` call |
 | C61 | Reconcile | cli | a statement balance that differs from cleared | shows the difference, lists uncleared rows, no adjustment without a yes |
 | C62 | Person-only actions | cli | "delete this category", "reverse that import" | no call, or `ASSISTANT_CANNOT` reported as "do it in the app" |
-| C63 | Review | cli | `review month` with accounts in two currencies | one block per currency, no combined total |
+| C63 | Review | cli | `review month` with accounts in two currencies | one block per currency; a combined figure only as the app's net worth estimate |
 | C64 | Finance tools = the app's | auto (AT1) | a finance tool name removed from `FINANCE_TOOLS` | AT1 fails naming it |
+| C100 | Room left this year | staging | "How much TFSA room do I have left this year?" with a room entered for a made-up year, then a year with none | `contribution_room` read; the entered room, what counted and the room left in its currency; the year with none reads "Not entered", never zero (BB-526) |
+| C101 | Net worth in one currency | staging | "What's my net worth in CAD?" with a made-up CAD investment account and a USD account over several months, one USD-to-CAD rate inside its history | the app's newest month labelled Estimate, the USD account's rate and date, earlier months' left-out accounts named (`no_rate`); no figure worked out by Claude; a rate entered only as the user gives it, never proposed (BB-526) |
+| C102 | A transfer over the room | staging | a transfer into the made-up TFSA larger than its room left | the app's `OVER_ROOM` line shown, nothing saved; saved only after the yes, with `overRoomConfirmed: true` on the same call (BB-526) |
+| C103 | Market value entered and read | staging | a value for the made-up investment account | `set_market_value`, then `market_value` read with the app's gain; the account's balance unchanged (BB-526) |
+| C104 | Import into an investment account | staging | a few rows imported into the made-up investment account | the "Dividend, interest or fee" mark offered on the rows the user picks, one `update` with `incomeMark: true` each (BB-526) |
 
 ## 🗺️ Domain scope (debug D2, 2026-10-14)
 

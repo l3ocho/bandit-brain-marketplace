@@ -1,6 +1,6 @@
 ---
 name: "finance"
-description: "Works the Bandit Brain Finance module: setup, logging spending, bank CSV import, sorting the uncategorised, the budget month, bills, reconciling, money reviews and a clean-up audit. Use for any request about accounts, transactions, budgets, bills or money reports. Not for board tasks (bandit:tasks)."
+description: "Works the Bandit Brain Finance module: setup, logging, bank CSV import, sorting, the budget month, bills, reconciling, investments, money reviews and a clean-up audit. Use for any request about accounts, transactions, budgets, bills, investments or money reports. Not for board tasks (bandit:tasks)."
 ---
 
 # 💰 Finance
@@ -8,7 +8,8 @@ description: "Works the Bandit Brain Finance module: setup, logging spending, ba
 One skill for the Finance module. The router names each command's reference file: **read it before acting**.
 
 > **The money test.** Every number shown is one the app returned, in its own currency, and every
-> write was seen before it happened. Nothing is guessed, converted or rounded.
+> write was seen before it happened. Nothing is guessed, converted or rounded by Claude; the one
+> converted figure is the app's net worth estimate (`references/money.md` → Currencies).
 
 ## 🧭 Router
 
@@ -24,7 +25,8 @@ Natural language always works ("spent R$40 on Uber yesterday" is `log`).
 | `month` | The budget month: left to assign, overspent, targets, moving money | `references/month.md` |
 | `bills` | Repeating bills and income: due, late, skip, change one, post, retire | `references/bills.md` |
 | `reconcile` | Statement in hand → difference → lock | `references/reconcile.md` |
-| `review` | Forecast, spending by category, income against expense, for a week or a month | `references/review.md` |
+| `review` | Forecast, spending by category, income against expense, net worth, for a week or a month | `references/review.md` |
+| `investments` | Subtypes, contributions, room, tax year, market values, goals, exchange rates, net worth | `references/investments.md` |
 | `audit` | Clean-up check over the whole module, findings as fix rows | `references/audit.md` |
 
 | Also read | When |
@@ -42,9 +44,8 @@ Finance is off for this member: say so and stop.
 1. 🗺️ **Scope first** (`references/scope.md`). A `finance:` line in the Project Context names the
    accounts; no line, or a plain chat, means every account the member can see. A name that doesn't
    resolve → stop, never the nearest match
-2. 🪙 **Whole cents, one currency.** Every amount is integer cents with its currency. Never add,
-   compare or total amounts of two currencies; a summary shows one block per currency
-   (`references/money.md`)
+2. 🪙 **Whole cents, one currency.** Every amount is integer cents with its currency. The currency
+   rule and its one exception, the app's net worth estimate, live in `references/money.md`
 3. 👀 **Preview before every bulk write.** Import, bulk edit, auto-assign, rule run, payee merge:
    the preview call first, its result shown, the write only on the user's yes
 4. 🗑️ **Every delete confirmed, one by one.** `finance_delete_items` has no undo and no trash.
@@ -74,9 +75,10 @@ The full list is `references/gotchas.md`: read it once at the start of a session
 
 ## 🚫 Never
 
-- Convert, estimate or round between currencies, or put two currencies in one total
+- Convert, estimate or round between currencies itself (`references/money.md` → Currencies)
 - Guess a CSV's date format, separator or sign: read the first rows and ask when they don't say
-- Retry a variant of a refused call to get past the refusal
+- Retry a variant of a refused call to get past the refusal (`OVER_ROOM` is the app's own confirm
+  step: `references/log.md`)
 - Edit a reconciled transaction, reverse an import, delete an account or category, or change who
   sees an account (`ASSISTANT_CANNOT`): the user does those in the app
 - Write board cards, notes or plans (bandit:tasks, bandit:notes, bandit:plan)

@@ -15,6 +15,7 @@ that month.
 | **Where things stand** | `finance_get_context` | Each scoped account: cleared and working balance |
 | **What's coming** | `finance_get_report { kind: "forecast", horizonDays? }` (default 90) | Per account and per currency: `lowestCents`, `lowestDate` and `firstBelowZeroDate` (read them; never list the daily `points`). 🔴 Any `firstBelowZeroDate` comes first, flagged |
 | **Where it went** | `finance_get_report { kind: "reports", from, to, currency? }` | Spending by category, biggest first; income against expense |
+| **Net worth**, offered | `finance_get_report { kind: "net_worth", currency? }` | The newest month in one reporting currency, labelled Estimate, with what was left out (`references/investments.md` → Net worth) |
 | **The budget** | `finance_get_budget { month, accountId }` per scoped budget | Left to assign, overspent categories (`references/month.md`) |
 | **Loose ends** | Counts only | Uncategorised rows, late bills, accounts not reconciled for a while: each with the command that clears it |
 
@@ -22,7 +23,8 @@ that month.
 
 - Every figure is the app's own. No sums, averages or percentages the app didn't return, except a
   difference between two figures of **one** currency the user asked for, shown with both inputs.
-- One block per currency. `reports` takes one currency per call: call it once per currency in scope.
+- One block per currency (`references/money.md` → Currencies); a combined figure only as the app's
+  net worth estimate. `reports` takes one currency per call: call it once per currency in scope.
 - `reports` returns a `note` saying what it leaves out (transfers, opening balances, what isn't posted, other currencies): show it once under the block.
 - Reports and the forecast count every account the member can see. With a `finance:` line, say in
   one line that the report also includes accounts outside this project's.

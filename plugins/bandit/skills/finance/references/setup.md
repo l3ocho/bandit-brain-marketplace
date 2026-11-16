@@ -27,6 +27,8 @@ One message, plain words, only what the user hasn't already said:
 | Regular bills and income: name, amount, how often, next date, which account | Become schedules (`references/bills.md`) |
 
 Account types: `checking` · `savings` · `cash` · `creditCard` · `loan` · `investment` · `other`.
+An investment account may take a subtype (`tfsa` · `rrsp` · `fhsa` · `nonRegistered` · `crypto`);
+TFSA, RRSP or FHSA makes the app start a goal for it (`references/investments.md` → Subtype).
 A card or loan you owe on opens **negative**. A new account starts **private to the user who made it**: sharing it is the user's own, in the app.
 
 ## 3️⃣ Propose, then write
@@ -36,7 +38,7 @@ the ids earlier ones return), reading each result before the next:
 
 | Order | Call |
 |---|---|
-| Accounts | `finance_manage_accounts { action: "create", name, type, onBudget, openingBalanceCents, openingDate, currency }` |
+| Accounts | `finance_manage_accounts { action: "create", name, type, onBudget, openingBalanceCents, openingDate, currency, investmentSubtype? }` |
 | Groups | `finance_manage_categories { action: "create_group", name, accountId, isIncome? }`: `accountId` names the budget, never guessed |
 | Categories | `finance_manage_categories { action: "create_category", groupId, name }` |
 | Targets | `finance_manage_budget { action: "set_target", categoryId, kind, amountCents?, byMonth?, scheduleId?, priority?, currency }` |
@@ -51,7 +53,7 @@ no amount, so its bill is created first). A target never assigns money by itself
 
 | Ask | Call | Note |
 |---|---|---|
-| Rename, change type, statement days | `finance_manage_accounts { action: "update" }` | `statementCloseDay`, `paymentDueDay`: 1–31 or null |
+| Rename, change type, statement days, subtype | `finance_manage_accounts { action: "update" }` | `statementCloseDay`, `paymentDueDay`: 1–31 or null; `investmentSubtype` or null (a type away from investment clears it) |
 | Move on or off budget | `move_budget_side` with the full account order | 🔴 Confirm first: every budget number changes. `ACCOUNT_BUDGET_NOT_EMPTY` → its budget still has categories; the user removes them in the app |
 | Retire an account | `close` (history kept, reversible with `reopen`) | Deleting an account is the user's own, in the app |
 | Rename, hide, move a category | `rename_category` · `set_hidden` · `move` | Hiding keeps history. `move` stays inside one budget and leaves the assignment history behind: say so |

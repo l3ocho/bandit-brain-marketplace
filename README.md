@@ -24,7 +24,7 @@
 
 - 📥 **Capture and triage**: brain dumps become cards; every card leaves the inbox with its fields answered and its date set last
 - 🗺️ **Domain-aware**: each project works its own board first, reads and writes across its domain, and never sees anything outside it
-- 💰 **Money from chat**: log spending in plain words, import a bank CSV with a preview, sort the uncategorised, run the budget month, bills and reconciliation, without ever mixing currencies
+- 💰 **Money from chat**: log spending in plain words, import a bank CSV with a preview, sort the uncategorised, run the budget month, bills and reconciliation, track investments (room, market values, goals), and see net worth as the app's labelled estimate, never a figure Claude converted
 - 🗂️ **Notes that file themselves**: one set of vault conventions (Obsidian over WebDAV), meeting minutes from a recording, clean rewrites of messy text
 - 🧭 **From idea to plan**: clarify a fuzzy idea, write a project plan and architecture, break it into a gap-checked WBS
 - 🏃 **A sprint pipeline with gates**: plan in waves, an independent plan review, one subagent per wave, test, debug, release on your word

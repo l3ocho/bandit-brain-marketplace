@@ -43,7 +43,8 @@ Only the **current occurrence** exists as a real task. Everything further out is
 
 Use it to answer *"is this week overloaded"* — the Week board shows placement, workload shows density.
 
-Both are counts. **Neither knows how long anything takes.** Weight by `effort` if the tasks carry it, and say that is what you did.
+Both are counts. **Neither knows how long anything takes.** Keep them counts: show each card's Size
+as the app wrote it, never a total of Sizes (`references/board.md` → Size, band and Rank).
 
 ---
 
@@ -52,8 +53,10 @@ Both are counts. **Neither knows how long anything takes.** Weight by `effort` i
 ### `/bandit:tasks week` — read, then date on request
 
 1. `list_tasks { view: "week" }`, filtered to the domain (`references/scope.md` → Filtering)
-2. Report: overdue first (if the Due column exists), then day by day
-3. Mark projections explicitly as recurring, not as tasks
+2. Report: overdue first (if the Due column exists), then day by day; inside each, the app's rank
+   order (`references/board.md` → Size, band and Rank)
+3. Mark projections explicitly as recurring, not as tasks; a projection has no rank and is listed
+   by date. Each card shows its Size, band and Rank as the app wrote them
 4. Flag the heaviest day and any empty stretch
 5. **Stop.** No writes, unless the user asks to plan or date the week: then run **Dating the week** below.
 
@@ -68,7 +71,8 @@ Both are counts. **Neither knows how long anything takes.** Weight by `effort` i
    **`stage/ready` filter** (called by `/bandit:tasks pick-ready` on a dev project): add `tagId` = the
    `stage/ready` tag, `noSprint: true` and `noTagWithPrefix: "sprint/"`. Only approved cards in no
    sprint and with no old sprint tag are candidates. Sprints are read as `references/board.md` → Tags says: a card in a sprint is the sprint's work, not a weekly pick. Nothing else changes
-3. Propose dates as a list. One line per task
+3. Propose dates as a list, candidates in the app's rank order (`references/board.md` → Size, band
+   and Rank). One line per task
 4. On confirmation: `update_tasks { items: [{ taskId, dueDate }, …] }`, ≤100 per call
 5. Read `results` and report refused entries by name (`references/board.md` → Many cards in one call)
 

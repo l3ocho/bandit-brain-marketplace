@@ -42,7 +42,8 @@ On a Workflow board a Dev command says so and stops. Surface roles: `references/
 
 ## 🔒 Hard rules
 
-1. 📅 **Date is king.** A due date is the single strongest signal on a task
+1. 📅 **Date is king.** A due date is the single strongest signal on a task. The app's rank already
+   counts it, so the order inside a group is the app's (`references/board.md` → Size, band and Rank)
 2. 🅿️ **Parked ≠ dated.** A parked task given a due date moves into the board's first column, so
    a parked task never holds a date. The date is set last, when a card leaves the inbox: in the
    same `update_tasks` entry as the move (a move applies before fields) or after it, never before

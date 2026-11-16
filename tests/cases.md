@@ -52,6 +52,10 @@ the `bandit-staging` board only. `read` cases are checked by reading the shipped
 | C18 | P8 Clarified Specification | read | `references/dev-workflow.md` → spec step 1 | a Clarified Specification maps into the Spec; `Source: clarify, {date}` |
 | C19 | P8 audit row | read | `references/audit.md` check 2 | untriaged parked cards come back as one fix row per project |
 | C20 | G4 structure | cli | `audit` on a staging project with a column named like a member | a fix row: make it a lane for that person (tag, lane, re-file, delete the empty column on confirm) |
+| C105 | Today in rank order | staging | `today` with a blocked card and an unsized card among the columns | inside each board of each column, cards by the app's rank, higher first, each with its Size, band and Rank; then the blocked card naming its blocker; then the unsized card saying it has no size; the rank values the app returned recorded beside the order (BB-527) |
+| C106 | Triage of a split-band card | staging | `triage` with a parked card the app bands `split` | a split proposed, nothing split without a yes; a `big` card gets no split proposal (BB-527) |
+| C107 | Triage of an unsized card | staging | `triage` with a parked card with no effort or complexity | an effort and a complexity proposed; nothing written without a yes (BB-527) |
+| C108 | No figure of Claude's own | read + staging | every Size, band and Rank in C105 to C107 against the app's reads | each shown figure is one the app returned; no total, average or Size worked out (BB-527) |
 
 ### 🗃️ Inbox groups (BB-338)
 

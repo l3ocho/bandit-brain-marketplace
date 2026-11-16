@@ -51,7 +51,8 @@ using it. Report a card by the `shortId` its latest read returned.
 **Over-splitting is as wrong as under-splitting.** Three cards that were always one sitting is
 three cards of noise on Execution, three dates to maintain, two dependency links to justify.
 
-**Propose. Never resize silently in either direction.**
+**Propose. Never resize silently in either direction.** The app's band says when a card's size
+calls for a split, and an unsized card gets a size proposed (Size, band and Rank below).
 
 `manage_subtasks { action: "promote", subtaskId }` converts a subtask to a task — it inherits the parent's board and column,
 everything else starts unset, and it returns the new task id.
@@ -65,8 +66,34 @@ They are **instruments**, not decoration.
 | Variable | Means | Behaviour |
 |---|---|---|
 | 🧩 **Complexity** | How tangled the work is | High is normal in early planning. Drive it down before execution |
-| ⏱️ **Effort** | Time range | Too large triggers a split |
-| 🔺 **Priority** | Urgency **only** | Drives sort order. Independent of the other two — a Complex XL task can be top priority |
+| ⏱️ **Effort** | Time range | With complexity, makes the app's Size; the band says when to split |
+| 🔺 **Priority** | Urgency **only** | Feeds the app's Rank, which drives the order. Independent of the other two — a Complex XL task can be top priority |
+
+The stored scales (`references/execution.md` → The three variables) are what the card holds.
+
+### 📐 Size, band and Rank
+
+The one home of this rule. Every card `list_tasks` and `get_task` return carries the app's own
+scores. **The skill never works them out**: it reads them, shows them and orders by them.
+
+| Field | The app's |
+|---|---|
+| `size` | Effort points times complexity; null when unsized |
+| `band` | `fits` · `big` · `split`; null when unsized |
+| `rank` | Value over size, to one decimal, higher goes first. It already counts priority, the due date, the cards waiting on it and its age |
+| `rankBlank` | Why `rank` is null: `unsized` (no effort or no complexity) or `blocked` (an open card or sprint blocks it). Unsized wins: an unsized card that is also blocked reads `unsized`, so read its `blockers` too |
+
+- **Show** Size, band and Rank as the app wrote them, rank to one decimal. Never a figure the app did
+  not return: no total, average or Size worked out from effort and complexity.
+- **Order** inside each group the skill shows (a column, a board, a list of candidates): higher rank
+  first; then the blocked cards, each naming its blocker (the card's `blockers`, or `get_task` →
+  `blockedBy`; a sprint is named as a sprint); then the unsized cards, each saying it has no size.
+  A card both unsized and blocked says both.
+- **Split** only on `split` (any XL, or L and Complex): propose it (Right-sizing above), never done
+  silently. `big` is shown and never triggers a split proposal.
+- **Unsized:** propose an effort and a complexity; write them only on the user's yes.
+- **Missing scores.** A view that carries none (a recurring projection, or an older read): read them
+  from the plain `list_tasks` or `get_task`. A projection has no rank: list it by date.
 
 ---
 

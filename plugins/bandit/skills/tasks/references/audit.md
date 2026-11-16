@@ -59,7 +59,7 @@ Rules in `references/dev.md` and `references/dev-workflow.md`. Every finding is 
 |---|---|---|
 | V1 | **Lane and stage tags** | Every open card has exactly one `lane/*` tag and, except `lane/incident`, exactly one `stage/*` tag. Sprint cards are exempt (`references/dev.md` → Sprint card) |
 | V2 | **Plan note present** | `stage/planned` and `stage/ready` cards name a plan-note filename under `Technical plan`, and bandit:notes finds it filed (its lookup; this skill never restates vault paths). A recurring card may carry a `Runbook:` line instead (`references/dev-workflow.md` → Record homes). A shared sprint plan counts for every card that names it |
-| V3 | **XL cards** | `effort` 5 → split candidate (B7, `references/dev-workflow.md`); the new cards stay in the same sprint. Sprint cards are exempt |
+| V3 | **Split-band cards** | The app's `band` is `split` → split candidate (B7, `references/dev-workflow.md`; `references/board.md` → Size, band and Rank); the new cards stay in the same sprint. Sprint cards are exempt |
 | V4 | **Possible duplicates** | Two open cards in the same area column and lane with the same outcome (B6, `references/dev-workflow.md`). Judgment call: show both |
 | V5 | **Open spec changes** | Cards with a comment starting `Spec change needed:` (`get_task` → `comments`), or a legacy line of it under `Technical plan` |
 | V6 | **Card complete** | Every open card holds every **🧾 Card fields** value and every heading of its lane template (`references/dev.md`). One fix row per card: the missing values and headings, the exact `update_tasks { items: [{ taskId, description, tagIds }] }` entry (one entry per card; `tagIds` per `references/board.md` → Tags). Sprint cards are exempt |

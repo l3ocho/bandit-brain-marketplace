@@ -56,7 +56,8 @@ Tasks that are **assigned to a board** and either:
 
 More than five items live across **Next + Doing** is the signal to stop and say so.
 
-Report the breach. Propose what moves back to To Do or Stand By. **Do not silently trim.**
+Report the breach. Propose what moves back to To Do or Stand By, starting from the lowest rank.
+**Do not silently trim.**
 
 ---
 
@@ -66,7 +67,8 @@ Report the breach. Propose what moves back to To Do or Stand By. **Do not silent
 
 1. `list_tasks({ executionState, boardId })` for `doing`, `next`, `assigned` and `standby`, one call per board of the domain (`references/scope.md` → Filtering)
 2. Report **Doing** first, then **Next**, then To Do; inside each, the home board first, then
-   the rest of the domain by board
+   the rest of the domain by board; inside each board, the app's rank order, each card with its
+   Size, band and Rank as the app wrote them (`references/board.md` → Size, band and Rank)
 3. Flag: cap breach · anything overdue · anything in Stand By older than a week, **except** a
    card in a sprint (a record or a `sprint/*` tag, `references/board.md` → Tags) or an old-way sprint card
    (`references/dev.md` → Sprint card): those wait
@@ -119,7 +121,8 @@ Over 100, or malformed → **whole call refused, nothing changed.**
 
 ## 🎚️ The three variables
 
-Read them off the task; do not invent them.
+Read them off the task; do not invent them. These are the stored scales; the Size, band and Rank
+the app makes from them live in `references/board.md` → Size, band and Rank.
 
 | Field | Scale |
 |---|---|
@@ -129,7 +132,7 @@ Read them off the task; do not invent them.
 
 Priority is **urgency only** and is independent. A Complex XL task can be Urgent.
 
-Effort L or XL sitting in Doing is a split candidate — propose, never act. On a Technical board only XL is (L cards are allowed there, `references/dev-workflow.md` B7).
+A card in Doing the app bands `split` is a split candidate — propose, never act (`references/board.md` → Size, band and Rank).
 
 ---
 

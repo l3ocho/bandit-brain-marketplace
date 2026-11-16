@@ -63,7 +63,7 @@ with these answered, in this order, in one proposal row per card (the user corre
 |---|---|---|
 | 1 | Description | The high-level what and how, block-tag HTML (`references/board.md` → Card descriptions). Detail lives in notes |
 | 2 | Priority | Urgency only |
-| 3 | Effort | Too large → propose the split first (right-sizing below) |
+| 3 | Effort | Banded `split` → propose the split first; unsized → propose an effort (right-sizing below) |
 | 4 | Complexity | High is fine now; it is driven down before execution |
 | 5 | Assignee | `get_context` → `boardMembers[boardId]` (or `members` on a shared board), resolved live |
 | 6 | Column | The board's real column (Stage 2 above) |
@@ -138,11 +138,15 @@ An `update_tasks` entry places a card the same way for one card or a hundred:
 
 Triage is where wrong-sized items get caught, because it is the only pass that sees them all together.
 
+Each card shows its Size, band and Rank as the app wrote them; the band and an unsized card's
+proposed size follow `references/board.md` → Size, band and Rank.
+
 | Split it if | Merge it if |
 |---|---|
-| It needs more than one due date | Three items are one sitting |
-| Parts have different execution states | They only make sense in sequence |
-| One part blocks another | None of them would ever appear on a board alone |
+| The app bands it `split` | Three items are one sitting |
+| It needs more than one due date | They only make sense in sequence |
+| Parts have different execution states | None of them would ever appear on a board alone |
+| One part blocks another | |
 
 **Propose. Never resize silently in either direction.**
 

@@ -2,6 +2,11 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
+## Unreleased
+
+### Added
+- **bandit:tasks uses each card's Size, band and Rank** (BB-527), the app's 0.51.0. The tasks skill reads the scores the app now returns on every card and never works them out: `today` orders each board inside each column by the app's rank, with blocked and unsized cards after it and named as such, and the five-item cap proposes moving back the lowest rank first; the week shows each card's Size, keeps workload as counts and offers cards for dating in rank order; triage, the Doing check and the audit propose a split only for a card the app bands `split`, and propose an effort and complexity for an unsized card, written only on a yes. One home: `tasks/references/board.md` → Size, band and Rank.
+
 ## 0.20.0 · 2026-11-13
 
 ### Added

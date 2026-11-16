@@ -64,7 +64,11 @@ These start outside, so no file here triggers them. Each has its own check.
 A place the done check lists as open, checked and found to need nothing for this release. One line
 each: the path as the map writes it, then why. `scripts/release.py --write` empties this list.
 
-- none yet
+- `plugins/bandit/skills/tasks/references/errors.md` — BB-527 adds no refusal and no new code; the tasks errors stay as they are
+- `plugins/bandit-dev/skills/sprint/references/*.md` — the sprint's sizing points to the dev board's cap (B7), which the app's band agrees with; nothing there reads rank
+- `plugins/bandit-dev/skills/sprint/scripts/check_sprint.py` — BB-527 leaves Card IDs in board.md untouched; the checker reads ids only
+- `plugins/bandit-dev/skills/sprint/scripts/subtask_gate.py` — BB-527 leaves Card IDs in board.md untouched; the gate reads ids only
+- `plugins/bandit-dev/skills/sprint/scripts/sprint_data.py` — BB-527 leaves Card IDs in board.md untouched; the data file reads ids only
 
 ## ✅ Before saying done
 

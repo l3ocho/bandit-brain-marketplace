@@ -16,9 +16,8 @@ Set or change it with `finance_manage_accounts { action: "update", accountId, in
 `null` to clear it. Only an `investment` account takes one (`INVALID_ARGUMENTS` otherwise). Setting
 TFSA, RRSP or FHSA makes the app start a goal for it (its `starter`): say so in the proposal.
 
-`finance_get_context` does not list subtypes: read them from
-`finance_get_report { kind: "goals" }` → `accounts` (every investment account the member sees, with
-its subtype and goal).
+Read it from `finance_get_context` → each account's `investmentSubtype` (null for none). Which goal
+an account is in: `finance_get_report { kind: "goals" }` → `accounts`.
 
 ## 💸 Contributions
 

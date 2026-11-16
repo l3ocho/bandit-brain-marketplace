@@ -81,18 +81,19 @@ scores. **The skill never works them out**: it reads them, shows them and orders
 | `size` | Effort points times complexity; null when unsized |
 | `band` | `fits` · `big` · `split`; null when unsized |
 | `rank` | Value over size, to one decimal, higher goes first. It already counts priority, the due date, the cards waiting on it and its age |
-| `rankBlank` | Why `rank` is null: `unsized` (no effort or no complexity) or `blocked` (an open card or sprint blocks it). Unsized wins: an unsized card that is also blocked reads `unsized`, so read its `blockers` too |
+| `rankBlank` | Why `rank` is null: `unsized` (no effort or no complexity) or `blocked` (an open card or sprint blocks it). Unsized wins: an unsized card that is also blocked reads `unsized`, so read its `blockedBy` too |
 
 - **Show** Size, band and Rank as the app wrote them, rank to one decimal. Never a figure the app did
   not return: no total, average or Size worked out from effort and complexity.
 - **Order** inside each group the skill shows (a column, a board, a list of candidates): higher rank
-  first; then the blocked cards, each naming its blocker (the card's `blockers`, or `get_task` →
-  `blockedBy`; a sprint is named as a sprint); then the unsized cards, each saying it has no size.
+  first; then the blocked cards, each naming its blocker (the card's `blockedBy`, in a list, a view
+  or `get_task`; a sprint is named as a sprint); then the unsized cards, each saying it has no size.
   A card both unsized and blocked says both.
 - **Split** only on `split` (any XL, or L and Complex): propose it (Right-sizing above), never done
   silently. `big` is shown and never triggers a split proposal.
 - **Unsized:** propose an effort and a complexity; write them only on the user's yes.
-- **Missing scores.** A view that carries none (a recurring projection, or an older read): read them
+- **Missing scores.** A view that carries none (the workload view, a recurring projection, or an
+  older read): read them
   from the plain `list_tasks` or `get_task`. A projection has no rank: list it by date.
 
 ---

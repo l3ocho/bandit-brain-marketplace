@@ -53,7 +53,8 @@ as the app wrote it, never a total of Sizes (`references/board.md` → Size, ban
 ### `/bandit:tasks week` — read, then date on request
 
 1. `list_tasks { view: "week" }`, filtered to the domain (`references/scope.md` → Filtering)
-2. Report: overdue first (if the Due column exists), then day by day
+2. Report: overdue first (if the Due column exists), then day by day; inside each, the app's rank
+   order (`references/board.md` → Size, band and Rank)
 3. Mark projections explicitly as recurring, not as tasks; a projection has no rank and is listed
    by date. Each card shows its Size, band and Rank as the app wrote them
 4. Flag the heaviest day and any empty stretch

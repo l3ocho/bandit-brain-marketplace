@@ -97,7 +97,8 @@ Account's: say so before entering one.
 `finance_get_report { kind: "net_worth", currency? }`, one reporting currency (default the
 household's). Show the **newest month first**, labelled **Estimate**: its total, each account's
 figure with its source (balance or market value), each converted account's rate and date, and the
-accounts left out with their reason. Offer the earlier months; never list them all unasked.
+accounts left out with their reason. Offer the earlier months; never list them all unasked. Like the
+reports, it counts every account the member sees (`references/review.md` → Rules for the numbers).
 
 A left-out account (`no_rate`, `no_market_value`) is named, never filled in: offer the rate or the
 value it needs, from the user.

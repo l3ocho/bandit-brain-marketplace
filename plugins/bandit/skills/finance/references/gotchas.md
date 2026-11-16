@@ -12,7 +12,13 @@ session that writes.
 - **A decimal amount.** `12.34` is refused or misread. → Integer cents, signed like the
   transaction (`references/money.md`).
 - **One currency assumed for every account.** Accounts and budgets each have their own. → Read the
-  target's currency from `finance_get_context` and send it with every amount.
+  target's currency from `finance_get_context` and send it with every amount
+  (`references/money.md` → Currencies).
+- **Net worth refused as "converting".** It is the app's estimate, the one converted figure. → Show it
+  labelled Estimate with what was left out (`references/money.md` → Currencies).
+- **A market value added to a balance.** It is not a transaction and never part of the balance. →
+  Show it beside the balance, never in a total with it (`references/investments.md`).
+- **A room not entered read as zero.** `enteredCents` null means not entered. → Say "Not entered".
 - **A guessed CSV date format.** `03/04` is March or April. → Read the rows; when every day is 12 or
   less, ask (`references/import.md`).
 - **Ambiguous import rows dropped without a word.** They are left out by default. → List them and

@@ -44,6 +44,19 @@ own. Show the parts and their total against the parent before writing.
 
 The sending side's category counts as spending in that budget's reports. Deleting one side deletes both.
 
+## 🎟️ Over the room
+
+A `create`, `update` or `transfer` into a TFSA, RRSP or FHSA larger than the member's room left for
+that year saves nothing and answers `OVER_ROOM`, naming the room left. This is the app's own confirm
+step (its "Save anyway"), not a refusal to get around:
+
+1. Show the app's line: the account, the amount, the year and the room left, in its currency.
+2. Ask once whether to save it anyway.
+3. On the user's yes, resend **the same call** with `overRoomConfirmed: true`. No yes → nothing is
+   saved. Never send the flag before the user has seen the line.
+
+Room: `references/investments.md` → Contribution room.
+
 ## ✏️ Edit
 
 `update { transactionId, … }`: only the fields sent change; an amount needs `currency`.

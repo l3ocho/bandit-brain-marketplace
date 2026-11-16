@@ -2,6 +2,14 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
+## Unreleased
+
+### Added
+- **bandit:finance works the investment features** (BB-526), the app's 0.52.0. A new `investments` command and reference: set an investment account's subtype (TFSA, RRSP, FHSA, non-registered, crypto); read contributions per account and year and mark a row "Dividend, interest or fee", one at a time; enter, clear and read contribution room, with a room not entered shown as "Not entered", never zero; read a tax year's RRSP and FHSA contributions; enter, remove and read market values with the app's gain; make, change, delete and read goals with their value at 65, an estimate; enter and remove exchange rates, always as the user gives them; read net worth. `log` handles a transfer over the room as the app's own confirm step: it shows the app's line and saves only on the user's yes. `review` offers net worth; `import` offers the mark on rows imported into an investment account; `setup` takes the subtype.
+
+### Changed
+- **The currency rule has one home and one exception** (BB-526). `finance/references/money.md` now holds it: Claude never converts, estimates or rounds between currencies itself; the one converted figure it shows is the app's net worth, always labelled Estimate, with each converted account's rate and date and the accounts the app left out and why. The skill, its errors, review and gotchas point there instead of restating it, so Claude no longer refuses the app's own net worth.
+
 ## 0.20.0 · 2026-11-13
 
 ### Added

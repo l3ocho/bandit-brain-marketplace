@@ -33,7 +33,7 @@ updated: 2026-10-20
 | 🗃️ | [[#🗃️ bandit:notes\|bandit:notes]]         | `/bandit:notes {command}`     | Vault rules, filing the inbox, domain home pages                                 |
 | ✅   | [[#✅ bandit:tasks\|bandit:tasks]]           | `/bandit:tasks {command}`     | The Bandit Brain task board, plus the dev card workflow on Technical boards  |
 | 🎙️ | [[#🎙️ bandit:minutes\|bandit:minutes]]   | `/bandit:minutes` + the audio | Meeting recording → minutes in the vault                                         |
-| 💰  | [[#💰 bandit:finance\|bandit:finance]]      | `/bandit:finance {command}`   | The Finance module: log, import, sort, the budget month, bills, reconcile, review |
+| 💰  | [[#💰 bandit:finance\|bandit:finance]]      | `/bandit:finance {command}`   | The Finance module: log, import, sort, the budget month, bills, reconcile, review, investments |
 | 🛠️ | [[#🛠️ bandit:project\|bandit:project]] | `/bandit:project {command}`   | Onboarding (instructions + vault + board, one approval) and project instructions |
 | 📐  | [[#📐 bandit:audit\|bandit:audit]]          | `/bandit:audit {command}`     | Domain and project structure: Claude.ai ↔ vault ↔ board                          |
 | 🧭  | [[#🧭 bandit:plan\|bandit:plan]]            | `/bandit:plan {mode}`         | `project`: plan → architecture doc · `wbs`: docs or cards → work breakdown       |
@@ -181,7 +181,7 @@ updated: 2026-10-20
 ### 💰 bandit:finance
 
 > [!abstract] Works the Bandit Brain Finance module from chat
-> `plugin` · [[bandit:finance/SKILL|open skill]] · a `finance: accounts "…"` line in the Project Context limits it to those accounts; no line, or a plain chat, means every account you can see · previews before every bulk write, every delete confirmed, never mixes currencies
+> `plugin` · [[bandit:finance/SKILL|open skill]] · a `finance: accounts "…"` line in the Project Context limits it to those accounts; no line, or a plain chat, means every account you can see · previews before every bulk write, every delete confirmed, never converts money itself: the one combined figure is the app's net worth, labelled Estimate
 
 | Command                       | ⚙️ Modifiers              | Does                                                                                                                         |        | 📚 Reads       |
 |-------------------------------|---------------------------|------------------------------------------------------------------------------------------------------------------------------|--------|----------------|
@@ -193,11 +193,12 @@ updated: 2026-10-20
 | `/bandit:finance month`       | `[YYYY-MM]`               | The budget month: left to assign, overspent, behind on target; assign, move, hold, auto-assign (preview first)               | ✋      | `month.md`     |
 | `/bandit:finance bills`       | —                         | Due and late bills and income; create, skip, amend, post, unmatch, archive. A bill you pay by hand gets the app's "needs action" task | ✋      | `bills.md`     |
 | `/bandit:finance reconcile`   | `{account}`               | Statement in hand → the difference → lock (an adjustment only on your yes)                                                   | ✋      | `reconcile.md` |
-| `/bandit:finance review`      | `[week · month · YYYY-MM]` | Balances, the forecast (below-zero dates first), spending by category, income against expense, one block per currency        | 👀     | `review.md`    |
+| `/bandit:finance review`      | `[week · month · YYYY-MM]` | Balances, the forecast (below-zero dates first), spending by category, income against expense, one block per currency; net worth offered, the app's Estimate | 👀     | `review.md`    |
+| `/bandit:finance investments` | —                         | Subtypes, contributions and the "Dividend, interest or fee" mark, room left ("Not entered", never zero), tax year, market values with the gain, goals at 65, exchange rates (yours, never proposed), net worth labelled Estimate | 👀 → ✋ | `investments.md` |
 | `/bandit:finance audit`       | —                         | Clean-up check: uncategorised, duplicate payees, late or never-matching bills, rules off, budget below zero, not reconciled; fix rows you approve | 👀 → ✋ | `audit.md`     |
 
 > [!note]- 🔧 The Finance tools
-> Every command works through the app's 17 Finance tools: `finance_get_context` (accounts, balances, categories, payees, in one call) · `finance_list_transactions` · `finance_get_budget` · `finance_list_schedules` · `finance_get_report` (`forecast`, `reports`) · `finance_list_rules` · `finance_get_account_history` · `finance_manage_accounts` · `finance_manage_transactions` · `finance_manage_budget` · `finance_manage_categories` · `finance_manage_payees` · `finance_manage_schedules` · `finance_import_transactions` · `finance_manage_reconciliation` · `finance_manage_rules` · `finance_delete_items`. Money is whole cents with its currency; some actions stay yours, in the app (who sees an account, deleting accounts and categories, undoing an import, unlocking a reconciled row).
+> Every command works through the app's 17 Finance tools: `finance_get_context` (accounts, balances, categories, payees, in one call) · `finance_list_transactions` · `finance_get_budget` · `finance_list_schedules` · `finance_get_report` (`forecast`, `reports`, `contributions`, `contribution_room`, `tax_year_contributions`, `goals`, `net_worth`) · `finance_list_rules` · `finance_get_account_history` (with `market_value`) · `finance_manage_accounts` · `finance_manage_transactions` · `finance_manage_budget` · `finance_manage_categories` · `finance_manage_payees` · `finance_manage_schedules` · `finance_import_transactions` · `finance_manage_reconciliation` · `finance_manage_rules` · `finance_delete_items`. Money is whole cents with its currency; some actions stay yours, in the app (who sees an account, deleting accounts and categories, undoing an import, unlocking a reconciled row).
 
 📚 **Also reads:** `scope.md` before every read or write (which accounts) · `money.md` before any amount, date or currency · `errors.md` when a call is refused · `gotchas.md` once at the start of a session that writes.
 

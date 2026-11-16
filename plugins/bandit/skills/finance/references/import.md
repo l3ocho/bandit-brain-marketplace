@@ -57,6 +57,11 @@ The app runs the user's rules and payee default categories on commit, so rows ca
 categorised. Report: how many imported, how many matched bills, how many skipped, how many still
 uncategorised, and offer `sort` for those.
 
+**Into an investment account:** offer the "Dividend, interest or fee" mark on the imported rows the
+user picks, so they don't count as contributions: one
+`finance_manage_transactions { action: "update", transactionId, incomeMark: true }` per row, never a
+bulk edit (`references/investments.md` → Contributions).
+
 ## ↩️ Undo
 
 Reversing an import is the user's own action, in the app. The skill can show what it would remove:

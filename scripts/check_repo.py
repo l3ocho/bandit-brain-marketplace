@@ -1211,9 +1211,12 @@ def check_tag_creation():
            "tags: no helper forbids creating one or asks first; board.md names the app's roles as the gate")
 
 
-# ── AP1 · the approval line: one home, no wave, run or debug step ticks it, close ticks it only on the user's yes ─
+# ── AP1 · the approval line: one home, no wave, run or debug step ticks it, close ticks it only on the user's yes,
+#    and a line the user ticked is the approval: close then runs to the archive without asking ─
 APPROVAL_LINE = "Tested and approved by you"
 NEVER_TICKED = "the approval line is never ticked here"
+TICKED_IS_APPROVAL = "approval line the user has ticked is approved"
+NO_ARCHIVE_ASK = "applied without a question"
 TICKS_IT = re.compile(r"\btick(?:s)?\s+(?:the|its|their)\s+approval\s+line", re.I)
 
 
@@ -1238,6 +1241,8 @@ def approval_problems(files, claude):
     if "Tick the approval line" not in close or "approval line is open" not in close or \
             close.find("Tick the approval line") > close.find("`update_tasks { items: [{ taskId, complete: true }"):
         bad.append("close.md must tick the approval line on the quoted approval before it completes, and refuse an open one")
+    if TICKED_IS_APPROVAL not in close or NO_ARCHIVE_ASK not in close or "applied on the user's yes" in close:
+        bad.append("close.md must take a line the user ticked as the approval and archive without asking (BB-559)")
     c = " ".join(claude.split())
     if "stay in Stand By" not in c or "approval line" not in c or "Only then close the card" in c:
         bad.append("CLAUDE.md 'Done means released' must leave the cards in Stand By until Leo's yes")
@@ -1260,6 +1265,7 @@ def check_approval_line():
                without("execute.md", NEVER_TICKED, "so tick the approval line"),
                without("plan.md", "templates.md` → Approval line"),
                without("close.md", "Tick the approval line"),
+               without("close.md", TICKED_IS_APPROVAL), without("close.md", NO_ARCHIVE_ASK, "applied on the user's yes"),
                without("templates.md", "## Approval line", "## Other"),
                {**files, "plan.md": files["plan.md"] + f"\n{APPROVAL_LINE}\n"}]
     missed = [i for i, m in enumerate(mutants) if not approval_problems(m, claude)]
@@ -1267,7 +1273,8 @@ def check_approval_line():
         bad.append(f"the rule does not fail on every broken copy (missed {missed})")
     report("AP1", not bad, "; ".join(bad) + " (BB-378)" if bad else
            "approval line: one home in templates.md; execute, run and debug never tick it; plan adds and checks it; close "
-           "ticks it on the quoted approval and refuses an open one; the repo CLAUDE.md leaves cards in Stand By until Leo's yes")
+           "ticks it on the quoted approval and refuses an open one; a line the user ticked is the approval and close archives "
+           "without asking; the repo CLAUDE.md leaves cards in Stand By until Leo's yes")
 
 
 # ── SM1 · the sprint map draws every card and link, routes no arrow through a card, follows the recipe ─

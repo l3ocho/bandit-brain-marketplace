@@ -47,7 +47,7 @@ resumes where it stopped.
    use it.
 3. **Add its cards while they are open:** `manage_sprints { action: "add_cards", sprintId, taskIds }`
    with the batch cards that will close, in wave order. A card that stays open (detached, carried, not
-   approved in this chat) is not added: `close.md` step 0 handles it, with its tag and its link to the
+   approved) is not added: `close.md` step 0 handles it, with its tag and its link to the
    sprint card in place of `remove_card`. A card completed by hand before the close cannot join
    (`SPRINT_CARD_COMPLETED`): leave it out and name it in the ledger and the report.
 4. **Date and status:** `update` `expectedDate` = the sprint card's due date (none: the sprint date in

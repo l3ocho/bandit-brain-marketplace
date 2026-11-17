@@ -2,7 +2,7 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
-## Unreleased
+## 0.22.0 · 2026-11-17
 
 ### Changed
 - **Sprint close runs on the approval lines you ticked, with no question** (BB-559). When you run `/bandit-dev:sprint close` and every card's "Tested and approved by you" line is ticked, close takes that as your approval and as the go for the archive: it completes the cards, closes the sprint and archives the folder without asking. It asks only about a card whose line is still open, and you can still stop it or change a step by saying so. Checker rule AP1 has the new cases.

@@ -39,7 +39,7 @@ Rules (each one a failure, not a warning):
   SP15 a closed sprint keeps no paper and no WBS unarchived: a sprint whose ledger records the close (`Status: Closed …`,
        `Current wave: Sprint closed`), whose ledger is archived, or that is named in `--closed` (closed in the app)
        fails while a note with its tag, or its WBS note {project}-sprint-{name}-wbs, has a status other than archived
-Retired with the vault folder: SP5 (the project folder's root, scored by bandit:audit's S16) and the `--listing`
+Retired with the vault folder: SP5 (the project folder's root; bandit:audit's S16, retired with it) and the `--listing`
 mode; SP8 is the repo checker's rule on this script's Stop hook.
 
 Usage:

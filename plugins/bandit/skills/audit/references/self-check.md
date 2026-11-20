@@ -31,7 +31,9 @@
    On a 412, re-read once and re-merge; a second 412 → stop and report.
 7. **Score this project** (`domain` ≠ `none` only). Build a snapshot per `references/snapshot.md`
    with the full board, this domain in `vault.domains`, only this project's folder under
-   `settings`, and the ledger **as just written**. Then:
+   `settings`, only this project's notes under `vault.projects` (from the app's Notes with
+   `notes: app`, else the vault), and the ledger **as just written**. It is a working file in any
+   scratch folder, never saved: `check` runs on any surface and writes only the stamp. Then:
 
    ```
    python {skill folder}/scripts/check_structure.py --rules rules.yaml --rulebook rulebook.md \

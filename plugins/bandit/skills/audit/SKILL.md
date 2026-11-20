@@ -1,6 +1,6 @@
 ---
 name: "audit"
-description: "Audits domain and project structure across Claude.ai, the MyNotes vault and the Bandit Brain board against the structure rulebook, scored by a script into a replayable report of numbered fix rows run through their owner skills. Use to check a project, audit a domain, or close a report."
+description: "Audits domain and project structure across Claude.ai, the MyNotes vault, the app's Notes and the Bandit Brain board against the structure rulebook, scored by a script into a replayable report of fix rows run through their owner skills. Use to check a project, audit a domain, or close a report."
 ---
 
 # 🧱 Audit
@@ -17,13 +17,13 @@ works too: "is this project in sync" → `check`.
 
 | Command | Run from | Does | Reference |
 |---|---|---|---|
-| `check` | Inside the project being checked | Reads this project's running `**Version:**` and Project Context, compares with the vault, writes the stamp, scores this project, runs its fix rows | `references/self-check.md` |
-| `audit {domain}` · `audit all` | Anywhere | One snapshot, the script, its report unedited, every fix row run, report + snapshot written | `references/domain-audit.md` · `references/snapshot.md` |
-| `close {domain}` | Anywhere | Replays the live report; valid → moves it and its snapshot to `_archive/` | `references/domain-audit.md` → Close |
+| `check` | Inside the project being checked, on any surface | Reads this project's running `**Version:**` and Project Context, compares with the vault, writes the stamp, scores this project, runs its fix rows | `references/self-check.md` |
+| `audit {domain}` · `audit all` | Claude Code on the Pi | One snapshot, the script, its report unedited, every fix row run, report + snapshot written | `references/domain-audit.md` · `references/snapshot.md` |
+| `close {domain}` | Claude Code on the Pi, where its snapshot is | Replays the live report; valid → archives it and moves its snapshot to `.audit/_archive/` | `references/domain-audit.md` → Close |
 
 | Read | When |
 |---|---|
-| `references/structure-rulebook.md` · `references/structure-rules.yaml` | Every run, fresh: the standard (S1–S16) and the same rules as data, with `paths.stamps` (the stamp ledger) |
+| `references/structure-rulebook.md` · `references/structure-rules.yaml` | Every run, fresh: the standard (S1–S13; S14–S16 retired) and the same rules as data, with `paths.stamps` (the stamp ledger) |
 | `references/fix-rows.md` | Building fix rows, and before running them: owners, linked rows, order |
 | `references/gotchas.md` | Once, before a `check` or an `audit` |
 
@@ -32,9 +32,10 @@ works too: "is this project in sync" → `check`.
 | Thing | Path | Written by |
 |---|---|---|
 | Rulebook, rules, scorer | `references/structure-rulebook.md`, `references/structure-rules.yaml`, `scripts/check_structure.py` | The bandit-brain-marketplace repo. Read-only here |
-| Stamp ledger | `paths.stamps` in `references/structure-rules.yaml` | `check` |
-| Domain report + snapshot | `MyNotes/{Domain}/Projects/{workflow-project}/audit-{YYYY-MM-DD}.md` and `.snapshot.json` | `audit` |
-| Archived report + snapshot | `MyNotes/{Domain}/_archive/Projects/{workflow-project}/` | `audit` (old report), `close` |
+| Stamp ledger | `paths.stamps` in `references/structure-rules.yaml` (BanditCloud) | `check` |
+| Domain report | Where the workflow project keeps its notes: a `log` note `audit-{YYYY-MM-DD}` on its board (`notes: app`), or `MyNotes/{Domain}/Projects/{workflow-project}/audit-{YYYY-MM-DD}.md` | `audit` |
+| Domain snapshot | `.audit/audit-{Domain}-{YYYY-MM-DD}.snapshot.json` at the root of the folder Claude Code runs from (`paths.snapshots`), git-ignored | `audit` |
+| Archived report + snapshot | The note's status `archived`, or `MyNotes/{Domain}/_archive/Projects/{workflow-project}/`; the snapshot in `.audit/_archive/` | `audit` (old report), `close` |
 
 `{workflow-project}` = the `project:` key of the domain's workflow project. A repo's `CLAUDE.md` +
 `.claude/` are scored through its mirror in `code-{slug}/`, never the lagging GitHub copy.
@@ -51,8 +52,9 @@ with `check`, and `audit` compares stamps with the vault. No stamp → **uncheck
    (`references/fix-rows.md`), never with this skill's own calls. The owner doesn't ask again: the
    command is the go. Its own writes are the report, the snapshot and the stamp ledger. Left for the
    user: only what no tool can do, the paste into Claude.ai
-4. **Writes follow bandit:notes write safety**: new files fail closed, edits carry the bare-hex etag (strip `W/`, `"` and `-gzip`), never `if_match: "*"`,
-   names resolve live, nothing is deleted (`close` moves, never deletes)
+4. **Writes follow bandit:notes write safety** (the report, in the app or the vault; the stamp
+   ledger): new files fail closed, edits carry the bare-hex etag (strip `W/`, `"` and `-gzip`), never
+   `if_match: "*"`, names resolve live, nothing is deleted (`close` archives, never deletes)
 5. **Settings means settings:** a report never goes in a `Claude/ai-*` folder
 
 ## ⚠️ Gotchas

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Score the user's domains against the structure rules (S1–S16).
+"""Score the user's domains against the structure rules (S1–S13; S14–S16 retired 2026-11-20).
 
 Usage:
   check_structure.py --rules structure-rules.yaml --rulebook structure-rulebook.md \
@@ -11,6 +11,8 @@ Usage:
 Same inputs → same bytes. Exit 0 = scored, 2 = an input broke its contract
 (nothing scored), 3 = replay mismatch (the report is not what these inputs produce).
 The model never scores by hand: it builds the snapshot, runs this, and shows the output.
+Snapshots of schema 1 to 7 load. Schema 7 carries a project on the app's Notes (`notes: app`) as its
+notes list; every older schema scores the rules that stay exactly as before.
 """
 import argparse, datetime, hashlib, json, re, sys
 from pathlib import Path
@@ -20,9 +22,10 @@ try:
 except ImportError:  # pragma: no cover
     sys.exit("PyYAML missing: pip install pyyaml")
 
-SCRIPT_VERSION = "5"
+SCRIPT_VERSION = "6"
 S5_ORDER = ["no_stamp", "stamp_matches_newest", "stamp_matches_older",
             "stamp_newer_than_all", "stamp_before_newest_file_date", "otherwise"]
+RETIRED = ("S14", "S15", "S16")   # one filename, frontmatter parses, sprint project root: retired 2026-11-20
 MARK = {"ok": "✅", "warn": "⚠️", "fail": "❌", "na": "—", "unchecked": "unchecked"}
 
 
@@ -40,7 +43,7 @@ def load_rules(path, rulebook_path):
     rules = yaml.safe_load(raw)
     for key in ("schema", "rulebook_updated", "levels", "names", "workflow",
                 "project_context", "settings_files", "owners", "row_order", "s9",
-                "surfaces", "s10", "s11", "s12", "vault_content"):
+                "surfaces", "s10", "s11", "s12", "sprint_briefs"):
         if key not in rules:
             raise ContractError(f"rules: missing key `{key}`")
     # Parts of the rules that are logic, not settings: the script implements them in code,
@@ -48,8 +51,9 @@ def load_rules(path, rulebook_path):
     if [c.get("when") for c in rules.get("s5", [])] != S5_ORDER:
         raise ContractError("rules.s5 order differs from what this script implements: update the script too")
     pc = rules["project_context"]
-    if pc.get("optional_keys", []) != ["dev"] or pc.get("dev_values") != ["true"]:
-        raise ContractError("rules.project_context optional_keys/dev_values changed: update the script too")
+    if pc.get("optional_keys", []) != ["dev", "notes"] or pc.get("dev_values") != ["true"] \
+            or pc.get("notes_values") != ["app"]:
+        raise ContractError("rules.project_context optional_keys/dev_values/notes_values changed: update the script too")
     for k in ("lane_tags", "stage_tags", "first_lane_tag", "dev_profile"):
         if k not in rules["s9"]:
             raise ContractError(f"rules.s9: missing `{k}`")
@@ -62,22 +66,21 @@ def load_rules(path, rulebook_path):
                                "manifest", "manifest_max_age_days", "root_allowed", "task_dirs",
                                "task_folder_pattern", "data_extensions", "retention_days",
                                "backup_dir", "backup_name_pattern")),
-                      ("vault_content", ("sprint_folder_pattern", "sprint_tag_prefix", "planning_dir",
-                                         "brief_type", "unique_exempt", "unique_scope"))):
+                      ("sprint_briefs", ("sprint_folder_pattern", "sprint_tag_prefix", "brief_kind"))):
         for k in keys:
             if k not in rules[blk]:
                 raise ContractError(f"rules.{blk}: missing `{k}`")
     if "board_profile" not in rules["workflow"]:
         raise ContractError("rules.workflow: missing `board_profile`")
     for k in ("board_profile", "twin_update", "dev_mirror", "surface_folder", "workdir_guard", "workdir_fix",
-              "brief_move", "duplicate_name", "frontmatter_fix", "root_move"):
+              "brief_move", "brief_tag"):
         if k not in rules["owners"]:
             raise ContractError(f"rules.owners: missing `{k}`")
-    for r in ("S13", "S14", "S15", "S16"):
-        if r not in rules["levels"]:
-            raise ContractError(f"rules.levels: missing `{r}`")
-    if rules["vault_content"]["unique_scope"] != ["_inbox", "Projects"]:
-        raise ContractError("rules.vault_content.unique_scope changed: update the script and the snapshot too")
+    if "S13" not in rules["levels"]:
+        raise ContractError("rules.levels: missing `S13`")
+    retired = sorted(set(rules["levels"]) & set(RETIRED))
+    if retired:
+        raise ContractError(f"rules.levels: {', '.join(retired)} retired (2026-11-20): this script no longer scores them")
     if rules.get("s7", {}).get("prompt_reference_keep") != "highest":
         raise ContractError("rules.s7.prompt_reference_keep changed: update the script too")
     m = re.search(r"^updated:\s*(\S+)", Path(rulebook_path).read_text(), re.M)
@@ -87,6 +90,11 @@ def load_rules(path, rulebook_path):
         raise ContractError(f"rules say rulebook_updated {rules['rulebook_updated']}, "
                             f"rulebook says {m.group(1)}: update both in one proposal")
     return rules, sha12(raw)
+
+
+def optional_note(ctx):
+    """The S4 note's optional keys. Unchanged for a project without `notes`, so old reports read the same."""
+    return " (+ optional `dev`, `notes`)" if "notes" in ctx else " (+ optional `dev`)"
 
 
 def kebab(name):
@@ -99,7 +107,7 @@ def load_snapshot(path):
     s = json.loads(raw)
     errs = []
     need = lambda cond, msg: None if cond else errs.append(msg)
-    need(s.get("schema") in (1, 2, 3, 4, 5, 6), "snapshot.schema must be 1 to 6")
+    need(s.get("schema") in (1, 2, 3, 4, 5, 6, 7), "snapshot.schema must be 1 to 7")
     need(isinstance(s.get("taken_at"), str), "snapshot.taken_at missing")
     b, v = s.get("board", {}), s.get("vault", {})
     need(isinstance(b.get("folders"), list), "board.folders must be a list")
@@ -168,13 +176,20 @@ def load_snapshot(path):
                                           and isinstance(c.get("sprints"), list) for c in (sc or [])),
              "board.sprint_cards must be a list of {id, short_id, sprints} (schema 5)")
         need(isinstance(v.get("projects"), dict), "vault.projects must be an object (schema 5)")
-        need(isinstance(v.get("inbox"), dict), "vault.inbox must be an object (schema 5)")
+        # Schema 7 no longer reads the inbox (S14 retired); schemas 5 and 6 still carry it.
+        need(isinstance(v.get("inbox"), dict) or (s.get("schema") >= 7 and v.get("inbox") is None),
+             "vault.inbox must be an object (schema 5 and 6)")
         for dom, names in (v.get("inbox") or {}).items():
             need(isinstance(names, list) and all(isinstance(n, str) for n in names),
                  f"vault.inbox.{dom} must be a list of filenames")
         for dom, projs in (v.get("projects") or {}).items():
             for slug_, pd in projs.items():
                 ev_ = f"vault.projects.{dom}.{slug_}"
+                if s.get("schema") >= 7:
+                    need(pd.get("storage") in ("vault", "app"), f"{ev_}.storage must be `vault` or `app` (schema 7)")
+                    if pd.get("storage") == "app":
+                        errs.extend(app_entry_errors(ev_, pd))
+                        continue
                 need(isinstance(pd.get("entries"), list), f"{ev_}.entries missing")
                 need(isinstance(pd.get("frontmatter"), dict), f"{ev_}.frontmatter missing (an empty object when none was read)")
                 listed = {e.get("name"): e.get("dir") for e in pd.get("entries") or []}
@@ -196,6 +211,29 @@ def load_snapshot(path):
     if errs:
         raise ContractError("snapshot: " + "; ".join(errs))
     return s, sha12(raw)
+
+
+def app_entry_errors(ev_, pd):
+    """Schema 7: a project on the app's Notes, as its board's notes (`notes_list`, briefs read with `notes_get`)."""
+    errs = []
+    notes = pd.get("notes")
+    if not isinstance(notes, list):
+        return [f"{ev_}.notes must be a list (schema 7, storage app)"]
+    for i, n in enumerate(notes):
+        if not isinstance(n, dict):
+            errs.append(f"{ev_}.notes[{i}] must be an object")
+            continue
+        for k in ("id", "title", "kind", "status"):
+            if not isinstance(n.get(k), str):
+                errs.append(f"{ev_}.notes[{i}].{k} must be text")
+        if not (isinstance(n.get("cards"), list) and all(isinstance(c, str) for c in n["cards"])):
+            errs.append(f"{ev_}.notes[{i}].cards must be a list of card ids")
+        tags = n.get("tags")
+        if not (tags is None or (isinstance(tags, list) and all(isinstance(x, str) for x in tags))):
+            errs.append(f"{ev_}.notes[{i}].tags must be a list of tags, or null when not read")
+        if n.get("kind") == "brief" and n.get("cards") and tags is None:
+            errs.append(f"{ev_}: brief `{n.get('title')}` is linked to a card, but its tags weren't read (notes_get)")
+    return errs
 
 
 # ───────────────────────── helpers ─────────────────────────
@@ -304,8 +342,9 @@ class Domain:
                                      st.get("folder"), self.rules["owners"]["decide"], "S6"))
         slugs = {f[3:] for f in settings if f.startswith("ai-")}
         for ps in sorted(self.vprojects):
-            if ps not in slugs and self.is_sprint_project(self.vprojects[ps]):
-                self.unchecked.append(f"Projects/{ps}/: sprint folders but no `ai-{ps}/` project → S13, S15, S16 not scored")
+            pd = self.vprojects[ps]
+            if ps not in slugs and pd.get("storage", "vault") == "vault" and self.is_sprint_project(pd):
+                self.unchecked.append(f"Projects/{ps}/: sprint folders but no `ai-{ps}/` project → S13 not scored")
         for sf in sorted(self.surfaces):
             if sf.split("-", 1)[1] not in slugs:
                 self.unchecked.append(f"{sf}: no `ai-{sf.split('-', 1)[1]}/` project → surface not scored")
@@ -403,6 +442,8 @@ class Domain:
                 problems.append(f"type `{ctx['type']}` unknown")
             if "dev" in ctx and ctx["dev"] not in pc["dev_values"]:
                 problems.append(f"dev `{ctx['dev']}` must be `true` or absent")
+            if "notes" in ctx and ctx["notes"] not in pc["notes_values"]:
+                problems.append(f"notes `{ctx['notes']}` must be `app` or absent")
             if board_kind not in pc["board_forms"]:
                 problems.append(f"board form `{board_kind}` not allowed ({', '.join(pc['board_forms'])})")
             elif board_kind == "project" and board_name not in self.all_board_names:
@@ -411,7 +452,7 @@ class Domain:
                     and board_name not in {b["name"] for b in self.boards}:
                 problems.append(f"board `{board_name}` is outside the `{self.name}` folder")
             R.append(self.res("S4", "bad" if problems else "ok",
-                              "; ".join(problems) or f"5 required keys (+ optional `dev`), board `{ctx['board']}` resolves",
+                              "; ".join(problems) or f"5 required keys{optional_note(ctx)}, board `{ctx['board']}` resolves",
                               f"{ev}.instructions[{chosen[0]}].context"))
             s4_board_problems = [p for p in problems if p.startswith("board")]
             for p in problems:
@@ -688,11 +729,11 @@ class Domain:
         # S12 · Claude Code working folder (twin projects)
         R.append(self.s12(folder, fslug, ctx, is_dev, code, code_name, cpath, rows, unchecked))
 
-        # S13, S15, S16 · vault content of a sprint project
-        R.extend(self.vault_content(folder, fslug, rows))
+        # S13 · a sprint card's brief is with its sprint (vault folder or app tag)
+        R.append(self.sprint_briefs(folder, fslug, ctx, rows, unchecked))
 
         R.insert(0, s5)
-        order = ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8", "S9", "S10", "S11", "S12", "S13", "S15", "S16"]
+        order = ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8", "S9", "S10", "S11", "S12", "S13"]
         R.sort(key=lambda r: order.index(r["rule"]))
         return {"folder": folder, "title": title, "results": R, "rows": rows, "unchecked": unchecked,
                 "mine": mine, "is_wf": is_wf, "newest_pending": None if use_newest else pending,
@@ -804,119 +845,95 @@ class Domain:
             note += " · manifest truncated: fix these, then re-run"
         return self.res("S12", "bad" if probs else "ok", note, ev + ".workdir")
 
-    # ---------- vault content (S13–S16, schema 5) ----------
+    # ---------- S13 · sprint briefs (vault: schema 5; app: schema 7) ----------
     def is_sprint_project(self, pd):
-        pat = re.compile(self.rules["vault_content"]["sprint_folder_pattern"])
+        pat = re.compile(self.rules["sprint_briefs"]["sprint_folder_pattern"])
         return any(e["dir"] and "/" not in e["name"] and pat.match(e["name"]) for e in pd["entries"])
 
     @staticmethod
     def parse_fm(raw):
-        """(mapping or None, error or None). error = (line number in the block, key on or above it)."""
+        """The frontmatter as a mapping, or None when it is missing or doesn't parse (S15 retired: not scored)."""
         if raw is None:
-            return None, None
+            return None
         try:
             data = yaml.safe_load(raw)
-        except yaml.YAMLError as e:
-            mark = getattr(e, "problem_mark", None) or getattr(e, "context_mark", None)
-            lines = raw.split("\n")
-            n = min(mark.line, len(lines) - 1) if mark is not None else 0
-            key = None
-            for i in range(n, -1, -1):
-                m = re.match(r"^([A-Za-z0-9_-]+):", lines[i]) if lines else None
-                if m:
-                    key = m.group(1)
-                    break
-            return None, (n + 1, key)
-        return (data if isinstance(data, dict) else None), None
+        except yaml.YAMLError:
+            return None
+        return data if isinstance(data, dict) else None
 
-    def vault_content(self, folder, fslug, rows):
-        rules, own = self.rules["vault_content"], self.rules["owners"]
-        out = []
+    def want_tags(self, card):
+        """The sprint-{name} words of the sprints holding a card (a real sprint's name, or its old tag), or []."""
+        prefix = self.rules["sprint_briefs"]["sprint_tag_prefix"]
+        sprints = self.sprint_of.get(card) or self.sprint_of.get(card.upper()) or []
+        # A real sprint's name is free text; its folder and its tag are the name in kebab-case (bandit:notes).
+        return [f"sprint-{kebab(s[len(prefix):] if s.startswith(prefix) else s)}" for s in sprints]
+
+    def sprint_briefs(self, folder, fslug, ctx, rows, unchecked):
+        rules, own = self.rules["sprint_briefs"], self.rules["owners"]
         ev = f"vault.projects.{self.name}.{fslug}"
         if self.snap["schema"] < 5:
-            return [self.res(r, "unchecked", f"Snapshot schema {self.snap['schema']} has no project files", "snapshot.schema")
-                    for r in ("S13", "S15", "S16")]
+            return self.res("S13", "unchecked", f"Snapshot schema {self.snap['schema']} has no project files", "snapshot.schema")
         pd = self.vprojects.get(fslug)
+        on_app = bool(ctx and ctx.get("notes") in self.rules["project_context"]["notes_values"])
+        if self.snap["schema"] >= 7:
+            held = None if pd is None else pd["storage"]
+            if on_app != (held == "app"):
+                unchecked.append(f"{folder}: the Project Context and the snapshot disagree on where its notes are "
+                                 "→ rebuild the snapshot (`references/snapshot.md`)")
+            if on_app and held != "app":
+                return self.res("S13", "unchecked", "Project Context says `notes: app`, the snapshot "
+                                + ("has no notes for it" if pd is None else "holds vault files") + ": rebuild the snapshot", ev)
+            if not on_app and held == "app":
+                return self.res("S13", "unchecked", "The snapshot holds app notes, the Project Context has no "
+                                "`notes: app`: rebuild the snapshot", ev)
+            if held == "app":
+                return self.sprint_briefs_app(folder, pd, ev, rows)
         if pd is None:
-            return [self.res(r, "na", f"No `Projects/{fslug}/`", ev) for r in ("S13", "S15", "S16")]
+            return self.res("S13", "na", f"No `Projects/{fslug}/`", ev)
         if not self.is_sprint_project(pd):
-            return [self.res(r, "na", "No sprint folders", ev) for r in ("S13", "S15", "S16")]
+            return self.res("S13", "na", "No sprint folders", ev)
         base = f"MyNotes/{self.name}/Projects/{fslug}"
-        n0 = len(rows)
-        parsed, broken = {}, []
-        for f in sorted(pd["frontmatter"]):
-            data, err = self.parse_fm(pd["frontmatter"][f])
-            if err:
-                line, key = err
-                broken.append(f"`{f}` (line {line}, key `{key or '?'}`)")
-                rows.append(Row(f"Quote the value of `{key or '?'}` in `{f}` so its frontmatter parses (YAML style)",
-                                f"{base}/{f}", own["frontmatter_fix"], "S15"))
-            elif data is not None:
-                parsed[f] = data
-        # S13 · a brief of a sprint card sits in that sprint's folder
         misplaced = []
-        prefix = rules["sprint_tag_prefix"]
-        for f in sorted(parsed):
-            fm = parsed[f]
-            if fm.get("type") != rules["brief_type"]:
+        for f in sorted(pd["frontmatter"]):
+            fm = self.parse_fm(pd["frontmatter"][f])
+            if fm is None or fm.get("type") != rules["brief_kind"]:
                 continue
             bt = str(fm.get("board-task") or "")
-            sprints = self.sprint_of.get(bt) or self.sprint_of.get(bt.upper())
-            if not sprints:
+            want = self.want_tags(bt) if bt else []
+            if not want:
                 continue
             top = f.split("/", 1)[0] if "/" in f else ""
-            # A real sprint's name is free text; its folder is the name in kebab-case (bandit:notes §1).
-            want = [f"sprint-{kebab(s[len(prefix):] if s.startswith(prefix) else s)}" for s in sprints]
             if top not in want:
                 misplaced.append(f"`{f}` (card {bt} → `{want[0]}/`)")
-                rows.append(Row(f"Move the brief `{f}` into `{want[0]}/` (its card's sprint)", f"{base}/{f}",
-                                own["brief_move"], "S13"))
-        out.append(self.res("S13", "bad" if misplaced else "ok",
-                            "; ".join(misplaced) or "Every sprint card's brief is in its sprint folder", ev))
-        # S15 · frontmatter parses
-        out.append(self.res("S15", "bad" if broken else "ok",
-                            "Doesn't parse: " + "; ".join(broken) if broken else f"{len(pd['frontmatter'])} note(s) parse", ev))
-        # S16 · the root holds only the hub, sprint-* folders and planning/
-        pat = re.compile(rules["sprint_folder_pattern"])
-        stray = []
-        for e in sorted(pd["entries"], key=lambda e: e["name"]):
-            n = e["name"]
-            if "/" in n:
-                continue
-            if (not e["dir"] and n == f"{fslug}.md") or (e["dir"] and (pat.match(n) or n == rules["planning_dir"])):
-                continue
-            stray.append(f"`{n}{'/' if e['dir'] else ''}`")
-            if e["dir"]:
-                rows.append(Row(f"Move `{n}/` into `{rules['planning_dir']}/` or its card's sprint folder", f"{base}/{n}",
-                                own["root_move"], "S16"))
-            else:
-                rows.append(Row(f"Move `{n}` into `{rules['planning_dir']}/`", f"{base}/{n}", own["root_move"], "S16"))
-        out.append(self.res("S16", "bad" if stray else "ok",
-                            "At the root: " + ", ".join(stray) if stray else "Hub, sprint folders and `planning/` only", ev))
-        for r in rows[n0:]:
-            r.proj = folder
-        return out
+                r = Row(f"Move the brief `{f}` into `{want[0]}/` (its card's sprint)", f"{base}/{f}",
+                        own["brief_move"], "S13")
+                r.proj = folder
+                rows.append(r)
+        return self.res("S13", "bad" if misplaced else "ok",
+                        "; ".join(misplaced) or "Every sprint card's brief is in its sprint folder", ev)
 
-    def s14(self):
-        """Domain-wide: no filename twice across Projects/ and _inbox/."""
-        if self.snap["schema"] < 5:
-            return self.res("S14", "unchecked", f"Snapshot schema {self.snap['schema']} has no project files", "snapshot.schema")
-        rules, own = self.rules["vault_content"], self.rules["owners"]
-        seen = {}
-        for ps in sorted(self.vprojects):
-            for e in self.vprojects[ps]["entries"]:
-                if not e["dir"] and e["name"].endswith(".md"):
-                    seen.setdefault(e["name"].rsplit("/", 1)[-1], []).append(f"Projects/{ps}/{e['name']}")
-        for n in sorted(self.snap["vault"]["inbox"].get(self.name, [])):
-            if n.endswith(".md"):
-                seen.setdefault(n, []).append(f"_inbox/{n}")
-        dups = sorted((n, sorted(locs)) for n, locs in seen.items() if len(locs) > 1 and n not in rules["unique_exempt"])
-        for n, locs in dups:
-            self.rows.append(Row(f"`{n}` exists {len(locs)} times: archive the consumed copy (on proof) or rename one",
-                                 ", ".join(f"MyNotes/{self.name}/{l}" for l in locs), own["duplicate_name"], "S14"))
-        return self.res("S14", "bad" if dups else "ok",
-                        "; ".join(f"`{n}` × {len(l)}" for n, l in dups) or "No filename twice in `Projects/` and `_inbox/`",
-                        f"vault.projects.{self.name} + vault.inbox.{self.name}")
+    def sprint_briefs_app(self, folder, pd, ev, rows):
+        """A brief of a card in sprint {name} carries the tag sprint-{name} (notes on the app's Notes)."""
+        rules, own = self.rules["sprint_briefs"], self.rules["owners"]
+        board = pd.get("board") or "its board"
+        missing, seen = [], 0
+        for n in sorted(pd["notes"], key=lambda n: (n["title"], n["id"])):
+            if n["kind"] != rules["brief_kind"]:
+                continue
+            want = sorted({w for c in n["cards"] for w in self.want_tags(c)})
+            if not want:
+                continue
+            seen += 1
+            if not set(want) & set(n["tags"] or []):
+                missing.append(f"`{n['title']}` (card {', '.join(n['cards'])} → tag `{want[0]}`)")
+                r = Row(f"Tag the brief `{n['title']}` `{want[0]}` (its card's sprint), keeping its other tags",
+                        f"Bandit Brain note \"{n['title']}\" ({n['id']}) on \"{board}\"", own["brief_tag"], "S13")
+                r.proj = folder
+                rows.append(r)
+        if not seen:
+            return self.res("S13", "na", "No brief of a sprint card", ev)
+        return self.res("S13", "bad" if missing else "ok",
+                        "; ".join(missing) or "Every sprint card's brief carries its sprint's tag", ev)
 
     def kind(self, board):
         """The board's profile (schema 6); older snapshots carry the app's old type in its place."""
@@ -987,7 +1004,6 @@ class Domain:
                 self.rows.append(Row("Pick the one workflow project; retype the others", self.name,
                                      self.rules["owners"]["decide"], "S3"))
         D.insert(1, self.res("S3", "bad" if probs else "ok", "; ".join(probs) or f"`{wf[0]['name']}`", "board.projects"))
-        D.append(self.s14())
         pats = [re.compile(p) for p in self.rules["names"]["banned_board_patterns"]]
         for b in self.boards:
             if any(p.search(b["name"]) for p in pats):
@@ -1106,7 +1122,8 @@ def main():
     if a.replay:
         text = Path(a.replay).read_text()
         d = re.search(r"^# 🔍 (\S+) structure audit", text, re.M)
-        if not d or d.group(1) not in reports or reports[d.group(1)] != text:
+        # Trailing newlines aside (a note's text may come back without its last one), byte for byte.
+        if not d or d.group(1) not in reports or reports[d.group(1)].rstrip("\n") != text.rstrip("\n"):
             print("REPLAY MISMATCH — this report is not what these inputs produce. Treat it as invalid.")
             return 3
         print("REPLAY OK")

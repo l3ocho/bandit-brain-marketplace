@@ -3,13 +3,21 @@
 > Scores domains against the structure rulebook with `scripts/check_structure.py` and writes one
 > report per domain, with its snapshot. Runs every fix row in the same turn: no approval asked.
 
+**Run from Claude Code on the Pi.** The snapshot is a data file in `.audit/` at the root of the
+folder Claude Code runs from (`paths.snapshots`), so `audit` and `close` run there; from Claude.ai,
+say so and stop. Pick a folder whose root may hold `.audit/`: a repository, or an agent's folder
+without the working-folder guard. A Claude Code twin's working folder refuses it (its guard keeps
+the root to the S12 layout). A repository that does not ignore `.audit/` in its `.gitignore`: say
+so, as the sprint helper does for `.sprint/`.
+
 ## 📥 Gather (read-only)
 
 Build the three input files exactly as `references/snapshot.md` says: `rules.yaml`,
 `rulebook.md`, `snapshot.json`. **One snapshot per run.** `audit all` scores every domain from that
 single pull, so all four reports describe the same moment.
 
-The domain must be a folder in `MyNotes`. Not there → stop and list the domains that exist.
+The domain must be a folder in `MyNotes` (its settings live there whichever storage holds its
+notes). Not there → stop and list the domains that exist.
 
 ## 🧮 Score: the script's job
 
@@ -47,28 +55,37 @@ Right after the report is shown, no question:
 
 ## 📄 Report
 
-Two new files per domain, written every run (new files: omit `if_match`):
+Per domain, written every run: the report where the domain's **workflow project** keeps its notes
+(its Project Context: `notes: app`, or no line for the vault), and the snapshot on the Pi.
 
-| File | Content |
-|---|---|
-| `MyNotes/{domain}/Projects/{workflow-project}/audit-{YYYY-MM-DD}.md` | The script's `out/audit-{domain}-{date}.md`, **byte for byte** |
-| `MyNotes/{domain}/Projects/{workflow-project}/audit-{YYYY-MM-DD}.snapshot.json` | The `snapshot.json` it scored |
+| What | Notes in the app (`notes: app`) | Notes in the vault |
+|---|---|---|
+| The report: the script's `out/audit-{domain}-{date}.md`, **byte for byte** | A note of kind `log`, title `audit-{YYYY-MM-DD}`, summary the report's score line, on the workflow project's board, written straight in through bandit:notes (create without a duplicate, then filed) | `MyNotes/{domain}/Projects/{workflow-project}/audit-{YYYY-MM-DD}.md`, a new file (omit `if_match`) |
+| The snapshot it scored | `.audit/audit-{domain}-{YYYY-MM-DD}.snapshot.json` | the same |
 
 - Never into `Claude/ai-*`: that's the settings folder, for instructions and the reference doc only — never project logs, working notes, decision journals, discussion records, reports, briefs, plans or drafts.
-- The workflow project's `Projects/` folder missing → a separate row (`bandit:notes` creates it).
-- A live report already there (valid or **superseded**, see Replay) → archive it and its snapshot,
-  as-is, to `_archive/Projects/{workflow-project}/` before the new report is written. An invalid
-  one is archived too; say it failed replay.
+- In the vault, the workflow project's `Projects/` folder missing → a separate row (`bandit:notes` creates it).
+- A live report already there (valid or **superseded**, see Replay) → archive it as-is before the
+  new report is written: in the app `notes_set_status` → `archived` (through bandit:notes), in the
+  vault moved to `_archive/Projects/{workflow-project}/` with its old vault snapshot, if any. Its
+  snapshot in `.audit/` moves to `.audit/_archive/`. An invalid one is archived too; say it failed replay.
+- The live report is found the same way every time: in the app, the workflow board's notes
+  (`notes_list`) of kind `log` whose title starts `audit-`; in the vault, `audit-*.md` in the
+  workflow project's folder.
 
 ## 🔁 Replay
 
 ```
 python {skill folder}/scripts/check_structure.py --rules rules.yaml --rulebook rulebook.md \
-    --snapshot {saved snapshot} --replay {saved report}
+    --snapshot .audit/audit-{domain}-{date}.snapshot.json --replay {saved report}
 ```
 
-- **Superseded first.** No footer, or a footer whose rules or script hash differs from today's →
-  the report was built under other rules and can never replay. It isn't invalid, it's superseded:
+`{saved report}` is the report's text written to a file in `.audit/` as read: the note's text
+(`notes_get`) or the vault file, raw. The script compares it byte for byte, trailing newlines aside.
+
+- **Superseded first.** No footer, a footer whose rules or script hash differs from today's, or no
+  snapshot of that date in `.audit/` (an audit run before the snapshot moved to the Pi, or from
+  another folder) → the report can never replay. It isn't invalid, it's superseded:
   don't replay it, don't act on its rows, and say which hashes differ. It leaves only through a
   fresh audit (the archive row under Report).
 - `REPLAY OK` → the report is exactly what its snapshot produces.
@@ -83,10 +100,14 @@ python {skill folder}/scripts/check_structure.py --rules rules.yaml --rulebook r
 
 ## 📦 Close (`close {domain}`)
 
-1. Find the live `audit-*.md` and its `.snapshot.json` in
-   `MyNotes/{domain}/Projects/{workflow-project}/`. None → say so.
+Run from Claude Code, in the folder that holds the report's snapshot in `.audit/`.
+
+1. Find the live report (Report, above) and its snapshot in `.audit/`. None → say so.
 2. **Replay** it. Superseded → stop and offer a fresh audit, which archives it. Invalid → stop
    and say why.
-3. Move both files to `MyNotes/{domain}/_archive/Projects/{workflow-project}/` with
-   `nc_webdav_move_resource`. A missing target folder → `bandit:notes` creates it first.
-4. Confirm by listing both folders.
+3. Archive the report: in the app `notes_set_status` → `archived` through bandit:notes; in the
+   vault move it to `MyNotes/{domain}/_archive/Projects/{workflow-project}/` with
+   `nc_webdav_move_resource` (a missing target folder → `bandit:notes` creates it first). Move its
+   snapshot to `.audit/_archive/`.
+4. Confirm: the note read back with status `archived` (in the vault, both folders listed), and
+   `.audit/_archive/` listed.

@@ -3,3 +3,4 @@
 .claude/mirror-stamp.json
 __pycache__/
 .sprint/
+.audit/

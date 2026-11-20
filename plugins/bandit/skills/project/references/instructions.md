@@ -21,7 +21,8 @@ repo; skill rules are never restated here.
 1. **Pick the template** by the table. Read the current instructions (this chat's own, or the vault
    production file for another project, `references/update.md`).
 2. **Fill it:** `{Project Name}`, `{Emoji}`, the overview sentences, the Project Context values (from
-   the current block, `references/project-context.md`), the role line, and the metadata line
+   the current block, `references/project-context.md`; the template's `{notes: app …}` line becomes
+   `notes: app` when the project's notes are in the app's Notes and is removed otherwise), the role line, and the metadata line
    (`references/output.md`). `**Version:**` is the next major of the current one; `instructions_version`
    the next `v{N}` of the vault folder (`references/vault-storage.md`).
 3. **Carry over what the project needs and the template lacks** (a project-specific hard rule, a mode

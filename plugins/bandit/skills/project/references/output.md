@@ -1,6 +1,6 @@
 # 📤 Output and metadata
 
-> Read before writing any deliverable: where the instructions and reference doc go, and the metadata fields that track them. Folder mechanics: `references/vault-storage.md`.
+> Read before writing any deliverable: where the instructions and reference doc go, and the metadata fields that track them. Folder mechanics: `references/vault-storage.md`. Settings storage, not notes storage: `references/vault-storage.md` → Settings storage.
 
 ## 🧾 Metadata Storage Fields
 

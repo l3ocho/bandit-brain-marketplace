@@ -5,9 +5,10 @@
 ## 🗄️ Which storage
 
 A project's notes live in one of two storages: **the app's Notes** (`references/storage-app.md`) or
-**the MyNotes vault** (`references/storage-vault.md`). The project's Project Context says which;
-its format is bandit:project's. **No word on it means the vault**, so a project nobody has switched
-keeps working as before. Read it with the domain, before any command and before any other skill's
+**the MyNotes vault** (`references/storage-vault.md`). The project's Project Context says which:
+a `notes: app` line means the app's Notes (the key and its format are bandit:project's). **No line
+means the vault**, so a project nobody has switched keeps working as before. With `notes: app`,
+`domain:` names the board folder of that name, whether or not a vault domain folder exists. Read it with the domain, before any command and before any other skill's
 note is written. A domain-level run with no Project Context (the scheduled `home`) is a vault run.
 
 Settings files (`Claude/ai-{slug}/`, `Claude/code-{slug}/`), the working-folder manifest, a

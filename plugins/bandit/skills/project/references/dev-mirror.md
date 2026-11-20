@@ -3,7 +3,7 @@
 > Read when onboarding or auditing a `dev: true` project. Holds the exact repo change that keeps
 > `MyNotes/{Domain}/Claude/code-{slug}/` a current, Obsidian-visible mirror of the repo's
 > `CLAUDE.md` + `.claude/`. Hook format checked against the Claude Code hooks docs
-> (https://code.claude.com/docs/en/hooks) on 2026-09-28.
+> (https://code.claude.com/docs/en/hooks) on 2026-09-28. Settings storage, not notes storage: `references/vault-storage.md` → Settings storage.
 
 ## 🧭 How it works
 

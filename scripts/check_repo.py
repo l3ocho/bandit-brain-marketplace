@@ -371,7 +371,7 @@ def check_app_tools():
                 f"{len(app_removed)} removed)")
 
 
-# ── AT2 · copies that must match: the project audit's tool list, the Project Context lines ──
+# ── AT2 · copies that must match: the project audit's tool list, the Project Context lines and keys ──
 SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
 CONTEXT_BLOCK = PLUGINS / "bandit" / "skills" / "project" / "references" / "project-context.md"
 PROJECT_AUDIT = PLUGINS / "bandit" / "skills" / "project" / "references" / "audit.md"
@@ -382,6 +382,27 @@ def context_lines(text):
     return [l for l in text.splitlines() if l.startswith(("Read by ", "**Home board first", "Names only:"))][:3]
 
 
+CONTEXT_KEY_RE = re.compile(r"^\{?([a-z]+): ")
+
+
+def context_keys(text):
+    """The key lines of the Project Context block, in order: `domain: …`, or an optional `{dev: true — …}`."""
+    block = text.split("## 🧭 Project Context", 1)[-1].split("Read by ", 1)[0]
+    return [m.group(1) for l in block.splitlines() if (m := CONTEXT_KEY_RE.match(l))]
+
+
+def context_keys_bad(keys, canon, required=5):
+    """The five required keys first, in the block's order, then only optional keys, in the block's order."""
+    if keys[:required] != canon[:required]:
+        return f"required keys {keys[:required]} ≠ {canon[:required]}"
+    rest = keys[required:]
+    if any(k not in canon[required:] for k in rest):
+        return f"unknown key in {rest}"
+    if rest != sorted(rest, key=canon.index):
+        return f"optional keys out of order: {rest}"
+    return ""
+
+
 def check_copies():
     bad = []
     audit = PROJECT_AUDIT.read_text(encoding="utf-8")
@@ -390,14 +411,26 @@ def check_copies():
     if sorted(listed) != sorted(CURRENT_TOOLS + FINANCE_TOOLS):
         bad.append(f"project audit's tool list ≠ CURRENT_TOOLS + FINANCE_TOOLS: "
                    f"{sorted(set(listed) ^ set(CURRENT_TOOLS + FINANCE_TOOLS))}")
-    canon = context_lines(CONTEXT_BLOCK.read_text(encoding="utf-8"))
+    block = CONTEXT_BLOCK.read_text(encoding="utf-8")
+    canon, canon_keys = context_lines(block), context_keys(block)
     if len(canon) != 3:
         bad.append("project-context.md: the block's three lines not found")
-    for f in [ROOT / "CLAUDE.md", *sorted((ROOT / "templates" / "instructions").glob("*.md"))]:
-        if context_lines(f.read_text(encoding="utf-8")) != canon:
+    if canon_keys[:5] != ["domain", "project", "type", "board", "prefix"] or "notes" not in canon_keys:
+        bad.append(f"project-context.md: the block's keys not found: {canon_keys}")
+    for f in [ROOT / "CLAUDE.md", *sorted((ROOT / "templates" / "instructions").glob("*.md")),
+              *sorted((PLUGINS / "bandit" / "skills" / "project" / "assets" / "instructions").glob("*.md"))]:
+        text = f.read_text(encoding="utf-8")
+        if context_lines(text) != canon:
             bad.append(f"{f.relative_to(ROOT)}: Project Context lines ≠ project-context.md")
-    report("AT2", not bad, "; ".join(bad) or "project audit lists the current tools; Project Context lines match "
-           "in CLAUDE.md and the templates")
+        if why := context_keys_bad(context_keys(text), canon_keys):
+            bad.append(f"{f.relative_to(ROOT)}: Project Context keys: {why}")
+    for keys, want in ((["domain", "project", "type", "board", "prefix", "notes", "dev"], "out of order"),
+                       (["domain", "project", "type", "board", "prefix", "vault"], "unknown key"),
+                       (["domain", "project", "type", "prefix"], "required keys")):
+        if want not in context_keys_bad(keys, canon_keys):
+            bad.append(f"the key check passes a broken block {keys}")
+    report("AT2", not bad, "; ".join(bad) or "project audit lists the current tools; Project Context lines and keys "
+           "match in CLAUDE.md, the templates and their shipped copies (3 broken key orders refused)")
 
 
 # ── CL1 · a plugin change since the last release has an Unreleased CHANGELOG entry ──────

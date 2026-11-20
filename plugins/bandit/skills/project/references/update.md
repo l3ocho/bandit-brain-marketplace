@@ -1,6 +1,6 @@
 # 🎯 Targeted update from the vault
 
-> Read for `/bandit:project update`: another project's instructions changed from their vault copy (bandit:audit settings rows use it).
+> Read for `/bandit:project update`: another project's instructions changed from their vault copy (bandit:audit settings rows use it). Settings storage, not notes storage: `references/vault-storage.md` → Settings storage.
 
 ## 🎯 Targeted update from the vault
 

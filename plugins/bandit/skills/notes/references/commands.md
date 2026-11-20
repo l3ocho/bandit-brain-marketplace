@@ -106,8 +106,8 @@ settings folders `Claude/ai-{slug}/` and `Claude/code-{slug}/` stay vault rows (
 
 ### Onboarding rows (run by bandit:project)
 
-The vault step of project onboarding. bandit:project passes `domain`, `project` (slug), `type`,
-`dev` (when set), whether the project has a Claude Code surface (item 8 decides on these two),
+The notes step of project onboarding. bandit:project passes `domain`, `project` (slug), `type`,
+`dev` (when set), `notes` (when set), whether the project has a Claude Code surface (item 8 decides on these two),
 the hub-note summary drafted in its interview, and, for a new domain, the chosen modules. This
 procedure returns rows; bandit:project puts them in its one combined proposal.
 
@@ -144,6 +144,17 @@ procedure returns rows; bandit:project puts them in its one combined proposal.
    A row whose parent folder row was declined is skipped. Report per row.
 5. If the README already existed and any row ran, run `home` afterwards to refresh it (an
    auto-write, `references/storage-vault.md`).
+
+**On the app's Notes** (`notes: app`): no domain scaffold and no folder for notes.
+1. List `MyNotes` and the domain's `Claude/`. Return create rows only for the settings, which stay
+   in the vault: the domain folder and `Claude/` when missing, item 7 `Claude/ai-{slug}/`, and item
+   8 `Claude/code-{slug}/` under the same condition as above. No `init`, core-folder, template,
+   `Projects/` or README rows.
+2. Return one create row for the hub note on the project's board, built as `onboard` does on the
+   app's Notes (above). The board may not exist yet: the row runs after bandit:tasks' board rows.
+3. Domain-level fix rows as in step 3 above, for the settings folders only.
+4. Execute the approved rows: the folders with `nc_webdav_create_directory`, then, once the board
+   exists, the hub note with `notes_create` and `notes_file`, read back. Report per row.
 
 ---
 

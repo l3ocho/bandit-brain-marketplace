@@ -68,6 +68,10 @@ A place the done check lists as open, checked and found to need nothing for this
 each: the path as the map writes it, then why. `scripts/release.py --write` empties this list.
 
 - `README.md` — BB-597 changed only the pointers in the notes skill's `SKILL.md` (which reference to read); no command, requirement or plugin row changes. BB-600 adds the app's Notes path to the notes commands; no command is added, removed or renamed, and the README's command examples stay right. The README's vault wording and the app version the notes skill needs change at the cutover (BB-596).
+- `plugins/bandit/skills/tasks/references/errors.md` — BB-594 changed one wording in `scope.md` (`domain:` names the board folder whichever storage holds the notes); no error code, refusal or recovery changes.
+- `plugins/bandit-dev/skills/sprint/references/*.md` — BB-594's `scope.md` wording changes nothing the sprint reads; where a sprint's papers live on the app's Notes is BB-593's.
+- `plugins/bandit/skills/finance/references/scope.md` — Finance reads only the `finance:` line; the new `notes: app` line does not change its scope.
+- `.claude/hooks/mirror-check.py` — BB-594 added one pointer line to `dev-mirror.md` (settings storage, not notes storage); the script's mechanics are unchanged by design and DM1 is green.
 
 ## ✅ Before saying done
 

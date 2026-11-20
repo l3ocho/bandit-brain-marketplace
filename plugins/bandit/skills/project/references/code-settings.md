@@ -3,6 +3,7 @@
 > Read for a full audit or a targeted update of a `dev: true` project's Claude.ai instructions
 > (`references/audit.md` Step 1, `references/update.md`). It brings over the tool and architecture
 > changes made on the Claude Code side that matter to Claude.ai's job, and nothing else.
+> Settings storage, not notes storage: `references/vault-storage.md` → Settings storage.
 
 The two surfaces have different purposes, so the two settings are never made to match: Claude.ai
 captures, clarifies, triages, writes Specs and keeps the overview; Claude Code plans sprints,

@@ -21,7 +21,8 @@ Phase 5: RECONCILE → Backport findings into the source document and deliver up
 ### Vault Document Source (Check First)
 
 When the chat has a `## 🧭 Project Context` with `domain` and `project`, look in the project's
-planning folder before asking for uploads: `MyNotes/{domain}/Projects/{project}/`, or its
+planning documents before asking for uploads (with `notes: app`, the project's notes, through
+bandit:notes; otherwise the vault folder): `MyNotes/{domain}/Projects/{project}/`, or its
 `planning/` on a project with sprint folders (bandit:notes conventions §1 names the folder):
 
 | Found | Do |

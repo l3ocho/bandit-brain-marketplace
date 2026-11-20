@@ -23,7 +23,7 @@ This skill does NOT do these. It tells the user when to invoke them:
 
 | What | Where |
 |---|---|
-| Folder | `MyNotes/{domain}/Projects/{project}/`, or its `planning/` once the project has sprint folders (bandit:notes conventions §1 names it), with `domain` and `project` from the `## 🧭 Project Context` section (owned by bandit:project). Missing, or `domain: none` → ask for the folder once. Never guess |
+| Folder | `MyNotes/{domain}/Projects/{project}/`, or its `planning/` once the project has sprint folders (bandit:notes conventions §1 names it), with `domain` and `project` from the `## 🧭 Project Context` section (owned by bandit:project). Missing, or `domain: none` → ask for the folder once. Never guess. A project with `notes: app` has no folder: its documents are notes, placed by bandit:notes (`references/model.md` there → Which storage) |
 | Project plan | `{project}-project-plan.md` |
 | Architecture | `{project}-architecture.md` |
 | WBS | `{project}-wbs.md`, written by `wbs` mode (`references/wbs.md`), not this mode |

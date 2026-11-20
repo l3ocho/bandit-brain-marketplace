@@ -9,7 +9,9 @@
    the `## 🧭 Project Context` section of the project instructions (or the repo's `CLAUDE.md`
    on Claude Code). Legacy fallback: `vault_domain` and `vault_project` in the
    line-1 metadata comment (any label: bandit:project `references/reference-template.md` → Marker). Neither, or `domain: none` → the domain is
-   unknown and Q2 asks for it.
+   unknown and Q2 asks for it. A `notes: app` line puts the project's notes in the app's Notes, and
+   `domain:` then names the board folder of that name; where the minutes go in each storage is
+   bandit:notes' (`references/model.md` there → Which storage).
 3. **Ask the setup questions** in a single `AskUserQuestion` call, before any processing:
    - **Q1 — "Which version of the minutes?"** (header: `Version`, single select)
      - `Both (Recommended)` — full minutes plus a short version at about a third the length. Two files.

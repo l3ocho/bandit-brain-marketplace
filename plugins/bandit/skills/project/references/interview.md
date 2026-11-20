@@ -140,7 +140,8 @@ Quick resolution of optionals and output preference.
 
    Then show the derived paths and confirm, e.g. for a regular project:
    - Settings (this skill writes here): `MyNotes/Acme/Claude/ai-home-reno`
-   - Shared project docs (read by Claude.ai and Claude Code): `MyNotes/Acme/Projects/home-reno`
+   - Shared project docs (read by Claude.ai and Claude Code): `MyNotes/Acme/Projects/home-reno`,
+     for a project on the vault (the Notes question below); on the app's Notes, its board
    - Claude Code settings (configured in the repo): `MyNotes/Acme/Claude/code-home-reno`
 
    Every project type, **workflow included**, gets both folders (settings and shared project
@@ -159,6 +160,14 @@ Quick resolution of optionals and output preference.
 
    Version numbers are integers appended without dots. Initial version is always `v0`. See
    **Vault Folder (WebDAV)** in `references/output.md` for the full rules.
+
+4. **Notes** (single select), asked for every project, whatever the output target: where the
+   project's notes live (plans, minutes, briefs, reports). The domain is asked first if no answer
+   gave it yet (the Domain question above, without the custom path).
+   - "The app's Notes" (recommended: documents for AI work live in the app) → the Project Context
+     line `notes: app`. The project's docs are notes on its board, not `Projects/{slug}/`; any
+     settings path above stays in the vault
+   - "The MyNotes vault" → no `notes:` line
 
 For each selected optional, ask its focused follow-up (same pattern as Phase 3).
 

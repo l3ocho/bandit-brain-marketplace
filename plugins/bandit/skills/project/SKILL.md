@@ -1,6 +1,6 @@
 ---
 name: "project"
-description: "Onboards a project in one approval (vault, board and settings rows), writes and audits its Claude.ai instructions, owns the Project Context block every skill reads, and syncs the instructions to the project's vault settings folder. Use for project setup, instructions, or the Project Context."
+description: "Onboards a project in one approval (notes, board and settings rows), writes and audits its Claude.ai instructions, owns the Project Context block every skill reads, and syncs the instructions to the project's vault settings folder. Use for project setup, instructions, or the Project Context."
 ---
 
 # 🛠️ Project
@@ -15,7 +15,7 @@ restates them.
 
 | Command | Does | Reference |
 |---|---|---|
-| `onboard` | New or existing project: interview or audit, then **one proposal** of vault, board and settings rows, executed on approval, instructions handed over to paste | `references/onboard.md` · `references/interview.md` (new) |
+| `onboard` | New or existing project: interview or audit, then **one proposal** of notes, board and settings rows, executed on approval, instructions handed over to paste | `references/onboard.md` · `references/interview.md` (new) |
 | `audit` | Scores this project's instructions against the template; builds the updated version straight away | `references/audit.md` |
 | `update {project}` | Targeted change to **another** project's instructions from its vault copy (used by bandit:audit settings rows) | `references/update.md` |
 | `sync` | Saves the instructions and reference doc to the vault settings folder | `references/output.md` · `references/vault-storage.md` |

@@ -1,7 +1,13 @@
 # Part 3 — Commands
 
-Every procedure starts by resolving the domain (`references/model.md`) and reading Part 2
-(`references/conventions.md`, and for the vault `references/conventions-vault.md`).
+Every procedure starts by resolving the storage and the domain (`references/model.md`) and reading
+Part 2 (`references/conventions.md`, and for the vault `references/conventions-vault.md`).
+
+**Two storages.** Each command's steps below are the vault's; its **On the app's Notes** block says
+what replaces them for a project whose notes are in the app, with the tools of
+`references/storage-app.md`. `init`, `home` and `settings` are vault-only: run for a project on the
+app's Notes, say so in one line and stop. A project with no word on its storage is a vault project,
+and its commands run exactly as written here.
 
 **Proposal format** used by every command that writes on confirmation:
 
@@ -15,6 +21,10 @@ Every procedure starts by resolving the domain (`references/model.md`) and readi
 
 The user answers "all", a list ("1, 3"), or "none". Execute only the approved rows, in order, and
 report per row: done / refused (with reason). A refused row doesn't undo the others.
+
+On the app's Notes, From and To name the note by its title and its place (`BanditBrain · Inbox` →
+`BanditBrain · Docs`), never by its id; a refusal is reported with its code and reason
+(`references/storage-app.md` → Refusals).
 
 ---
 
@@ -80,6 +90,16 @@ then run Stage C on
 fix rows marked `domain`, built with Stage B/C, after this project's rows. They run only when the user
 approves them by number (`references/model.md` → Scope).
 
+**On the app's Notes: the hub note only.** Folders, templates, frontmatter style and Obsidian
+settings have no counterpart in the app, so Stages A to D do not run. Project scope: look for the
+project's hub note on its board, a `reference` note titled with the project's slug, with its summary
+(Create without a duplicate, `references/storage-app.md`). Missing → one create row, the summary
+drafted in the row for the user to edit; found without a summary → one `notes_set_fields` row.
+Domain scope: the same for every project board in the domain's folder. On approval, create it with
+`notes_create` and file it with `notes_file` into the board's first column, then read it back. The
+settings folders `Claude/ai-{slug}/` and `Claude/code-{slug}/` stay vault rows (`references/model.md`
+→ Which storage).
+
 ---
 
 ### Onboarding rows (run by bandit:project)
@@ -127,7 +147,8 @@ procedure returns rows; bandit:project puts them in its one combined proposal.
 
 ### `/bandit:notes init {Domain}`
 
-For a new domain — a new job, a new business area.
+For a new domain — a new job, a new business area. **Vault only.** On the app's Notes a domain is
+a board folder, made with the board step of onboarding (bandit:tasks), not here.
 
 1. Check `MyNotes/{Domain}` doesn't exist. If it does, stop and offer `onboard` instead. Typed
    in a project chat to set up a new project: say that's bandit:project' onboarding and stop.
@@ -144,7 +165,8 @@ For a new domain — a new job, a new business area.
 ### `/bandit:notes home [Domain]`
 
 Rebuilds `{Domain}/README.md` from the **README template** in `references/readme-template.md`. Runs unattended from a
-scheduled task, so it **never asks** and writes only the README.
+scheduled task, so it **never asks** and writes only the README. **Vault only:** the app lists a
+board's notes itself, so a project on the app's Notes has no home page to build.
 
 1. Read the existing README if there is one: keep its frontmatter (update `generated`) and the
    whole `## Notes` section verbatim. No README → start from the template with
@@ -235,6 +257,30 @@ it fast.
   adds: *card {title} can move to `stage/planned`: run `/bandit:tasks stage {card} planned`*. This
   skill never writes the board.
 
+**On the app's Notes.**
+1. `notes_list` of the scope's board (Project scope: the project's board; Domain scope: each board
+   in the domain's folder) and read each Inbox note in scope with `notes_get`. **Named notes:** only
+   those. **No names:** rows only for helpers' drafts (`createdViaAssistant` true); the user's own
+   Inbox notes are listed in one line by title and get a row only once the user names them
+   (`references/model.md` → The inbox is the user's). Nothing is written in this step or the next.
+2. Per note, work out the row: its place (the project's board and the column of the area it is
+   about; a meeting or a request, the domain's workflow board; a card's brief or plan, its card),
+   its kind, a drafted summary shown in the row, the kind's fields, its tags with the user's kept,
+   and `active` or `waiting` when the content says so. Body changes, open questions, notes too thin
+   to classify and consumed drafts are handled as in the vault steps above, with an archive row
+   that sets `archived` (`references/storage-app.md` → Archive, restore, delete).
+3. Present the proposal, rows ordered by place.
+4. On approval, per note: `notes_set_fields` (kind, summary, tags, the kind's fields) →
+   `notes_move` when its board changes → `notes_file` into its column (it leaves the Inbox,
+   `triaged`) → `notes_set_status` when the row says `active` or `waiting` → any approved body row
+   (`notes_get` right before, then `notes_update_section`). A note that belongs to a card is linked
+   with `notes_link_card` instead of filed into a column (`references/storage-app.md` → Status and
+   filing). A refused step stops that note's row; what ran is reported, and the note is read back.
+5. Report per row, with each note's kind, summary, status and place.
+
+A plan on the app's Notes needs no hub `## Docs` line: its link to its card is its inbound link. The
+report names the card and the same `/bandit:tasks stage {card} planned` prompt.
+
 ---
 
 ### `/bandit:notes lint [Domain]`
@@ -273,11 +319,27 @@ fix), so the report is the proposal: the user answers all, a list or none. A bre
 to another command (`settings`, `archive`) is still a row, run through that command's procedure.
 In project scope, lint only the project's own areas.
 
+**On the app's Notes: the fields only.** The app holds folders, filenames and frontmatter for
+itself, so lint reads the notes of the scope's boards (`notes_list`, then `archived: true`) and checks
+each note's fields:
+
+| Check | Breach |
+|---|---|
+| Scope | **The Inbox is skipped entirely**: the user's notes and helpers' drafts are not linted before review |
+| Summary | A note out of the Inbox with none |
+| Kind's fields | Minutes without `meeting` or `meetingDate`; a request without `requester` or `receivedOn` (conventions §5) |
+| Status | `done` and not archived (fix: `archive`); `inbox` out of the Inbox |
+| Card | A brief or plan with no card link and no `sprint-{name}` tag; a card link to a card that no longer resolves (read live, read-only) |
+| Tags | A `sprint-{name}` tag whose sprint does not resolve through `get_sprints` |
+
+Each row is fixed with `notes_set_fields`, `notes_set_status` or `notes_link_card`, as the row says.
+
 ---
 
 ### `/bandit:notes settings [Domain]`
 
-Aligns the vault's Obsidian settings with Part 2 §11. Domain scope only. Never unattended.
+Aligns the vault's Obsidian settings with Part 2 §11. Domain scope only. Never unattended. **Vault
+only:** the app has no Obsidian settings.
 
 1. Read the allowlisted files from `{Domain}/.obsidian/` (a missing file is "not set"). If one
    doesn't parse as JSON, report it and leave that file out of the proposal.
@@ -304,9 +366,9 @@ since the read. Re-read and confirm it parses.
 
 ---
 
-### `/bandit:notes delete {path…}`
+### `/bandit:notes delete {note…}`
 
-1. Resolve each argument to an exact path (`nc_webdav_find_by_name` for a bare note name). Zero
+1. Resolve each argument (a path, or a note's name) to an exact path (`nc_webdav_find_by_name` for a bare note name). Zero
    or several matches → ask; never pick one.
 2. Propose one `delete` row per path. For a folder, list its contents in the row.
 3. Say plainly that a delete may not be recoverable, and offer archive as the alternative for
@@ -316,6 +378,17 @@ since the read. Re-read and confirm it parses.
 Other commands can also add `delete` rows to their proposals (empty inbox notes the user put up for
 review, losing conflict copies, duplicates), but only when the user asked for cleanup, and each row
 still needs their approval.
+
+**On the app's Notes.**
+1. Resolve each named note: `search` with its title, then `notes_list` of its place (and
+   `archived: true`). The match is a note with exactly that title in the scope. Zero or several →
+   ask; never pick one.
+2. Propose one `delete` row per note, with its place and status.
+3. Say that a deleted note goes to the Trash with its text, versions and links, can be brought back
+   with `restore` for 30 days, and is then gone for good; offer `archive` for anything that isn't
+   junk.
+4. On approval: `notes_get` each approved note again (it is still there and still the one named),
+   then `notes_delete`; report per row with the days the Trash keeps it.
 
 ---
 
@@ -357,5 +430,19 @@ moves them; this skill does the move.
    target is always the mirrored path, and it is moved back without any edit.
 3. Propose: move back, set `status: active`, remove `archived-from` and `archived`. Along with
    `file-to` at filing, these are the only keys this skill removes — they're its own stamps.
+
+**On the app's Notes.** No folder moves and no stamps: the app keeps the note in its place and the
+status says it is archived (`references/storage-app.md` → Archive, restore, delete).
+
+- **Archive:** find the scope's notes with status `done` (`notes_list`). Propose one row per note
+  setting `archived`. On approval, `notes_set_status` → `archived`, read back. A plan linked to its
+  card follows the card and is not archived by hand (`PLAN_FOLLOWS_CARD`): it gets no row. Settings
+  versions stay a vault procedure.
+- **Restore:** find the named note in the place's archived notes (`notes_list` with
+  `archived: true`), then in the Trash (`notes_list_trash`). Exactly one match by title, or ask.
+  From the archive: propose `triaged`, or the status the user names, since the app does not keep the
+  one it had; on approval `notes_set_status`. From the Trash: propose bringing it back as it was,
+  with the days left; on approval `notes_restore`. Read the note back with `notes_get` and report
+  its status and place.
 
 ---

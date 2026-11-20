@@ -1,12 +1,14 @@
-# 🚀 Onboarding: the vault step
+# 🚀 Onboarding: the notes step
 
-> Read when bandit:project runs the vault step of onboarding. The procedure itself is `references/commands.md` → Onboarding rows.
+> Read when bandit:project runs the notes step of onboarding. The procedure itself is `references/commands.md` → Onboarding rows.
 
-## 🚀 Onboarding — the vault step, run by bandit:project
+## 🚀 Onboarding — the notes step, run by bandit:project
 
 **Onboarding a project is one command, owned by bandit:project.** It interviews the user, then loads
-this skill for the vault rows and bandit:tasks for the board rows, and shows **one** proposal.
-This skill only produces the vault rows and executes the approved ones; it never shows its own
+this skill for the notes rows and bandit:tasks for the board rows, and shows **one** proposal.
+Which storage the project's notes use comes from bandit:project with the rest of the interview
+(`references/model.md` → Which storage). This skill only produces the notes rows and executes the
+approved ones; it never shows its own
 proposal or asks for its own approval when bandit:project runs it. Procedure: *Onboarding rows*
 in Part 3.
 

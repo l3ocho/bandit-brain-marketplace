@@ -1,6 +1,6 @@
 # README template
 
-Used by `home` and `init`. Placeholders in `{braces}`; HTML comments are instructions, not output.
+Used by `home` and `init`, vault only: a project on the app's Notes has no README (`references/commands.md` → `home`). Placeholders in `{braces}`; HTML comments are instructions, not output.
 Order matters: agents read from the top and a truncated read keeps only the start, so the agent
 block and the lists come first and the human-oriented summary last.
 

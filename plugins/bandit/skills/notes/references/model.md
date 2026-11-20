@@ -1,6 +1,20 @@
-# 🧭 The vault model, domain and scope
+# 🧭 Storage, domain and scope
 
-> Read before any command: what a domain is, how this project's scope is resolved, and why the inbox is the user's.
+> Read before any command: which storage holds the project's notes, what a domain is, how this project's scope is resolved, and why the inbox is the user's.
+
+## 🗄️ Which storage
+
+A project's notes live in one of two storages: **the app's Notes** (`references/storage-app.md`) or
+**the MyNotes vault** (`references/storage-vault.md`). The project's Project Context says which;
+its format is bandit:project's. **No word on it means the vault**, so a project nobody has switched
+keeps working as before. Read it with the domain, before any command and before any other skill's
+note is written. A domain-level run with no Project Context (the scheduled `home`) is a vault run.
+
+Settings files (`Claude/ai-{slug}/`, `Claude/code-{slug}/`), the working-folder manifest, a
+domain's home page, templates and Obsidian's settings stay in the vault whichever storage holds the
+notes (`references/other-skills.md`).
+
+---
 
 ## 🧭 Model in one screen
 
@@ -43,6 +57,11 @@ MyNotes/                         ← BanditCloud root of all domains
 
 Never guess the nearest match. If the named domain isn't in the listing, stop and say so.
 
+**On the app's Notes** the same names are read live from `get_context`: the domain is the board
+folder of that name, the project is its board (`board:` in the Project Context), an area is a column
+of that board (`references/storage-app.md` → Places). A board or folder that isn't there: stop and
+say so, as for the vault.
+
 ---
 
 ## 🎯 Scope — what this project may see and change
@@ -82,7 +101,12 @@ metadata), resolved together with the domain:
 | Missing core structure of the domain | ✓ | **Onboarding only:** create the missing core folders, `_templates/new-note.md` and the README, as approved rows |
 | Everything else | ✗ | ✗ |
 
-Anything outside the scope (another project's folder, a domain-level rename, `init`, `home`,
+**On the app's Notes**, Project scope is the project's board: its notes, its Inbox, its archived
+notes and its notes in the Trash. Minutes and requests on the domain's workflow board are read when
+they name this project and never changed from here, like `Meetings/` and `Requests/` above. Domain
+scope is every board in the domain's folder. Settings folders keep the vault rows above.
+
+Anything outside the scope (another project's folder or board, a domain-level rename, `init`, `home`,
 `settings`) that the user asks for: stop and say it's a domain-level action to run from the workflow
 project. Never widen scope on your own. Two exceptions: onboarding's approved rows may create the
 domain's missing core structure (and `home` then builds the README), and a **`domain` fix row**

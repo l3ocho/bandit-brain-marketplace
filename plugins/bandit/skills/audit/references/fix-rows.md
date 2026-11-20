@@ -28,8 +28,9 @@ the exact target.
 
 **The local checker stays separate.** bandit-dev:sprint's `scripts/check_sprint.py` checks a
 sprint's papers at write time, as a `Stop` hook, from the project's notes file: by title, tag and
-status, not by folder or filename, so it no longer scores S14–S16. This skill's script needs a
-snapshot and can't run from a hook, so it never absorbs that checker; it scores S13–S16 at audit time.
+status, not by folder or filename (its SP2 to SP4 are that file's forms of S13 to S15; S16 has none).
+This skill's script needs a snapshot and can't run from a hook, so it never absorbs that checker; it
+scores S13–S16 at audit time.
 
 ---
 

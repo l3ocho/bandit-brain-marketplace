@@ -78,7 +78,7 @@ each: the path as the map writes it, then why. `scripts/release.py --write` empt
 - `tests/fixture-expected/sprint-targets-*.md` — BB-601 moves `sprint_targets.py` to the notes file; its four outputs are the same by design, and KP1 checks them against these files unchanged.
 - `tests/fixture-map/estimate.csv` — BB-601 changes only where `sprint_data.py` reads the sprints from; `--estimate` reads a data file as before, and ES1 is green on it unchanged.
 - `plugins/bandit-dev/hooks/hooks.json` — BB-601 changes what `check_sprint.py --hook` reads inside the script (the repository's notes file); the hook's command takes no vault argument and stays as it is, and SP8 runs it.
-- `plugins/bandit/skills/audit/scripts/check_structure.py` — BB-601 changed only the sentences in the rulebook, `structure-rules.yaml` (a comment) and `fix-rows.md` that said the sprint checker scores S14–S16 too; no rule, key or score changes, and A1 is green.
+- `plugins/bandit/skills/audit/scripts/check_structure.py` — BB-601 changed only the sentences in the rulebook (and the S16 row's SP5 label), `structure-rules.yaml` (a comment) and `fix-rows.md` that said which sprint-checker rules mirror S13–S16; no rule, key or score changes, and A1 is green.
 
 ## ✅ Before saying done
 

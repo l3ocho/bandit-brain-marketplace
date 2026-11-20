@@ -62,5 +62,8 @@
    "cards": [],
    "text": "# Fixture\n\n## At a glance\n\n- **Sprint record:** summer on Garden\n- **Status:** In progress (planning)\n\n## Plan steps\n\n| # | Step | Done | Evidence |\n|---|---|---|---|\n| 1 | Select and freeze the batch | 2026-11-01 | Step evidence. |\n| 2 | Spec completeness check, per card | 2026-11-01 | Step evidence. |\n| 3 | Close the open questions | 2026-11-01 | Step evidence. |\n| 4 | Size and classify | 2026-11-01 | Step evidence. |\n| 5 | Cross-card analysis | 2026-11-01 | Step evidence. |\n| 6 | Sequence | 2026-11-01 | Step evidence. |\n| 7 | Write the one technical plan | 2026-11-01 | Step evidence. |\n| 8 | Risk and rollback |  |  |\n| 9 | Definition of ready, per card |  |  |\n| 10 | Approval gate |  |  |\n| 11 | Independent plan review |  |  |\n| 12 | Commit the sprint |  |  |\n"
   }
+ ],
+ "titles": [
+  "garden"
  ]
 }

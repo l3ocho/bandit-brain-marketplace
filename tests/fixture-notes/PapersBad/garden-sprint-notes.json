@@ -55,7 +55,7 @@
   {
    "title": "garden-ga-1-brief",
    "kind": "brief",
-   "status": "active",
+   "status": "triaged",
    "tags": [],
    "cards": [
     "GA-1"
@@ -77,7 +77,7 @@
   {
    "title": "garden-ga-2-brief-draft",
    "kind": "brief",
-   "status": "active",
+   "status": "inbox",
    "tags": [
     "sprint-spring"
    ],
@@ -97,22 +97,10 @@
     "GA-2"
    ],
    "text": "# garden-ga-2-brief-2026-10-01\n\nFixture brief of GA-2.\n"
-  },
-  {
-   "title": "garden-notes",
-   "kind": "reference",
-   "status": "active",
-   "tags": [],
-   "cards": [],
-   "text": "One.\n"
-  },
-  {
-   "title": "garden-notes",
-   "kind": "reference",
-   "status": "active",
-   "tags": [],
-   "cards": [],
-   "text": "Two.\n"
   }
+ ],
+ "titles": [
+  "garden",
+  "garden-sprint-spring-plan"
  ]
 }

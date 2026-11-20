@@ -3,14 +3,19 @@
 
 The notes file is built by the sprint helper through bandit:notes, in whichever storage the project uses
 (references/templates.md → Notes file): `.sprint/{project}-sprint-notes.json` at the root of the repository, a JSON
-object `{"project", "built", "notes": [{"title", "kind", "status", "tags", "cards", "text"}]}`. A sprint's papers are
-the notes tagged `sprint-{name}`; a paper is found by its title. No script reads a vault folder or the app.
+object `{"project", "built", "notes": [{"title", "kind", "status", "tags", "cards", "text"}], "titles": [...]}`: in
+`notes` every paper, WBS note and targets note of the project and every brief of the project whatever its tag (the
+Inbox, the project's root and the domain's inbox included), in `titles` the titles of the project's other notes; a note
+read from the vault whose frontmatter does not parse carries `frontmatter_error`. A sprint's papers are the notes
+tagged `sprint-{name}`; a paper is found by its title. No script reads a vault folder or the app.
 
 Rules (each one a failure, not a warning):
   SP1  every sprint has its plan, handover prompt and ledger: notes titled {project}-sprint-{name}-{record} with its tag
        (a sprint kept in the app: the ledger from plan step 1, the plan once step 7 is done, the prompt once committed)
   SP2  a brief (kind brief) linked to a card of a sprint (a card row of the ledger's tables) carries that sprint's tag
-  SP3  no two notes in the file share a title (the scripts find a paper by its title)
+  SP3  no two notes of the project share a title, `notes` and `titles` together (the scripts find a paper by its title)
+  SP4  a note read from the vault has frontmatter that parses as YAML: its `frontmatter_error` fails (never set for a
+       note on the app's Notes, nor for the user's own inbox notes: no frontmatter or status inbox)
   SP6  one brief per card: a card has at most one brief that is not archived (a card detached from a closing sprint
        carries everything into that one note, which waits in the inbox; its ledger row says "detached")
   SP7  a sprint whose ledger says it is committed (a `Committed:` line, written at plan step 12) has its independent
@@ -34,7 +39,7 @@ Rules (each one a failure, not a warning):
   SP15 a closed sprint keeps no paper and no WBS unarchived: a sprint whose ledger records the close (`Status: Closed …`,
        `Current wave: Sprint closed`), whose ledger is archived, or that is named in `--closed` (closed in the app)
        fails while a note with its tag, or its WBS note {project}-sprint-{name}-wbs, has a status other than archived
-Retired with the vault folder: SP4 (frontmatter YAML), SP5 (the project folder's root) and the `--listing`
+Retired with the vault folder: SP5 (the project folder's root, scored by bandit:audit's S16) and the `--listing`
 mode; SP8 is the repo checker's rule on this script's Stop hook.
 
 Usage:
@@ -54,6 +59,7 @@ import os
 import re
 import sys
 from collections import defaultdict
+from datetime import datetime, timezone
 from pathlib import Path
 
 RECORDS = ("plan", "handover-prompt", "progress")
@@ -81,6 +87,7 @@ OWED = re.compile(r"trigger\s*:[^)\n]*\b(?:close|closing|release)\b|\b(?:at|on|d
 WAVE_ROW = re.compile(r"^\|\s*Wave\s+(\d+)\s*\|\s*([^|]+?)\s*\|\s*([^|]*?)\s*\|\s*((?:[^|\\]|\\.)*?)\s*\|\s*$", re.M)
 SPRINT_TAG = re.compile(r"^sprint-(.+)$")
 NOTES_NAME = "{project}-sprint-notes.json"
+RULES = "SP1-SP4, SP6, SP7, SP9-SP15"
 FIELDS = ("title", "kind", "status", "tags", "cards", "text")
 
 
@@ -110,8 +117,12 @@ def load_notes(path) -> dict:
             raise NotesFileError(f"could not read the notes file {path}: note {i} has no title")
         notes.append({"title": note["title"], "kind": str(note.get("kind") or ""), "status": str(note.get("status") or ""),
                       "tags": [str(t) for t in note.get("tags") or []], "cards": [str(c) for c in note.get("cards") or []],
-                      "text": str(note.get("text") or "")})
-    return {"project": str(data.get("project") or ""), "built": str(data.get("built") or ""), "notes": notes}
+                      "text": str(note.get("text") or ""), "frontmatter_error": str(note.get("frontmatter_error") or "")})
+    titles = data.get("titles") or []
+    if not isinstance(titles, list):
+        raise NotesFileError(f"could not read the notes file {path}: `titles` is not a list")
+    return {"project": str(data.get("project") or ""), "built": str(data.get("built") or ""), "notes": notes,
+            "titles": [str(t) for t in titles]}
 
 
 def sprints_of(notes: list) -> dict:
@@ -308,14 +319,19 @@ def check(data: dict, folder: Path, closed_in_app: set = frozenset()) -> list[st
     project, notes = data["project"], data["notes"]
     papers = sprints_of(notes)
 
-    # SP3 two notes with one title
+    # SP3 two notes of the project with one title (the notes read whole, and the titles of the others)
     by_title = defaultdict(int)
-    for note in notes:
-        by_title[note["title"]] += 1
+    for title in [n["title"] for n in notes] + data.get("titles", []):
+        by_title[title] += 1
     for title, count in sorted(by_title.items()):
         if count > 1:
             errors.append(f"SP3 {count} notes are titled {title}: the scripts find a paper by its title "
                           "(archive or rename one through bandit:notes)")
+
+    # SP4 a vault note's frontmatter that does not parse (the builder records it)
+    for note in notes:
+        if note["frontmatter_error"]:
+            errors.append(f"SP4 {note['title']}: {note['frontmatter_error']}")
 
     # SP6 one brief per card that is not archived; and the briefs by card for SP2
     briefs_by_card = defaultdict(list)
@@ -391,6 +407,24 @@ def session_start(text: str) -> str:
     return m.group(1) if m else ""
 
 
+def when(stamp: str):
+    """An ISO 8601 time as an aware datetime (`Z` or an offset; no offset read as UTC), or None."""
+    try:
+        t = datetime.fromisoformat(stamp.strip().replace("Z", "+00:00").replace("z", "+00:00"))
+    except (ValueError, AttributeError):
+        return None
+    return t if t.tzinfo else t.replace(tzinfo=timezone.utc)
+
+
+def built_before(built: str, start: str) -> bool:
+    """The notes file is old: no `built` time it can be read by, or built before the session began."""
+    b = when(built)
+    if b is None:
+        return True
+    s = when(start)
+    return s is not None and b < s
+
+
 def repo_root() -> Path:
     return Path(os.environ.get("CLAUDE_PROJECT_DIR") or os.getcwd())
 
@@ -451,17 +485,16 @@ def main() -> int:
 
     errors = check(data, path.parent, closed)
     if args.hook:
-        start = session_start(text)
-        if data["built"] and start and data["built"] < start:
-            note = (f"bandit-dev:sprint check: the notes file {path.name} was built {data['built']}, before this session "
-                    "began, so it may not hold this session's writes: rebuild it and run check_sprint.py.")
+        if built_before(data["built"], session_start(text)):
+            note = (f"bandit-dev:sprint check: the notes file {path.name} was built {data['built'] or 'at no time it says'}, "
+                    "before this session began, so it may not hold this session's writes: rebuild it and run check_sprint.py.")
             if errors:
                 note += f" On that copy, {len(errors)} problem(s), not blocking: " + " | ".join(errors)
             print(json.dumps({"systemMessage": note}))
             return 0
     if not errors:
         if not args.hook:
-            print(f"OK: {path.name} passes the sprint rules SP1-SP3, SP6, SP7, SP9-SP15 "
+            print(f"OK: {path.name} passes the sprint rules {RULES} "
                   f"({len(sprints_of(data['notes']))} sprint(s))")
         return 0
     out = sys.stderr if args.hook else sys.stdout

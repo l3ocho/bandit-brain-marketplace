@@ -699,12 +699,15 @@ def check_sp7():
     bad = run_script(script, "--notes", notes_fixture("Bad"))
     papers = run_script(script, "--notes", notes_fixture("PapersBad"))   # one break each of SP2, SP3, SP6 (BB-601)
     papers_ok = (papers[0] == 1 and papers[1].count("\n- ") == 3 and all(f"- {r} " in papers[1] for r in ("SP2", "SP3", "SP6"))
-                 and "garden-ga-2-brief-2026-10-01" not in papers[1])
-    ok = good[0] == 0 and bad[0] == 1 and "SP7" in bad[1] and bad[1].count("\n- ") == 1 and papers_ok
-    report("SP7", ok, "check_sprint passes the reviewed sprint and refuses the unreviewed one with SP7 only; a brief without "
-           "its sprint's tag, a title held twice and two live briefs of one card fail SP2, SP3 and SP6 (an archived brief counts not)"
+                 and "garden-ga-2-brief-2026-10-01" not in papers[1] and "titled garden-sprint-spring-plan" in papers[1])
+    yaml_bad = run_script(script, "--notes", notes_fixture("SprintData"))   # five vault notes whose frontmatter fails (SP4)
+    sp4_ok = yaml_bad[1].count("\n- SP4 ") == 5 and "frontmatter is not valid YAML" in yaml_bad[1]
+    ok = good[0] == 0 and bad[0] == 1 and "SP7" in bad[1] and bad[1].count("\n- ") == 1 and papers_ok and sp4_ok
+    report("SP7", ok, "check_sprint passes the reviewed sprint and refuses the unreviewed one with SP7 only; a root brief "
+           "without its sprint's tag, a paper's title held by another note and an inbox draft brief fail SP2, SP3 and SP6 "
+           "(an archived brief counts not); a vault note whose frontmatter does not parse fails SP4"
            if ok else f"fixtures: good → {good[0]} {good[1][-120:]!r}; bad → {bad[0]} {bad[1][-160:]!r}; "
-           f"PapersBad → {papers[0]} {papers[1][-240:]!r}")
+           f"PapersBad → {papers[0]} {papers[1][-240:]!r}; SprintData SP4 lines → {yaml_bad[1].count(chr(10) + '- SP4 ')}")
 
 
 # ── SP8 · the Stop hook needs no vault: it reads the repository's notes file, says when it is missing or old,
@@ -726,11 +729,13 @@ def check_sp8():
                  ("fresh", "2026-11-20T12:00:00Z", "bandit-dev:sprint"),
                  ("named", "2026-11-20T12:00:00Z", ".sprint/home-reno-sprint-notes.json"),
                  ("old", "2026-11-19T08:00:00Z", "bandit-dev:sprint"),
+                 ("offset", "2026-11-20T08:00:00-05:00", "bandit-dev:sprint"),   # 13:00 UTC, after the 10:00 start
+                 ("unbuilt", "", "bandit-dev:sprint"),
                  ("silent", "2026-11-20T12:00:00Z", "a chat about something else"))
         for name, built, words in cases:
             if notes.exists():
                 notes.unlink()
-            if built:
+            if built is not None:
                 notes.write_text(bad.replace('"built": "2026-11-20T00:00:00Z"', f'"built": "{built}"'), encoding="utf-8")
             t = Path(d) / f"{name}.jsonl"
             t.write_text(json.dumps({"timestamp": "2026-11-20T10:00:00Z", "message": words}) + "\n", encoding="utf-8")
@@ -742,9 +747,11 @@ def check_sp8():
     ok = (got["missing"][0] == 0 and "could not read the notes file" in got["missing"][1]
           and got["fresh"][0] == 2 and "SP7" in got["fresh"][1] and got["named"][0] == 2
           and got["old"][0] == 0 and "before this session" in got["old"][1] and "SP7" in got["old"][1]
+          and got["offset"][0] == 2 and got["unbuilt"][0] == 0 and "before this session" in got["unbuilt"][1]
           and got["silent"] == (0, "") and 'check_sprint.py" --hook' in hooks and "--vault" not in hooks)
     report("SP8", ok, "the Stop hook runs with no vault: it reads the repository's notes file, blocks once on a real error, "
-           "says so (exit 0) when the file is missing or built before the session, and stays silent in a chat that "
+           "says so (exit 0) when the file is missing, has no built time or was built before the session (times read with their "
+           "offset), and stays silent in a chat that "
            "names neither the sprint helper nor the notes file"
            if ok else "hook: " + "; ".join(f"{k} → {v[0]} {v[1][-120:]!r}" for k, v in got.items()))
 

@@ -6,8 +6,10 @@
 
 The **settings storage** holds this skill's files: the instructions and the reference doc in
 `Claude/ai-{slug}/`, the Claude Code twin and the dev mirror in `Claude/code-{slug}/`, and the
-working-folder manifest. It is the vault's settings folder, `MyNotes/{domain}/Claude/`, for every
-project. The **notes storage** holds the project's notes, and the Project Context's `notes:` line
+working-folder manifest. It is the vault, for every project: `MyNotes/{domain}/Claude/` for the
+settings folders, and `MyNotes/{domain}/Projects/{project}/workdir-manifest.json` for the manifest
+(`references/workdir.md`). A project on the app's Notes with a Claude Code twin still has that
+`Projects/{project}/` folder in the vault, for the manifest only. The **notes storage** holds the project's notes, and the Project Context's `notes:` line
 says which one it is (`references/project-context.md`). The two are separate: a project whose
 notes are in the app's Notes keeps its settings here, so one can move without the other. Every
 "vault" in this skill's settings procedures means the settings storage.

@@ -145,7 +145,8 @@ Quick resolution of optionals and output preference.
    - Claude Code settings (configured in the repo): `MyNotes/Acme/Claude/code-home-reno`
 
    Every project type, **workflow included**, gets both folders (settings and shared project
-   docs); which folders a project has is bandit:notes' rule, not this skill's. Show both paths.
+   docs) on the vault; on the app's Notes, the settings folder and the hub note on its board. Which
+   folders a project has is bandit:notes' rule, not this skill's. Show the paths that apply.
    Store the settings path as `webdav_folder`. The `Projects/` and `Claude/` folders are **vault rows** from bandit:notes'
    onboarding procedure (see **🚀 Onboarding** (`references/onboard.md`)), never created outside the approved proposal.
 

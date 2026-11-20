@@ -106,6 +106,7 @@ State the project classification at the top of the overview. It shapes smart def
 - Present, directly after Project Overview
 - All five required keys, valid values; `domain` exists in `MyNotes`, or with `notes: app` as a board folder (or `none`); `board` resolves (or `none` / `pending`)
 - `dev`, when present, is `true`; anything else → fix or remove the line. Absent is valid
+- `notes`, when present, is `app`; anything else → fix or remove the line. Absent is valid (the vault)
 - Missing on legacy instructions → ⚠️ Legacy context, migrated from the metadata
 
 **Length:** 5 lines (6 with `dev`) plus the 2 closing lines.

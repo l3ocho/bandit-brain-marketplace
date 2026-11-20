@@ -148,8 +148,10 @@ procedure returns rows; bandit:project puts them in its one combined proposal.
 **On the app's Notes** (`notes: app`): no domain scaffold and no folder for notes.
 1. List `MyNotes` and the domain's `Claude/`. Return create rows only for the settings, which stay
    in the vault: the domain folder and `Claude/` when missing, item 7 `Claude/ai-{slug}/`, and item
-   8 `Claude/code-{slug}/` under the same condition as above. No `init`, core-folder, template,
-   `Projects/` or README rows.
+   8 `Claude/code-{slug}/` under the same condition as above. A project without `dev: true` that
+   runs in Claude Code (a twin) also gets items 9 and 10, `Projects/` and `Projects/{slug}/`, when
+   missing: they hold its working-folder manifest (bandit:project `references/workdir.md`), not its
+   notes, so no hub note goes there. No `init`, other core-folder, template or README rows.
 2. Return one create row for the hub note on the project's board, built as `onboard` does on the
    app's Notes (above). The board may not exist yet: the row runs after bandit:tasks' board rows.
 3. Domain-level fix rows as in step 3 above, for the settings folders only.

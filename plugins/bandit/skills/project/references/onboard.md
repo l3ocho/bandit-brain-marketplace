@@ -52,7 +52,7 @@ a list, or none.*
   "all" fixes everything; a row the user didn't approve never runs. Nothing outside this project's own
   folders is touched except by a `fix` row they approved.
 - A row that depends on a declined row is skipped and reported (the hub note without its folder,
-  the settings files without `Claude/ai-{slug}/`).
+  or on the app's Notes without its board; the settings files without `Claude/ai-{slug}/`).
 - The Project Context written into the instructions reflects what was approved: `domain:` is the
   real domain whenever a vault or a board folder is used (`none` only for a custom path or
   artifact-only), `board:` is the line bandit:tasks returned, and `notes: app` is written only when

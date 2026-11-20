@@ -382,13 +382,29 @@ def context_lines(text):
     return [l for l in text.splitlines() if l.startswith(("Read by ", "**Home board first", "Names only:"))][:3]
 
 
-CONTEXT_KEY_RE = re.compile(r"^\{?([a-z]+): ")
+CONTEXT_KEY_RE = re.compile(r"^\{?([a-z]+): (.*)$")
+CONTEXT_HEAD_RE = re.compile(r"^## 🧭 Project Context$", re.M)
 
 
 def context_keys(text):
-    """The key lines of the Project Context block, in order: `domain: …`, or an optional `{dev: true — …}`."""
-    block = text.split("## 🧭 Project Context", 1)[-1].split("Read by ", 1)[0]
-    return [m.group(1) for l in block.splitlines() if (m := CONTEXT_KEY_RE.match(l))]
+    """The key lines of the Project Context block, in order: `domain: …`, or an optional `{dev: true — …}`.
+    Every other non-blank line before `Read by` (and a missing heading) comes back as `?`, so it fails."""
+    head = CONTEXT_HEAD_RE.search(text)
+    if not head:
+        return ["?"]
+    block = text[head.end():].split("Read by ", 1)[0]
+    keys = []
+    for l in block.splitlines():
+        if not l.strip() or l.startswith("```"):
+            continue
+        m = CONTEXT_KEY_RE.match(l)
+        if not m:
+            keys.append("?")
+        elif m.group(1) == "notes" and not m.group(2).startswith("app"):
+            keys.append("notes=?")
+        else:
+            keys.append(m.group(1))
+    return keys
 
 
 def context_keys_bad(keys, canon, required=5):
@@ -396,6 +412,8 @@ def context_keys_bad(keys, canon, required=5):
     if keys[:required] != canon[:required]:
         return f"required keys {keys[:required]} ≠ {canon[:required]}"
     rest = keys[required:]
+    if len(set(keys)) != len(keys):
+        return f"a key twice in {keys}"
     if any(k not in canon[required:] for k in rest):
         return f"unknown key in {rest}"
     if rest != sorted(rest, key=canon.index):
@@ -426,11 +444,19 @@ def check_copies():
             bad.append(f"{f.relative_to(ROOT)}: Project Context keys: {why}")
     for keys, want in ((["domain", "project", "type", "board", "prefix", "notes", "dev"], "out of order"),
                        (["domain", "project", "type", "board", "prefix", "vault"], "unknown key"),
-                       (["domain", "project", "type", "prefix"], "required keys")):
+                       (["domain", "project", "type", "prefix"], "required keys"),
+                       (["domain", "project", "type", "board", "prefix", "notes", "notes"], "twice")):
         if want not in context_keys_bad(keys, canon_keys):
             bad.append(f"the key check passes a broken block {keys}")
+    head = "## 🧭 Project Context\n\ndomain: Acme\nproject: home-reno\ntype: workflow\nboard: none\nprefix: hr\n"
+    for sample, ok in ((head + "notes: app\n\nRead by every skill.", True),
+                       (head + "notes: vault\n\nRead by every skill.", False),
+                       (head + "  bogus: 1\n\nRead by every skill.", False),
+                       ("domain: Acme\n## 🧭 Project Context section\nRead by every skill.", False)):
+        if (not context_keys_bad(context_keys(sample), canon_keys)) != ok:
+            bad.append(f"the key parser {'refuses a good' if ok else 'passes a broken'} block: {sample[:60]!r}")
     report("AT2", not bad, "; ".join(bad) or "project audit lists the current tools; Project Context lines and keys "
-           "match in CLAUDE.md, the templates and their shipped copies (3 broken key orders refused)")
+           "match in CLAUDE.md, the templates and their shipped copies (4 broken key lists and 3 broken blocks refused, a good one passes)")
 
 
 # ── CL1 · a plugin change since the last release has an Unreleased CHANGELOG entry ──────

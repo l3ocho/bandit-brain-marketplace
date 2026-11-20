@@ -32,7 +32,7 @@ Names only: skills resolve IDs live via `get_context`. No hardcoded IDs, ever.
 
 | Key | Values | Filled from (phases: `references/interview.md`) |
 |---|---|---|
-| `domain` | MyNotes domain folder (e.g. `Acme`), or `none`. It also names the board folder of the same name, and with `notes: app` and no domain folder it is that board folder's name | Phase 4 Domain question. `none` for a custom path and artifact-only |
+| `domain` | MyNotes domain folder (e.g. `Acme`), or `none`. It also names the board folder of the same name, and with `notes: app` and no domain folder it is that board folder's name. The vault domain folder still holds the settings (`references/vault-storage.md` → Settings storage) | Phase 4 Domain question. `none` for a custom path and artifact-only |
 | `project` | The project's own slug (e.g. `home-reno`) | Phase 4 slug question. When it wasn't asked, suggest a kebab-case slug from the project name and confirm it |
 | `type` | `product_service` · `workflow` · `claude_marketplace` | Phase 1 question 1 |
 | `board` | `project "{name}"` (the **home board**, filed inside the domain's board folder) · `none` · `pending` | Phase 1 question 5. Names exactly as `get_context → boards` returns them, quoted. `folder "…"` and `global` are retired (2026-10-14) |

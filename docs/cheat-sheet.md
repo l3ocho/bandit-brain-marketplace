@@ -240,7 +240,7 @@ updated: 2026-10-20
 > | Folder backend             | Domain (or custom path → `domain: none`) · project slug · prefix                                                                    |
 > | Notes → `notes: app`       | The app's Notes (recommended) · the MyNotes vault (no `notes` line). Asked for every project; settings stay in the vault either way |
 
-> [!note] Audits flag and migrate legacy projects: Notes-app storage → vault folder, and old `lifecycle` blocks are dropped.
+> [!note] Audits flag and migrate legacy projects: Nextcloud Notes app storage → vault folder, and old `lifecycle` blocks are dropped.
 
 > [!tip] `dev: true` projects: onboarding adds the dev board shape, the instructions allow `/bandit:tasks spec`, and you get the exact Project Context block to put in the repo's `CLAUDE.md` for Claude Code.
 

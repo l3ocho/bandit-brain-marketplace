@@ -52,7 +52,7 @@ Kind `plan`, status `active`, no lane and no card link: the sprint's tag in plac
 
 ## Brief change log
 
-Each brief ends, before Related, with `## Change log`: one dated entry per planning pass, saying what changed and why (requirements added or removed and the finding behind it, decisions, answered questions, a split). Keep the old wording out of the body; keep the reason in the log.
+Each brief ends, before Related, with `## Change log`: one dated entry per planning pass, saying what changed and why (requirements added or removed and the finding behind it, decisions, answered questions, a split). Keep the old wording out of the body; keep the reason in the log. On the app's Notes a brief then gets `## Conclusions`, after Change log and before Related, when its card is completed (bandit:notes `references/conclusions.md`).
 
 ## Execution prompt
 

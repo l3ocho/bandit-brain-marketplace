@@ -84,13 +84,16 @@ Report the breach. Propose what moves back to To Do or Stand By, starting from t
 
 ### `/bandit:tasks done`
 
-1. **Conclusions first** (bandit:notes `references/conclusions.md`): what each card's comments
-   taught goes into its linked note, one row a card in one proposal; a card with nothing worth
-   keeping gets no row. For an approved row bandit:notes writes the note, then, on a Workflow board
-   only, this skill writes the card's short description it drafted (`update_tasks`, read back as
-   `references/board.md` → Card descriptions says). A refused write is reported by card and never
-   stops the completion. Completing by origin (below) skips this step
-2. Once the rows are answered (all, a list or none): `update_tasks { items: [{ taskId, complete: true }] }`
+1. **Conclusions first, on a project whose notes are in the app's Notes** (`notes: app` in its
+   Project Context; a vault project skips this step and completes as before). bandit:notes
+   `references/conclusions.md`: what each card's comments taught goes into its linked note, one row
+   a card in one proposal; a card with nothing worth keeping gets no row. For an approved row
+   bandit:notes writes the note, then, on a Workflow board only, this skill writes the description
+   bandit:notes drafted (`update_tasks`, read back as `references/board.md` → Card descriptions
+   says). A refused write is reported by card and never stops the completion. Completing by origin
+   (below) skips this step
+2. Once the proposal is answered (all, a list or none), or at once when step 1 did not run or made no
+   row: `update_tasks { items: [{ taskId, complete: true }] }`
    — this is what moves it to Done. Every card another system made for one record:
    `{ originSystem, originReference, complete: true }`. `ASSISTANT_CANNOT` (a card another member
    made): report it; the member completes it in the app
@@ -118,7 +121,7 @@ Bumping is a **date** change, not a column change.
 
 `update_tasks` with `complete: true` or `dueDate` — cap 100, one result per entry
 (`references/board.md` → Many cards in one call). Completing several cards at once runs `done`'s
-step 1 first, the same way: one proposal, one row a card.
+step 1 first, the same way and on the same projects: one proposal, one row a card.
 
 **Completing blockers and their dependents:** entries apply in list order, so one call works with
 every blocker **listed before** its dependents (checked on the app 2026-10-20). A dependent listed

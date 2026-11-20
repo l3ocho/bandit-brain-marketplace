@@ -1,12 +1,18 @@
 # 🏁 A finished card's conclusions
 
-> Read when a card is completed (bandit:tasks `done`, bandit-dev:sprint `close`): what its comments taught goes into its linked note, under one `Conclusions` section that a later close replaces.
+> Read when a card is completed (bandit:tasks `done`, bandit-dev:sprint `close`) on a project whose notes are in the app's Notes: what its comments taught goes into its linked note, under one `Conclusions` section that a later close replaces.
 
-Contents: Who runs it · The steps · The row · Unattended · Writing the section · Refusals · Never
+Contents: Where it runs · Who runs it · The steps · The row · Unattended · Writing the section · Refusals · Never
 
 The card keeps a short summary that names its note, its comments keep the conversation, and the
-note keeps what was learned, updated, never added to. Both storages (`references/model.md` → Which
-storage). Nothing here changes how a card is completed: that stays bandit:tasks'.
+note keeps what was learned, updated, never added to. Nothing here changes how a card is
+completed: that stays bandit:tasks'.
+
+## 🗄️ Where it runs
+
+**Only on a project whose Project Context carries `notes: app`** (`references/model.md` → Which
+storage). On a vault project nothing here runs: its `done`, completing several cards at once and
+its sprint close work as before.
 
 ## 🤝 Who runs it
 
@@ -15,9 +21,10 @@ storage). Nothing here changes how a card is completed: that stays bandit:tasks'
 | bandit:tasks `done`, one card or several at once (`execution.md`) | Before the cards are completed | In a chat: one row a card, only approved rows run |
 | bandit-dev:sprint `close` (`close.md`, step 1) | After the approval lines are ticked, before the cards are completed | Unattended: running `close` is the go |
 
-The caller completes the card afterwards, whatever happened here: a skipped, refused or
-unanswered row never holds back the completion. This skill writes the note; the card's new
-description is drafted here and written by the caller, since this skill never writes to the board
+In a chat nothing is completed until the proposal is answered (all, a list or none). Then the
+caller completes the cards, whatever happened here: a row left out of the answer, skipped or
+refused never holds back the completion. This skill writes the note; the card's new description
+is drafted here and written by the caller, since this skill never writes to the board
 (`references/other-skills.md`). A card that is already complete is not read again.
 
 ## 🪜 The steps
@@ -26,10 +33,11 @@ For each card:
 
 1. **Read the card:** `get_task` (description, comments, board, `origin`). The board's profile is
    read from `get_context` → `boards`.
-2. **Find its note.** App: `notes_list` of the card's board; the notes whose `cards` hold the card
-   are its notes. Vault: the note its `Brief:` line, or its `Note:` line from an earlier close,
-   names, found and checked by the lookup (`references/other-skills.md` → Lookup). One note: that
-   one. None: the create-or-skip row. Two or more: the row names each and the user picks one.
+2. **Find its note:** `notes_list` of the card's board; the notes whose `cards` hold the card are
+   its notes. One note: that one. None: the create-or-skip row. Two or more: the row names each and
+   the user picks one. A note still in the Inbox (status `inbox`) is not written, whoever created it
+   (`references/model.md` → The inbox is the user's): the row says so and that the note is reviewed
+   first with `/bandit:notes file`.
 3. **Draft the conclusions** from the description and the comments, as short lines with a bold
    label: **Decided**, **Found**, **Changed from the plan**, **Do differently**; a label with nothing
    under it is left out. First line `{card id} · closed {YYYY-MM-DD}`. What counts is the outcome,
@@ -50,15 +58,15 @@ In a chat, one row a card in the proposal (Hard rule 3), each showing:
 | Part | Shows |
 |---|---|
 | The card | Its id and title |
-| The note | Its title and place; "in the Inbox" when it is there (a yes to the row puts that note up for this one change, `references/model.md` → The inbox is the user's) |
+| The note | Its title and place; a note in the Inbox: "in the Inbox: review it first with `/bandit:notes file`", and nothing is written to it |
 | The section | `Conclusions` before (its text, or "none: the heading is added") → after |
 | The description | Before → after, or "kept" with the reason (Technical board, made by another module) |
 
 **No linked note:** the row offers *create a note and link it* or *skip*. Created as other skills
 create a note (`references/other-skills.md`): kind `note`, titled with the card's title, its
-summary, the summary line and the `Conclusions` section as its text, its card named (the card link
-in the app, `board-task` in the vault), waiting in the Inbox for review. Nothing is written for a
-card until its row is answered.
+summary, the summary line and the `Conclusions` section as its text, linked to the card with
+`notes_link_card`, waiting in the Inbox for review. Nothing is written for a card whose row is
+left out of the answer.
 
 ## 🌙 Unattended
 
@@ -68,14 +76,13 @@ written for that card, and the close's report names it with the reason.
 
 ## ✏️ Writing the section
 
-- **App.** No `Conclusions` heading yet: `notes_get` right before, then `notes_update` with the whole
-  text and `## Conclusions` added empty, before `## Related`, or last when there is none (conventions
-  §12). Then `notes_update_section` with heading `Conclusions` (`## Conclusions` after a
+- No `Conclusions` heading yet: `notes_get` right before, then `notes_update` with the whole text
+  and `## Conclusions` added empty, before `## Related`, or last when there is none (conventions
+  §12). A brief keeps it after `## Change log` (conventions §13).
+- Then `notes_update_section` with heading `Conclusions` (`## Conclusions` after a
   `SECTION_AMBIGUOUS`) and the new text: it replaces what was there, so a second close leaves one
   section.
-- **Vault.** Read with the etag; replace the text under `## Conclusions` (the heading added the same
-  way); write back with the bare etag (`references/storage-vault.md`).
-- **Read it back** once (`notes_get`, or the read): the section holds the new text, and there is one.
+- **Read it back** once (`notes_get`): the section holds the new text, and there is one.
 - **Then the description**, by the caller: `update_tasks` with it, read back as bandit:tasks says.
 
 ## ⛔ Refusals
@@ -89,13 +96,14 @@ card is still completed.
 | `SECTION_AMBIGUOUS` | Retry once with the level; still two at that level: report |
 | `ROLE_CANNOT` · `NOT_FOUND` · `NOTE_TOO_LARGE` | Report; nothing shortened, nothing worked around |
 | `NOTES_SPACE_FULL` | Report and write no more notes in this run |
-| A vault write refused (the etag) | Report; never retry with `if_match: "*"` |
 | On the description: `SPEC_LOCKED` · `ORIGIN_TASK_READ_ONLY` · `ASSISTANT_CANNOT` · `ROLE_CANNOT` | The description stays; report |
 
 ## 🚫 Never
 
+- Run on a vault project.
+- Write into a note in the Inbox.
 - Edit or delete a comment.
 - Add a second `Conclusions` section, or append to the one there.
 - Cut a description on a Technical board or one another module made.
-- Write for a card whose row is unanswered, or, unattended, a card with no note or two.
+- Write for a card whose row is left out of the answer, or, unattended, a card with no note or two.
 - Hold back a card's completion because a write here was refused.

@@ -28,7 +28,7 @@ How the same note is written in each storage:
 | bandit:plan (both modes) | `reference` (the project plan, the architecture, the WBS) | **Written straight in**, not to the Inbox, because they're worked on across many sessions: the project's board, in the column of the area it is about (app, Places), or `Projects/{slug}/`, its `planning/` on a project with sprint folders (vault, Part 2 §1 → Sprint project root). Still Part 2: kind, status, summary; in the vault create fail-closed and edit only with the etag |
 | bandit-dev:sprint | the sprint's records (plan, execution prompt, ledger, report, briefs) | **Written straight in**, for the same reason: the project's board with the tag `sprint-{name}` (app) or `Projects/{slug}/sprint-{name}/` (vault, Part 2 §1 → Sprint folders) |
 | bandit:tasks (dev projects) | a card's `brief` and `plan` | Linked to its card from the start and waiting in the Inbox for review: in the app a plan is linked with no summary, so it waits until the review gives it one (`references/storage-app.md` → Status and filing); in the vault `_inbox/` with `board-task`, then the project's folder. Part 2 §13 |
-| bandit:tasks `done`, bandit-dev:sprint `close` | a finished card's conclusions | The `Conclusions` section of the card's linked note, replaced at each close; a card with no note gets a `note` linked to it, on the user's yes, waiting in the Inbox (`references/conclusions.md`) |
+| bandit:tasks `done`, bandit-dev:sprint `close` (app's Notes only) | a finished card's conclusions | The `Conclusions` section of the card's linked note, replaced at each close; a card with no note gets a `note` linked to it, on the user's yes, waiting in the Inbox; a vault project gets none (`references/conclusions.md`) |
 
 - **Settings files stay in the vault**, whichever storage holds the notes. **bandit:project** owns
   the files inside `Claude/ai-{slug}/`. Those files start with an HTML metadata comment on line 1,
@@ -56,13 +56,12 @@ How the same note is written in each storage:
   exists only on dev projects, `file` and `lint` apply the plan-note rules to any plan note,
   whichever project they run from (usually the domain workflow project).
 - **Lookup for bandit:tasks: the notes linked to this card.** bandit:tasks names the card, and the
-  note's title from its `Brief:` or `Technical plan` line (or its `Note:` line, a finished card's
-  note, `references/conclusions.md`). App: `notes_list` of the card's board;
+  note's title from its `Brief:` or `Technical plan` line. App: `notes_list` of the card's board;
   the notes whose `cards` hold the card are its notes: its brief, and its plan unless it is a sprint
   plan (tagged with the sprint, Part 2 §13). Reviewed means out of the Inbox. Vault: the title is the
   filename without `.md` (a line written before, ending in `.md`, has it stripped first); this skill
   finds it with
   `nc_webdav_find_by_name(pattern="{title}.md", scope="MyNotes/{Domain}")`, checks the match sits in
-  `Projects/{slug}/`, its `planning/` or one of its sprint folders (a `Note:` line: anywhere in the
-  domain) and that its `board-task` is the card; reviewed means filed out of `_inbox/`. Places and paths stay here; bandit:tasks never
+  `Projects/{slug}/`, its `planning/` or one of its sprint folders and that its `board-task` is the
+  card; reviewed means filed out of `_inbox/`. Places and paths stay here; bandit:tasks never
   restates them.

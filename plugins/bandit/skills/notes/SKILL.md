@@ -41,7 +41,7 @@ is Project.
 | `references/storage-app.md` | Before any write into the app's Notes: the tool for each operation, places, fields, refusals |
 | `references/onboarding.md` | When bandit:project runs the notes step of onboarding |
 | `references/other-skills.md` | When another skill or a chat writes a note |
-| `references/conclusions.md` | When a card is completed: its conclusions into its linked note |
+| `references/conclusions.md` | When a card is completed on the app's Notes: its conclusions into its linked note |
 | `references/gotchas.md` | Once, before a session's first note write |
 
 "Conventions §N" (or "Part 2 §N") means that section of `references/conventions.md`, whose section

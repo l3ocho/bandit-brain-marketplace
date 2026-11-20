@@ -21,6 +21,6 @@ One line per real failure: what went wrong → what to do instead. Read once bef
   `audit` run every row in the same turn, no question; an either/or runs the recommended option.
 - **2026-09-29 · `check` said the rules were missing after they'd been written.** It reused the
   files it had read earlier in the chat and refused to score, twice. → Every run re-reads
-  `rules.yaml`, `rulebook.md` (this skill's `references/`) and the snapshot inputs from the vault, never from earlier in the chat.
+  `rules.yaml`, `rulebook.md` (this skill's `references/`) and the snapshot inputs from their sources (the vault, the app, the board), never from earlier in the chat.
 - **2026-09-30 · S11 dated the Home Reno mirror from GitHub, which lagged the repo by a month.** →
   S11 scores the hook, the script and the files only; the snapshot's `repo` is always `null`.

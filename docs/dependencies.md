@@ -31,6 +31,7 @@ The third is the rule that enforces it, if one does.
 | `plugins/bandit/skills/project/references/dev-mirror.md` | `.claude/hooks/mirror-check.py` (this repo's own copy, byte for byte; each dev project gets the new copy as a ready change) | 🔒 DM1 |
 | `.claude/hooks/mirror-check.py` | `plugins/bandit/skills/project/references/dev-mirror.md` | 🔒 DM1 |
 | `plugins/bandit/skills/audit/references/structure-rulebook.md` | `plugins/bandit/skills/audit/references/structure-rules.yaml` · `plugins/bandit/skills/audit/scripts/check_structure.py` | 🔒 A1 |
+| `plugins/bandit/skills/audit/scripts/check_structure.py` | `tests/fixture-audit/**` (the fixture snapshots, and the kept rows the script before BB-595 printed, never regenerated) · `plugins/bandit/skills/audit/references/snapshot.md` (the snapshot schema) · `tests/cases.md` (C145 to C148) | 🔒 A2 |
 | `plugins/bandit-dev/skills/sprint/scripts/recipe.py` | `plugins/bandit-dev/skills/sprint/references/bandit-yaml.md` · `docs/bandit-yaml.md` · `bandit.yaml` · `tests/fixture-app/**` | 🔒 Y1 · Y2 |
 | `plugins/bandit-dev/skills/sprint/references/bandit-yaml.md` | `plugins/bandit-dev/skills/sprint/scripts/recipe.py` · `docs/bandit-yaml.md` | 🔒 Y2 |
 | `docs/bandit-yaml.md` | `plugins/bandit-dev/skills/sprint/references/bandit-yaml.md` · `bandit.yaml` | — |
@@ -78,7 +79,7 @@ each: the path as the map writes it, then why. `scripts/release.py --write` empt
 - `tests/fixture-expected/sprint-targets-*.md` — BB-601 moves `sprint_targets.py` to the notes file; its four outputs are the same by design, and KP1 checks them against these files unchanged.
 - `tests/fixture-map/estimate.csv` — BB-601 changes only where `sprint_data.py` reads the sprints from; `--estimate` reads a data file as before, and ES1 is green on it unchanged.
 - `plugins/bandit-dev/hooks/hooks.json` — BB-601 changes what `check_sprint.py --hook` reads inside the script (the repository's notes file); the hook's command takes no vault argument and stays as it is, and SP8 runs it.
-- `plugins/bandit/skills/audit/scripts/check_structure.py` — BB-601 changed only the sentences in the rulebook (and the S16 row's SP5 label), `structure-rules.yaml` (a comment) and `fix-rows.md` that said which sprint-checker rules mirror S13–S16; no rule, key or score changes, and A1 is green.
+- `plugins/bandit/skills/audit/scripts/check_structure.py` — BB-601 changed only the sentences in the rulebook (and the S16 row's SP5 label), `structure-rules.yaml` (a comment) and `fix-rows.md` that said which sprint-checker rules mirror S13–S16; no rule, key or score changes, and A1 is green. BB-595 then changed the script itself (snapshot schema 7, S13 on the app's Notes, S14–S16 retired, S4's `notes` line): A1 and A2 run it on the shipped rules and the fixtures in `tests/fixture-audit/`.
 
 ## ✅ Before saying done
 

@@ -85,7 +85,7 @@ Written before the first real run; correct them with what happens.
 - Two sprints planned separately can claim the same migration number → `run` checks plans across sprints before the first wave.
 
 - Briefs for sprint privacy-a were left at the project root by the same agent that filed two other sprints correctly → rules that matter are enforced by `scripts/check_sprint.py` and the Stop hook, not by prose.
-- A WBS and an out-of-sprint brief were left at the project root → SP5: a sprint project's root holds only `{project}.md`, `sprint-*` folders and `planning/`; the WBS, the project plan and the architecture live in `planning/`; an out-of-sprint brief lives in the folder of the sprint it follows. (SP5 retired once the checker read the notes file: a brief at the root now fails SP2 there; a WBS or plan at the root is the audit's S16.)
+- A WBS and an out-of-sprint brief were left at the project root → SP5: a sprint project's root holds only `{project}.md`, `sprint-*` folders and `planning/`; the WBS, the project plan and the architecture live in `planning/`; an out-of-sprint brief lives in the folder of the sprint it follows. (SP5 retired once the checker read the notes file: a brief at the root now fails SP2 there; a WBS or plan at the root was the audit's S16, retired since, so nothing scores it now.)
 
 - Leftovers stayed behind after the work that used them; then two notes were archived on a guess → write No leftovers into every command, and archive only on proof that the successor exists.
 - Inbox drafts stayed behind after their brief was filed, a WBS draft after the WBS was filed, a brief after its card was deleted → archive what a step consumed in that same step; SP2, SP3 and SP6 catch the sprint cases, on the notes file.

@@ -679,6 +679,75 @@ def check_audit_contract():
            if ok else "audit rules: paths.stamps missing")
 
 
+# ── A2 · the audit scorer on its fixture snapshots (BB-595): each kept rule caught, the old shape as before ─
+AUDIT_FIXTURES = ROOT / "tests" / "fixture-audit"
+AUDIT_RETIRED = ("S14", "S15", "S16")
+
+
+def audit_kept_rows(text):
+    """A report's rule rows and fix rows, the retired rules' rows left out, fix numbers and pairings dropped.
+    Two reports with the same kept rows score every rule that stays the same way."""
+    out, where = [], ""
+    for line in text.splitlines():
+        if line.startswith(("## ", "### ")):
+            where = line
+            continue
+        m = re.match(r"^\| (S\d+) \|", line)
+        if m and m.group(1) not in AUDIT_RETIRED:
+            out.append(f"{where} {line}")
+            continue
+        m = re.match(r"^\| \d+ \| (.*) \| (S\d+)(?: · with \d+)? \|$", line)
+        if m and m.group(2) not in AUDIT_RETIRED:
+            out.append(f"fix | {m.group(1)} | {m.group(2)}")
+    return out
+
+
+def check_audit_fixtures():
+    base = PLUGINS / "bandit" / "skills" / "audit"
+    script, refs = base / "scripts" / "check_structure.py", base / "references"
+    if not script.exists() or not AUDIT_FIXTURES.is_dir():
+        return report("A2", True, "skipped (no audit scorer or fixtures)")
+    import yaml  # the scorer needs PyYAML too (A1 loads it the same way)
+    rules = yaml.safe_load((refs / "structure-rules.yaml").read_text(encoding="utf-8"))
+
+    def score(name):
+        with tempfile.TemporaryDirectory() as out:
+            code, msg = run_script(script, "--rules", str(refs / "structure-rules.yaml"), "--rulebook",
+                                   str(refs / "structure-rulebook.md"), "--snapshot", str(AUDIT_FIXTURES / name),
+                                   "--out", out)
+            reports = list(Path(out).glob("audit-*.md"))
+            return (reports[0].read_text(encoding="utf-8") if code == 0 and len(reports) == 1 else None), msg
+
+    def statuses(text, rule):
+        return {c.split(" | ")[1] for c in (l for l in text.splitlines() if l.startswith(f"| {rule} | "))}
+
+    bad = []
+    good, msg = score("good.json")
+    if good is None:
+        return report("A2", False, f"good.json not scored: {msg}")
+    if any(s in good for s in ("| ❌ |", "| ⚠️ |", "| unchecked |")) or "\n| 1 | " in good:
+        bad.append("good.json has a finding, an unchecked rule or a fix row")
+    for rule in sorted(rules["levels"], key=lambda r: int(r[1:])):
+        cases = sorted(AUDIT_FIXTURES.glob(f"break-{rule}.json")) + sorted(AUDIT_FIXTURES.glob(f"break-{rule}-*.json"))
+        if not cases:
+            bad.append(f"no break-{rule} fixture")
+        for c in cases:
+            text, msg = score(c.name)
+            if text is None:
+                bad.append(f"{c.name} not scored: {msg}")
+            elif not statuses(text, rule) & {"❌", "⚠️"}:
+                bad.append(f"{c.name}: {rule} not caught")
+    text, msg = score("mismatch.json")
+    if text is None or "unchecked" not in statuses(text, "S13"):
+        bad.append("mismatch.json: S13 not unchecked when the Project Context and the snapshot disagree")
+    text, msg = score("old-shape.json")
+    want = (AUDIT_FIXTURES / "old-shape.kept.txt").read_text(encoding="utf-8").splitlines()
+    if text is None or audit_kept_rows(text) != want:
+        bad.append("old-shape.json: the rules that stay no longer score as the old script did (old-shape.kept.txt)")
+    report("A2", not bad, "; ".join(bad) or f"audit fixtures: good clean, each of {len(rules['levels'])} kept rules "
+           "caught, the mismatch unchecked, the old shape as before")
+
+
 # ── SP7 · the sprint checker refuses a committed sprint without its plan review (fixtures) ─
 def run_script(script, *args, cwd=None):
     r = subprocess.run([sys.executable, "-B", str(script), *args], capture_output=True, text=True, cwd=cwd)
@@ -2328,6 +2397,7 @@ def main(argv):
     check_t1()
     check_house_lint()
     check_audit_contract()
+    check_audit_fixtures()
     check_sp7()
     check_sp8()
     check_sp9()

@@ -4,7 +4,7 @@
 > values as-is. Never fix, tidy, reorder or leave anything out: a wrong snapshot gives a report
 > that looks right but isn't.
 
-## 📂 Three input files (in the sandbox, next to the script run)
+## 📂 Three input files (next to the script run: `.audit/` for `audit`, any scratch folder for `check`)
 
 | File | From | How |
 |---|---|---|
@@ -15,17 +15,19 @@
 A read that fails → stop and say which. Don't build a partial snapshot: the script can't tell a
 missing folder from an empty one.
 
-## 🧾 Schema (`schema: 6`)
+## 🧾 Schema (`schema: 7`)
 
-Build schema 6. The script still reads older saved snapshots: schema 5 carries each board's old
-`type` where schema 6 has its `profile` (S3 reads the type, S9 skips the profile), schema 4 has no project files
-(S13–S16 score **unchecked**), schema 3 has no working-folder manifests either (S12 unchecked too),
-schema 2 has no surfaces either (S10 and S11 unchecked too), schema 1 has no lanes either (S9
-unchecked too).
+Build schema 7. It adds, under `vault.projects`, the notes of a project on the app's Notes
+(`notes: app` in its Project Context), and drops `vault.inbox` (S14 is retired). The script still
+reads older saved snapshots and scores the rules that stay as before: schema 6 has no app notes
+(every project is read from the vault), schema 5 carries each board's old `type` where schema 6 has
+its `profile` (S3 reads the type, S9 skips the profile), schema 4 has no project files (S13 scores
+**unchecked**), schema 3 has no working-folder manifests either (S12 unchecked too), schema 2 has no
+surfaces either (S10 and S11 unchecked too), schema 1 has no lanes either (S9 unchecked too).
 
 ```json
 {
-  "schema": 6,
+  "schema": 7,
   "taken_at": "2026-09-27T19:18:00Z",
   "tags": ["deep-work", "lane/feature", "stage/spec"],
   "board": {
@@ -67,16 +69,24 @@ unchecked too).
     },
     "projects": {
       "Acme": {
-        "home-reno": {
-          "entries": [{"name": "home-reno.md", "dir": false},
+        "garden": {
+          "storage": "vault",
+          "entries": [{"name": "garden.md", "dir": false},
                       {"name": "sprint-staging", "dir": true},
-                      {"name": "sprint-staging/home-reno-sprint-staging-plan.md", "dir": false}],
-          "frontmatter": {"home-reno.md": "<raw YAML between the --- lines>",
-                          "sprint-staging/home-reno-sprint-staging-plan.md": "<raw>"}
+                      {"name": "sprint-staging/garden-sprint-staging-plan.md", "dir": false}],
+          "frontmatter": {"garden.md": "<raw YAML between the --- lines>",
+                          "sprint-staging/garden-sprint-staging-plan.md": "<raw>"}
+        },
+        "home-reno": {
+          "storage": "app",
+          "board": "Home Reno",
+          "notes": [{"id": "<uuid>", "title": "home-reno-tiles-brief", "kind": "brief", "status": "active",
+                     "cards": ["{PFX}-26"], "tags": ["sprint-staging"]},
+                    {"id": "<uuid>", "title": "home-reno-sprint-staging-plan", "kind": "plan", "status": "active",
+                     "cards": [], "tags": null}]
         }
       }
-    },
-    "inbox": {"Acme": ["Untitled 3.md", "home-reno-wbs.md"]}
+    }
   },
   "stamps": { "Personal/career-manager": { "...": "the ledger entry, as-is" } }
 }
@@ -103,14 +113,20 @@ unchecked too).
 | `….workdir` | `nc_webdav_read_file` raw of `MyNotes/{D}/Projects/{slug}/workdir-manifest.json` (`{slug}` = the folder name after `code-`), parsed | `code-*` of a project **without** `dev: true` only: the JSON object as-is. Missing file, `design-*`, or dev → `null`. Never rebuilt or tidied: S12 reads it field by field |
 | `stamps` | ``nc_webdav_read_file` of the stamp ledger (`paths.stamps` in `references/structure-rules.yaml`)` | Its `projects` object, as-is. Missing ledger → `{}` |
 | `board.sprint_cards` | Real sprints: `get_sprints { boardId }` on each Technical board of the domain, then `get_sprints { sprintId }` for each one's cards. Old sprints, until the tags retire: `list_tasks(tagPrefix: "sprint/")`, open and completed (not archived). `MODULE_DISABLED` → stop and say Sprints is off; never write an empty list for it | One entry per card: `id`, `short_id` (`shortId`, or `null`), `sprints` = the **names** of the real sprints holding it, as-is, and its tag names starting `sprint/`, as-is |
-| `vault.projects.{D}` | `nc_webdav_find_by_name(pattern="%", scope="MyNotes/{D}/Projects")` | One key per folder directly under `Projects/`. `entries`: every file and folder inside it, `name` relative to that folder (`sprint-x/note.md`), `dir` as listed. Results must equal `total_found`; fewer → stop (a partial listing) |
-| `….frontmatter` | `nc_webdav_read_file` raw of **every** `.md` in a project that has a `sprint-*` folder at its root; none for other projects (`{}`) | The text between the first two `---` lines, verbatim, without them. A file that doesn't start with `---` → `null`. The script refuses a sprint project with a note left unread |
-| `vault.inbox.{D}` | `nc_webdav_list_directory("MyNotes/{D}/_inbox")` | Filenames only, as-is. Never read: the inbox is the user's |
+| `vault.projects.{D}` | The production instructions' Project Context (`….instructions` above) says where each project's notes are: `notes: app` → the app's Notes, no line → the vault | One key per project: `storage` is `app` or `vault`. A project on the app's Notes is never read from the vault, even when an old `Projects/{slug}/` folder is still there |
+| `….{slug}` (vault) | `nc_webdav_find_by_name(pattern="%", scope="MyNotes/{D}/Projects")` | One key per folder directly under `Projects/`, except the folder of a project with `notes: app`. `entries`: every file and folder inside it, `name` relative to that folder (`sprint-x/note.md`), `dir` as listed. Results must equal `total_found`; fewer → stop (a partial listing) |
+| `….frontmatter` (vault) | `nc_webdav_read_file` raw of **every** `.md` in a project that has a `sprint-*` folder at its root; none for other projects (`{}`) | The text between the first two `---` lines, verbatim, without them. A file that doesn't start with `---` → `null`. The script refuses a sprint project with a note left unread |
+| `….{slug}` (app) | `notes_list` of the project's board (`board:` in its Project Context; its Inbox included, archived notes left out) | `board` = the board's name. `notes`: one row per note, `id`, `title`, `kind`, `status` as-is, `cards` = each linked card's `shortId` (its `id` when it has none). `board: none` → `notes: []` (a sprint lives on a board) |
+| `….notes[].tags` (app) | `notes_get` of **every** note of kind `brief` linked to a card | Its `tags`, as-is. Every other note: `null` (not read). The script refuses a brief linked to a card whose tags are `null` |
 
-`audit {domain}` still snapshots every domain's board, but only reads settings, project files and
-the inbox for the domains it scores. `audit all` reads them all, once.
+`audit {domain}` still snapshots every domain's board, but only reads settings and project notes for
+the domains it scores. `audit all` reads them all, once.
 
 ## ▶️ Run
+
+From Claude Code, in the folder the audit runs from (`references/domain-audit.md`). The
+three input files are working files: write them in `.audit/` at that folder's root, then keep only
+`snapshot.json`, renamed as the report's snapshot (`references/domain-audit.md` → Report).
 
 ```
 python {skill folder}/scripts/check_structure.py --rules rules.yaml --rulebook rulebook.md \

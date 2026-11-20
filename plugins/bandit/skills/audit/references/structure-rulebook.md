@@ -1,19 +1,20 @@
 ---
 type: reference
-summary: House standard for the user's domains and projects across Claude.ai, the MyNotes vault and BanditBrains. bandit:audit scores against these 16 rules.
-updated: 2026-10-31
+summary: House standard for the user's domains and projects across Claude.ai, the MyNotes vault and BanditBrains. bandit:audit scores against these 13 rules.
+updated: 2026-11-20
 ---
 
 # 🧱 Structure Rulebook
 
-> House standard for the user's domains and projects across Claude.ai, the MyNotes vault and BanditBrains. bandit:audit scores against these 16 rules.
+> House standard for the user's domains and projects across Claude.ai, the MyNotes vault and BanditBrains. bandit:audit scores against these 13 rules.
 
 ## 🗺️ Overview
 
 - **8 musts** (S1–S5, S9, S10, S12): a break is ❌ and gets a fix row.
-- **8 shoulds** (S6–S8, S11, S13–S16): a break is ⚠️, fixed when the project is touched anyway or when the user asks.
+- **5 shoulds** (S6–S8, S11, S13): a break is ⚠️, fixed when the project is touched anyway or when the user asks.
+- **Retired** (2026-11-20): S14, S15, S16. Their numbers are never reused.
 - A rule that doesn't apply scores **—**. Anything the auditor couldn't read scores **unchecked**, never a guess.
-- **Score line:** `musts 8/8 · shoulds 7/8 · 2026-10-09`, one per project, plus one for the domain.
+- **Score line:** `musts 8/8 · shoulds 4/5 · 2026-11-20`, one per project, plus one for the domain.
 - **Exempt:** boards with a `systemOwner` (e.g. Finance in Money). Listed as "system, not audited".
 - **Scored by a script, never by hand.** `structure-rules.yaml`, next to this file, holds these rules as data. bandit:audit's `check_structure.py` scores against it. Change a rule → change both files in the same approved proposal, and keep `rulebook_updated` there equal to `updated:` here: the script refuses to run when they differ.
 
@@ -22,8 +23,8 @@ updated: 2026-10-31
 | Place | Holds | Named |
 |---|---|---|
 | Claude.ai | Project instructions, in production | `{L} - Name` (workflow project: the domain's display name) |
-| MyNotes vault | `{Domain}/Claude/ai-{slug}/`: **settings only**, the production instructions and reference docs. Work output (reports, notes, plans) goes in `{Domain}/Projects/{slug}/`. The project's other surfaces sit beside it, settings only too: `code-{slug}/` (Claude Code) and `design-{slug}/` (Claude Design) | `ai-{slug}` · `code-{slug}` · `design-{slug}` |
-| BanditBrains | Board, filed in the domain folder | `Name` (workflow board: `Name - wkflw`) |
+| MyNotes vault | `{Domain}/Claude/ai-{slug}/`: **settings only**, the production instructions and reference docs. Work output (reports, notes, plans) goes in `{Domain}/Projects/{slug}/`, or, for a project whose notes are in the app (`notes: app`), on its board. The project's other surfaces sit beside it, settings only too: `code-{slug}/` (Claude Code) and `design-{slug}/` (Claude Design) | `ai-{slug}` · `code-{slug}` · `design-{slug}` |
+| BanditBrains | Board, filed in the domain folder; with `notes: app`, the project's notes too | `Name` (workflow board: `Name - wkflw`) |
 
 The `{L} - ` prefix exists only in Claude.ai, as a workaround until Claude.ai can group projects by domain. When it can, the prefix goes, and S2 drops that part.
 
@@ -59,10 +60,10 @@ The `{L} - ` prefix exists only in Claude.ai, as a workaround until Claude.ai ca
 ### S4 · Project Context
 
 - The `## 🧭 Project Context` block (owned by `bandit:project`) has all 5 required keys: `domain`, `project`, `type`, `board`, `prefix`.
-- One optional key: `dev`. Valid value `true`, or the line is absent. Any other value is ❌. A project without the line is never flagged.
+- Two optional keys: `dev`, valid value `true`, and `notes`, valid value `app` (the project's notes are in the app's Notes; no line means the vault). Each is that value or its line is absent. Any other value is ❌. A project without the line is never flagged.
 - `domain` is the vault domain. `board` is `project "{name}"` naming an existing board, or `none`. `folder "…"`, `global` and `pending` don't pass.
 - The `board` line's board is filed in the domain's board folder or one of its subfolders: `domain` and `board` together are the project's board scope (bandit:tasks `references/scope.md`). A home board outside its domain folder is ❌.
-- **Check:** read from the production instructions file in the vault. Keys missing, `dev` invalid, `board` unresolved or outside the domain folder → ❌.
+- **Check:** read from the production instructions file in the vault. Keys missing, `dev` or `notes` invalid, `board` unresolved or outside the domain folder → ❌.
 
 ### S5 · Production version
 
@@ -123,9 +124,10 @@ Numbered last so old reports keep their numbers; it's a must.
 
 ### S6 · Complete footprint
 
-- Every project has a vault folder and a board, or declares `board: none` in its Project Context.
+- Every project has its settings folder (`ai-{slug}/`) and a board, or declares `board: none` in its Project Context.
+- A project whose notes are in the app (`notes: app`) keeps its notes on its board: it needs no `Projects/{slug}/` folder, and nothing scores it for having none.
 - `code-{slug}/` and `design-{slug}/` don't count as vault folders with no board: they inherit the project's board through the shared slug.
-- **Check:** vault folders with no board, and boards with no vault folder.
+- **Check:** settings folders with no board, and boards with no settings folder.
 
 ### S7 · One production version in the vault
 
@@ -149,36 +151,47 @@ Numbered last so old reports keep their numbers; it's a must.
 - Freshness isn't scored. GitHub's last push lags the repo's real remote, so it can't date the mirror, and nothing else the auditor can read can either. The hook reports a failed copy in the Claude Code session itself.
 - **Check:** files and hook from the snapshot (schema 3). Folder missing → bandit:notes creates it; hook or script missing → bandit:project.
 
-### S13–S16 · Vault content of a sprint project
+### S13 · Sprint briefs
 
-Numbered last so old reports keep their numbers. The conventions are bandit:notes' (§1 Sprint
-folders, §4 uniqueness, §5 YAML style); these rules only score them. A **sprint project** is a
-`Projects/{slug}/` with at least one `sprint-{name}/` folder at its root. bandit-dev:sprint's local
-checker (`check_sprint.py`, a `Stop` hook) reads the project's notes file, not its folders: its SP2,
-SP3 and SP4 are that file's forms of S13 to S15, and S16 has no checker rule. The audit scores these
-rules from the snapshot (schema 5) and never replaces that checker.
+Numbered last so old reports keep their numbers. The conventions are bandit:notes'; this rule only
+scores them. bandit-dev:sprint's local checker (`check_sprint.py`, a `Stop` hook) reads the project's
+notes file, and its SP2 is this rule at write time. The audit scores it from the snapshot and never
+replaces that checker.
 
-| Rule | Holds | Scope | Fix row |
+A brief (vault `type: brief`, app kind `brief`) whose card is in sprint `{name}` (a real sprint, or
+its old `sprint/{name}` tag) is with its sprint:
+
+| Notes in | Holds | Scope | Fix row |
 |---|---|---|---|
-| **S13 · Sprint briefs** (SP2) | A `type: brief` note whose `board-task` card is in sprint `{name}` (a real sprint, or its old `sprint/{name}` tag) sits in `sprint-{name}/` | Sprint projects | bandit:notes: move it |
-| **S14 · One filename** (SP3) | No `.md` filename twice across `Projects/` and `_inbox/`. `README.md` exempt | The domain | bandit:notes: archive the consumed copy on proof, or rename one |
-| **S15 · Frontmatter parses** (SP4) | Every note's frontmatter is valid YAML | Sprint projects | bandit:notes: quote the value on the failing line |
-| **S16 · Sprint project root** | The root holds only the hub `{slug}.md`, `sprint-*` folders and `planning/` | Sprint projects | bandit:notes: move it into `planning/` (or its card's sprint folder) |
+| The vault | It sits in `Projects/{slug}/sprint-{name}/` | Sprint projects: a `Projects/{slug}/` with a `sprint-*` folder at its root | bandit:notes: move it |
+| The app (`notes: app`) | It carries the tag `sprint-{name}` | The project's board | bandit:notes: tag it (`notes_set_fields`, the other tags kept) |
 
-- Not a sprint project → S13, S15, S16 score **—**. A schema-4 or older snapshot → **unchecked**.
-- **Check:** project files and frontmatter, `_inbox/` filenames and the cards in a sprint (real
-  sprints, and `sprint/*` tags until they retire), from the snapshot (schema 5).
+- `{name}` is the sprint's name in kebab-case. Not a sprint project, or no brief of a sprint card → **—**.
+  A schema-4 or older snapshot → **unchecked**; a project on the app's Notes needs schema 7.
+- **Check:** the project's notes and the cards in a sprint (real sprints, and `sprint/*` tags until
+  they retire), from the snapshot: vault files and frontmatter (schema 5), app notes with their
+  kind, cards and a brief's tags (schema 7).
+
+### Retired: S14, S15, S16
+
+Retired 2026-11-20 with the move of the notes into the app: S14 (no filename twice across
+`Projects/` and `_inbox/`), S15 (frontmatter parses) and S16 (a sprint project's root holds only the
+hub, `sprint-*` and `planning/`). The app has ids, fields and no folders. They are scored for no
+storage, old snapshots included; their numbers are never reused. A vault project's frontmatter that
+doesn't parse leaves its brief unread by S13; `/bandit:notes lint` still reports it.
 
 ---
 
 ## 📄 Report lifecycle
 
-- One live report per domain, in the workflow project's own folder: `MyNotes/{Domain}/Projects/{workflow-project}/audit-{YYYY-MM-DD}.md`. Never in a settings folder.
+- One live report per domain, kept where the domain's workflow project keeps its notes, never in a settings folder:
+  - **The app** (`notes: app`): a note of kind `log` titled `audit-{YYYY-MM-DD}` on the workflow project's board, written straight in through bandit:notes.
+  - **The vault:** `MyNotes/{Domain}/Projects/{workflow-project}/audit-{YYYY-MM-DD}.md`.
 - Per project: the score line, then numbered fix rows `| # | Action | Path | Effect | Why |`. The audit runs every row in the same turn; no approval is asked.
-- The snapshot the script scored sits next to the report: `audit-{YYYY-MM-DD}.snapshot.json`. The report is written exactly as the script printed it; its footer carries the rules, snapshot and script hashes.
-- **Replay:** `close` and the next audit re-run the script on the saved snapshot. A report that doesn't reproduce byte for byte is invalid.
-- **Superseded:** a report with no footer, or built with other rules or script hashes, can't replay. It's archived as-is by the fresh audit that replaces it; its rows are never run.
-- When the fixes are done, the report and its snapshot move to `{Domain}/_archive/Projects/{workflow-project}/`.
+- **The snapshot** the script scored is a data file, not a note: `audit-{Domain}-{YYYY-MM-DD}.snapshot.json` in `.audit/` at the root of the folder Claude Code runs the audit from (`paths.snapshots`), git-ignored. So `audit` and `close` run from Claude Code; `check` runs anywhere, and its stamp ledger stays in BanditCloud (`paths.stamps`). The report is written exactly as the script printed it; its footer carries the rules, snapshot and script hashes.
+- **Replay:** `close` and the next audit re-run the script on the saved snapshot. A report that doesn't reproduce byte for byte (trailing newlines aside) is invalid.
+- **Superseded:** a report with no footer, built with other rules or script hashes, or whose snapshot isn't in `.audit/`, can't replay. The fresh audit that replaces it archives it as-is; its rows are never run.
+- When the fixes are done, `close` archives the report (the app: status `archived`; the vault: moved to `{Domain}/_archive/Projects/{workflow-project}/`) and moves its snapshot to `.audit/_archive/`.
 
 ---
 
@@ -195,4 +208,5 @@ rules from the snapshot (schema 5) and never replaces that checker.
 - **Exception:** S13–S16 were added as preventive shoulds with the user's explicit approval (2026-10-09), so bandit-dev:sprint's local checker cites one rulebook, before the findings had appeared in two domains.
 - **2026-10-13 · Moved into the bandit-brain-marketplace repo** with the skills (sprint marketplace-v1): this file and `structure-rules.yaml` now live in bandit:audit's `references/`, owner names follow the plugin names (`bandit:tasks`, `bandit:notes`, `bandit:project`), `s12.hook_sha12` follows the renamed guard script, and the YAML gains `paths.stamps`, the stamp ledger's home. No rule changed.
 - **2026-10-29 · Board profile** (sprint 2026-w44-d), with the user's approval: the app replaced Type with a profile on boards (Workflow or Technical). S3 checks the workflow board's profile, and no longer asks that no other board be Workflow; S9 adds that a dev project's board is Technical. Snapshot schema 6 carries the profile.
+- **2026-11-20 · Notes in the app** (sprint 2026-w47), with the user's approval ("Go with your recommendations", 2026-11-20): S13 is restated for a project whose notes are in the app (the brief carries its sprint's tag); S14, S15 and S16 are retired; S4 accepts the optional `notes: app` line; S6 asks no notes folder of a project on the app's Notes. Snapshot schema 7 carries such a project's notes; older snapshots score the rules that stay as before. The report is a note on the app's Notes; the snapshot moves to `.audit/` in the folder Claude Code runs from (the user's answer, 2026-11-20).
 - A rules or script change stops earlier reports from replaying (their footer hashes differ). Close live reports before installing one if their fixes are done; any left live become superseded (**📄 Report lifecycle**), and the next fresh audit archives them.

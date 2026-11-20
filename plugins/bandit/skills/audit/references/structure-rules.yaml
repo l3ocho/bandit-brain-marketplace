@@ -3,7 +3,7 @@
 # `rulebook_updated` equal to the rulebook's `updated:` frontmatter.
 # check_structure.py refuses to run when they differ.
 schema: 1
-rulebook_updated: 2026-10-31
+rulebook_updated: 2026-11-20
 
 levels:            # must → ❌ on a break · should → ⚠️
   S1: must
@@ -18,14 +18,13 @@ levels:            # must → ❌ on a break · should → ⚠️
   S10: must        # Claude Code twin; added 2026-09-28 as a preventive must, widened 2026-09-29 to every project without dev: true
   S11: should      # dev mirror; added 2026-09-28 as a preventive should
   S12: must        # Claude Code working folder; added 2026-09-29 as a preventive must
-  S13: should      # sprint brief in its sprint folder; S13–S16 added 2026-10-09 as preventive shoulds
-  S14: should      # no filename twice across Projects/ and _inbox/
-  S15: should      # frontmatter parses
-  S16: should      # sprint project root: hub, sprint-* folders and planning/ only
+  S13: should      # a sprint card's brief is with its sprint (vault: its folder · app: its tag); added 2026-10-09
+  # S14 (one filename), S15 (frontmatter parses), S16 (sprint project root): retired 2026-11-20, numbers not reused
 
 paths:
   # Installation paths the procedures read (2026-10-13): the one place a fixed vault path lives.
-  stamps: "MyNotes/BanditLabs/Projects/bandit-brain-marketplace/.audit/stamps.json"   # the self-check stamp ledger
+  stamps: "MyNotes/BanditLabs/Projects/bandit-brain-marketplace/.audit/stamps.json"   # the self-check stamp ledger (BanditCloud: `check` writes it from anywhere)
+  snapshots: ".audit"   # domain-audit snapshots: this folder at the root of the folder Claude Code runs `audit` from (2026-11-20)
 
 exempt:
   system_owner: true          # boards with a systemOwner are listed, never scored
@@ -50,9 +49,10 @@ workflow:
 
 project_context:
   required_keys: [domain, project, type, board, prefix]
-  optional_keys: [dev]
+  optional_keys: [dev, notes]
   # Strings, not booleans: the snapshot stores Project Context values as text.
   dev_values: ["true"]
+  notes_values: ["app"]   # `notes: app` = the project's notes are in the app's Notes; no line = the vault (2026-11-20)
   types: [product_service, workflow, claude_marketplace]
   # S4: `project "…"` naming an existing board, or `none`.
   # `folder "…"`, `global` and `pending` do not pass (rulebook 2026-09-27).
@@ -127,16 +127,14 @@ s12:
   backup_dir: _backup               # settings rollback copies only, flat, no retention clock; never work
   backup_name_pattern: "^(CLAUDE\\.md|settings\\.json|workdir\\.py)\\..+$"
 
-vault_content:
-  # S13–S16: vault content (snapshot schema 5). The conventions are bandit:notes' (§1, §4, §5);
-  # bandit-dev:sprint's local checker reads a notes file, not folders (its SP2-SP4 mirror S13-S15; S16 is only here).
-  # A sprint project is a Projects/{slug}/ with at least one sprint folder at its root.
+sprint_briefs:
+  # S13 in either storage (vault: snapshot schema 5; the app's Notes: schema 7). The conventions are bandit:notes';
+  # bandit-dev:sprint's local checker reads a notes file (its SP2 is the same rule at write time).
+  # Vault: a sprint project is a Projects/{slug}/ with a sprint folder at its root; the brief sits in that folder.
+  # App: the brief carries the tag sprint-{name}.
   sprint_folder_pattern: "^sprint-[a-z0-9]+(-[a-z0-9]+)*$"
-  sprint_tag_prefix: "sprint/"      # sprint {name} (a real sprint, or its old tag sprint/{name}) ↔ folder sprint-{name}
-  planning_dir: planning            # S16: the one other folder at a sprint project's root
-  brief_type: brief                 # S13: notes with this type and a board-task in a sprint
-  unique_exempt: [README.md]        # S14: the domain home page
-  unique_scope: [_inbox, Projects]  # S14 compares .md filenames here; implemented in the script
+  sprint_tag_prefix: "sprint/"      # sprint {name} (a real sprint, or its old card tag sprint/{name}) ↔ sprint-{name}
+  brief_kind: brief                 # vault `type:` · app `kind`, with a card in a sprint
 
 s9:
   # Dev board shape. With `dev: true`: every lane tag has a lane, the first lane is
@@ -164,9 +162,7 @@ owners:
   surface_folder: bandit:notes        # S11: code-{slug}/ missing
   workdir_guard: bandit:project     # S12: guard missing or outdated
   workdir_fix: Claude Code in the project   # S12: layout rows, run in the twin's own session
-  brief_move: bandit:notes            # S13
-  duplicate_name: bandit:notes        # S14: archive the consumed copy on proof, or rename one
-  frontmatter_fix: bandit:notes       # S15
-  root_move: bandit:notes             # S16
+  brief_move: bandit:notes            # S13, vault: move the brief into its sprint folder
+  brief_tag: bandit:notes             # S13, app: tag the brief sprint-{name} (notes_set_fields)
 
 row_order: [bandit:notes, bandit:notes archive, bandit:project, bandit:tasks, Claude Code in the project, the user (by hand), the user (/bandit:audit check in the project), the user]

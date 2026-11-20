@@ -12,7 +12,7 @@ the exact target.
 | Rename a board, switch its profile (its creator only), rename a board folder | `bandit:tasks` |
 | Missing dev lanes or `lane/*` / `stage/*` tags (S9) | `bandit:tasks` **dev board shape** procedure |
 | Dev lanes on a board without `dev: true` (S9) | One row, two options, recommended first: remove the lanes (`bandit:tasks`) or onboard the project as dev (`bandit:project`). The recommended one runs; the report names the other |
-| An invalid `dev:` value (S4) | `bandit:project` targeted update |
+| An invalid `dev:` or `notes:` value (S4) | `bandit:project` targeted update |
 | Move old settings versions into `_archive/Claude/ai-{slug}/` (S7) | `bandit:notes archive` |
 | Create a missing folder | `bandit:notes` |
 | Project Context keys, instructions version, re-paste into Claude.ai | `bandit:project` targeted update (paste: the user) |
@@ -22,15 +22,16 @@ the exact target.
 | `code-{slug}/` folder missing (S11) | `bandit:notes` |
 | Working-folder guard missing or outdated (S12) | `bandit:project` (`references/workdir.md`) |
 | Working-folder layout rows (S12): move, rename, delete on the Claude Code machine | That project's Claude Code session: the rows are handed over, targets `{slug}:{path}` |
-| A sprint brief outside its sprint folder (S13), a sprint project's root (S16) | `bandit:notes` (a move) |
-| A filename twice in `Projects/` and `_inbox/` (S14) | `bandit:notes`: archive the consumed copy on proof (its Leftovers rule), or rename one |
-| Frontmatter that doesn't parse (S15) | `bandit:notes` (quote the value, its YAML style) |
+| A sprint brief not with its sprint (S13), in the vault: outside its sprint folder | `bandit:notes`, the move its `lint` Sprint briefs row makes (`nc_webdav_move_resource`; owner key `brief_move`) |
+| A sprint brief not with its sprint (S13), on the app's Notes: without the tag `sprint-{name}` | `bandit:notes`, a field fix as its `lint` rows make on the app's Notes (`notes_set_fields`, the brief's other tags kept; owner key `brief_tag`) |
+
+S14, S15 and S16 are retired (rulebook → Retired): they make no rows.
 
 **The local checker stays separate.** bandit-dev:sprint's `scripts/check_sprint.py` checks a
 sprint's papers at write time, as a `Stop` hook, from the project's notes file: by title, tag and
-status, not by folder or filename (its SP2 to SP4 are that file's forms of S13 to S15; S16 has none).
+status, not by folder or filename (its SP2 is that file's form of S13).
 This skill's script needs a snapshot and can't run from a hook, so it never absorbs that checker; it
-scores S13–S16 at audit time.
+scores S13 at audit time.
 
 ---
 
@@ -39,7 +40,7 @@ scores S13–S16 at audit time.
 Every row runs in the same turn, no approval asked; this skill runs them **through their owners**,
 and the owner doesn't ask again. It loads the owner skill and
 follows that skill's own procedure for the row. It never renames, moves, switches profiles or writes
-instructions with its own calls. Its own writes are the report and the ledger, nothing else.
+instructions with its own calls. Its own writes are the report, the snapshot and the ledger, nothing else.
 
 **Linked rows.** A board or board-folder rename breaks every Project Context whose `board:` line
 names the old name: readers stop when the name no longer resolves. So when building fix rows,
@@ -47,8 +48,8 @@ search every project's `board:` line for the old name. Each match gets a second 
 the rename: `bandit:project` targeted update of that project, `board:` → the new name.
 
 - A pair runs together, or not at all.
-- **Order:** vault rows (`bandit:notes`) → settings rows (`bandit:project`) → board rows
-  (`bandit:tasks`). The new instructions version exists before the old board name stops
+- **Order:** notes rows (`bandit:notes`, the vault's or the app's) → settings rows
+  (`bandit:project`) → board rows (`bandit:tasks`). The new instructions version exists before the old board name stops
   resolving.
 - A row whose owner refuses or fails → skip the rows that depend on it, and report both.
 - **S12 layout rows** live on the Claude Code machine, out of reach here. Hand them over as one

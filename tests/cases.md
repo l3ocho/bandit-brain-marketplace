@@ -105,6 +105,20 @@ Staging cases run on a staging project whose Project Context puts its notes in t
 | C143 | A vault project as before | cli | `done`, completing two cards at once, and `close` of a scratch sprint on a test vault project with no word on its storage, cards with comments and a linked brief | no conclusions row, no note read or written, no description changed; the cards completed as before |
 | C144 | The sprint checks from a notes file | staging + auto (SP7, SP15, SD1, KP1) | a scratch sprint on a staging project with `notes: app`, planned, run for one wave and closed; the notes file built through the note tools after each step; `check_sprint.py`, `sprint_data.py --notes` and `sprint_targets.py --notes` on it, no vault on the machine; then a brief of a sprint card left in the board's Inbox with no sprint tag, and a second brief of a card in the Inbox; then the fixtures in `tests/fixture-notes/` | the check prints OK after planning, the wave and the close (with `--closed`); the notes file holds the Inbox briefs and the board's other titles, and the check fails SP2 and SP6 on them; the data rows and the targets block come from the notes file; each fixture that breaks a kept rule fails with that rule only (PapersBad: SP2, SP3, SP6; SprintData: SP4) (BB-601) |
 
+## 📐 Structure audit on the app's Notes (BB-595)
+
+Fixture cases score `tests/fixture-audit/` with `check_structure.py`. Staging cases run from Claude Code on the Pi against a staging domain whose projects carry `notes: app`, with notes and cards titled with the card id, removed after.
+
+| # | Item | Kind | Input | Expected |
+|---|---|---|---|---|
+| C145 | Each kept rule caught | auto (A2) | `good.json` (schema 7: a workflow project, a dev project with `notes: app`), then each `break-S{n}*.json`, one change each | good: no ❌, ⚠️ or unchecked and no fix row; each break file: its rule ❌ or ⚠️; S13 twice: the vault brief outside its sprint folder (move row), the app brief without `sprint-{name}` (tag row, bandit:notes) |
+| C146 | The old shape as before | auto (A2) | `old-shape.json` (schema 6, S13 to S16 broken in the vault) | every rule that stays and every fix row of those rules as the script before BB-595 printed them (`old-shape.kept.txt`); no S14, S15 or S16 row |
+| C147 | The Project Context and the snapshot disagree | auto (A2) | `mismatch.json`: the snapshot holds app notes, the Project Context has no `notes: app` | S13 unchecked, an Unchecked line asks to rebuild the snapshot; no finding, no row |
+| C148 | The `notes` line in S4 | auto (A2) | `break-S4.json`: `notes: vault`; `good.json`: `notes: app` | `notes: vault` → S4 ❌ "notes `vault` must be `app` or absent" and a bandit:project row; `notes: app` → S4 ✅ |
+| C149 | A domain on the app's Notes | staging | `audit {domain}` on a staging domain whose workflow project and one dev project carry `notes: app`, a sprint with one brief tagged `sprint-{name}` and one without | the snapshot in `.audit/`, schema 7, no vault folder read for those projects; S13 ⚠️ for the untagged brief only, its row run through bandit:notes; no finding about a missing `Projects/` folder; the report a `log` note `audit-{date}` on the workflow board |
+| C150 | The next audit finds the report | staging | a second `audit` of the same domain, then `close` | the first report note archived before the second is written, its snapshot in `.audit/_archive/`; `close` prints `REPLAY OK` on the second and sets it archived |
+| C151 | Run from Claude.ai | read | `audit/SKILL.md` router and `references/domain-audit.md`, `audit {domain}` asked in Claude.ai | `audit` and `close` say they run from Claude Code and stop; `check` runs there and writes the stamp |
+
 ## 🧩 Clarify, notes, project
 
 | # | Item | Kind | Input | Expected |

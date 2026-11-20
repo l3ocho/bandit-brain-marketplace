@@ -9,7 +9,7 @@
 | The sprint | A real sprint on the home board: status and the batch in run order (`references/templates.md` → The sprint in the app) |
 | Plan, briefs, execution prompt, ledger (planning steps and wave progress), review record, wave report, handover report | The sprint's papers: notes in the project's storage, through bandit:notes. On the app's Notes, notes on the project's board with the tag `sprint-{name}`; in the vault, the sprint folder `Projects/{slug}/sprint-{name}/`. Titles and kinds in `references/templates.md` → Papers |
 | The project's targets note | A note in the project's place for planning documents (`references/templates.md` → Papers, Sprint targets) |
-| The sprint map and the project's sprint data file (not text, so not notes) | On the app's Notes, data files in `.sprint/` in the project's working folder; in the vault, the sprint folder and `Projects/{slug}/planning/` as before (`references/templates.md` → Papers, Sprint map, Sprint data) |
+| The sprint map and the project's sprint data file (not text, so not notes) | On the app's Notes, data files in `.sprint/` at the root of the repository the helper runs from; in the vault, the sprint folder and `Projects/{slug}/planning/` as before (`references/templates.md` → Papers, Sprint map, Sprint data) |
 | The sprint's papers link | Text naming where the papers are (`references/templates.md` → The sprint in the app) |
 | An old-way sprint's sprint card and tag | `references/old-way.md` |
 

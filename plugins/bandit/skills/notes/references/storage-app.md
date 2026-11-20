@@ -86,7 +86,8 @@ The app creates a second note with the same title without complaint. So, before 
    and put an archived one up to the user before bringing it back. A same-titled note somewhere
    else is another note; say so when it could be confused.
 4. None found → `notes_create` on its board (`boardId`; left out for a private note), with its
-   kind, its summary, its tags, the kind's fields and its text. It starts in that place's Inbox.
+   kind, its summary (a card's plan: none, Status and filing), its tags, the kind's fields and its
+   text. It starts in that place's Inbox.
 5. Then its place: a draft for the user's review stays in the Inbox. A note written straight in
    (`references/other-skills.md`) is filed in the same step with `notes_file` into its column.
    A note that belongs to a card is linked with `notes_link_card`; a draft of it stays in the Inbox

@@ -58,7 +58,8 @@ How the same note is written in each storage:
   note's title from its `Brief:` or `Technical plan` line. App: `notes_list` of the card's board;
   the notes whose `cards` hold the card are its notes: its brief, and its plan unless it is a sprint
   plan (tagged with the sprint, Part 2 §13). Reviewed means out of the Inbox. Vault: the title is the
-  filename without `.md`; this skill finds it with
+  filename without `.md` (a line written before, ending in `.md`, has it stripped first); this skill
+  finds it with
   `nc_webdav_find_by_name(pattern="{title}.md", scope="MyNotes/{Domain}")`, checks the match sits in
   `Projects/{slug}/`, its `planning/` or one of its sprint folders and that its `board-task` is the
   card; reviewed means filed out of `_inbox/`. Places and paths stay here; bandit:tasks never

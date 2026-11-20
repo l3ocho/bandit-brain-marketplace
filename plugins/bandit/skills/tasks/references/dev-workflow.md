@@ -116,9 +116,9 @@ runbook needs no plan note: its `Technical plan` carries `Runbook: {repo path} �
    is locked (`references/dev.md` → Spec lock): a settled change is written straight away and
    reported old and new → one `update_tasks` entry (fields and tags together). Claude Code never rewrites a `Spec` whose `Source` is Claude.ai (it adds a
    `Spec change needed:` comment instead). Tags per `references/dev.md` → Tag merging.
-6. **Brief:** hand bandit:notes the card's brief (new, or updated when it exists): a note of kind
-   `brief` with its handler and lane, linked to the card, waiting for the user's review in the
-   inbox. One brief a card: the app refuses to link a brief to a second card. The Spec's `Brief:`
+6. **Brief:** hand bandit:notes the card's brief: a new note of kind `brief` with its handler and
+   lane, linked to the card, waiting for the user's review in the inbox; or, when it exists, the
+   same brief updated where it is (a reviewed brief does not go back to the inbox). One brief a card: the app refuses to link a brief to a second card. The Spec's `Brief:`
    line names its title.
 7. **WBS link:** the card cites a `WBS-X.Y.Z` → hand bandit:notes one approval row adding the
    Card links row to the project's WBS note (bandit:notes finds it and owns the write, bandit:plan
@@ -247,8 +247,8 @@ Steps 1 and 5 are the **card-write rules** bandit-dev:sprint calls for a sprint'
 3. **`planned`:** a plan note must be linked to the card and out of the inbox, that is reviewed
    (bandit:notes' lookup of the card's notes), or, on a recurring card, a `Runbook:` line must name
    the runbook (**🗂️ Record homes**). A card whose `Technical plan` names its sprint's shared plan
-   is the sprint helper's to check (bandit-dev:sprint), not this step's. Each card still needs its
-   own plan lines (branch, size, summary).
+   passes without the lookup: that plan is bandit-dev:sprint's, which writes and checks it before it
+   moves its batch here. Each card still needs its own plan lines (branch, size, summary).
    Neither → say so and stop. **`ready`** expects a `planned` card; from `spec`, say so
    and ask the user to confirm.
 4. **Write the tags** per `references/dev.md` → Tag merging (one `stage/*`, every other tag kept),

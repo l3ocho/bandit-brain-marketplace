@@ -149,7 +149,7 @@ there is a board's Inbox or the private one, and a note in it has status `inbox`
 | Note in status `inbox` | Whose | Rules |
 |---|---|---|
 | `createdViaAssistant` false | The user's, in progress | None. Untouchable until they put it up for review |
-| `createdViaAssistant` true | A helper's draft, waiting for the user's review | The helper wrote it compliant (kind, summary, fields); not edited again until review, except on the user's explicit request in the conversation that wrote it. A plan linked to its card does not wait here (`references/storage-app.md` → Status and filing) |
+| `createdViaAssistant` true | A helper's draft, waiting for the user's review | The helper wrote it compliant (kind, summary, fields); not edited again until review, except on the user's explicit request in the conversation that wrote it. In the app's Notes a plan linked to its card waits here with no summary until the review gives it one (`references/storage-app.md` → Status and filing) |
 | any other status | Reviewed | All of the conventions |
 
 A helper's own draft is one it created. It stays in the Inbox, status `inbox`, until the user

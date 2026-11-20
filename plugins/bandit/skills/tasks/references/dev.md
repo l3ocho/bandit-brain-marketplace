@@ -45,7 +45,7 @@ project whose board is Workflow is a bandit:audit finding (S9), fixed by the dev
 | Stage | Means | Set by |
 |---|---|---|
 | `stage/spec` | Scope agreed, `Spec` written; a screen-changing card also has its approved design linked | `spec` |
-| `stage/planned` | Plan note reviewed and filed by the user | `stage … planned`, after `/bandit:notes file` |
+| `stage/planned` | Plan note linked to the card, reviewed by the user and out of the inbox | `stage … planned`, after the review (`/bandit:notes file`) |
 | `stage/ready` | The user approved; a sprint candidate | `stage … ready`, or the user by hand |
 
 **Stage tags stay after a card is completed.** Completion clears nothing (38 completed BanditBrain
@@ -67,7 +67,7 @@ no description pre-fills the same text.
 
 | `<h3>` | Holds | From the template? |
 |---|---|---|
-| Source | `<p>Claude.ai</p>` or `<p>Claude Code</p>`, then `<p>Brief: {filename}</p>`: filename only, never a folder; a screen-changing card adds `<p>Design: {page link}</p>`, a full web address (`dev-workflow.md` → Design step) | Added |
+| Source | `<p>Claude.ai</p>` or `<p>Claude Code</p>`, then `<p>Brief: {the brief's title}</p>`: the title of the brief linked to the card, never a folder or a path; a screen-changing card adds `<p>Design: {page link}</p>`, a full web address (`dev-workflow.md` → Design step) | Added |
 | Outcome | What is true when done, one or two sentences | ✅ |
 | Lane | The `lane/*` value | ✅ |
 | Problem | **`lane/issue` only:** the wrong behaviour and where it comes from | Added |
@@ -78,7 +78,7 @@ no description pre-fills the same text.
 | `WBS-X.Y.Z` | A `<p>` line, when one fits | Added |
 
 `<h2>Technical plan</h2>` keeps the template's placeholder until `plan-tech` (Claude Code) writes:
-plan note **filename** (never a path), or a `Runbook:` line on a recurring card
+the plan note's **title** (the note linked to the card, never a path), or a `Runbook:` line on a recurring card
 (`references/dev-workflow.md` → Record homes) · branch · size · short summary. The repo's close-out
 may add the landing (merge commit, PR URL): `plan-tech` never removes it. Spec changes are card
 comments (`references/dev-workflow.md` → Surface), not lines here.
@@ -86,6 +86,12 @@ comments (`references/dev-workflow.md` → Surface), not lines here.
 **Incident:** its own template (`<h2>` Impact · Timeline · Root cause · Fix · Follow-ups), no Spec.
 
 Subtasks carry the plan's steps. Everything longer lives in the plan note.
+
+**A card's notes are the notes linked to it**, found through bandit:notes' lookup
+(`references/other-skills.md` there), never by a filename: its brief, and its plan. The `Brief:`
+and `Technical plan` lines keep the note's title for the reader. In the app's Notes a brief or a
+plan belongs to one card (a second card is refused), and a linked plan's status follows its card:
+Active while the card is open, Done once it is complete.
 
 ---
 
@@ -131,7 +137,7 @@ Every dev card is written **complete**, in one `create_tasks` entry, then read b
 | `dependencies` | `blockedBy` / `blocks` for every known link, in the same entry |
 | `subtasks` | Claude Code only: the build steps, when it writes the card or at `plan-tech`. Claude.ai writes none. Order as `references/board.md` → Sub-tasks |
 | `description` | **🃏 Card sections**, written per `references/board.md` → Card descriptions |
-| Brief | One `brief` note per card through bandit:notes, `board-task` = the card's short id. Its body is bandit:notes' rule |
+| Brief | One `brief` note per card through bandit:notes, linked to the card. Its body is bandit:notes' rule |
 
 ---
 
@@ -150,7 +156,7 @@ what the board sees.
 | Batch | Every card in the sprint is a **blocker** of the sprint card (`link_tasks { blockerTaskId: card, blockedTaskId: sprint card }`). The live blockers are the source of truth |
 | Sprint tag | `sprint/{name}` on each batch card, never on the sprint card. Read it as `references/board.md` → Tags says (records and tags both, until the tags retire) |
 | Effort | Its own size as the umbrella; B7 applies to the batch cards, not to it |
-| Records | Plan, execution prompt, ledger, report and the batch's briefs, in the sprint folder (bandit:notes owns the names and the folder) |
+| Records | Plan, execution prompt, ledger, report and the batch's briefs, with the sprint's records (bandit-dev:sprint and bandit:notes own where they go and their names) |
 
 ---
 

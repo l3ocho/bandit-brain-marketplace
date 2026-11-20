@@ -3,7 +3,7 @@
 **Command:** `/bandit:tasks onboard`
 
 **Run by bandit:project.** Onboarding is one command, owned by bandit:project: it interviews,
-then loads this file for the board rows and bandit:notes for the vault rows, and puts all of
+then loads this file for the board rows and bandit:notes for the notes rows, and puts all of
 them in **one** proposal. This file only produces rows and executes the approved ones. It never
 shows its own proposal or asks for its own approval when bandit:project runs it.
 

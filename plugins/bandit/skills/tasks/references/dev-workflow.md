@@ -55,7 +55,7 @@ can do it (*"`plan-tech` runs in Claude Code, from the repo"*).
 |---|---|
 | B1 | One card = one lane, one branch, one landing, one "done" signal, pickable into a sprint on its own. **Landing** is however the repo lands work (a merge, or a PR); an Incident's merge to `main` plus its back-merge counts as one |
 | B2 | No WBS for simple work. A WBS only for work spanning more than one branch or more than one sprint |
-| B3 | The WBS lives in the vault (bandit:plan). L1 and L2 never become cards |
+| B3 | The WBS is a note (bandit:plan writes it through bandit:notes). L1 and L2 never become cards |
 | B4 | Lazy: the next L3 work package becomes a card only through `spec`, which cites its `WBS-X.Y.Z` |
 | B5 | Thin card: `Spec` + `Technical plan`, each short. Everything else goes in the doc |
 | B6 | Before creating: merge check (below). Skipped for Incident |
@@ -74,7 +74,7 @@ The card is the work record. Every other record a lane produces has its home in 
 
 | Record | Lane |
 |---|---|
-| Plan note | Any lane with a `Technical plan` (the vault, through bandit:notes) |
+| Plan note | Any lane with a `Technical plan` (a note linked to the card, through bandit:notes) |
 | Postmortem | Incident |
 | Maintenance log entry | Maintenance |
 | Decision record | Feature, Tech Debt |
@@ -85,7 +85,7 @@ it → stop and ask the user; never pick a place.
 
 **Recurring runbook cards.** A recurring card (it belongs to a series) that follows an existing
 runbook needs no plan note: its `Technical plan` carries `Runbook: {repo path} §{section}` instead.
-`stage … planned` and audit V2 accept that line in place of a filed plan note.
+`stage … planned` and audit V2 accept that line in place of a linked plan note.
 
 ---
 
@@ -116,11 +116,13 @@ runbook needs no plan note: its `Technical plan` carries `Runbook: {repo path} �
    is locked (`references/dev.md` → Spec lock): a settled change is written straight away and
    reported old and new → one `update_tasks` entry (fields and tags together). Claude Code never rewrites a `Spec` whose `Source` is Claude.ai (it adds a
    `Spec change needed:` comment instead). Tags per `references/dev.md` → Tag merging.
-6. **Brief:** hand bandit:notes the card's brief (new, or updated when it exists), `board-task` =
-   the card's short id; the Spec's `Brief:` line names its filename.
+6. **Brief:** hand bandit:notes the card's brief (new, or updated when it exists): a note of kind
+   `brief` with its handler and lane, linked to the card, waiting for the user's review in the
+   inbox. One brief a card: the app refuses to link a brief to a second card. The Spec's `Brief:`
+   line names its title.
 7. **WBS link:** the card cites a `WBS-X.Y.Z` → hand bandit:notes one approval row adding the
-   Card links row to `{slug}-wbs.md` (bandit:notes owns the write and the path, bandit:plan the
-   format).
+   Card links row to the project's WBS note (bandit:notes finds it and owns the write, bandit:plan
+   the name and the format).
 
 ### Design step — screen-changing cards, before `stage/spec`
 
@@ -155,7 +157,7 @@ unblocks the build:
    call makes `Design: {build card title}` in the `design:` line's column (on the home board unless the
    line names a board), with `dependencies.blocks: [the build card]` so the dependency gate names the
    build card's gate line ("the design handover is linked and approved"). Its description: the build
-   card's short id, its brief's filename and its Spec's Outcome, as the design's input. A link made
+   card's short id, its brief's title and its Spec's Outcome, as the design's input. A link made
    later with `link_tasks` gets the gate's generic notice.
 2. **The design session's result is its handover.** Steps 2 and 3 above run on the design card. Once
    the handover lands, the design card carries `<p>Design page: {page link}</p>` (the Claude.ai page
@@ -188,7 +190,8 @@ the sprint's ledger or an old-way sprint card). Run only when the user asks; spr
    `get_task` each to check it. Only settled changes go in; anything still open stays in Open questions.
 4. **Report** each card's old and new `Spec` side by side, changed lines marked, all cards together.
 5. Add a comment on each changed card: `Spec reconciled {date}: {one line on what changed}`. The brief
-   gets the same change and a Change log line through bandit:notes.
+   linked to the card gets the same change through bandit:notes, one section at a time: each changed
+   section, and a line in its `## Change log`.
 
 **Incident** (`/incident` in the repo → `spec` with `lane/incident`, Claude Code): no stage tag, no
 merge check, `dueDate` today, created in its area column, then `update_tasks { items: [{ taskId, executionState: "assigned" }] }`
@@ -215,21 +218,24 @@ Steps 1 and 5 are the **card-write rules** bandit-dev:sprint calls for a sprint'
 
 1. **Drift check first.** Compare the repo `CLAUDE.md` Project Context with the **production**
    Claude.ai block: the instructions version matching the project's self-check stamp, read the way
-   bandit:project reads its vault folder. Report any difference before anything else; don't fix it.
+   bandit:project reads its settings folder. Report any difference before anything else; don't fix it.
 2. **List** the `stage/spec` cards (`list_tasks { boardId, tagId: {stage/spec tag id}, completed: false }`). Separately list the
-   ones whose plan note is already filed (ask bandit:notes whether the filename in `Technical plan`
-   exists in the project folder) and offer the `planned` flip for them.
+   ones whose plan note is already linked and out of the inbox (bandit:notes' lookup of the card's
+   notes) and offer the `planned` flip for them.
 3. The user picks a card → technical discussion.
-4. **Plan note** through bandit:notes: a new `plan` note in `_inbox/` (type, filename and keys are
-   bandit:notes' rules), `board-task` = this card's id.
+4. **Plan note** through bandit:notes: a new note of kind `plan` (its name and fields are
+   bandit:notes' rules), linked to this card and waiting for the user's review in the inbox
+   (bandit:notes writes a linked plan so that it stays there until reviewed). One plan a card: the
+   app refuses a second card, and keeps a linked plan's status in step with its card. A sprint's
+   shared plan is bandit-dev:sprint's: `plan-tech` never writes one.
 5. **Card:** `get_task` → read the current `Technical plan` first (rulebook R14). **The build steps
    go on first**: as sub-tasks, ordered and read back (`references/board.md` → Sub-tasks); bandit-dev's
    sub-task gate refuses a Technical plan written before them. Then write only the
-   lines that are missing (plan-note filename, branch, size, summary). A line already there with a
+   lines that are missing (the plan note's title, branch, size, summary). A line already there with a
    different value (above all the branch, the merge commit or the PR URL) → show both and ask the user;
    never replace it silently. Every other line stays. → one `update_tasks` entry with the description and `effort` ≤ L (XL →
    propose the split, B7); a Claude.ai estimate that differs → show both and ask.
-6. **The card stays `stage/spec`.** It moves only after the user files the note (`/bandit:notes file`).
+6. **The card stays `stage/spec`.** It moves only after the user has reviewed the note (`/bandit:notes file`).
 
 ### `/bandit:tasks stage {card} {spec|planned|ready}` — the only stage writer
 
@@ -238,11 +244,11 @@ Steps 1 and 5 are the **card-write rules** bandit-dev:sprint calls for a sprint'
 2. `get_task` → refuse on a `lane/incident` card. **`spec`** on a screen-changing card: refuse without its
    `Design:` line and approval comment (Design step, gate), and name the step owed; with a `design:`
    line in the Project Context, also refuse while its design card is open, and name that card.
-3. **`planned`:** its plan note must be filed (bandit:notes lookup of the filename in `Technical
-   plan`), or, on a recurring card, a `Runbook:` line must name the runbook (**🗂️ Record homes**).
-   A **shared sprint plan** counts: one filed plan note whose filename sits in the `Technical plan`
-   of several cards of the same sprint. Each card still needs its own plan lines (branch, size,
-   summary).
+3. **`planned`:** a plan note must be linked to the card and out of the inbox, that is reviewed
+   (bandit:notes' lookup of the card's notes), or, on a recurring card, a `Runbook:` line must name
+   the runbook (**🗂️ Record homes**). A card whose `Technical plan` names its sprint's shared plan
+   is the sprint helper's to check (bandit-dev:sprint), not this step's. Each card still needs its
+   own plan lines (branch, size, summary).
    Neither → say so and stop. **`ready`** expects a `planned` card; from `spec`, say so
    and ask the user to confirm.
 4. **Write the tags** per `references/dev.md` → Tag merging (one `stage/*`, every other tag kept),

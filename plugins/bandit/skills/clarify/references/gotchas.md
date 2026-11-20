@@ -12,9 +12,9 @@ One line per real failure: what went wrong → what to do instead. Read once per
 - **2026-09-25 · "See attached" with nothing attached.** The skill didn't check, lost a tool call,
   then guessed which feature was meant. → Check references in Phase 1; name a missing one as an
   assumption.
-- **2026-09-28 · Skill spec saved to Acme/_inbox.** The save offer always pointed at the domain
-  inbox, so a spec changing bandit:tasks and bandit:notes landed in a vault. → The destination
-  follows the subject: skill changes go to a Marketplace card plus brief, everything else to the domain `_inbox`.
-- **2026-10-07 · Inbox note with no card.** The offer was note-only, so specs sat in `_inbox` with
+- **2026-09-28 · Skill spec saved to the Acme inbox.** The save offer always pointed at the domain
+  inbox, so a spec changing bandit:tasks and bandit:notes landed in a domain's notes. → The destination
+  follows the subject: skill changes go to a Marketplace card plus brief, everything else to a note for the domain.
+- **2026-10-07 · Inbox note with no card.** The offer was note-only, so specs sat in the inbox with
   nothing on the board pointing at them, and got lost or binned. → Offer note **and** card by
-  default, linked via `board-task`; the user drops one by saying so.
+  default, linked; the user drops one by saying so.

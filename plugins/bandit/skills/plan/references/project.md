@@ -23,19 +23,20 @@ This skill does NOT do these. It tells the user when to invoke them:
 
 | What | Where |
 |---|---|
-| Folder | `MyNotes/{domain}/Projects/{project}/`, or its `planning/` once the project has sprint folders (bandit:notes conventions §1 names it), with `domain` and `project` from the `## 🧭 Project Context` section (owned by bandit:project). Missing, or `domain: none` → ask for the folder once. Never guess. A project with `notes: app` has no folder: its documents are notes, placed by bandit:notes (`references/model.md` there → Which storage) |
-| Project plan | `{project}-project-plan.md` |
-| Architecture | `{project}-architecture.md` |
-| WBS | `{project}-wbs.md`, written by `wbs` mode (`references/wbs.md`), not this mode |
-| Note format | Frontmatter, keys and YAML style follow the **bandit:notes** conventions. Read that skill before the first write. `type: reference`, `project` links the hub note |
+| Place | The project's place for planning documents, from `domain` and `project` in the `## 🧭 Project Context` section (owned by bandit:project). bandit:notes names it, in the app's Notes or the vault (`references/other-skills.md` there → Who writes what). Missing, or `domain: none` → ask once where they go. Never guess |
+| Project plan | A note named `{project}-project-plan` |
+| Architecture | A note named `{project}-architecture` |
+| WBS | A note named `{project}-wbs`, written by `wbs` mode (`references/wbs.md`), not this mode |
+| Note format | Kind `reference`, its summary, the project linking its hub note; body per the **bandit:notes** conventions (§5, §12). Read that skill before the first write. Every write goes through it |
 
-Planning documents go straight into that folder, not through `_inbox/`: they are worked on
-across many sessions, and the inbox is the user's. If the hub note `{project}.md` is
-missing, say so and point to `/bandit:notes onboard`; don't create it here.
+Planning documents are written straight into that place, not to the inbox: they are worked on
+across many sessions, and the inbox is the user's. If the project's hub note is missing, say so
+and point to `/bandit:notes onboard`; don't create it here.
 
-### 🧾 State comes from the files
+### 🧾 State comes from the notes
 
-No metadata block, no stored IDs. Read the folder at session start:
+No metadata block, no stored IDs. At session start, ask bandit:notes for the two notes by name in
+the project's place, and read their status and sections:
 
 | Plan | Architecture | Mode |
 |---|---|---|
@@ -53,12 +54,21 @@ When resuming, greet with the state:
 
 ### ✍️ Writing safely
 
-- **First save:** create the file with no `if_match`. The write fails if the file exists:
-  stop and ask, never overwrite.
-- **Every later save:** read the file for its etag, write with `if_match` = that bare-hex
-  etag. A 412 means someone edited it (often the user in Obsidian): re-read, say what changed, ask.
-- Never pass `if_match: "*"`. Never delete. No version numbers or copies: the file is
-  edited in place.
+Every save goes through bandit:notes, which writes it safely in either storage.
+
+- **First save:** bandit:notes looks for a note of that name first (its create without a
+  duplicate). None → it creates the note with **every section heading and `_Pending_` under
+  each**, so each later save changes only its sections, puts it in its place and sets its status
+  **`active`** (filing alone would mark it settled, and the state table would skip the phase).
+  One found → stop and ask, never overwrite: it is the note to resume.
+- **Every later save:** read the note right before, then save the confirmed sections one at a
+  time (bandit:notes `references/write-safety.md` → An edit starts from the note as it is now).
+  If it changed since you last read it (often the user editing it), say what changed and ask.
+  Only the phase's last save sets `triaged`.
+- Never delete. No version numbers or copies: the note is edited in place.
+- **Too large.** The app's Notes refuses a note over 200 KB. Keep one note until it is refused,
+  then propose splitting it by section into notes of the same project, related to each other.
+  Nothing is cut or saved shorter.
 - Save after every 2–3 confirmed sections.
 
 ---
@@ -160,7 +170,7 @@ If gaps: list them and ask user to fill before proceeding.
 
 ### Entry Point
 
-Read `{project}-project-plan.md` from the project folder.
+Read the `{project}-project-plan` note from the project's place (through bandit:notes).
 > "I've read your project plan. I'll auto-draft the architecture document from it.
 > Let's walk through — I'll show what I generated and you confirm or adjust."
 
@@ -241,7 +251,7 @@ After all sections are confirmed:
 1. Save the architecture with no `_Pending_` left and `status: triaged`
 2. Check whether Phase 2 changed the plan: new scope items, technical constraints that
    change deliverables, new risks
-3. If so: show the changes, and on confirmation edit the plan in place (etag rules above)
+3. If so: show the changes, and on confirmation edit the plan in place (Writing safely above)
 4. Summary: "Architecture saved. Project plan updated (added X, Y). Next: `/bandit:plan wbs` to
    break this into a WBS; it offers the board step." The route after the WBS is `wbs` mode's.
 
@@ -251,7 +261,7 @@ After all sections are confirmed:
 
 Every interaction must work on mobile:
 
-- **One interaction = one section or one decision.** State comes from the files, so any
+- **One interaction = one section or one decision.** State comes from the notes, so any
   session can pick up.
 - **Draft first, confirm second:** never present a blank prompt when context exists.
 - **Summaries are 3-5 bullets, not paragraphs:** "Section 4 done. 2 goals, 5 objectives.

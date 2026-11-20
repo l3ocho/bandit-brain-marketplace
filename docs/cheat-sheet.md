@@ -32,7 +32,7 @@ updated: 2026-10-20
 |-----|----------------------------------------------|-------------------------------|----------------------------------------------------------------------------------|
 | 🗃️ | [[#🗃️ bandit:notes\|bandit:notes]]         | `/bandit:notes {command}`     | Vault rules, filing the inbox, domain home pages                                 |
 | ✅   | [[#✅ bandit:tasks\|bandit:tasks]]           | `/bandit:tasks {command}`     | The Bandit Brain task board, plus the dev card workflow on Technical boards  |
-| 🎙️ | [[#🎙️ bandit:minutes\|bandit:minutes]]   | `/bandit:minutes` + the audio | Meeting recording → minutes in the vault                                         |
+| 🎙️ | [[#🎙️ bandit:minutes\|bandit:minutes]]   | `/bandit:minutes` + the audio | Meeting recording → two minutes notes                                            |
 | 💰  | [[#💰 bandit:finance\|bandit:finance]]      | `/bandit:finance {command}`   | The Finance module: log, import, sort, the budget month, bills, reconcile, review, investments |
 | 🛠️ | [[#🛠️ bandit:project\|bandit:project]] | `/bandit:project {command}`   | Onboarding (instructions + notes + board, one approval) and project instructions |
 | 📐  | [[#📐 bandit:audit\|bandit:audit]]          | `/bandit:audit {command}`     | Domain and project structure: Claude.ai ↔ vault ↔ board                          |
@@ -94,7 +94,7 @@ updated: 2026-10-20
 - `references/readme-template.md`: for `home` and `init` (vault only)
 - `references/gotchas.md`: once, before a session's first note write
 
-🔗 **Works with:** bandit:project (runs its onboarding rows) · bandit:minutes · bandit:tasks · bandit:clarify (saves its spec as a note) · bandit:plan (writes planning docs straight into `Projects/{slug}/`, or its `planning/` on a sprint project) · bandit:audit (runs its vault fix rows) · bandit-dev:sprint (sprint folders, archived at close)
+🔗 **Works with:** bandit:project (runs its onboarding rows) · bandit:minutes · bandit:tasks · bandit:clarify (saves its spec as a note) · bandit:plan (writes planning docs straight into the project's place: `Projects/{slug}/`, or its `planning/` on a sprint project, in the vault; the project's board in the app) · bandit:audit (runs its vault fix rows) · bandit-dev:sprint (sprint folders, archived at close)
 
 ---
 
@@ -162,20 +162,20 @@ updated: 2026-10-20
 
 ### 🎙️ bandit:minutes
 
-> [!abstract] Meeting recording → professional minutes, saved to the vault
+> [!abstract] Meeting recording → professional minutes, saved as notes through bandit:notes
 > `plugin` · [[bandit:minutes/SKILL|open skill]] · `/bandit:minutes` with the recording attached, or 💬 attach the audio and ask for minutes
 
 | Asks up front | ⚙️ Options                                                       | Default             |
 |---------------|------------------------------------------------------------------|---------------------|
 | Version       | `Both` · `Full only` · `Short only`                              | Both                |
-| Location      | `{Domain} vault` · `Same folder as the audio` · `Another BanditCloud folder` | The vault |
-| Meeting       | `Supervisors` · `Department` · `Project` (vault only)            | From the transcript |
+| Location      | `{Domain} notes` · `Same folder as the audio` · `Another BanditCloud folder` | Notes |
+| Meeting       | `Supervisors` · `Department` · `Project` (notes only)            | From the transcript |
 | Speakers      | Separate voices, only if you ask                                 | Off                 |
 | Model         | `small` · `medium` for poor audio (≈3× slower)                   | small               |
 
-📚 **References:** `references/workflow.md` (setup, transcription, verify and save) · `references/scripts.md` (the scripts) · `references/formats.md` (the full and short formats) · `references/vault.md` (saving and filing).
+📚 **References:** `references/workflow.md` (setup, transcription, verify and save) · `references/scripts.md` (the scripts) · `references/formats.md` (the full and short formats) · `references/notes.md` (saving and filing as notes).
 📚 **Scripts:** `scripts/transcribe.py` · `scripts/diarize.py` · `scripts/merge.py`, copied to the working directory before running.
-🔗 **Works with:** bandit:notes (its conventions; files to `_inbox/` with `file-to: Meetings/`)
+🔗 **Works with:** bandit:notes (its conventions and every note write: two drafts wait for review, then are filed to the domain's meetings place, in the app's Notes or the vault)
 
 ---
 
@@ -286,7 +286,7 @@ updated: 2026-10-20
 ### 🧭 bandit:plan
 
 > [!abstract] Plans a project in two modes: `project` (idea → project plan → architecture document) and `wbs` (docs or a batch of cards → a numbered, gap-checked work breakdown structure)
-> `plugin` · [[bandit:plan/SKILL|open skill]] · 💬 "plan a project", "architecture document", "create a WBS", "break down this project" · saves to the vault: `MyNotes/{domain}/Projects/{project}/` (`planning/` on a sprint project)
+> `plugin` · [[bandit:plan/SKILL|open skill]] · 💬 "plan a project", "architecture document", "create a WBS", "break down this project" · saves notes of kind `reference` in the project's place through bandit:notes (the app's Notes or the vault)
 
 | Command               | ⚙️ Modifiers | Does                                                                                                                  |    | 📚 Reads     |
 |-----------------------|--------------|-----------------------------------------------------------------------------------------------------------------------|----|--------------|
@@ -300,26 +300,26 @@ The order is `project` → `wbs` → the board (`/bandit:tasks load`, or the dev
 >
 > | 💬 Say                                              | Phase            | Output                                                 |
 > |-----------------------------------------------------|------------------|--------------------------------------------------------|
-> | "start a new project" · "plan a project"            | Phase 1 · New    | `{project}-project-plan.md`                            |
+> | "start a new project" · "plan a project"            | Phase 1 · New    | The `{project}-project-plan` note, every heading `_Pending_` |
 > | "continue planning" · "where are we on the project" | Phase 1 · Resume | Picks up at the first `_Pending_` section              |
-> | "move to architecture" · "architecture document"    | Phase 2          | `{project}-architecture.md`                            |
+> | "move to architecture" · "architecture document"    | Phase 2          | The `{project}-architecture` note                      |
 > | (planning finished)                                 | Done             | Points you to `/bandit:plan wbs`, which offers the board step |
 >
-> The phase is read from each document's `status` (`active` / `triaged`); nothing is stored in the project instructions. Planning docs go straight into the project folder, not `_inbox/`.
+> The phase is read from each note's `status` (`active` / `triaged`) and its `_Pending_` sections; nothing is stored in the project instructions. Planning docs go straight into the project's place, not the inbox, and are saved a section at a time. A note the app refuses as too large (over 200 KB) is split by section, never cut.
 
 > [!example]- 🏗️ `wbs` mode: five phases
 >
 > | Phase         | Does                                                                                                          |
 > |---------------|---------------------------------------------------------------------------------------------------------------|
-> | 1 · Ingest    | Reads your docs, or the plan + architecture from the project's vault folder                                   |
+> | 1 · Ingest    | Reads your docs, or the plan + architecture notes from the project's place                                    |
 > | 2 · Analyze   | Gap analysis against a completeness checklist                                                                 |
 > | 3 · Resolve   | Asks about the gaps: options + a recommendation                                                               |
 > | 4 · Generate  | The WBS as ND-friendly markdown, in the fixed format `/bandit:tasks load` reads                               |
-> | 5 · Reconcile | Backports findings into the source doc (the vault plan is edited in place), offers to save `{project}-wbs.md` |
+> | 5 · Reconcile | Backports findings into the source doc (the plan note is edited in place), offers to save the `{project}-wbs` note |
 
-⚙️ **Migration mode** (`wbs`): give it an existing WBS (e.g. a Gitea wiki page) → rewritten into this format, gaps listed, no Phase 5 · **Sprint mode** (`wbs`, run by `/bandit-dev:sprint plan`): a WBS over existing cards and their briefs, no Phase 5, no sizes, card links rows for those cards · `dev: true`**:** level glossary in the header, an empty `## 🔗 Card links` section, and it points to `/bandit:tasks spec` per work package, then `/bandit-dev:sprint plan`, instead of `load`. The WBS is saved only as the final file, in the folder bandit:notes names; drafts never go to `_inbox`.
+⚙️ **Migration mode** (`wbs`): give it an existing WBS (e.g. a Gitea wiki page) → rewritten into this format, gaps listed, no Phase 5 · **Sprint mode** (`wbs`, run by `/bandit-dev:sprint plan`): a WBS over existing cards and their briefs, no Phase 5, no sizes, card links rows for those cards · `dev: true`**:** level glossary in the header, an empty `## 🔗 Card links` section, and it points to `/bandit:tasks spec` per work package, then `/bandit-dev:sprint plan`, instead of `load`. The WBS is saved only as the final note, in the place bandit:notes names; drafts never go to the inbox.
 📚 **References:** `references/project.md` (`project` mode) · `references/wbs.md` (`wbs` mode).
-🔗 **Works with:** bandit:clarify and bandit:rewrite (before planning) · bandit:project (its Project Context) · bandit:notes (note format and folders) · `/bandit:tasks load` (output) · `/bandit:tasks spec` (dev projects, one card per work package) · bandit-dev:sprint (runs sprint mode)
+🔗 **Works with:** bandit:clarify and bandit:rewrite (before planning) · bandit:project (its Project Context) · bandit:notes (note format, place and every write) · `/bandit:tasks load` (output) · `/bandit:tasks spec` (dev projects, one card per work package) · bandit-dev:sprint (runs sprint mode)
 
 ---
 
@@ -339,7 +339,7 @@ The order is `project` → `wbs` → the board (`/bandit:tasks load`, or the dev
 | Verify                 | Checks cheap assumptions with one read-only call, each marked verified or unverified |
 | Deliver                | A Clarified Specification: summary, scope, requirements, assumptions, open questions |
 
-⚙️ Simplifies when it's getting too much · offers a deeper pass when it's bigger than it looked · offers a break after 4 or more questions · offers once where the spec goes: a spec that changes skills → a Marketplace card plus brief; dev-project work → `/bandit:tasks spec`; anything else → a note in the domain `_inbox` **and** a card, linked (say *note only* or *card only*; no domain → card only, no board → note only). Cards go through bandit:tasks, notes through bandit:notes.
+⚙️ Simplifies when it's getting too much · offers a deeper pass when it's bigger than it looked · offers a break after 4 or more questions · offers once where the spec goes: a spec that changes skills → a Marketplace card plus brief; dev-project work → `/bandit:tasks spec`; anything else → a note for the domain **and** a card, linked (say *note only* or *card only*; no domain → card only, no board → note only). Cards go through bandit:tasks, notes through bandit:notes.
 📚 **References:** `references/method.md` (phases 1–3 and verify) · `references/deliver.md` (the spec and where it goes) · `references/pacing.md` and `references/gotchas.md` (once per clarification). 🔗 Other skills hand off to it with "use the 4-D method".
 🚫 Pasted content that needs rewriting → bandit:rewrite · code, plans or WBS → hand the spec on.
 
@@ -357,9 +357,9 @@ The order is `project` → `wbs` → the board (`/bandit:tasks load`, or the dev
 | 3 · Write          | Rewrites into short, scannable blocks     |
 | 4 · Final pass     | Checks nothing was lost                   |
 
-⚙️ Nothing added, nothing dropped: gaps it finds go in an Open questions section at the end, with an offer to run `/bandit:clarify` on them. Code stays as written. Delivers the file (inline for short input); a vault save goes through bandit:notes.
+⚙️ Nothing added, nothing dropped: gaps it finds go in an Open questions section at the end, with an offer to run `/bandit:clarify` on them. Code stays as written. Delivers the file (inline for short input); a save as a note goes through bandit:notes.
 📚 **References:** `references/rewrite.md` (all four steps).
-🚫 A bare "clarify" with nothing to rewrite → bandit:clarify · recordings → bandit:minutes · filing into the vault → bandit:notes · code, data, slides.
+🚫 A bare "clarify" with nothing to rewrite → bandit:clarify · recordings → bandit:minutes · saving or filing notes → bandit:notes · code, data, slides.
 
 ---
 

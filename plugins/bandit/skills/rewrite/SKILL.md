@@ -26,17 +26,17 @@ there: no questions, no new ideas.
 2. **Nothing dropped.** The final pass checks every inventory item made it in
 3. **Format follows the data:** tables for comparisons, numbered lists for sequences, checkboxes for actions
 4. **Code stays as written:** structure the text around it
-5. **Deliver the file** (inline for short input). A vault save goes through bandit:notes
+5. **Deliver the file** (inline for short input). Saving it as a note goes through bandit:notes
 
 ## ⚠️ Gotchas
 
 - Adds ideas, opinions or recommendations that weren't in the source → expand only what's there; flag gaps instead of filling them.
 - Drops content during the merge → the final pass checks every inventory item made it in.
-- Writes straight into BanditCloud with a hard-coded path → deliver the file; vault saves go through bandit:notes.
+- Writes straight into BanditCloud with a hard-coded path → deliver the file; a save as a note goes through bandit:notes.
 - Treats a bare "clarify" with no content as its job → that's bandit:clarify.
 
 ## 🚫 Never
 
 - Invent new points, facts or decisions
 - Rewrite code inside code blocks
-- Save into the MyNotes vault directly
+- Save a note directly: bandit:notes writes notes, in whichever storage holds them

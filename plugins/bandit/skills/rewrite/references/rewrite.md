@@ -112,7 +112,7 @@ Before outputting:
 
 ## 📝 Output Format
 
-The final output is always markdown. Deliver it as a `.md` file (or inline for short input). If the user wants it in the MyNotes vault, hand the result to bandit:notes to file it.
+The final output is always markdown. Deliver it as a `.md` file (or inline for short input). If the user wants it kept as a note, hand the result to bandit:notes, which owns where and how notes are written. It looks for a note of that name first and never makes a second: One found → it is shown and changed only on the user's yes; an inbox note that is not this conversation's own draft is left alone and named (bandit:notes' inbox rule). A result too large for one note (the app's Notes refuses one over 200 KB) is split by section into related notes, never cut.
 
 If the rewrite turned up gaps or open questions (the "missing clarity" spots from Step 1), list them in a short `## ❓ Open questions` section at the end, and offer to run `/bandit:clarify` on them. Don't answer them yourself.
 

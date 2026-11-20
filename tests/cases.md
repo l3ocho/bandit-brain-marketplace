@@ -117,7 +117,7 @@ Fixture cases score `tests/fixture-audit/` with `check_structure.py`. Staging ca
 | C148 | The `notes` line in S4 | auto (A2) | `break-S4.json`: `notes: vault`; `good.json`: `notes: app` | `notes: vault` → S4 ❌ "notes `vault` must be `app` or absent" and a bandit:project row; `notes: app` → S4 ✅ |
 | C149 | A domain on the app's Notes | staging | `audit {domain}` on a staging domain whose workflow project and one dev project carry `notes: app`, a sprint with one brief tagged `sprint-{name}` and one without | the snapshot in `.audit/`, schema 7, no vault folder read for those projects; S13 ⚠️ for the untagged brief only, its row run through bandit:notes; no finding about a missing `Projects/` folder; the report a `log` note `audit-{date}` on the workflow board |
 | C150 | The next audit finds the report | staging | a second `audit` of the same domain, then `close` | the first report note archived before the second is written, its snapshot in `.audit/_archive/`; `close` prints `REPLAY OK` on the second and sets it archived |
-| C151 | Run from Claude.ai | read | `audit/SKILL.md` router and `references/domain-audit.md`, `audit {domain}` asked in Claude.ai | `audit` and `close` say they run from Claude Code on the Pi and stop; `check` runs there and writes the stamp |
+| C151 | Run from Claude.ai | read | `audit/SKILL.md` router and `references/domain-audit.md`, `audit {domain}` asked in Claude.ai | `audit` and `close` say they run from Claude Code and stop; `check` runs there and writes the stamp |
 
 ## 🧩 Clarify, notes, project
 

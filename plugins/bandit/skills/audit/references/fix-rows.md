@@ -22,8 +22,8 @@ the exact target.
 | `code-{slug}/` folder missing (S11) | `bandit:notes` |
 | Working-folder guard missing or outdated (S12) | `bandit:project` (`references/workdir.md`) |
 | Working-folder layout rows (S12): move, rename, delete on the Claude Code machine | That project's Claude Code session: the rows are handed over, targets `{slug}:{path}` |
-| A sprint brief not with its sprint (S13), in the vault: outside its sprint folder | `bandit:notes` (a move, `brief_move`) |
-| A sprint brief not with its sprint (S13), on the app's Notes: without the tag `sprint-{name}` | `bandit:notes` (`notes_set_fields`, the brief's other tags kept, `brief_tag`) |
+| A sprint brief not with its sprint (S13), in the vault: outside its sprint folder | `bandit:notes`, the move its `lint` Sprint briefs row makes (`nc_webdav_move_resource`; owner key `brief_move`) |
+| A sprint brief not with its sprint (S13), on the app's Notes: without the tag `sprint-{name}` | `bandit:notes`, a field fix as its `lint` rows make on the app's Notes (`notes_set_fields`, the brief's other tags kept; owner key `brief_tag`) |
 
 S14, S15 and S16 are retired (rulebook → Retired): they make no rows.
 

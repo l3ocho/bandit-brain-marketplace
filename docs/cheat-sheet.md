@@ -264,18 +264,18 @@ updated: 2026-10-20
 
 ### 📐 bandit:audit
 
-> [!abstract] Audits domain and project structure across Claude.ai, the vault, the app's Notes and the board, against the structure rulebook. Scored by a script, never by hand. `check` runs anywhere; `audit` and `close` run from Claude Code on the Pi (the snapshot lives there)
+> [!abstract] Audits domain and project structure across Claude.ai, the vault, the app's Notes and the board, against the structure rulebook. Scored by a script, never by hand. `check` runs anywhere; `audit` and `close` run from Claude Code (the snapshot lives in the folder it runs from)
 > `plugin` · [[bandit:audit/SKILL|open skill]] · 💬 "audit the BanditLabs domain", "audit all domains", "is this project in sync with the vault"
 
 | Command               | ⚙️ Modifiers       | Does                                                                                                                                                                                                                    |        | 📚 Reads                          |
 |-----------------------|--------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|-----------------------------------|
 | `/bandit:audit`       | —                  | Lists the commands and asks which one                                                                                                                                                                                   | 👀     | —                                 |
 | `/bandit:audit check` | —                  | Run inside the project, on any surface: stamps its running instructions version, scores that project with the script, runs its fix rows. No question                                                                                    | ⚡      | `self-check.md`                   |
-| `/bandit:audit audit` | `{domain}` · `all` | From Claude Code on the Pi. One snapshot of board + vault + app notes + stamps → `check_structure.py` → report with numbered fix rows, shown unedited, plus **Extra fix rows** below it for findings the rules don't cover. `all` = every domain, same snapshot. Runs every row, archives the old report, writes the new one (a `log` note on the app's Notes, else a vault file) and its snapshot in `.audit/`. No question | ⚡      | `domain-audit.md` · `snapshot.md` |
-| `/bandit:audit close` | `{domain}`         | From Claude Code on the Pi. Replays the report; valid → archives it, snapshot to `.audit/_archive/`                                                                                                                                                       | ⚡      | `domain-audit.md`                 |
+| `/bandit:audit audit` | `{domain}` · `all` | From Claude Code. One snapshot of board + vault + app notes + stamps → `check_structure.py` → report with numbered fix rows, shown unedited, plus **Extra fix rows** below it for findings the rules don't cover. `all` = every domain, same snapshot. Runs every row, archives the old report, writes the new one (a `log` note on the app's Notes, else a vault file) and its snapshot in `.audit/`. No question | ⚡      | `domain-audit.md` · `snapshot.md` |
+| `/bandit:audit close` | `{domain}`         | From Claude Code. Replays the report; valid → archives it, snapshot to `.audit/_archive/`                                                                                                                                                       | ⚡      | `domain-audit.md`                 |
 
 > [!warning] Findings come fixed, through their owners
-> Every finding is a fix row, never a bare note; S9 (dev lanes without `dev: true`) is one row with both options; the recommended one runs. It never changes anything with its own calls: every row runs through its owner, no question, in order: vault (bandit:notes) → settings (bandit:project) → board (bandit:tasks). A board rename always comes paired with its `board:` update.
+> Every finding is a fix row, never a bare note; S9 (dev lanes without `dev: true`) is one row with both options; the recommended one runs. It never changes anything with its own calls: every row runs through its owner, no question, in order: notes rows, the vault's or the app's (bandit:notes) → settings (bandit:project) → board (bandit:tasks). A board rename always comes paired with its `board:` update.
 
 📚 **Rules:** `structure-rulebook.md` + `structure-rules.yaml` (read-only): 13 rules (S14–S16 retired 2026-11-20). S4 accepts `dev: true` and `notes: app` · S9 = dev board shape (`dev: true` boards have the six dev lanes, others have none) · S10 = Claude Code twin of any project without `dev: true` · S11 = dev mirror (`code-{slug}/` has the Stop hook and script) · S12 = Claude Code working folder · S13 = a sprint card's brief is with its sprint (vault: in `sprint-{name}/`; app: tagged `sprint-{name}`; bandit-dev:sprint's SP2 is the same at write time). **Script:** `scripts/check_structure.py`, snapshot schema 7 (lanes + tags + surfaces + working-folder manifests + vault project files and frontmatter, or a project's app notes + sprint cards); older snapshots score the rules that stay as before. **Ledger:** `paths.stamps` in the rules (BanditCloud). **Snapshot:** `.audit/` at the root of the folder Claude Code runs from (`paths.snapshots`), git-ignored. Reports go where the workflow project keeps its notes, never a settings folder.
 📚 **Also reads:** `references/fix-rows.md` (building and running fix rows: owners, linked rows, order) · `references/gotchas.md` (once, before a `check` or an `audit`).
@@ -537,7 +537,7 @@ Show the table, then every decision any row needs (either/or choices, deletes, a
 My single answer approves everything: "all", a list of row numbers, or "none", plus my answers to the questions. After that, ask me nothing.
 
 PHASE 3 — AUTONOMOUS RUN (no more stops)
-- Run exactly the approved rows, through their owner skills, in this order: vault (bandit:notes), then settings (bandit:project, which writes the new instructions version), then board (bandit:tasks).
+- Run exactly the approved rows, through their owner skills, in this order: notes rows, the vault's or the app's (bandit:notes), then settings (bandit:project, which writes the new instructions version), then board (bandit:tasks).
 - My Phase 2 answer is the approval each skill would normally ask for. Don't ask again.
 - A row that depends on a declined or failed row is skipped, and the reason is recorded.
 - If something new turns up during the run, don't act on it. Add it to the final report as a fix row.
@@ -551,7 +551,7 @@ One result line per row, then the fix rows for anything new, then my hand-off:
 
 ### 🌐 Whole domain
 
-Paste into a Claude Code session on the Pi (the audit's snapshot lives there): a repository or an agent's folder, not a Claude Code twin's working folder.
+Paste into a Claude Code session (the audit's snapshot lives in the folder it runs from): a repository or an agent's folder, not a Claude Code twin's working folder.
 
 ```
 Full setup review of the {Domain} domain. Work in three phases.
@@ -569,7 +569,7 @@ My single answer approves everything: "all", a list of row numbers, or "none", p
 
 PHASE 3 — AUTONOMOUS RUN (no more stops)
 - Write the audit report where the workflow project keeps its notes, and its snapshot to `.audit/`.
-- Run exactly the approved rows through their owner skills, in this order: vault (bandit:notes), then settings (bandit:project writes each project's new instructions version), then board (bandit:tasks).
+- Run exactly the approved rows through their owner skills, in this order: notes rows, the vault's or the app's (bandit:notes), then settings (bandit:project writes each project's new instructions version), then board (bandit:tasks).
 - Then run /bandit:notes home {Domain}.
 - My Phase 2 answer is the approval each skill would normally ask for. Don't ask again.
 - A row that depends on a declined or failed row is skipped, and the reason is recorded. Half of a linked pair never runs alone.

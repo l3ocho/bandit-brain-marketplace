@@ -18,8 +18,8 @@ works too: "is this project in sync" → `check`.
 | Command | Run from | Does | Reference |
 |---|---|---|---|
 | `check` | Inside the project being checked, on any surface | Reads this project's running `**Version:**` and Project Context, compares with the vault, writes the stamp, scores this project, runs its fix rows | `references/self-check.md` |
-| `audit {domain}` · `audit all` | Claude Code on the Pi | One snapshot, the script, its report unedited, every fix row run, report + snapshot written | `references/domain-audit.md` · `references/snapshot.md` |
-| `close {domain}` | Claude Code on the Pi, where its snapshot is | Replays the live report; valid → archives it and moves its snapshot to `.audit/_archive/` | `references/domain-audit.md` → Close |
+| `audit {domain}` · `audit all` | Claude Code | One snapshot, the script, its report unedited, every fix row run, report + snapshot written | `references/domain-audit.md` · `references/snapshot.md` |
+| `close {domain}` | Claude Code, in the folder that holds its snapshot | Replays the live report; valid → archives it and moves its snapshot to `.audit/_archive/` | `references/domain-audit.md` → Close |
 
 | Read | When |
 |---|---|

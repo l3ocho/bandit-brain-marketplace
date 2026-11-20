@@ -124,7 +124,7 @@ the domains it scores. `audit all` reads them all, once.
 
 ## ▶️ Run
 
-From Claude Code on the Pi, in the folder the audit runs from (`references/domain-audit.md`). The
+From Claude Code, in the folder the audit runs from (`references/domain-audit.md`). The
 three input files are working files: write them in `.audit/` at that folder's root, then keep only
 `snapshot.json`, renamed as the report's snapshot (`references/domain-audit.md` → Report).
 

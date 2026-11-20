@@ -3,9 +3,9 @@
 > Scores domains against the structure rulebook with `scripts/check_structure.py` and writes one
 > report per domain, with its snapshot. Runs every fix row in the same turn: no approval asked.
 
-**Run from Claude Code on the Pi.** The snapshot is a data file in `.audit/` at the root of the
-folder Claude Code runs from (`paths.snapshots`), so `audit` and `close` run there; from Claude.ai,
-say so and stop. Pick a folder whose root may hold `.audit/`: a repository, or an agent's folder
+**Run from Claude Code.** The snapshot is a data file in `.audit/` at the root of the folder
+Claude Code runs from (`paths.snapshots`), so `audit` and `close` run there; from Claude.ai, say so
+and stop. Pick a folder whose root may hold `.audit/`: a repository, or an agent's folder
 without the working-folder guard. A Claude Code twin's working folder refuses it (its guard keeps
 the root to the S12 layout). A repository that does not ignore `.audit/` in its `.gitignore`: say
 so, as the sprint helper does for `.sprint/`.
@@ -46,7 +46,7 @@ python {skill folder}/scripts/check_structure.py --rules rules.yaml --rulebook r
 
 Right after the report is shown, no question:
 
-1. Execute in the order `references/fix-rows.md` sets (vault → settings → board), each row through
+1. Execute in the order `references/fix-rows.md` sets (notes rows, the vault's or the app's → settings → board), each row through
    its owner's procedure. Skip rows that depend on a failed row.
 2. Settings rows: load `bandit:project` and run its targeted update **from the vault**, with the
    project's folder, its production file (the one matching the stamp) and the change. It writes
@@ -56,7 +56,7 @@ Right after the report is shown, no question:
 ## 📄 Report
 
 Per domain, written every run: the report where the domain's **workflow project** keeps its notes
-(its Project Context: `notes: app`, or no line for the vault), and the snapshot on the Pi.
+(its Project Context: `notes: app`, or no line for the vault), and the snapshot in `.audit/`.
 
 | What | Notes in the app (`notes: app`) | Notes in the vault |
 |---|---|---|
@@ -66,12 +66,16 @@ Per domain, written every run: the report where the domain's **workflow project*
 - Never into `Claude/ai-*`: that's the settings folder, for instructions and the reference doc only — never project logs, working notes, decision journals, discussion records, reports, briefs, plans or drafts.
 - In the vault, the workflow project's `Projects/` folder missing → a separate row (`bandit:notes` creates it).
 - A live report already there (valid or **superseded**, see Replay) → archive it as-is before the
-  new report is written: in the app `notes_set_status` → `archived` (through bandit:notes), in the
-  vault moved to `_archive/Projects/{workflow-project}/` with its old vault snapshot, if any. Its
-  snapshot in `.audit/` moves to `.audit/_archive/`. An invalid one is archived too; say it failed replay.
-- The live report is found the same way every time: in the app, the workflow board's notes
-  (`notes_list`) of kind `log` whose title starts `audit-`; in the vault, `audit-*.md` in the
-  workflow project's folder.
+  new report is written, through `/bandit:notes archive`: in the app its status set to `archived`
+  (`notes_set_status`), in the vault moved to `_archive/Projects/{workflow-project}/` with its old
+  vault snapshot, if any. Its snapshot in `.audit/` moves to `.audit/_archive/`. An invalid one is
+  archived too; say it failed replay.
+- **Finding the live reports.** By the title prefix `audit-`, whatever the note's kind (a report the
+  vault move carried into the app may have another kind): in the app, the workflow board's notes
+  (`notes_list`) whose title starts `audit-`; in the vault, `audit-*.md` in the workflow project's
+  folder. A workflow project with `notes: app` is also looked for in that vault folder, so a report
+  written before the switch is found and archived by the first audit after it; every live one found,
+  in either place, is archived.
 
 ## 🔁 Replay
 
@@ -84,7 +88,7 @@ python {skill folder}/scripts/check_structure.py --rules rules.yaml --rulebook r
 (`notes_get`) or the vault file, raw. The script compares it byte for byte, trailing newlines aside.
 
 - **Superseded first.** No footer, a footer whose rules or script hash differs from today's, or no
-  snapshot of that date in `.audit/` (an audit run before the snapshot moved to the Pi, or from
+  snapshot of that date in `.audit/` (an audit run before the snapshot moved to `.audit/`, or from
   another folder) → the report can never replay. It isn't invalid, it's superseded:
   don't replay it, don't act on its rows, and say which hashes differ. It leaves only through a
   fresh audit (the archive row under Report).
@@ -105,9 +109,9 @@ Run from Claude Code, in the folder that holds the report's snapshot in `.audit/
 1. Find the live report (Report, above) and its snapshot in `.audit/`. None → say so.
 2. **Replay** it. Superseded → stop and offer a fresh audit, which archives it. Invalid → stop
    and say why.
-3. Archive the report: in the app `notes_set_status` → `archived` through bandit:notes; in the
-   vault move it to `MyNotes/{domain}/_archive/Projects/{workflow-project}/` with
-   `nc_webdav_move_resource` (a missing target folder → `bandit:notes` creates it first). Move its
+3. Archive the report through `/bandit:notes archive`: in the app its status set to `archived`
+   (`notes_set_status`); in the vault moved to `MyNotes/{domain}/_archive/Projects/{workflow-project}/`
+   (`nc_webdav_move_resource`; a missing target folder → `bandit:notes` creates it first). Move its
    snapshot to `.audit/_archive/`.
 4. Confirm: the note read back with status `archived` (in the vault, both folders listed), and
    `.audit/_archive/` listed.

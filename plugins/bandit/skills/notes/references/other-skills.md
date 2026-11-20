@@ -16,7 +16,7 @@ How the same note is written in each storage:
 
 | | App's Notes (`references/storage-app.md`) | Vault (`references/storage-vault.md`) |
 |---|---|---|
-| A draft for review | `notes_create` on its board, status `inbox` | A new file in `{Domain}/_inbox/`, `status: triaged`, with `file-to:` naming its home |
+| A draft for review | `notes_create` on its board, status `inbox` | A new file in `{Domain}/_inbox/`, `status: triaged`; it may set `file-to:` naming its home |
 | Its place | A board, and a column of it (Places) | A folder (`references/conventions-vault.md` §1) |
 | Written straight in | Filed with `notes_file` in the same step | Created in its folder |
 
@@ -24,8 +24,8 @@ How the same note is written in each storage:
 
 | Skill | Kind | Place |
 |---|---|---|
-| bandit:minutes | `minutes` | Inbox first, then the domain's meetings place: the domain's workflow board (app) or `Meetings/` (vault) |
-| bandit:plan (both modes) | `reference`, or `plan` on a dev project | **Written straight in**, not to the Inbox, because they're worked on across many sessions: the project's board (app) or `Projects/{slug}/`, its `planning/` on a project with sprint folders (vault, Part 2 §1 → Sprint project root). Still Part 2: kind, status, summary; in the vault create fail-closed and edit only with the etag |
+| bandit:minutes | `minutes` | Inbox first, then the domain's meetings place: created in the Inbox of the domain's workflow board (app), or `_inbox/` with `file-to: Meetings/` (vault) |
+| bandit:plan (both modes) | `reference`, or `plan` on a dev project | **Written straight in**, not to the Inbox, because they're worked on across many sessions: the project's board, in the column of the area it is about (app, Places), or `Projects/{slug}/`, its `planning/` on a project with sprint folders (vault, Part 2 §1 → Sprint project root). Still Part 2: kind, status, summary; in the vault create fail-closed and edit only with the etag |
 | bandit-dev:sprint | the sprint's records (plan, execution prompt, ledger, report, briefs) | **Written straight in**, for the same reason: the project's board with the tag `sprint-{name}` (app) or `Projects/{slug}/sprint-{name}/` (vault, Part 2 §1 → Sprint folders) |
 | bandit:tasks (dev projects) | a card's `brief` and `plan` | Inbox-first, then its card: linked to it (app) or the project's folder with `board-task` (vault). Part 2 §13 |
 
@@ -55,7 +55,7 @@ How the same note is written in each storage:
   exists only on dev projects, `file` and `lint` apply the plan-note rules to any plan note,
   whichever project they run from (usually the domain workflow project).
 - **Lookup for bandit:tasks: the notes linked to this card.** App: `notes_list` of the card's board;
-  the notes whose `cards` hold the card are its notes, a plan and a brief one each. Vault: bandit:tasks
+  the notes whose `cards` hold the card are its notes: its brief, and its plan unless it is a sprint plan (tagged with the sprint, Part 2 §13). Vault: bandit:tasks
   asks whether a plan-note **filename** is filed; this skill answers with
   `nc_webdav_find_by_name(pattern="{filename}", scope="MyNotes/{Domain}")` and checks the match sits
   in `Projects/{slug}/`, its `planning/` or one of its sprint folders. Places and paths stay here;

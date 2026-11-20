@@ -92,11 +92,13 @@ approves them by number (`references/model.md` → Scope).
 
 **On the app's Notes: the hub note only.** Folders, templates, frontmatter style and Obsidian
 settings have no counterpart in the app, so Stages A to D do not run. Project scope: look for the
-project's hub note on its board, a `reference` note titled with the project's slug, with its summary
-(Create without a duplicate, `references/storage-app.md`). Missing → one create row, the summary
-drafted in the row for the user to edit; found without a summary → one `notes_set_fields` row.
+project's hub note on its board. The storage reference has no hub note yet, so it is defined here:
+a `reference` note titled with the project's slug, with its summary, in the column of the area it
+is about (`references/storage-app.md` → Places). Look for it first (Create without a duplicate).
+Missing → one create row naming its column, the summary drafted in the row for the user to edit;
+the column is asked when no area fits. Found without a summary → one `notes_set_fields` row.
 Domain scope: the same for every project board in the domain's folder. On approval, create it with
-`notes_create` and file it with `notes_file` into the board's first column, then read it back. The
+`notes_create` and file it with `notes_file` into the row's column, then read it back. The
 settings folders `Claude/ai-{slug}/` and `Claude/code-{slug}/` stay vault rows (`references/model.md`
 → Which storage).
 
@@ -263,8 +265,11 @@ it fast.
    those. **No names:** rows only for helpers' drafts (`createdViaAssistant` true); the user's own
    Inbox notes are listed in one line by title and get a row only once the user names them
    (`references/model.md` → The inbox is the user's). Nothing is written in this step or the next.
+   **Project scope:** only notes for this project's board get a row. Minutes, requests and notes
+   for another project stay in their Inbox for the workflow project; list those in one line.
 2. Per note, work out the row: its place (the project's board and the column of the area it is
-   about; a meeting or a request, the domain's workflow board; a card's brief or plan, its card),
+   about; a meeting or a request, the domain's workflow board; a card's brief, its card; a plan, left
+   to the card workflow),
    its kind, a drafted summary shown in the row, the kind's fields, its tags with the user's kept,
    and `active` or `waiting` when the content says so. Body changes, open questions, notes too thin
    to classify and consumed drafts are handled as in the vault steps above, with an archive row
@@ -273,13 +278,16 @@ it fast.
 4. On approval, per note: `notes_set_fields` (kind, summary, tags, the kind's fields) →
    `notes_move` when its board changes → `notes_file` into its column (it leaves the Inbox,
    `triaged`) → `notes_set_status` when the row says `active` or `waiting` → any approved body row
-   (`notes_get` right before, then `notes_update_section`). A note that belongs to a card is linked
-   with `notes_link_card` instead of filed into a column (`references/storage-app.md` → Status and
-   filing). A refused step stops that note's row; what ran is reported, and the note is read back.
+   (`notes_get` right before, then `notes_update_section`). A card's brief is linked with
+   `notes_link_card`, then filed with `notes_file` into its card's column. A plan is not linked
+   here: when a plan is linked is the card workflow's (bandit:tasks), and a linked plan follows its
+   card (`references/storage-app.md` → Status and filing). A refused step stops that note's row;
+   what ran is reported, and the note is read back.
 5. Report per row, with each note's kind, summary, status and place.
 
 A plan on the app's Notes needs no hub `## Docs` line: its link to its card is its inbound link. The
-report names the card and the same `/bandit:tasks stage {card} planned` prompt.
+report names the card and the same `/bandit:tasks stage {card} planned` prompt, where the card
+workflow links the plan.
 
 ---
 
@@ -328,7 +336,7 @@ each note's fields:
 | Scope | **The Inbox is skipped entirely**: the user's notes and helpers' drafts are not linted before review |
 | Summary | A note out of the Inbox with none |
 | Kind's fields | Minutes without `meeting` or `meetingDate`; a request without `requester` or `receivedOn` (conventions §5) |
-| Status | `done` and not archived (fix: `archive`); `inbox` out of the Inbox |
+| Status | `done` and not archived (fix: `archive`), except a plan linked to its card, which follows the card; `inbox` out of the Inbox |
 | Card | A brief or plan with no card link and no `sprint-{name}` tag; a card link to a card that no longer resolves (read live, read-only) |
 | Tags | A `sprint-{name}` tag whose sprint does not resolve through `get_sprints` |
 
@@ -368,8 +376,8 @@ since the read. Re-read and confirm it parses.
 
 ### `/bandit:notes delete {note…}`
 
-1. Resolve each argument (a path, or a note's name) to an exact path (`nc_webdav_find_by_name` for a bare note name). Zero
-   or several matches → ask; never pick one.
+1. Resolve each argument (a path, or a note's name) to an exact path (`nc_webdav_find_by_name`
+   for a bare note name). Zero or several matches → ask; never pick one.
 2. Propose one `delete` row per path. For a folder, list its contents in the row.
 3. Say plainly that a delete may not be recoverable, and offer archive as the alternative for
    anything that isn't junk.
@@ -437,7 +445,8 @@ status says it is archived (`references/storage-app.md` → Archive, restore, de
 - **Archive:** find the scope's notes with status `done` (`notes_list`). Propose one row per note
   setting `archived`. On approval, `notes_set_status` → `archived`, read back. A plan linked to its
   card follows the card and is not archived by hand (`PLAN_FOLLOWS_CARD`): it gets no row. Settings
-  versions stay a vault procedure.
+  versions stay a vault procedure. A sprint on the app's Notes has no folder: its records are
+  archived by bandit-dev:sprint's close, not by a sprint row here.
 - **Restore:** find the named note in the place's archived notes (`notes_list` with
   `archived: true`), then in the Trash (`notes_list_trash`). Exactly one match by title, or ask.
   From the archive: propose `triaged`, or the status the user names, since the app does not keep the

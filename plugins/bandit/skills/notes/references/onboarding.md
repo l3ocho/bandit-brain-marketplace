@@ -6,7 +6,7 @@
 
 **Onboarding a project is one command, owned by bandit:project.** It interviews the user, then loads
 this skill for the notes rows and bandit:tasks for the board rows, and shows **one** proposal.
-Which storage the project's notes use comes from bandit:project with the rest of the interview
+Which storage the project's notes use is read from the Project Context
 (`references/model.md` → Which storage). This skill only produces the notes rows and executes the
 approved ones; it never shows its own
 proposal or asks for its own approval when bandit:project runs it. Procedure: *Onboarding rows*

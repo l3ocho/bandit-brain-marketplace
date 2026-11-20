@@ -31,6 +31,6 @@ One line per real failure: what went wrong → what to do instead. Read once bef
 - **2026-09-30 · Content migrated from a repo had no `source:` value to take.** → `migrated`, with
   the original location in the body's first line (conventions §5).
 - **2026-10-07 · A colon in a `summary` broke a note.** Obsidian opened it with invalid
-  properties. → Quote any value that YAML would misread (conventions §5 → YAML style).
+  properties. → Quote any value that YAML would misread (`references/conventions-vault.md` §5 → YAML style).
 - **2026-10-08 · Two notes were archived on a guess.** They looked done. → Archive a consumed note
   only on proof that its successor exists and was read (*Other skills* → Leftovers).

@@ -20,6 +20,9 @@ The third is the rule that enforces it, if one does.
 | `plugins/bandit/skills/tasks/references/*.md` | `plugins/bandit/skills/tasks/references/errors.md` · `plugins/bandit-dev/skills/sprint/references/*.md` | — |
 | `plugins/bandit/skills/tasks/references/board.md` | `plugins/bandit-dev/skills/sprint/scripts/check_sprint.py` · `plugins/bandit-dev/skills/sprint/scripts/subtask_gate.py` · `plugins/bandit-dev/skills/sprint/scripts/sprint_data.py` (the card id patterns, Card IDs) | 🔒 ID1 |
 | `plugins/bandit-dev/skills/sprint/references/*.md` | `docs/pipeline.md` · `docs/cheat-sheet.md` · `CLAUDE.md` (the "Done means released" rule, the approval line) · `docs/decisions.md` | 🔒 EX1 (plan step 12 checks the Execution board by date) · AP1 (the approval line) · DK1 (the debug card, its moves and Process lines) |
+| `plugins/bandit/skills/notes/references/conventions.md` | `plugins/bandit/skills/notes/references/conventions-vault.md` (the same section numbers; how the vault writes each field) · `plugins/bandit/skills/notes/references/storage-app.md` (Places, Fields) · `plugins/bandit/skills/notes/references/model.md` (the inbox rule) | — |
+| `plugins/bandit/skills/notes/references/conventions-vault.md` | `plugins/bandit/skills/notes/references/conventions.md` (the section map) · `plugins/bandit/skills/notes/references/storage-vault.md` · `tests/cases.md` | — |
+| `plugins/bandit/skills/notes/references/write-safety.md` | `plugins/bandit/skills/notes/references/storage-app.md` · `plugins/bandit/skills/notes/references/storage-vault.md` | — |
 | `plugins/bandit/skills/project/references/project-context.md` | `templates/instructions/*.md` · `plugins/bandit/skills/project/assets/instructions/*.md` · `CLAUDE.md` · `plugins/bandit/skills/finance/references/scope.md` | 🔒 AT2 |
 | `templates/instructions/*.md` | `plugins/bandit/skills/project/assets/instructions/*.md` | 🔒 L5 |
 | `plugins/bandit/skills/project/references/audit.md` | `docs/cheat-sheet.md` | 🔒 AT2 (tool list) |
@@ -56,7 +59,7 @@ These start outside, so no file here triggers them. Each has its own check.
 | When | Also update | Caught by |
 |---|---|---|
 | The app adds, removes or renames an assistant tool | Every skill naming it; `CURRENT_TOOLS`, `FINANCE_TOOLS` and `REMOVED_TOOLS` in `scripts/check_repo.py`; the tool list in `plugins/bandit/skills/project/references/audit.md`; `plugins/bandit/skills/tasks/references/errors.md` or `plugins/bandit/skills/finance/references/errors.md` (codes); `README.md` and `docs/install.md` (app version needed); a smoke run on staging; then each project runs `/bandit:project audit` | 🔒 AT1 (app clone on Bandit Port), MT1, BR1 (names renamed for Boards) |
-| The app changes a tool's behaviour (a gate, an order, a refusal) | The skill reference that describes it, checked live on staging; `errors.md` | Staging smoke run |
+| The app changes a tool's behaviour (a gate, an order, a refusal) | The skill reference that describes it (for the note tools, `plugins/bandit/skills/notes/references/storage-app.md`), checked live on staging; `errors.md` | Staging smoke run |
 | The Project Context block changes | Every project's instructions and Claude Code `CLAUDE.md`: each project runs `/bandit:project audit` | The audit's Project Context check |
 
 ## ☑️ Checked, nothing to change

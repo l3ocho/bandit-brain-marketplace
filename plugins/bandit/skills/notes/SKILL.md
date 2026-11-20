@@ -30,14 +30,18 @@ scope is Project.
 | Read | When |
 |---|---|
 | `references/model.md` | Before any command: the vault model, resolving the domain, this project's scope, the inbox |
-| `references/write-safety.md` | Before **any** write into the vault, by this skill or any other |
-| `references/conventions.md` | Before any write: folders, filenames, frontmatter, status, archive (conventions §1–§13) |
+| `references/write-safety.md` | Before **any** write of a note, by this skill or any other: the rules both storages share |
+| `references/conventions.md` | Before any write: kinds, fields, status, body shape, dev projects, and the map of conventions §1–§13 |
+| `references/conventions-vault.md` | Before any write into the vault: folders, filenames, frontmatter, archive, Obsidian settings |
+| `references/storage-vault.md` | Before any write into the vault: the WebDAV mechanics |
+| `references/storage-app.md` | Before any write into the app's Notes: the tool for each operation, places, fields, refusals |
 | `references/onboarding.md` | When bandit:project runs the vault step of onboarding |
 | `references/other-skills.md` | When another skill or a chat writes a note |
 | `references/gotchas.md` | Once, before a session's first vault write |
 
-"Conventions §N" (or "Part 2 §N") means that section of `references/conventions.md`; "Part 3" means
-`references/commands.md`.
+"Conventions §N" (or "Part 2 §N") means that section of `references/conventions.md`, whose section
+map says which sections are written in `references/conventions-vault.md` under the same number;
+"Part 3" means `references/commands.md`.
 
 ## 🔒 Hard rules
 
@@ -47,13 +51,13 @@ scope is Project.
    they put the note up for review (`references/model.md` → The inbox is the user's)
 3. **The user confirms every move, rename, archive, delete, folder creation and edit.** A numbered
    proposal, approved by all, a list or none; only approved rows run. Two auto-writes: a new note in
-   `_inbox/`, and the generated README (`references/write-safety.md`). A row bandit:audit runs is
+   `_inbox/`, and the generated README (`references/storage-vault.md`). A row bandit:audit runs is
    already the go: no new proposal
 4. **Findings come fixed:** every problem is a numbered fix row in the same proposal, `domain` when
    outside the scope. End every proposal with: *Nothing is created or changed until you answer all, a
    list, or none.*
 5. **New files fail closed; edits carry the bare-hex etag; moves never overwrite; never `if_match: "*"`;
-   delete only on the user's word, by exact path** (`references/write-safety.md`)
+   delete only on the user's word, by exact path** (`references/storage-vault.md`)
 
 ## ⚠️ Gotchas
 

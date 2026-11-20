@@ -2,6 +2,11 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
+## Unreleased
+
+### Changed
+- **The notes skill keeps one set of conventions and two storages behind them** (BB-597). What a note is (its seven kinds, its status, its one-line summary, each kind's fields, its body shape, the dev-project rules) now reads the same whichever storage holds the note, in `notes/references/conventions.md`; the status list gains `archived`. What belongs to the MyNotes vault only (folders, filenames, how the fields are written as frontmatter, the archive folder, other files, templates, Obsidian settings) moved to `conventions-vault.md`, under the same section numbers, so "conventions §N" in every other skill still finds its section. Two new references say how a note is read and written in each storage: `storage-app.md` for the app's Notes (the tool for each operation, where a note lives, how each field is held, the app's refusals and what to do on each) and `storage-vault.md` for the vault (the WebDAV mechanics that were in `write-safety.md`, unchanged in meaning). `write-safety.md` keeps the rules both storages share: you confirm every move, archive, delete and edit; findings come as fix rows; nothing changes until you answer. In the app's Notes a helper looks for a note before creating it (the search by title, then the place's list, archived notes included) and updates the one it finds; it reads a note before changing it and changes one section where it can; and a note in the Inbox that no assistant created is yours and is not touched until you put it up. Nothing changes yet for a project on the vault, and no command writes to the app's Notes before the cards that follow.
+
 ## 0.22.0 · 2026-11-17
 
 ### Changed

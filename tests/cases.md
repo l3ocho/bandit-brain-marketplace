@@ -78,7 +78,7 @@ the `bandit-staging` board only. `read` cases are checked by reading the shipped
 | # | Item | Kind | Input | Expected |
 |---|---|---|---|---|
 | C21 | P9 hand-off | read | `clarify/references/deliver.md` destination table | dev-project work → `/bandit:tasks spec` with the spec as input |
-| C22 | P10 review record | read | `notes/references/conventions.md` §1 Sprint folders | the review record row, `type: log`, dated filename |
+| C22 | P10 review record | read | `notes/references/conventions-vault.md` §1 Sprint folders | the review record row, `type: log`, dated filename |
 | C23 | P11 + C templates | auto (L5) | `templates/instructions/*.md` | three templates, each ≤ one page, with Project Context, stage → command map and modes; shipped byte for byte in `project/assets/instructions/` |
 | C24 | P11 dev agent stops at spec | read | `templates/instructions/dev.md` → Role | "It stops at spec"; stages 4–10 are Claude Code |
 | C25 | P11 generation | read | `project/references/instructions.md` | instructions are generated from the template for the project's type, through one proposal |

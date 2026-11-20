@@ -116,6 +116,19 @@ is on:
 | `triaged` + `file-to`, in `_inbox/` | Written by a skill, waiting for the user's review | The skill wrote it compliant; not edited again until review, except on the user's explicit request in the conversation that wrote it (the exception above) |
 | anything, outside `_inbox/` | Reviewed | All of Part 2 |
 
+**In the app's Notes** the same rule reads from who created the note, not from a folder. The Inbox
+there is a board's Inbox or the private one, and a note in it has status `inbox`:
+
+| Note in status `inbox` | Whose | Rules |
+|---|---|---|
+| `createdViaAssistant` false | The user's, in progress | None. Untouchable until they put it up for review |
+| `createdViaAssistant` true | A helper's draft, waiting for the user's review | The helper wrote it compliant (kind, summary, fields); not edited again until review, except on the user's explicit request in the conversation that wrote it |
+| any other status | Reviewed | All of the conventions |
+
+A helper's own draft is one it created. It stays in the Inbox, status `inbox`, until the user
+reviews it; nothing marks it but who created it. The tools and the filing steps are
+`references/storage-app.md`.
+
 **Review is all or nothing per note.** Every question a note needs answered (which project,
 which meeting type, what an ambiguous date means) is asked before its row is final. A row with
 an open question is not executed, and **a note is never left half-edited in the inbox**: it is

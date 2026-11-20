@@ -45,7 +45,7 @@ updated: 2026-10-20
 | 🏃  | [[#🏃 bandit-dev:sprint\|bandit-dev:sprint]] | `/bandit-dev:sprint {command}` | A dev project's sprint: plan, run its waves, debug, release, close             |
 | 🌱  | [[#🌱 bandit-dev:testdata\|bandit-dev:testdata]] | `/bandit-dev:testdata {command}` | Made-up data in development, test and staging; each card's test data          |
 
-> [!important] New project? Run **`/bandit:project onboard`** ("onboard this project"). It's the one onboarding command: it runs the vault step (bandit:notes) and the board step (bandit:tasks) and shows everything in one proposal.
+> [!important] New project? Run **`/bandit:project onboard`** ("onboard this project"). It's the one onboarding command: it runs the notes step (bandit:notes) and the board step (bandit:tasks) and shows everything in one proposal.
 
 ---
 
@@ -53,24 +53,24 @@ updated: 2026-10-20
 
 ### 🗃️ bandit:notes
 
-> [!abstract] Owns the MyNotes vault: folders, filenames, frontmatter, status, archiving, home pages
-> `plugin` · [[bandit:notes/SKILL|open skill]] · domain comes from the Project Context `domain:`, from bandit:project during onboarding, or the command, or it asks
+> [!abstract] Owns the note conventions and their two storages, the app's Notes and the MyNotes vault: kinds, fields, status, places, archiving; in the vault also folders, filenames, frontmatter, home pages
+> `plugin` · [[bandit:notes/SKILL|open skill]] · the storage comes from the Project Context (no word on it: the vault) · domain comes from the Project Context `domain:`, from bandit:project during onboarding, or the command, or it asks
 
 | Command                  | ⚙️ Modifiers           | Does                                                                                                                                                                                                                       |        |
 |--------------------------|------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|
 | `/bandit:notes`          | —                      | Lists the commands and asks which one                                                                                                                                                                                      | 👀     |
-| `/bandit:notes onboard`  | `[Domain]`             | Audits a domain against the conventions, proposes the migration in stages A→D. New project → use `/bandit:project onboard`                                                                                                          | ✋      |
-| `/bandit:notes init`     | `{Domain}`             | Scaffolds a new domain: core folders, modules, templates, README                                                                                                                                                           | ✋      |
-| `/bandit:notes home`     | `[Domain]`             | Rebuilds the domain README home page. Safe to schedule                                                                                                                                                                     | ⚡      |
-| `/bandit:notes file`     | `[Domain]` `[note…]`   | Reviews inbox notes you put up: destination, filename, frontmatter. Body edits only as separate rows. A plan note → `active`, linked from the hub's `## Docs`, and the report prompts `/bandit:tasks stage {card} planned`. A consumed inbox draft gets an archive row, on proof the filed copy exists | ✋      |
-| `/bandit:notes lint`     | `[Domain]`             | Reports every convention breach, each as a numbered fix row (the report is the proposal). Plus plan-note checks: no `board-task`, card done but note not, card deleted. Plus frontmatter that doesn't parse, a filename also in `_inbox`, sprint briefs outside their sprint folder, a sprint project's root, triaged notes whose card is gone (asked, never acted on)                                                     | 👀 → ✋ |
-| `/bandit:notes settings` | `[Domain]` · `restore` | Checks Obsidian settings and proposes changes. `restore` rolls back from backup. Obsidian closed on every device                                                                                                           | ✋      |
-| `/bandit:notes archive`  | `[Domain]`             | Moves `status: done` notes into `_archive/`, a whole sprint folder at close, and old settings versions named by a structure audit (S7)                                                                                                                     | ✋      |
-| `/bandit:notes restore`  | `{note}`               | Moves an archived note back to where it came from                                                                                                                                                                          | ✋      |
-| `/bandit:notes delete`   | `{path…}`              | Deletes exactly the paths named                                                                                                                                                                                            | ✋      |
+| `/bandit:notes onboard`  | `[Domain]`             | Audits a domain against the conventions, proposes the migration in stages A→D. App's Notes: checks only each project's hub note. New project → use `/bandit:project onboard`                                                                                                          | ✋      |
+| `/bandit:notes init`     | `{Domain}`             | Scaffolds a new domain: core folders, modules, templates, README. Vault only                                                                                                                                                           | ✋      |
+| `/bandit:notes home`     | `[Domain]`             | Rebuilds the domain README home page. Safe to schedule. Vault only                                                                                                                                                                     | ⚡      |
+| `/bandit:notes file`     | `[Domain]` `[note…]`   | Reviews inbox notes you put up: destination, filename, frontmatter. Body edits only as separate rows. A plan note → `active`, linked from the hub's `## Docs`, and the report prompts `/bandit:tasks stage {card} planned`. A consumed inbox draft gets an archive row, on proof the filed copy exists. App's Notes: place, kind, summary and fields, then filed into its column; with no notes named, only helpers' drafts get rows and your own Inbox notes are listed until you name them | ✋      |
+| `/bandit:notes lint`     | `[Domain]`             | Reports every convention breach, each as a numbered fix row (the report is the proposal). Plus plan-note checks: no `board-task`, card done but note not, card deleted. Plus frontmatter that doesn't parse, a filename also in `_inbox`, sprint briefs outside their sprint folder, a sprint project's root, triaged notes whose card is gone (asked, never acted on). App's Notes: the fields only (summary, the kind's fields, status, card link, sprint tag), the Inbox skipped                                                     | 👀 → ✋ |
+| `/bandit:notes settings` | `[Domain]` · `restore` | Checks Obsidian settings and proposes changes. `restore` rolls back from backup. Obsidian closed on every device. Vault only                                                                                                           | ✋      |
+| `/bandit:notes archive`  | `[Domain]`             | Moves `status: done` notes into `_archive/`, a whole sprint folder at close, and old settings versions named by a structure audit (S7). App's Notes: sets done notes to archived, where they are                                                                                                                     | ✋      |
+| `/bandit:notes restore`  | `{note}`               | Moves an archived note back to where it came from. App's Notes: brings a note back from the archive (status `triaged` or the one you name) or from the Trash (as it was)                                                                                                                                                                          | ✋      |
+| `/bandit:notes delete`   | `{note…}`              | Deletes exactly the notes named (in the vault, also paths). App's Notes: to the Trash for 30 days, `restore` brings it back                                                                                                                                                                                            | ✋      |
 
 > [!tip] Scope
-> `type: workflow` projects see the whole domain. Other projects see only their own `Projects/{slug}/`, inbox and settings. `init`, `home` and `settings` are domain-only. A finding outside the scope still comes as a fix row marked `domain`; your yes to that row by number runs it.
+> `type: workflow` projects see the whole domain. Other projects see only their own `Projects/{slug}/` (in the app, their board), inbox and settings. `init`, `home` and `settings` are domain-only and vault-only. A finding outside the scope still comes as a fix row marked `domain`; your yes to that row by number runs it.
 
 > [!warning] Only approved rows run
 > "Yes" or "create it" approves the rows on the table, nothing else. Every finding is its own fix row in the same proposal, never a bare list.
@@ -82,17 +82,17 @@ updated: 2026-10-20
 
 📚 **References:**
 
-- `references/model.md`: before any command (the vault model, resolving the domain, the project's scope, the inbox)
+- `references/model.md`: before any command (which storage, the vault model, resolving the domain, the project's scope, the inbox)
 - `references/write-safety.md`: before any write of a note, by this skill or any other (the rules both storages share)
 - `references/conventions.md`: before any write (kinds, fields, status, body shape, dev projects, and the map of conventions §1–§13)
 - `references/conventions-vault.md`: before any write into the vault (folders, filenames, frontmatter, archive, Obsidian settings)
 - `references/storage-vault.md`: before any write into the vault (the WebDAV mechanics)
 - `references/storage-app.md`: before any write into the app's Notes (the tool for each operation, places, fields, refusals)
 - `references/commands.md`: the procedure of the command being run, including *Onboarding rows* (run by bandit:project; it adds `Claude/code-{slug}/` for `dev: true` projects and for any other project that runs in Claude Code, and returns domain findings as `domain` fix rows)
-- `references/onboarding.md`: when bandit:project runs the vault step of onboarding
+- `references/onboarding.md`: when bandit:project runs the notes step of onboarding
 - `references/other-skills.md`: when another skill or a chat writes a note
-- `references/readme-template.md`: for `home` and `init`
-- `references/gotchas.md`: once, before a session's first vault write
+- `references/readme-template.md`: for `home` and `init` (vault only)
+- `references/gotchas.md`: once, before a session's first note write
 
 🔗 **Works with:** bandit:project (runs its onboarding rows) · bandit:minutes · bandit:tasks · bandit:clarify (saves its spec as a note) · bandit:plan (writes planning docs straight into `Projects/{slug}/`, or its `planning/` on a sprint project) · bandit:audit (runs its vault fix rows) · bandit-dev:sprint (sprint folders, archived at close)
 

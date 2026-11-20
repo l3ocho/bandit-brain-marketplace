@@ -67,7 +67,7 @@ These start outside, so no file here triggers them. Each has its own check.
 A place the done check lists as open, checked and found to need nothing for this release. One line
 each: the path as the map writes it, then why. `scripts/release.py --write` empties this list.
 
-- `README.md` — BB-597 changed only the pointers in the notes skill's `SKILL.md` (which reference to read); no command, requirement or plugin row changes. The README's vault wording changes at the cutover (BB-596).
+- `README.md` — BB-597 changed only the pointers in the notes skill's `SKILL.md` (which reference to read); no command, requirement or plugin row changes. BB-600 adds the app's Notes path to the notes commands; no command is added, removed or renamed, and the README's command examples stay right. The README's vault wording and the app version the notes skill needs change at the cutover (BB-596).
 
 ## ✅ Before saying done
 

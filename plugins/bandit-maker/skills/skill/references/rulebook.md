@@ -52,7 +52,7 @@ A convention lives in exactly one skill. Other skills name that owner and never 
 
 | Convention | Owner |
 |---|---|
-| MyNotes vault: folders, filenames, frontmatter, inbox | `bandit:notes` |
+| Notes: kinds, fields, status, the inbox, and both storages (the app's Notes; the MyNotes vault's folders, filenames, frontmatter) | `bandit:notes` |
 | BanditBrains task vocabulary and board rules | `bandit:tasks` |
 | Claude.ai project instructions and metadata | `bandit:project` |
 | Project Context block (`## 🧭 Project Context`: keys and format, on Claude.ai and in `CLAUDE.md`) | `bandit:project` |
@@ -64,6 +64,7 @@ A convention lives in exactly one skill. Other skills name that owner and never 
 Applies to any skill that writes outside the chat (BanditCloud, boards, mail).
 
 - **New files fail closed** (no overwrite). **Edits** carry the etag from the read. **Never force-overwrite.**
+- **Notes** are written through `bandit:notes`, which holds each storage's safe write: in the vault the rules above; in the app's Notes, which takes no etag, look before creating and read before editing (its `storage-app.md`).
 - **Delete** only what the user named or approved by exact path; never in an unattended run.
 - **Resolve names live**; never store IDs.
 - **Check:** each write path in the skill states which of these it uses.

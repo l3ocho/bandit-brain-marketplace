@@ -1,6 +1,6 @@
 # ⚠️ Gotchas
 
-One line per real failure: what went wrong → what to do instead. Read once before a session's first vault write.
+One line per real failure: what went wrong → what to do instead. Read once before a session's first note write, in either storage.
 
 - **2026-09-24 · "create it" ran past the proposal.** The user said "create it" to a 5-row proposal and
   the chat also created `_inbox/`, `_templates/`, `_archive/` and `_attachments/`, which were only

@@ -18,7 +18,7 @@ Contents: Conventions · Steps 1 to 12 · Investigator brief · Handover
 
 ## 1 · Select and freeze the batch
 
-0. **Closed sprints left behind, first.** List the home board's closed sprints (`get_sprints { boardId }`, status `closed`) and run the archive check on them (Vault check, below). Any SP15 line → one archive proposal through bandit:notes for those folders and WBS files (the same move as `close.md` step 3), applied on the user's yes, then the check again. Planning goes on only once it prints OK; a declined proposal stops planning here, named.
+0. **Closed sprints left behind, first.** List the home board's closed sprints (`get_sprints { boardId }`, status `closed`) and run the archive check on them (Closed-sprint check, below). Any SP15 line → one archive proposal through bandit:notes for those folders and WBS files (the same move as `close.md` step 3), applied on the user's yes, then the check again. Planning goes on only once it prints OK; a declined proposal stops planning here, named.
 1. Resolve the selection (SKILL.md). Open cards only, not archived, in no sprint: none held by a real sprint (`list_tasks { noSprint: true }`) and none carrying a `sprint/*` tag while the tags exist (bandit:tasks `references/board.md` → Tags). Cards already in a sprint are excluded with a fix row. A card on the Inbox cannot join (`SPRINT_CARD_ON_INBOX`): a fix row to file it first.
 2. For every card read `blockedBy` and `blocks`. Report cards **outside** the batch that it blocks or is blocked by; none of them need links, but the ledger records them under "Out of this sprint".
 3. **Create the sprint** on the home board: `manage_sprints { action: "create", boardId, name, papersUrl }` (name given, else the ISO week, `2026-w42`, kebab-case; `papersUrl` = where its papers are, as text: `references/templates.md` → The sprint in the app), then `manage_sprints { action: "add_cards", sprintId, taskIds }` with the batch, all or none (a refusal names the card and why: a fix row). Read it back with `get_sprints { sprintId }`.
@@ -26,7 +26,7 @@ Contents: Conventions · Steps 1 to 12 · Investigator brief · Handover
 5. **Sprint order.** The previous open sprint on the board (`get_sprints { boardId }`, status not `closed`), or an open old-way sprint card (`references/old-way.md`). One exists → `link_tasks { blockerSprintId (or blockerTaskId for a sprint card), blockedSprintId }` so the new sprint is **blocked by** it. `run` and `execute` refuse a sprint that an open sprint blocks, so sprints ship in order.
 6. Step 1's row: selection rule, count, ids, the sprint it waits for; open Urgent cards listed as not selected.
 
-**Vault check** (here and `close.md` step 4). With a synced vault: `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py --closed {names}`. Without one: list `Projects/{slug}/`, `Projects/{slug}/planning/` and `_archive/Projects/{slug}/` through WebDAV, save the paths (relative to the domain folder, folders ending in `/`) as a JSON list in the session's scratch folder, and run `check_sprint.py --listing {file} --closed {names}`. "Could not read the vault" is a failed check, never a pass.
+**Closed-sprint check** (here and `close.md` step 4). Build the project's notes file (`references/templates.md` → Notes file), then run `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py --closed {names}`: SP15 fails while a paper or the WBS note of a closed sprint is not archived, in either storage. "Could not read the notes file" is a failed check, never a pass.
 
 **Done when** `get_sprints { sprintId }` shows the batch as its cards and the previous open sprint in
 `blockedBy` when there is one, and the ledger holds the Plan steps table.
@@ -121,7 +121,7 @@ blocker is open. `run` and `execute` refuse a sprint whose step 11 row is not do
 6. **Seed the Execution board:** every batch card to `assigned` with `update_tasks { items: [{ taskId, executionState: "assigned" }, …] }`, reading `results` per card, so the user sees the whole sprint before work starts. **Verify by date, not by column:** `get_task` each batch card and compare its due date with this week's Sunday. On or before it: on the Execution board. After it, or none: not on the board yet. The step's row lists every card and where it stands; the sprint's columns alone never prove the board shows a card.
 7. **Create the debug card** (`references/templates.md` → Debug card): one `create_tasks` on the home board, assigned to the user, with the sprint date, then `manage_sprints { action: "add_cards" }` after the batch (in no wave) and `executionState: "assigned"` so it shows on the Execution board; write `Debug card: {short id}` in At a glance.
 8. **Draw the sprint map, the pre-sprint report** (`references/templates.md` → Sprint map), with each wave's time estimate, and write it to its home (`references/templates.md` → Papers).
-9. Run `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py` and paste its output into the Milestone log; only once it prints OK, mark step 12's row done ("committed, checker OK").
+9. Build the notes file (`references/templates.md` → Notes file), run `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py` and paste its output into the Milestone log; only once it prints OK, mark step 12's row done ("committed, checker OK").
 
 ## Investigator brief
 

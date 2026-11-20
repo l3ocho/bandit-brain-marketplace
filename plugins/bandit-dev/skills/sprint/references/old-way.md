@@ -31,7 +31,7 @@ Everything else in each reference applies as written.
 | Status line (every command) | The ledger's Status line | Also the sprint card's section 1 Status line (`get_task` first, change only that line) |
 | Wave, debug, release notes | The ledger's Milestone log | Also one comment on the sprint card with the same line |
 | `run`'s wave check | Waves row, sprint status | The wave sub-task ticked; the sprint card unmoved while waves remain and in `standby` after the last |
-| The checker | SP9 and SP10 read the ledger's `Sprint record:` line | An old-way ledger has none, so SP9 and SP10 skip it; SP1 to SP7 hold. Never add that line to an old-way ledger |
+| The checker | SP9 and SP10 read the ledger's `Sprint record:` line | An old-way ledger has none, so SP9 and SP10 skip it; SP1, SP2, SP3, SP6 and SP7 hold. Never add that line to an old-way ledger |
 
 ## 🏁 Close
 

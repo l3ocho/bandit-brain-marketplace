@@ -685,33 +685,68 @@ def run_script(script, *args, cwd=None):
     return r.returncode, (r.stdout + r.stderr).strip()
 
 
+NOTES_FIXTURES = ROOT / "tests" / "fixture-notes"
+
+
+def notes_fixture(case):
+    """The notes file of one fixture case (tests/fixture-notes/{case}/{project}-sprint-notes.json), as a string."""
+    return str(next((NOTES_FIXTURES / case).glob("*-sprint-notes.json"), NOTES_FIXTURES / case / "missing-sprint-notes.json"))
+
+
 def check_sp7():
     script = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts" / "check_sprint.py"
-    vault = ROOT / "tests" / "fixture-vault"
-    good = run_script(script, "--vault", str(vault), "--domain", "Good")
-    bad = run_script(script, "--vault", str(vault), "--domain", "Bad")
-    ok = good[0] == 0 and bad[0] == 1 and "SP7" in bad[1] and bad[1].count("\n- ") == 1
-    report("SP7", ok, "check_sprint passes the reviewed sprint and refuses the unreviewed one with SP7 only"
-           if ok else f"fixtures: good → {good[0]} {good[1][-120:]!r}; bad → {bad[0]} {bad[1][-160:]!r}")
+    good = run_script(script, "--notes", notes_fixture("Good"))
+    bad = run_script(script, "--notes", notes_fixture("Bad"))
+    papers = run_script(script, "--notes", notes_fixture("PapersBad"))   # one break each of SP2, SP3, SP6 (BB-601)
+    papers_ok = (papers[0] == 1 and papers[1].count("\n- ") == 3 and all(f"- {r} " in papers[1] for r in ("SP2", "SP3", "SP6"))
+                 and "garden-ga-2-brief-2026-10-01" not in papers[1])
+    ok = good[0] == 0 and bad[0] == 1 and "SP7" in bad[1] and bad[1].count("\n- ") == 1 and papers_ok
+    report("SP7", ok, "check_sprint passes the reviewed sprint and refuses the unreviewed one with SP7 only; a brief without "
+           "its sprint's tag, a title held twice and two live briefs of one card fail SP2, SP3 and SP6 (an archived brief counts not)"
+           if ok else f"fixtures: good → {good[0]} {good[1][-120:]!r}; bad → {bad[0]} {bad[1][-160:]!r}; "
+           f"PapersBad → {papers[0]} {papers[1][-240:]!r}")
 
 
-# ── SP8 · the Stop hook blocks only on the session's own projects (fixtures) ─────────────
+# ── SP8 · the Stop hook needs no vault: it reads the repository's notes file, says when it is missing or old,
+#          and blocks once on a real error (fixtures, BB-601) ─
 def check_sp8():
     import tempfile
     script = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts" / "check_sprint.py"
-    vault = ROOT / "tests" / "fixture-vault"
+    bad = Path(notes_fixture("Bad")).read_text(encoding="utf-8")
     got = {}
     with tempfile.TemporaryDirectory() as d:
-        for name, body in (("own", "MyNotes/Bad/Projects/home-reno/sprint-one/x.md"),
-                           ("other", "MyNotes/Bad/Projects/other-app/sprint-a/x.md")):
+        home, repo = Path(d) / "home", Path(d) / "repo"
+        home.mkdir()
+        (repo / ".sprint").mkdir(parents=True)
+        (repo / "CLAUDE.md").write_text("# x\n\n## 🧭 Project Context\n\ndomain: Bad\nproject: home-reno\n", encoding="utf-8")
+        env = {k: v for k, v in os.environ.items() if k not in ("MYNOTES_DIR", "CLAUDE_PROJECT_DIR")}
+        env.update(HOME=str(home), CLAUDE_PROJECT_DIR=str(repo))   # no MYNOTES_DIR and no ~/Documents/MyNotes
+        notes = repo / ".sprint" / "home-reno-sprint-notes.json"
+        cases = (("missing", None, "bandit-dev:sprint"),
+                 ("fresh", "2026-11-20T12:00:00Z", "bandit-dev:sprint"),
+                 ("named", "2026-11-20T12:00:00Z", ".sprint/home-reno-sprint-notes.json"),
+                 ("old", "2026-11-19T08:00:00Z", "bandit-dev:sprint"),
+                 ("silent", "2026-11-20T12:00:00Z", "a chat about something else"))
+        for name, built, words in cases:
+            if notes.exists():
+                notes.unlink()
+            if built:
+                notes.write_text(bad.replace('"built": "2026-11-20T00:00:00Z"', f'"built": "{built}"'), encoding="utf-8")
             t = Path(d) / f"{name}.jsonl"
-            t.write_text(body + " bandit-dev:sprint\n", encoding="utf-8")
-            r = subprocess.run([sys.executable, "-B", str(script), "--hook", "--vault", str(vault), "--domain", "Bad"],
-                               input=json.dumps({"transcript_path": str(t)}), capture_output=True, text=True)
+            t.write_text(json.dumps({"timestamp": "2026-11-20T10:00:00Z", "message": words}) + "\n", encoding="utf-8")
+            r = subprocess.run([sys.executable, "-B", str(script), "--hook"], input=json.dumps({"transcript_path": str(t)}),
+                               capture_output=True, text=True, env=env, cwd=str(repo))
             got[name] = (r.returncode, r.stdout + r.stderr)
-    ok = got["own"][0] == 2 and got["other"][0] == 0 and "systemMessage" in got["other"][1]
-    report("SP8", ok, "hook blocks on the session's own project, warns (exit 0) on another's"
-           if ok else f"own → {got['own'][0]}, other → {got['other'][0]} {got['other'][1][-120:]!r}")
+    stop = json.loads((PLUGINS / "bandit-dev" / "hooks" / "hooks.json").read_text(encoding="utf-8"))["hooks"]["Stop"]
+    hooks = " ".join(h["command"] for entry in stop for h in entry["hooks"])
+    ok = (got["missing"][0] == 0 and "could not read the notes file" in got["missing"][1]
+          and got["fresh"][0] == 2 and "SP7" in got["fresh"][1] and got["named"][0] == 2
+          and got["old"][0] == 0 and "before this session" in got["old"][1] and "SP7" in got["old"][1]
+          and got["silent"] == (0, "") and 'check_sprint.py" --hook' in hooks and "--vault" not in hooks)
+    report("SP8", ok, "the Stop hook runs with no vault: it reads the repository's notes file, blocks once on a real error, "
+           "says so (exit 0) when the file is missing or built before the session, and stays silent in a chat that "
+           "names neither the sprint helper nor the notes file"
+           if ok else "hook: " + "; ".join(f"{k} → {v[0]} {v[1][-120:]!r}" for k, v in got.items()))
 
 
 # ── EX1 · the sprint commit proves the Execution board by due date, not by column ─
@@ -764,10 +799,9 @@ def check_design_card():
 # ── SP11 · a done wave has its section, Flow and Tokens blocks in the wave report ─
 def check_sp11():
     script = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts" / "check_sprint.py"
-    vault = ROOT / "tests" / "fixture-vault"
-    good = run_script(script, "--vault", str(vault), "--domain", "Record")
-    bad = run_script(script, "--vault", str(vault), "--domain", "WaveBad")
-    ok = (good[0] == 0 and "SP1-SP15" in good[1] and bad[0] == 1 and bad[1].count("\n- ") == 1
+    good = run_script(script, "--notes", notes_fixture("Record"))
+    bad = run_script(script, "--notes", notes_fixture("WaveBad"))
+    ok = (good[0] == 0 and "passes the sprint rules" in good[1] and bad[0] == 1 and bad[1].count("\n- ") == 1
           and "SP11" in bad[1] and "Tokens" in bad[1])
     report("SP11", ok, "check_sprint passes a done wave with its report section and refuses one without its Tokens block"
            if ok else f"SP11: Record → {good[0]} {good[1][-120:]!r}; WaveBad → {bad[0]} {bad[1][-160:]!r}")
@@ -887,9 +921,8 @@ def check_dev_mirror():
 # ── SP12 · a done wave is drawn done in the sprint map (temporary, decisions RS16) ─
 def check_sp12():
     script = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts" / "check_sprint.py"
-    vault = ROOT / "tests" / "fixture-vault"
-    good = run_script(script, "--vault", str(vault), "--domain", "Record")
-    bad = run_script(script, "--vault", str(vault), "--domain", "MapBad")
+    good = run_script(script, "--notes", notes_fixture("Record"))
+    bad = run_script(script, "--notes", notes_fixture("MapBad"))
     ok = good[0] == 0 and bad[0] == 1 and bad[1].count("\n- ") == 1 and "SP12" in bad[1]
     report("SP12", ok, "check_sprint passes a map that lists the done waves and refuses one not redrawn after a wave"
            if ok else f"SP12: Record → {good[0]} {good[1][-120:]!r}; MapBad → {bad[0]} {bad[1][-160:]!r}")
@@ -898,15 +931,14 @@ def check_sp12():
 # ── SP13 · a sprint committed after 2026-11-08 gives every batch card its build-step count in step 9 (fixtures) ─
 def check_sp13():
     script = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts" / "check_sprint.py"
-    vault = ROOT / "tests" / "fixture-vault"
-    good = run_script(script, "--vault", str(vault), "--domain", "StepsGood")
-    bad = run_script(script, "--vault", str(vault), "--domain", "StepsBad")
-    earlier = run_script(script, "--vault", str(vault), "--domain", "Record")   # committed before the cut-off: exempt
+    good = run_script(script, "--notes", notes_fixture("StepsGood"))
+    bad = run_script(script, "--notes", notes_fixture("StepsBad"))
+    earlier = run_script(script, "--notes", notes_fixture("Record"))   # committed before the cut-off: exempt
     plan = (PLUGINS / "bandit-dev" / "skills" / "sprint" / "references" / "plan.md").read_text(encoding="utf-8")
     plan = " ".join(plan.split())
     words = [w for w in ("write its **build steps** from its plan section as ordered sub-tasks",
                          "A card with no build sub-tasks fails readiness", "`{card id}: {n} steps`") if w not in plan]
-    ok = (good[0] == 0 and "SP1-SP15" in good[1] and bad[0] == 1 and bad[1].count("\n- ") == 1 and "SP13" in bad[1]
+    ok = (good[0] == 0 and "passes the sprint rules" in good[1] and bad[0] == 1 and bad[1].count("\n- ") == 1 and "SP13" in bad[1]
           and "GA-2" in bad[1] and earlier[0] == 0 and not words)
     report("SP13", ok, "check_sprint passes a sprint whose step 9 counts every batch card's build steps, refuses one with a "
            "card at 0 steps, leaves earlier sprints alone; plan.md steps 7 and 9 name the sub-tasks and the count"
@@ -927,9 +959,8 @@ def old_order_hits(text):
 def check_sp14():
     s = PLUGINS / "bandit-dev" / "skills" / "sprint"
     script = s / "scripts" / "check_sprint.py"
-    vault = ROOT / "tests" / "fixture-vault"
-    good = run_script(script, "--vault", str(vault), "--domain", "StepsGood")
-    bad = run_script(script, "--vault", str(vault), "--domain", "OwedBad")
+    good = run_script(script, "--notes", notes_fixture("StepsGood"))
+    bad = run_script(script, "--notes", notes_fixture("OwedBad"))
     text = {n: " ".join((s / "references" / n).read_text(encoding="utf-8").split())
             for n in ("templates.md", "release.md", "close.md")}
     words = [f"{n}: {w}" for n, w in (
@@ -946,36 +977,32 @@ def check_sp14():
            f"missing {words} (BB-450)")
 
 
-# ── SP15 · a closed sprint keeps neither its folder nor its WBS outside _archive/ (BB-437) ─
+# ── SP15 · a closed sprint keeps no paper and no WBS note unarchived (BB-437, BB-601) ─
 def check_sp15():
     s = PLUGINS / "bandit-dev" / "skills" / "sprint"
     script = s / "scripts" / "check_sprint.py"
-    vault = ROOT / "tests" / "fixture-vault"
-    left = run_script(script, "--vault", str(vault), "--domain", "ClosedLeft")
-    wbs = run_script(script, "--vault", str(vault), "--domain", "ClosedArchived")
-    app = run_script(script, "--vault", str(vault), "--domain", "StepsGood", "--closed", "spring")
-    listing = ROOT / "tests" / "fixture-listing"
-    l_left = run_script(script, "--listing", str(listing / "left.json"), "--closed", "spring,winter", "--domain", "Garden")
-    l_done = run_script(script, "--listing", str(listing / "archived.json"), "--closed", "spring,winter", "--domain", "Garden")
-    novault = run_script(script, "--vault", str(vault / "no-such-vault"), "--domain", "Garden")
+    left = run_script(script, "--notes", notes_fixture("ClosedLeft"))
+    wbs = run_script(script, "--notes", notes_fixture("ClosedArchived"))
+    app = run_script(script, "--notes", notes_fixture("StepsGood"), "--closed", "spring")
+    done = run_script(script, "--notes", notes_fixture("Record"), "--closed", "winter")   # closed, nothing of it left
+    nofile = run_script(script, "--notes", notes_fixture("NoSuchCase"))
     close = " ".join((s / "references" / "close.md").read_text(encoding="utf-8").split())
     plan = " ".join((s / "references" / "plan.md").read_text(encoding="utf-8").split())
     words = [w for w in ("and the sprint's WBS (`Projects/{slug}/planning/{project}-sprint-{name}-wbs.md`)",
-                         "check_sprint.py --closed {name}", "with `--listing` on a fresh WebDAV listing",
+                         "check_sprint.py --closed {name}", "on a notes file built after the archive",
                          "the sprint is not reported closed") if w not in close]
-    words += [w for w in ("**Closed sprints left behind, first.**", "**Vault check**",
-                          "\"Could not read the vault\" is a failed check, never a pass") if w not in plan]
-    ok = (left[0] == 1 and left[1].count("SP15") == 2 and "folder is outside _archive/" in left[1]
-          and wbs[0] == 1 and wbs[1].count("SP15") == 1 and "garden-sprint-spring-wbs.md" in wbs[1]
-          and app[0] == 1 and app[1].count("SP15") == 1
-          and l_left[0] == 1 and l_left[1].count("SP15") == 2 and "sprint-summer" not in l_left[1]
-          and l_done[0] == 0 and novault[0] == 1 and "could not read the vault" in novault[1] and not words)
-    report("SP15", ok, "check_sprint refuses a closed sprint's folder or WBS outside _archive/ (closed in the ledger, "
-           "named by --closed, or on a WebDAV --listing) and says when it could not read the vault; close checks the "
-           "archive before saying closed, and planning archives closed sprints left behind before it starts"
+    words += [w for w in ("**Closed sprints left behind, first.**", "**Closed-sprint check**",
+                          "\"Could not read the notes file\" is a failed check, never a pass") if w not in plan]
+    ok = (left[0] == 1 and left[1].count("SP15") == 2 and "papers are not archived" in left[1]
+          and wbs[0] == 1 and wbs[1].count("SP15") == 1 and "garden-sprint-spring-wbs" in wbs[1]
+          and app[0] == 1 and app[1].count("SP15") == 1 and done[0] == 0
+          and nofile[0] == 1 and "could not read the notes file" in nofile[1] and not words)
+    report("SP15", ok, "check_sprint refuses a closed sprint whose papers or WBS note are not archived (closed in the "
+           "ledger, its ledger archived, or named by --closed) and says when it could not read the notes file; close "
+           "checks the archive before saying closed, and planning archives closed sprints left behind before it starts"
            if ok else f"SP15: ClosedLeft → {left[0]} {left[1][-160:]!r}; ClosedArchived → {wbs[0]} {wbs[1][-120:]!r}; "
-           f"--closed → {app[0]} {app[1][-120:]!r}; listing left → {l_left[0]} {l_left[1][-160:]!r}; listing archived → "
-           f"{l_done[0]}; no vault → {novault[0]} {novault[1][-120:]!r}; missing {words} (BB-437, BB-494)")
+           f"--closed → {app[0]} {app[1][-120:]!r}; closed with nothing left → {done[0]} {done[1][-120:]!r}; "
+           f"no notes file → {nofile[0]} {nofile[1][-120:]!r}; missing {words} (BB-437, BB-494, BB-601)")
 
 
 def check_wave_order():
@@ -997,9 +1024,8 @@ def check_wave_order():
                               ("a wave whose dependencies are delivered runs even while an earlier wave holds a paused "
                                "or blocked card", run)) if w not in src]
     script = s / "scripts" / "check_sprint.py"
-    vault = ROOT / "tests" / "fixture-vault"
-    free = run_script(script, "--vault", str(vault), "--domain", "WavesFree")   # a later independent wave done early
-    dep = run_script(script, "--vault", str(vault), "--domain", "WavesDep")     # dependent waves done early
+    free = run_script(script, "--notes", notes_fixture("WavesFree"))   # a later independent wave done early
+    dep = run_script(script, "--notes", notes_fixture("WavesDep"))     # dependent waves done early
     fx = free[0] == 0 and dep[0] == 1 and dep[1].count("\n- ") == 2 and "which it depends on" in dep[1]
     ok = not hits and not bad_cases and not words and fx
     report("WO1", ok, f"wave order: no strict-order wording in {len(files)} sprint files ({len(cases)} self-test cases); the cap "
@@ -1472,9 +1498,9 @@ def sprint_data_text_problems(files):
     return [f"{name} lacks {want!r}" for name, want in SPRINT_DATA_TEXT if want not in files[name]]
 
 
-def sprint_data_cases(mod, vault, expected):
-    """Problems of the script on the fixture domain: the CSV against the hand-checked file, and a new measure as one column."""
-    waves, notes = mod.collect(vault / "SprintData", "garden")
+def sprint_data_cases(mod, data, expected):
+    """Problems of the script on the fixture notes file: the CSV against the hand-checked file, and a new measure as one column."""
+    waves, notes = mod.collect(data, "garden")
     got = mod.to_csv(waves)
     bad = [] if got == expected else ["the fixture CSV differs from tests/fixture-expected/sprint-data.csv"]
     if len(notes) != 1 or "sprint-broken" not in notes[0]:
@@ -1493,15 +1519,15 @@ def check_sprint_data():
     spec = importlib.util.spec_from_file_location("sprint_data", s / "scripts" / "sprint_data.py")
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
-    vault = ROOT / "tests" / "fixture-vault"
+    data = mod.load_notes(notes_fixture("SprintData"))
     expected = (ROOT / "tests" / "fixture-expected" / "sprint-data.csv").read_text(encoding="utf-8")
-    bad, got = sprint_data_cases(mod, vault, expected)
+    bad, got = sprint_data_cases(mod, data, expected)
     files = {n: (s / "references" / n).read_text(encoding="utf-8") for n in ("execute.md", "close.md", "templates.md", "homes.md")}
     bad += sprint_data_text_problems(files)
     # Both ways: a reader that guesses a count for a missing record, and a dropped measure, must each differ from the expected file.
     guess = [mod.Measure(m.name, m.source, (lambda w: "0") if m.name == "debug_lines" else m.reader) for m in mod.MEASURES]
     dropped = [m for m in mod.MEASURES if m.name != "effort"]
-    waves, _ = mod.collect(vault / "SprintData", "garden")
+    waves, _ = mod.collect(data, "garden")
     mutants = [mod.to_csv(waves, guess) == expected, mod.to_csv(waves, dropped) == expected]
     mutants += [not sprint_data_text_problems({**files, n: files[n].replace(w, "")}) for n, w in SPRINT_DATA_TEXT]
     ok = not bad and not any(mutants)
@@ -1524,7 +1550,7 @@ def sprint_targets_text_problems(files):
     return [f"{name} lacks {want!r}" for name, want in SPRINT_TARGETS_TEXT if want not in files[name]]
 
 
-def sprint_targets_outputs(data, targ, vault, rows, waves):
+def sprint_targets_outputs(data, targ, rows, waves):
     """The four outputs the script gives on the fixture: autumn wave 2, the whole of autumn, spring wave 1, the proposals."""
     return {"wave": targ.render(waves, rows, "autumn", 2), "sprint": targ.render(waves, rows, "autumn"),
             "spring-wave": targ.render(waves, rows, "spring", 1), "propose": targ.propose(waves, rows)}
@@ -1538,11 +1564,11 @@ def check_sprint_targets():
     targ = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(targ)
     data = targ.sprint_data
-    vault = ROOT / "tests" / "fixture-vault"
-    note = (vault / "SprintData" / "Projects" / "garden" / "planning" / "garden-sprint-targets.md").read_text(encoding="utf-8")
+    notes = data.load_notes(notes_fixture("SprintData"))
+    note = next(n["text"] for n in notes["notes"] if n["title"] == "garden-sprint-targets")
     rows, problems = targ.parse_targets(note)
-    waves, _ = data.collect(vault / "SprintData", "garden")
-    got = sprint_targets_outputs(data, targ, vault, rows, waves)
+    waves, _ = data.collect(notes, "garden")
+    got = sprint_targets_outputs(data, targ, rows, waves)
     bad = list(problems)
     for name, text in got.items():
         want = (ROOT / "tests" / "fixture-expected" / f"sprint-targets-{name}.md").read_text(encoding="utf-8")
@@ -1565,7 +1591,7 @@ def check_sprint_targets():
     loose = [{**r, "status": "approved", "approved": "2026-11-08", "words": "x"} if r["status"] == "proposed" else r for r in rows]
     unworded = [{**r, "words": ""} if r["measure"] == "time_min" else r for r in rows]
     flipped = [{**r, "direction": "at least"} if r["measure"] == "time_min" else r for r in rows]
-    mutants = [sprint_targets_outputs(data, targ, vault, m, waves) == got for m in (loose, unworded, flipped)]
+    mutants = [sprint_targets_outputs(data, targ, m, waves) == got for m in (loose, unworded, flipped)]
     mutants += [not sprint_targets_text_problems({**files, n: files[n].replace(w, "")}) for n, w in SPRINT_TARGETS_TEXT]
     ok = not bad and not any(mutants)
     report("KP1", ok, "sprint_targets.py: the wave block, the sprint table, the single-wave block and the proposals match the hand-checked "
@@ -1605,12 +1631,11 @@ def check_no_decide_and_continue():
 # ── SP9 · the sprint checker holds a sprint kept in the app to its plan steps and waves (fixtures) ─
 def check_sp9():
     script = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts" / "check_sprint.py"
-    vault = ROOT / "tests" / "fixture-vault"
-    good = run_script(script, "--vault", str(vault), "--domain", "Record")
-    bad = run_script(script, "--vault", str(vault), "--domain", "RecordBad")
+    good = run_script(script, "--notes", notes_fixture("Record"))
+    bad = run_script(script, "--notes", notes_fixture("RecordBad"))
     want = ("step 3 (Close the open questions) is marked done with no evidence",
             "Wave 2 is done while Wave 1, which it depends on, is not", "Wave 2 names GA-3",
-            "missing garden-sprint-summer-plan.md")
+            "missing garden-sprint-summer-plan (a note tagged sprint-summer)")
     # Record also holds a sprint still in planning (no plan or prompt yet), which must pass;
     # RecordBad's planning sprint has step 7 done with no plan, which must fail SP1.
     ok = good[0] == 0 and bad[0] == 1 and all(w in bad[1] for w in want) and bad[1].count("\n- ") == 4

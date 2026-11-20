@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Builds a project's sprint data file from its sprint records: one CSV row per wave, every sprint folder of the
-project, live (`Projects/{slug}/sprint-*`) and archived (`_archive/Projects/{slug}/sprint-*`). Numbers come only from
-the records (the ledger and the wave report); a measure a record does not hold is an empty cell, never an estimate.
+"""Builds a project's sprint data file from its sprint records: one CSV row per wave, every sprint of the project,
+live and archived (an archived ledger), read from the project's notes file (references/templates.md → Notes file;
+check_sprint.py reads the same file). Numbers come only from the records (the ledger and the wave report); a measure a
+record does not hold is an empty cell, never an estimate.
 
 Where each part is read (the measures list below is the one place a measure lives):
   ledger       `## Waves` (cards, done date; an older ledger: the cards of `## Waves and cards`, no date) · `## Batch` (effort, XS=1 S=2 M=3 L=4 XL=5) · `## Plan deviations`
@@ -11,18 +12,17 @@ Add a measure: one `Measure(name, source, reader)` line in MEASURES. `reader` ta
 cell text, or "" when the record does not hold it. The new measure is one new column; nothing else changes.
 
 Usage:
-  sprint_data.py [--vault DIR] --domain NAME --project SLUG [--out FILE]   CSV to stdout, or to FILE
+  sprint_data.py --notes FILE [--project SLUG] [--out FILE]               CSV to stdout, or to FILE
   sprint_data.py --list                                                    the measures and their sources
   sprint_data.py --estimate FILE.csv [--effort 3,5,4]                     minutes per effort point from the data file's
                                                                            past waves, and each listed wave's estimate (JSON)
-  (--vault defaults to $MYNOTES_DIR or ~/Documents/MyNotes)
-Exit codes: 0 ok · 2 usage (no such project folder).
+  (--notes: the project's notes file, .sprint/{project}-sprint-notes.json; --project defaults to the file's own)
+Exit codes: 0 ok · 2 usage (no notes file, or no sprint of the project in it).
 """
 import argparse
 import csv
 import io
 import json
-import os
 import re
 import statistics
 import sys
@@ -31,7 +31,8 @@ from pathlib import Path
 from typing import Callable
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from check_sprint import CARD_ID, COMMITTED_ON, WAVE_ROW, section  # noqa: E402  (one reading of the ledger tables)
+from check_sprint import (CARD_ID, COMMITTED_ON, WAVE_ROW, NotesFileError, is_archived, load_notes,  # noqa: E402
+                          section, sprints_of)  # one reading of the notes file and the ledger tables
 
 EFFORT = {"XS": 1, "S": 2, "M": 3, "L": 4, "XL": 5}
 FIXED = ("sprint", "where", "wave")
@@ -161,13 +162,13 @@ MEASURES = [
 ]
 
 
-def waves_of(folder: Path, where: str) -> tuple[list, str]:
-    """The waves of one sprint folder, or a note saying why it has none."""
-    name = folder.name.removeprefix("sprint-")
-    ledgers = sorted(folder.glob("*-progress.md"))
-    if not ledgers:
-        return [], f"{folder}: no ledger (*-progress.md)"
-    ledger = ledgers[0].read_text(encoding="utf-8", errors="replace")
+def waves_of(project: str, name: str, papers: dict) -> tuple[list, str]:
+    """The waves of one sprint (`papers`: its notes by title), or a note saying why it has none."""
+    note = papers.get(f"{project}-sprint-{name}-progress")
+    if note is None:
+        return [], f"sprint-{name}: no ledger ({project}-sprint-{name}-progress)"
+    where = "archived" if is_archived(note) else "live"
+    ledger = note["text"]
     rows = WAVE_ROW.findall(section(ledger, "Waves"))
     if not rows:
         # An older ledger has only `## Waves and cards` (wave, card, ...): the cards are known, the done date is not.
@@ -176,25 +177,27 @@ def waves_of(folder: Path, where: str) -> tuple[list, str]:
             by_wave.setdefault(int(m.group(1)), []).append(m.group(2))
         rows = [(str(n), " ".join(ids), "", "") for n, ids in sorted(by_wave.items())]
     if not rows:
-        return [], f"{folder}: the ledger has neither a ## Waves nor a ## Waves and cards table"
-    reports = sorted(folder.glob("*-wave-report.md"))
-    report = reports[0].read_text(encoding="utf-8", errors="replace") if reports else ""
+        return [], f"sprint-{name}: the ledger has neither a ## Waves nor a ## Waves and cards table"
+    report_note = papers.get(f"{project}-sprint-{name}-wave-report")
+    report = report_note["text"] if report_note else ""
     return [Wave(name, where, int(n), CARD_ID.findall(ids), done, ledger, report) for n, ids, done, _ in rows], ""
 
 
-def collect(domain: Path, project: str) -> tuple[list, list]:
-    """Every wave of every sprint of the project, live then archived, in the order sprints were committed."""
-    waves, notes = [], []
-    for where, base in (("live", domain / "Projects" / project), ("archived", domain / "_archive" / "Projects" / project)):
-        found = []
-        for folder in sorted(base.glob("sprint-*")) if base.is_dir() else []:
-            got, note = waves_of(folder, where)
-            if note:
-                notes.append(note)
-            if got:
-                on = COMMITTED_ON.search(got[0].ledger)
-                found.append((on.group(1) if on else "", got[0].sprint, got))
-        waves += [w for _, _, ws in sorted(found, key=lambda f: f[:2]) for w in ws]
+def collect(data: dict, project: str = "") -> tuple[list, list]:
+    """Every wave of every sprint of the project in the notes file (`load_notes`), live then archived, in the order
+    sprints were committed."""
+    project = project or data["project"]
+    papers = sprints_of(data["notes"])
+    found = {"live": [], "archived": []}
+    notes = []
+    for name in sorted(papers):
+        got, note = waves_of(project, name, papers[name])
+        if note:
+            notes.append(note)
+        if got:
+            on = COMMITTED_ON.search(got[0].ledger)
+            found[got[0].where].append((on.group(1) if on else "", got[0].sprint, got))
+    waves = [w for where in ("live", "archived") for _, _, ws in sorted(found[where], key=lambda f: f[:2]) for w in ws]
     return waves, notes
 
 
@@ -231,8 +234,7 @@ def estimate(text: str, efforts: list) -> dict:
 
 def main(argv) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--vault", default=os.environ.get("MYNOTES_DIR") or os.path.expanduser("~/Documents/MyNotes"))
-    ap.add_argument("--domain")
+    ap.add_argument("--notes", help="the project's notes file (.sprint/{project}-sprint-notes.json)")
     ap.add_argument("--project")
     ap.add_argument("--out")
     ap.add_argument("--list", action="store_true")
@@ -252,14 +254,19 @@ def main(argv) -> int:
         for m in MEASURES:
             print(f"{m.name}\t{m.source}")
         return 0
-    if not args.domain or not args.project:
-        print("sprint_data: --domain and --project are required", file=sys.stderr)
+    if not args.notes:
+        print("sprint_data: --notes is required (the project's notes file)", file=sys.stderr)
         return 2
-    domain = Path(args.vault).expanduser() / args.domain
-    if not (domain / "Projects" / args.project).is_dir() and not (domain / "_archive" / "Projects" / args.project).is_dir():
-        print(f"sprint_data: no project folder {args.project} in {domain}", file=sys.stderr)
+    try:
+        data = load_notes(args.notes)
+    except NotesFileError as exc:
+        print(f"sprint_data: {exc}", file=sys.stderr)
         return 2
-    waves, notes = collect(domain, args.project)
+    project = args.project or data["project"]
+    if not any(t.startswith(f"{project}-sprint-") for t in (n["title"] for n in data["notes"])):
+        print(f"sprint_data: no sprint paper of {project or 'the project'} in {args.notes}", file=sys.stderr)
+        return 2
+    waves, notes = collect(data, project)
     for n in notes:
         print(f"sprint_data: skipped {n}", file=sys.stderr)
     text = to_csv(waves)

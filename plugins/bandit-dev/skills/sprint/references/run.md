@@ -50,7 +50,7 @@ For each wave, in order:
    - the ledger's Status line reads `Wave {n} of {total} delivered…` for this wave: a stale line fails the wave;
    - `git status --short` is clean and `git branch --show-current` is `development`;
    - if the wave carries the final push (`execute.md` → Pushing `development`): the ledger records the pushed hash and `git status -sb` shows `development` level with `origin/development`. A recorded push failure is a "Needs the user" item, not a failed wave. After a recorded push, `get_task` on the ledger's `Staging handover:` card shows the ready form with the pushed hash; a card still not ready is a failed wave.
-   - `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py` prints OK.
+   - `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py` prints OK on a notes file built for this check (`references/templates.md` → Notes file).
    Any mismatch: treat the wave as not done and stop (see below).
 4. **Add one line to the ledger's Milestone log**: `Run: Wave {n} done by agent, checked ({what was checked}). Next: Wave {n+1}` or the next sprint.
 5. Next workable wave. After a sprint's last wave, move on to the next sprint's first open wave.

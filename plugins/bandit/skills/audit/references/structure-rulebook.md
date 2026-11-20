@@ -154,8 +154,8 @@ Numbered last so old reports keep their numbers; it's a must.
 Numbered last so old reports keep their numbers. The conventions are bandit:notes' (§1 Sprint
 folders, §4 uniqueness, §5 YAML style); these rules only score them. A **sprint project** is a
 `Projects/{slug}/` with at least one `sprint-{name}/` folder at its root. bandit-dev:sprint's local
-checker (`check_sprint.py`, a `Stop` hook) enforces the same rules at write time as SP2–SP5; the
-audit scores them from the snapshot (schema 5) and never replaces that checker.
+checker (`check_sprint.py`, a `Stop` hook) reads the project's notes file, not its folders, so these
+rules are scored only here, from the snapshot (schema 5); the audit never replaces that checker.
 
 | Rule | Holds | Scope | Fix row |
 |---|---|---|---|

@@ -1,0 +1,46 @@
+{
+ "project": "home-reno",
+ "built": "2026-11-20T00:00:00Z",
+ "notes": [
+  {
+   "title": "home-reno-review-sprint-one-2026-10-13",
+   "kind": "log",
+   "status": "done",
+   "tags": [
+    "sprint-one"
+   ],
+   "cards": [],
+   "text": "# Review\n"
+  },
+  {
+   "title": "home-reno-sprint-one-handover-prompt",
+   "kind": "reference",
+   "status": "active",
+   "tags": [
+    "sprint-one"
+   ],
+   "cards": [],
+   "text": "# Fixture handover-prompt\n"
+  },
+  {
+   "title": "home-reno-sprint-one-plan",
+   "kind": "reference",
+   "status": "active",
+   "tags": [
+    "sprint-one"
+   ],
+   "cards": [],
+   "text": "# Fixture plan\n"
+  },
+  {
+   "title": "home-reno-sprint-one-progress",
+   "kind": "reference",
+   "status": "active",
+   "tags": [
+    "sprint-one"
+   ],
+   "cards": [],
+   "text": "# Fixture progress\n\n## At a glance\n\nCommitted: 2026-10-13\n"
+  }
+ ]
+}

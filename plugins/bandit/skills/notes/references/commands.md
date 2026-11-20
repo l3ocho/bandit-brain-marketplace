@@ -1,7 +1,7 @@
 # Part 3 — Commands
 
 Every procedure starts by resolving the domain (`references/model.md`) and reading Part 2
-(`references/conventions.md`).
+(`references/conventions.md`, and for the vault `references/conventions-vault.md`).
 
 **Proposal format** used by every command that writes on confirmation:
 
@@ -121,7 +121,7 @@ procedure returns rows; bandit:project puts them in its one combined proposal.
    template and hub note as new files (`if_match` omitted), then the README by running `home`.
    A row whose parent folder row was declined is skipped. Report per row.
 5. If the README already existed and any row ran, run `home` afterwards to refresh it (an
-   auto-write, `references/write-safety.md`).
+   auto-write, `references/storage-vault.md`).
 
 ---
 

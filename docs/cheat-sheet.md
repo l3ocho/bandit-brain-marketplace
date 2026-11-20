@@ -83,8 +83,11 @@ updated: 2026-10-20
 📚 **References:**
 
 - `references/model.md`: before any command (the vault model, resolving the domain, the project's scope, the inbox)
-- `references/write-safety.md`: before any write into the vault, by this skill or any other
-- `references/conventions.md`: before any write (folders, filenames, frontmatter, status, archive: conventions §1–§13)
+- `references/write-safety.md`: before any write of a note, by this skill or any other (the rules both storages share)
+- `references/conventions.md`: before any write (kinds, fields, status, body shape, dev projects, and the map of conventions §1–§13)
+- `references/conventions-vault.md`: before any write into the vault (folders, filenames, frontmatter, archive, Obsidian settings)
+- `references/storage-vault.md`: before any write into the vault (the WebDAV mechanics)
+- `references/storage-app.md`: before any write into the app's Notes (the tool for each operation, places, fields, refusals)
 - `references/commands.md`: the procedure of the command being run, including *Onboarding rows* (run by bandit:project; it adds `Claude/code-{slug}/` for `dev: true` projects and for any other project that runs in Claude Code, and returns domain findings as `domain` fix rows)
 - `references/onboarding.md`: when bandit:project runs the vault step of onboarding
 - `references/other-skills.md`: when another skill or a chat writes a note

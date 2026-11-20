@@ -81,8 +81,9 @@ evidence in its row**; the checker (SP9, SP10) refuses a done row without it.
 ## 🔒 Hard rules
 
 1. **The checker is the proof.** `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py` enforces the
-   vault rules (SP1–SP13). Step 12, every wave end, `run` and `close` run it and paste its output; a
-   step with a failing check is not done. The plugin's Stop hook runs it too
+   sprint rules (SP1–SP4, SP6, SP7, SP9–SP15) on the project's notes file, built fresh before each run
+   (`references/templates.md` → Notes file). Step 12, every wave end, `run` and `close` run it and
+   paste its output; a step with a failing check is not done. The plugin's Stop hook runs it too
 2. **Gates read the recipe, never guess it:** `scripts/recipe.py` reads the project's `bandit.yaml`; a
    missing key refuses by name. `development` and `main` in the references mean `branches.trunk` and
    `branches.deploy`

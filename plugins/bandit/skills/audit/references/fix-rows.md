@@ -26,10 +26,11 @@ the exact target.
 | A filename twice in `Projects/` and `_inbox/` (S14) | `bandit:notes`: archive the consumed copy on proof (its Leftovers rule), or rename one |
 | Frontmatter that doesn't parse (S15) | `bandit:notes` (quote the value, its YAML style) |
 
-**The local checker stays.** bandit-dev:sprint's `scripts/check_sprint.py` enforces the same vault
-rules at write time, as a `Stop` hook (rules SP2–SP5, citing S13–S16). This skill's script needs a
-snapshot and can't run from a hook, so it never absorbs that checker; it scores the same rules at
-audit time.
+**The local checker stays separate.** bandit-dev:sprint's `scripts/check_sprint.py` checks a
+sprint's papers at write time, as a `Stop` hook, from the project's notes file: by title, tag and
+status, not by folder or filename (its SP2 to SP4 are that file's forms of S13 to S15; S16 has none).
+This skill's script needs a snapshot and can't run from a hook, so it never absorbs that checker; it
+scores S13–S16 at audit time.
 
 ---
 

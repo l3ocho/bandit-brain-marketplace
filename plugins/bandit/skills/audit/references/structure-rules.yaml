@@ -129,7 +129,7 @@ s12:
 
 vault_content:
   # S13–S16: vault content (snapshot schema 5). The conventions are bandit:notes' (§1, §4, §5);
-  # bandit-dev:sprint's local checker enforces the same rules at write time (SP2–SP5).
+  # bandit-dev:sprint's local checker reads a notes file, not folders (its SP2-SP4 mirror S13-S15; S16 is only here).
   # A sprint project is a Projects/{slug}/ with at least one sprint folder at its root.
   sprint_folder_pattern: "^sprint-[a-z0-9]+(-[a-z0-9]+)*$"
   sprint_tag_prefix: "sprint/"      # sprint {name} (a real sprint, or its old tag sprint/{name}) ↔ folder sprint-{name}

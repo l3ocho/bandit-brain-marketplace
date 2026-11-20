@@ -154,15 +154,16 @@ Numbered last so old reports keep their numbers; it's a must.
 Numbered last so old reports keep their numbers. The conventions are bandit:notes' (§1 Sprint
 folders, §4 uniqueness, §5 YAML style); these rules only score them. A **sprint project** is a
 `Projects/{slug}/` with at least one `sprint-{name}/` folder at its root. bandit-dev:sprint's local
-checker (`check_sprint.py`, a `Stop` hook) enforces the same rules at write time as SP2–SP5; the
-audit scores them from the snapshot (schema 5) and never replaces that checker.
+checker (`check_sprint.py`, a `Stop` hook) reads the project's notes file, not its folders: its SP2,
+SP3 and SP4 are that file's forms of S13 to S15, and S16 has no checker rule. The audit scores these
+rules from the snapshot (schema 5) and never replaces that checker.
 
 | Rule | Holds | Scope | Fix row |
 |---|---|---|---|
 | **S13 · Sprint briefs** (SP2) | A `type: brief` note whose `board-task` card is in sprint `{name}` (a real sprint, or its old `sprint/{name}` tag) sits in `sprint-{name}/` | Sprint projects | bandit:notes: move it |
 | **S14 · One filename** (SP3) | No `.md` filename twice across `Projects/` and `_inbox/`. `README.md` exempt | The domain | bandit:notes: archive the consumed copy on proof, or rename one |
 | **S15 · Frontmatter parses** (SP4) | Every note's frontmatter is valid YAML | Sprint projects | bandit:notes: quote the value on the failing line |
-| **S16 · Sprint project root** (SP5) | The root holds only the hub `{slug}.md`, `sprint-*` folders and `planning/` | Sprint projects | bandit:notes: move it into `planning/` (or its card's sprint folder) |
+| **S16 · Sprint project root** | The root holds only the hub `{slug}.md`, `sprint-*` folders and `planning/` | Sprint projects | bandit:notes: move it into `planning/` (or its card's sprint folder) |
 
 - Not a sprint project → S13, S15, S16 score **—**. A schema-4 or older snapshot → **unchecked**.
 - **Check:** project files and frontmatter, `_inbox/` filenames and the cards in a sprint (real

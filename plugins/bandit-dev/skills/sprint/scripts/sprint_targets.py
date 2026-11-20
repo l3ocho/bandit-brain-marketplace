@@ -1,24 +1,25 @@
 #!/usr/bin/env python3
 """Shows a project's approved sprint targets against the sprint data: the wave report's Targets block, the closing
-report's sprint table, and the lessons a miss leaves. Reads the same records as sprint_data.py (its waves and its one
-measures list); a target lives in the project's targets note, never in a script.
+report's sprint table, and the lessons a miss leaves. Reads the same notes file as sprint_data.py (its waves and its
+one measures list); a target lives in the project's targets note, never in a script.
 
-The targets note (`Projects/{slug}/planning/{project}-sprint-targets.md`) holds one table, keyed by measure name:
+The targets note (the note titled `{project}-sprint-targets` in the notes file) holds one table, keyed by measure name:
   | Measure | Target | Direction | Status | Approved | Words |
   Direction `at most` or `at least`; Status `proposed` or `approved`. A target is used only when its status is
   `approved` AND the approval date and the user's words are filled; a proposed target is never shown as met or missed.
 Only a measure whose `Measure` line in sprint_data.py names a direction can carry a target.
 
 Usage:
-  sprint_targets.py [--vault DIR] --domain NAME --project SLUG --sprint NAME --wave N [--targets FILE]
+  sprint_targets.py --notes FILE [--project SLUG] --sprint NAME --wave N [--targets FILE]
       the wave's Targets block (measure, value, target, met or missed) and its Lessons lines; nothing when no target is approved
   sprint_targets.py ... --sprint NAME                    the same for the whole sprint (the closing report)
   sprint_targets.py ... --propose                        proposed rows from the median of every row of the project's data, for
                                                          measures the note has no row for (written to the note as `proposed`)
-Exit codes: 0 ok · 2 usage or a targets note that cannot be used.
+  (--notes: the project's notes file, .sprint/{project}-sprint-notes.json; --targets: a file holding the table, in
+   place of the targets note)
+Exit codes: 0 ok · 2 usage, no notes file, or a targets note that cannot be used.
 """
 import argparse
-import os
 import statistics
 import sys
 from pathlib import Path
@@ -140,18 +141,27 @@ def propose(waves, rows):
 
 def main(argv) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--vault", default=os.environ.get("MYNOTES_DIR") or os.path.expanduser("~/Documents/MyNotes"))
-    ap.add_argument("--domain", required=True)
-    ap.add_argument("--project", required=True)
+    ap.add_argument("--notes", required=True, help="the project's notes file (.sprint/{project}-sprint-notes.json)")
+    ap.add_argument("--project")
     ap.add_argument("--sprint")
     ap.add_argument("--wave", type=int)
     ap.add_argument("--targets")
     ap.add_argument("--propose", action="store_true")
     args = ap.parse_args(argv)
-    domain = Path(args.vault).expanduser() / args.domain
-    waves, notes = sprint_data.collect(domain, args.project)
-    path = Path(args.targets) if args.targets else domain / "Projects" / args.project / "planning" / f"{args.project}-sprint-targets.md"
-    rows, problems = parse_targets(path.read_text(encoding="utf-8")) if path.is_file() else ([], [])
+    try:
+        data = sprint_data.load_notes(args.notes)
+    except sprint_data.NotesFileError as exc:
+        print(f"sprint_targets: {exc}", file=sys.stderr)
+        return 2
+    project = args.project or data["project"]
+    waves, notes = sprint_data.collect(data, project)
+    if args.targets:
+        path = Path(args.targets)
+        text = path.read_text(encoding="utf-8") if path.is_file() else ""
+    else:
+        note = next((n for n in data["notes"] if n["title"] == f"{project}-sprint-targets"), None)
+        text = note["text"] if note else ""
+    rows, problems = parse_targets(text) if text else ([], [])
     if problems:
         print("sprint_targets: " + "; ".join(problems), file=sys.stderr)
         return 2

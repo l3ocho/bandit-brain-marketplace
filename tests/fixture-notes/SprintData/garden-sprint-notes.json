@@ -1,0 +1,90 @@
+{
+ "project": "garden",
+ "built": "2026-11-20T00:00:00Z",
+ "notes": [
+  {
+   "title": "garden-sprint-targets",
+   "kind": "reference",
+   "status": "active",
+   "tags": [],
+   "cards": [],
+   "text": "# Garden — sprint targets\n\n| Measure | Target | Direction | Status | Approved | Words |\n|---|---|---|---|---|---|\n| time_min | 30 | at most | approved | 2026-11-08 | \"Use these.\" |\n| debug_lines | 1 | at most | approved | 2026-11-08 | \"Use these.\" |\n| test_runs | 5 | at most | approved | 2026-11-08 | \"Use these.\" |\n| full_check_runs | 1 | at most | proposed | | |\n| tokens_new_k | 100 | at most | approved | | |\n"
+  },
+  {
+   "title": "garden-sprint-broken-progress",
+   "kind": "log",
+   "status": "active",
+   "tags": [
+    "sprint-broken"
+   ],
+   "cards": [],
+   "text": "# Sprint broken: ledger\n\n## At a glance\n\n- Sprint: broken\n",
+   "frontmatter_error": "frontmatter is not valid YAML (mapping values are not allowed here)"
+  },
+  {
+   "title": "garden-sprint-spring-progress",
+   "kind": "log",
+   "status": "active",
+   "tags": [
+    "sprint-spring"
+   ],
+   "cards": [],
+   "text": "# Sprint spring — progress ledger\n\n## At a glance\n\n- Sprint: spring\n- Committed: 2026-11-05\n\n## Waves\n\n| Wave | Cards | Done | Evidence |\n|---|---|---|---|\n| Wave 1 | GA-4, GA-5 | 2026-11-06 | Both delivered. |\n| Wave 2 | GA-6 |  |  |\n\n## Batch\n\n| Card | Title | Lane | Effort | Complexity | Order | Blocked by |\n|---|---|---|---|---|---|---|\n| GA-4 | Dig | issue | S | Simple | 1 | — |\n| GA-5 | Plant | issue | M | Medium | 2 | — |\n| GA-6 | Water | issue | XL | Complex | 3 | — |\n\n## Plan deviations\n\n- GA-4 also changed the shed door.\n- GA-5 used compost in place of peat.\n- GA-5 planted a row later than planned.\n- GA-6 not started.\n\n## Needs the user\n\n- Nothing.\n",
+   "frontmatter_error": "frontmatter is not valid YAML (mapping values are not allowed here)"
+  },
+  {
+   "title": "garden-sprint-spring-wave-report",
+   "kind": "reference",
+   "status": "active",
+   "tags": [
+    "sprint-spring"
+   ],
+   "cards": [],
+   "text": "# Sprint spring — wave report (after wave 1)\n\n## 🙋 Open calls\n\nNone.\n\n## 🌊 Wave 1 — 2026-11-06\n\n### GA-4 Dig — ✅ As specified\n\n### GA-5 Plant — ⚠️ Different\n- Different: compost in place of peat — Why: none in the shed.\n\n#### ⏱️ Flow\n- Time: 1:05 · per card: GA-4 0:30, GA-5 0:35\n- Full checks: 3 runs, 12 min total, 1 failed (FAILED: 1 test)\n- Test runs: 2 whole suite, 3 targeted\n- Gates: code review 2 rounds, UI check 1 rounds\n- Repeat runs: 1 (make verify)\n\n#### 🪙 Tokens\n- Total: 5.3 M re-read from cache · 169 K new · 3 K written\n- Split: main chat 386 K (7%) · general-purpose 5.0 M (93%)\n- Main chat: 2 steps · start context 185 K · peak context 1.2 M\n- Hooks: 143 runs, 25007 ms total · added to the chat: 0 chars (no tokens recorded)\n- Estimated cost: $5.16 (estimate, not billing; prices checked 2026-11-08) · claude-opus-5-5 $2.42\n"
+  },
+  {
+   "title": "garden-sprint-summer-progress",
+   "kind": "log",
+   "status": "active",
+   "tags": [
+    "sprint-summer"
+   ],
+   "cards": [],
+   "text": "# Sprint summer: ledger\n\n## At a glance\n\n- Sprint: summer\n- Committed: 2026-08-01\n\n## Waves and cards\n\n| Wave | Card | Branch | Status |\n|---|---|---|---|\n| 1 | GA-20 | development | Closed |\n| 2 | GA-21 | development | Closed |\n| 2 | GA-22 | development | Closed |\n",
+   "frontmatter_error": "frontmatter is not valid YAML (mapping values are not allowed here)"
+  },
+  {
+   "title": "garden-sprint-winter-progress",
+   "kind": "log",
+   "status": "active",
+   "tags": [
+    "sprint-winter"
+   ],
+   "cards": [],
+   "text": "# Sprint winter — progress ledger\n\n## At a glance\n\n- Sprint: winter\n- Committed: 2026-09-01\n\n## Waves\n\n| Wave | Cards | Done | Evidence |\n|---|---|---|---|\n| Wave 1 | GA-10 | 2026-09-03 | GA-10 delivered. |\n| Wave 2 | GA-11, GA-12 | 2026-09-05 | Both delivered. |\n\n## Batch\n\n| Card | Title | Lane |\n|---|---|---|\n| GA-10 | Prune | issue |\n| GA-11 | Mulch | issue |\n| GA-12 | Rake | issue |\n\n## Plan deviations\n\n- The shed was repainted as well.\n",
+   "frontmatter_error": "frontmatter is not valid YAML (mapping values are not allowed here)"
+  },
+  {
+   "title": "garden-sprint-autumn-progress",
+   "kind": "log",
+   "status": "archived",
+   "tags": [
+    "sprint-autumn"
+   ],
+   "cards": [],
+   "text": "# Sprint autumn — progress ledger\n\n## At a glance\n\n- Sprint: autumn\n- Committed: 2026-10-01\n\n## Waves\n\n| Wave | Cards | Done | Evidence |\n|---|---|---|---|\n| Wave 1 | GA-1 | 2026-10-02 | Delivered. |\n| Wave 2 | GA-2, GA-3 | 2026-10-03 | Delivered. |\n\n## Batch\n\n| Card | Title | Lane | Effort | Complexity | Order | Blocked by |\n|---|---|---|---|---|---|---|\n| GA-1 | Sow | issue | L | Medium | 1 | — |\n| GA-2 | Hoe | issue | XS | Simple | 2 | — |\n| GA-3 | Weed | issue | S | Simple | 3 | — |\n\n## Plan deviations\n\nNone.\n"
+  },
+  {
+   "title": "garden-sprint-autumn-wave-report",
+   "kind": "reference",
+   "status": "archived",
+   "tags": [
+    "sprint-autumn"
+   ],
+   "cards": [],
+   "text": "# Sprint autumn — wave report (after wave 2)\n\n## 🌊 Wave 1 — 2026-10-02\n\n### GA-1 Sow — ✅ As specified\n\n#### ⏱️ Flow\n- Time: 0:20 · per card: GA-1 0:15\n- Full checks: 1 runs, 2 min total, 0 failed\n- Test runs: not measured (no test command given)\n- Gates: code review 0 rounds, UI check 0 rounds\n- Repeat runs: 0\n\n## 🌊 Wave 2 — 2026-10-03\n\n### GA-2 Hoe — ✅ As specified\n\n### GA-3 Weed — ✅ As specified\n\n#### ⏱️ Flow\n- Time: 0:10 · per card: GA-2 0:05, GA-3 0:04\n- Full checks: 2 runs, 3 min total, 0 failed\n- Test runs: not measured (no test command given)\n- Gates: code review 1 rounds, UI check 0 rounds\n- Repeat runs: 0\n\n## 🐞 Debug\n\n| Card | Expected | Found | Process | Fixed | Declined | New card |\n|---|---|---|---|---|---|---|\n| GA-1 | 1 | 2 | 0 | 3 | 0 | 0 |\n| GA-3 | 0 | 1 | 1 | 2 | 0 | 0 |\n| sprint | 0 | 0 | 1 | 1 | 0 | 0 |\n| Total | 1 | 3 | 2 | 6 | 0 | 0 |\n",
+   "frontmatter_error": "frontmatter is not valid YAML (mapping values are not allowed here)"
+  }
+ ],
+ "titles": []
+}

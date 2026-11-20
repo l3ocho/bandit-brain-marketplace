@@ -98,14 +98,15 @@ State the project classification at the top of the overview. It shapes smart def
 ### 2b. Project Context
 
 **Concern:** Context
-**Purpose:** Tell every other skill which project this is: vault domain, slug, type, board scope, prefix.
+**Purpose:** Tell every other skill which project this is: domain, slug, type, board scope, prefix, and where its notes live.
 
-**Must contain:** the five required keys (plus the optional `dev: true` and `finance:` lines), in the fixed format defined in **Project Context Section** (SKILL.md — not restated here).
+**Must contain:** the five required keys (plus the optional `dev: true`, `finance:`, `design:` and `notes: app` lines), in the fixed format defined in **Project Context Section** (SKILL.md — not restated here).
 
 **Audit criteria:**
 - Present, directly after Project Overview
-- All five required keys, valid values; `domain` exists in `MyNotes` (or `none`); `board` resolves (or `none` / `pending`)
+- All five required keys, valid values; `domain` exists in `MyNotes`, or with `notes: app` as a board folder (or `none`); `board` resolves (or `none` / `pending`)
 - `dev`, when present, is `true`; anything else → fix or remove the line. Absent is valid
+- `notes`, when present, is `app`; anything else → fix or remove the line. Absent is valid (the vault)
 - Missing on legacy instructions → ⚠️ Legacy context, migrated from the metadata
 
 **Length:** 5 lines (6 with `dev`) plus the 2 closing lines.

@@ -4,7 +4,7 @@
 > bandit:audit S12 row. Holds the layout, the guard (`scripts/workdir.py` in this skill), its
 > settings, the Environment line, and the rollout. The rule itself is S12 in
 > bandit:audit `references/structure-rulebook.md`. Hook format checked against the Claude Code hooks docs
-> (https://code.claude.com/docs/en/hooks) on 2026-09-29.
+> (https://code.claude.com/docs/en/hooks) on 2026-09-29. Settings storage, not notes storage: `references/vault-storage.md` → Settings storage.
 
 ## 🗂️ Layout
 
@@ -92,8 +92,8 @@ template, Hard Rules) names the guard too, so it changes in both twins in the sa
 **4. Hand-over line:** *Claude Code: copy `claude/settings.json` → `.claude/settings.json` and
 `claude/hooks/workdir.py` → `.claude/hooks/workdir.py` from the vault, create `work/`, `data/`,
 `scratch/`, `_closed/`, `_backup/`, then move existing loose files into task folders (the first
-manifest lists them), and search `MyNotes/{Domain}/Projects/{project}/` for every old path moved,
-proposing the note edits.*
+manifest lists them), and search the project's notes for every old path moved (through bandit:notes,
+in whichever storage holds them), proposing the note edits.*
 
 All three vault files are rows of one proposal, with the twin version bump. The length gate
 (`references/onboard.md` rules) runs first: the Environment line counts toward the budget.

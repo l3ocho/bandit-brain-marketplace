@@ -2,6 +2,18 @@
 
 > How bandit:project writes, versions and audits its two files in the project's settings folder. Read before any write to `webdav_folder` and before auditing it.
 
+## Settings storage
+
+The **settings storage** holds this skill's files: the instructions and the reference doc in
+`Claude/ai-{slug}/`, the Claude Code twin and the dev mirror in `Claude/code-{slug}/`, and the
+working-folder manifest. It is the vault, for every project: `MyNotes/{domain}/Claude/` for the
+settings folders, and `MyNotes/{domain}/Projects/{project}/workdir-manifest.json` for the manifest
+(`references/workdir.md`). A project on the app's Notes with a Claude Code twin still has that
+`Projects/{project}/` folder in the vault, for the manifest only. The **notes storage** holds the project's notes, and the Project Context's `notes:` line
+says which one it is (`references/project-context.md`). The two are separate: a project whose
+notes are in the app's Notes keeps its settings here, so one can move without the other. Every
+"vault" in this skill's settings procedures means the settings storage.
+
 ## Folder Naming Convention
 
 Files follow this pattern: `{webdav_folder}/{prefix}-{type}-v{N}.md`
@@ -185,10 +197,11 @@ does only the second:
 
 If the folder hasn't been moved yet, keep writing to the current `webdav_folder` and say so.
 
-**Project folder check (webdav, every project type).** If `domain` isn't `none` and
-`MyNotes/{domain}/Projects/{project}/` doesn't exist, flag it (workflow projects included)
+**Project folder check (webdav, every project type).** If `domain` isn't `none`, the project has
+no `notes: app` line, and `MyNotes/{domain}/Projects/{project}/` doesn't exist, flag it (workflow projects included)
 as ⚠️ **No shared project folder**. The fix is the vault rows of **🚀 Onboarding** (`references/onboard.md`) in the same
-proposal as the version bump. Never create it outside an approved row.
+proposal as the version bump. Never create it outside an approved row. With `notes: app` the
+check is the hub note on the project's board instead (bandit:notes `onboard` on the app's Notes).
 
 Then:
 - Default to the existing naming convention — do not re-ask the questions

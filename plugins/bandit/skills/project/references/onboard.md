@@ -5,17 +5,17 @@
 ## 🚀 Onboarding — one command for the whole project
 
 **This skill is the only way a project gets onboarded.** The user runs it once; it does the
-instructions, the vault and the board together. bandit:notes and bandit:tasks keep owning their
+instructions, the notes, the board and the settings together. bandit:notes and bandit:tasks keep owning their
 own rules: this skill loads them and runs their onboarding procedures, it never restates them.
 
 | Step | What | Who |
 |---|---|---|
-| 1 | Interview (new project) or audit (existing project): the five Project Context values (+ optional `dev` and `finance`), the hub-note summary, and the modules when the domain is new | This skill |
-| 2 | **Vault rows:** load the `bandit:notes` skill and run its *Onboarding rows* (Part 3) with `domain`, `project`, `type`, `dev` (when set), whether the project has a Claude Code surface, the summary and the modules | bandit:notes |
+| 1 | Interview (new project) or audit (existing project): the five Project Context values (+ optional `dev`, `finance` and `notes`), the hub-note summary, and the modules when the domain is new | This skill |
+| 2 | **Notes rows:** load the `bandit:notes` skill and run its *Onboarding rows* (Part 3) with `domain`, `project`, `type`, `dev` (when set), `notes` (when set), whether the project has a Claude Code surface, the summary and the modules. A project on the app's Notes gets its hub note on its board and no vault folder for notes; its settings folders stay vault rows | bandit:notes |
 | 3 | **Board rows:** load the `bandit:tasks` skill and run `references/onboard.md` with the board answer, project name, board profile and folder, plus `dev: true` when set (onboard then adds its dev board shape rows to the same proposal) | bandit:tasks |
 | 4 | **Settings rows:** the instructions and reference doc files in `Claude/ai-{slug}/` (see **Vault Folder**) | This skill |
 | 5 | **One proposal** with every row from steps 2–4 and a fix row for every finding, then the closing line | This skill |
-| 6 | Execute exactly the approved rows, in order: vault → board → settings files. Report per row | Each owner's procedure |
+| 6 | Execute exactly the approved rows, in order: vault → board → hub note on the app's Notes (it needs its board) → settings files. Report per row | Each owner's procedure |
 | 7 | Hand over the instructions to paste | This skill |
 
 **The one proposal:**
@@ -30,6 +30,9 @@ own rules: this skill loads them and runs their onboarding procedures, it never 
 | 5 | settings | create file | …/Claude/ai-home-reno/hr-instructions-v0.md | instructions |
 | 6 | settings | create file | …/Claude/ai-home-reno/hr-prompt-reference-v0.md | reference doc |
 ```
+
+For a project on the app's Notes, rows 1 and 2 become one row, step `notes`, action `create note`,
+target `"Home Reno" · {column}`: the hub note on its board, after the board row.
 
 **Findings come fixed.** Anything noticed along the way (a legacy folder elsewhere in the
 domain, a stale `board:` line) is a **row in the same table**, step `fix`, with its owner's exact
@@ -49,10 +52,11 @@ a list, or none.*
   "all" fixes everything; a row the user didn't approve never runs. Nothing outside this project's own
   folders is touched except by a `fix` row they approved.
 - A row that depends on a declined row is skipped and reported (the hub note without its folder,
-  the settings files without `Claude/ai-{slug}/`).
+  or on the app's Notes without its board; the settings files without `Claude/ai-{slug}/`).
 - The Project Context written into the instructions reflects what was approved: `domain:` is the
-  real domain whenever a vault is used (`none` only for a custom path or artifact-only), and
-  `board:` is the line bandit:tasks returned.
+  real domain whenever a vault or a board folder is used (`none` only for a custom path or
+  artifact-only), `board:` is the line bandit:tasks returned, and `notes: app` is written only when
+  the project's notes are in the app's Notes.
 - **Existing projects run the same flow.** Audit the instructions, then steps 2–7 propose only
   what's missing (a wrong `domain:`, a missing folder, no board scope). Nothing missing → say so.
 - bandit:notes' `init`/`onboard` and bandit:tasks' `onboard`, typed directly in a project chat to

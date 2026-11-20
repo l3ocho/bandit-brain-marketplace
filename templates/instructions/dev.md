@@ -15,6 +15,7 @@ type: product_service
 board: project "{Board Name}"
 prefix: {pf}
 dev: true
+{notes: app — this line only when the project's notes are in the app's Notes}
 
 Read by every `bandit` skill.
 **Home board first. Read and write across the domain. Nothing outside it.**

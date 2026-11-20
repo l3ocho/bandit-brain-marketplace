@@ -34,7 +34,7 @@ updated: 2026-10-20
 | ✅   | [[#✅ bandit:tasks\|bandit:tasks]]           | `/bandit:tasks {command}`     | The Bandit Brain task board, plus the dev card workflow on Technical boards  |
 | 🎙️ | [[#🎙️ bandit:minutes\|bandit:minutes]]   | `/bandit:minutes` + the audio | Meeting recording → minutes in the vault                                         |
 | 💰  | [[#💰 bandit:finance\|bandit:finance]]      | `/bandit:finance {command}`   | The Finance module: log, import, sort, the budget month, bills, reconcile, review, investments |
-| 🛠️ | [[#🛠️ bandit:project\|bandit:project]] | `/bandit:project {command}`   | Onboarding (instructions + vault + board, one approval) and project instructions |
+| 🛠️ | [[#🛠️ bandit:project\|bandit:project]] | `/bandit:project {command}`   | Onboarding (instructions + notes + board, one approval) and project instructions |
 | 📐  | [[#📐 bandit:audit\|bandit:audit]]          | `/bandit:audit {command}`     | Domain and project structure: Claude.ai ↔ vault ↔ board                          |
 | 🧭  | [[#🧭 bandit:plan\|bandit:plan]]            | `/bandit:plan {mode}`         | `project`: plan → architecture doc · `wbs`: docs or cards → work breakdown       |
 | 🔍  | [[#🔍 bandit:clarify\|bandit:clarify]]      | `/bandit:clarify [idea]`      | A thought, no text yet → questions → clear spec                                  |
@@ -219,7 +219,7 @@ updated: 2026-10-20
 | Command                            | ⚙️ Modifiers | Does                                                                                                                                                                                                                                  |        | 📚 Reads                                   |
 |------------------------------------|--------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|--------------------------------------------|
 | `/bandit:project`                  | —            | No command: picks the mode from the project's state (no instructions → new project, instructions → audit, another project named → vault update)                                                                                       | —      | `audit.md` → Mode Detection                |
-| `/bandit:project onboard`          | —            | New or existing project: interview or audit, then **one proposal** of vault rows (bandit:notes), board rows (`/bandit:tasks onboard`) and settings files, plus a fix row for every finding. Only approved rows run; you get the instructions to paste | ✋      | `onboard.md` · `interview.md` (new)        |
+| `/bandit:project onboard`          | —            | New or existing project: interview or audit, then **one proposal** of notes rows (bandit:notes: vault folders, or the hub note on the app's Notes), board rows (`/bandit:tasks onboard`) and settings files, plus a fix row for every finding. Only approved rows run; you get the instructions to paste | ✋      | `onboard.md` · `interview.md` (new)        |
 | `/bandit:project audit`            | —            | Scores every section of this project's instructions against the template, flags old Project Context lines and board tool names that aren't current (on Claude.ai, the hand-over adds a line to check the Claude Code `CLAUDE.md` too), on a dev project brings over the tool and architecture changes from its Claude Code settings copy (nothing Claude Code–only), finds duplicates, builds the fixed version straight away and adds whatever the vault or board is missing, all as rows in one proposal. Naming, board and footprint → `/bandit:audit check` (skip for `domain: none`) | 👀 → ✋ | `audit.md`                                 |
 | `/bandit:project update`           | `{project}`  | Targeted change to **another** project's instructions from its vault copy (bandit:audit settings rows use it): only that change → the next version in that project's vault folder; anything else noticed comes back as an extra fix row (on a dev project, so do new tool and architecture changes from its Claude Code settings). You paste it there, then `/bandit:audit check` (skip for `domain: none`) | ✋      | `update.md`                                |
 | `/bandit:project instructions`     | —            | Generates the instructions from the one-page template for the project's type (`workflow`, `product_service`, or `dev` for any `dev: true` project), as one proposal row                                                              | ✋      | `instructions.md`                          |
@@ -238,8 +238,9 @@ updated: 2026-10-20
 > | Task board → `board:`      | existing `project "{name}"` in the domain's folder · a new board (created empty, in the domain's folder) · `none` · `pending` |
 > | Output                     | Artifact · + vault folder · vault folder only                                                                                       |
 > | Folder backend             | Domain (or custom path → `domain: none`) · project slug · prefix                                                                    |
+> | Notes → `notes: app`       | The app's Notes (recommended) · the MyNotes vault (no `notes` line). Asked for every project; settings stay in the vault either way |
 
-> [!note] Audits flag and migrate legacy projects: Notes-app storage → vault folder, and old `lifecycle` blocks are dropped.
+> [!note] Audits flag and migrate legacy projects: Nextcloud Notes app storage → vault folder, and old `lifecycle` blocks are dropped.
 
 > [!tip] `dev: true` projects: onboarding adds the dev board shape, the instructions allow `/bandit:tasks spec`, and you get the exact Project Context block to put in the repo's `CLAUDE.md` for Claude Code.
 
@@ -248,7 +249,7 @@ updated: 2026-10-20
 📚 **References** (besides each command's file in the table):
 
 - `references/reference-template.md`: before anything else (the section standard, v1.4: every section, its audit criteria, the metadata block, the token budget)
-- `references/project-context.md`: the Project Context block (keys, format, repo copy, dev mirror, Claude Code twin)
+- `references/project-context.md`: the Project Context block (keys, including the optional `notes: app` line; format, repo copy, dev mirror, Claude Code twin)
 - `references/vault-storage.md`: before any write to, or audit of, the settings folder
 - `references/dev-mirror.md`: onboarding or auditing a `dev: true` project (the Stop hook and mirror script; the sprint checker is `bandit-dev`'s own hook, not wired here)
 - `references/code-settings.md`: auditing or updating a `dev: true` project's Claude.ai instructions (what comes over from its Claude Code settings)

@@ -1,14 +1,14 @@
 ---
 name: "sprint"
-description: "Plans, runs, debugs and closes a sprint on a dev project's Bandit Brain board: a real sprint in the app, one approved plan in waves, one subagent per wave, evidence in the sprint folder. Claude Code only. Use to plan a sprint, run its waves, or debug or close it."
+description: "Plans, runs, debugs and closes a sprint on a dev project's Bandit Brain board: a real sprint in the app, one approved plan in waves, one subagent per wave, evidence in the sprint's notes. Claude Code only. Use to plan a sprint, run its waves, or debug or close it."
 ---
 
 # 🏃 Sprint
 
 Turns a set of existing cards into one planned, approved sprint that a fresh chat can execute, test
 and debug from documents alone. The cards stay on the board; the sprint is a **real sprint** in the
-app (its status and its ordered cards) and adds a shared plan, a live ledger and a handover in the
-vault. No sprint card, no sprint tag. A card with no due date gets the sprint date at commit, so the
+app (its status and its ordered cards) and adds a shared plan, a live ledger and a handover as the
+sprint's notes, in the project's notes storage (bandit:notes). No sprint card, no sprint tag. A card with no due date gets the sprint date at commit, so the
 Execution board shows it; a card with its own date keeps it.
 
 > **The standard.** Every gate leaves evidence in the sprint's ledger and in the app's sprint. If this
@@ -33,11 +33,11 @@ old-way sprint: follow `references/old-way.md`. No command → offer the table a
 | `run` | One or more sprints; `--paced [minutes]` under `/loop` | Every open wave, each in its own subagent, one wave at a time, each once its dependencies are delivered; checks each wave on the board; stops on a blocker | `references/run.md` |
 | `debug` | Sprint | Turns the user's adjustments into verified fixes | `references/debug.md` |
 | `release` | Sprint, with the user's deploy word | Preconditions (cards tested, debug done, deploy word, migration tail, backup), then the project's `bandit.yaml` recipe; plugin release for Marketplace cards; fills the production handover card when the recipe names one | `references/release.md` |
-| `close` | Sprint | Releasing is optional (no app release: `Release: deferred`, the next release covers it; helpers changed: their release first); completes the approved cards, closes the sprint, archives the sprint folder; brings an old-way sprint into the app first | `references/close.md` |
+| `close` | Sprint | Releasing is optional (no app release: `Release: deferred`, the next release covers it; helpers changed: their release first); completes the approved cards, closes the sprint, archives the sprint's papers; brings an old-way sprint into the app first | `references/close.md` |
 
 | Read | When |
 |---|---|
-| `references/templates.md` | Writing a note or card: the shapes and filenames |
+| `references/templates.md` | Writing a note or card: the shapes, titles and kinds |
 | `references/pace.md` | Once at the start of `plan`: one question list per gate, investigate before asking |
 | `references/homes.md` | Before a step's first write: homes, write rules, owners |
 | `references/gotchas.md` | Once at the start of any command |
@@ -75,7 +75,7 @@ evidence in its row**; the checker (SP9, SP10) refuses a done row without it.
 | 8 | Risk and rollback | Per card and for the sprint, in the plan |
 | 9 | Definition of ready, per card | Each card checked; stage moved on; fix rows for failures |
 | 10 | Approval gate | The user's explicit approval, quoted in the ledger |
-| 11 | Independent plan review | The `plan-reviewer` agent's record in the sprint folder; majors applied; no blocker open (the only stop) |
+| 11 | Independent plan review | The `plan-reviewer` agent's record with the sprint's papers; majors applied; no blocker open (the only stop) |
 | 12 | Commit the sprint | Assignee, undated cards given the sprint date and checked against this week's Sunday, the sprint's expected date, Ready to execute, execution prompt, ledger with `Committed:` and its Waves table, the handover cards the recipe names, the debug card, the sprint map |
 
 ## 🔒 Hard rules
@@ -89,7 +89,7 @@ evidence in its row**; the checker (SP9, SP10) refuses a done row without it.
 3. **The ledger's Status line is current** after every wave, debug, release and close; the sprint's
    status in the app follows it (`references/execute.md` → Sprint status)
 4. **A new kind of mistake becomes a checker rule**, not a new sentence here
-5. **Rules have owners:** board rules are bandit:tasks', vault rules bandit:notes', the Project Context
+5. **Rules have owners:** board rules are bandit:tasks', note rules bandit:notes', the Project Context
    bandit:project's. Name the owner; never copy the rule (`references/homes.md`)
 
 ## ⚠️ Gotchas

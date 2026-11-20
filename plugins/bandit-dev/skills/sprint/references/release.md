@@ -66,8 +66,8 @@ Check all before anything runs. Each miss is refused by name, with what would sa
 
 ## Covering
 
-A release covers this sprint and every **deferred** sprint of the project: one whose ledger (in
-`Projects/{slug}/` or `_archive/Projects/{slug}/`) says `Release: deferred` and that closed after the
+A release covers this sprint and every **deferred** sprint of the project: one whose ledger, live or
+archived (`references/templates.md` → Papers), says `Release: deferred` and that closed after the
 project's last `Released:` line. Their code is on the trunk already, so the release ships it.
 
 - **The `Released:` line names them all:** `Released: {version} · {date} · {commit} · covers {sprint},

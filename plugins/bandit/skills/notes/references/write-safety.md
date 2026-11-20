@@ -33,7 +33,7 @@ row, marked `domain`. A finding with two valid fixes is one row with both, recom
 is created or changed until you answer all, a list, or none.*
 
 **A create never makes a second copy.** Before creating a note, look for the one that is already
-there, the way the storage's reference says; a note that exists is updated, not created again.
+there, the way the storage's reference says. What happens when one is found is the storage's too.
 
 **An edit starts from the note as it is now.** Read the note right before changing it, and change
 only what the approved row names.

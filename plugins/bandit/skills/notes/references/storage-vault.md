@@ -11,7 +11,7 @@ Every storage answers the same seven operations. In the vault:
 | Operation | Tool | How |
 |---|---|---|
 | Read | `nc_webdav_read_file` | Returns the text and the etag |
-| Create if absent | `nc_webdav_write_file`, `if_match` omitted | Fails if the path exists: that failure is the protection |
+| Create if absent | `nc_webdav_write_file`, `if_match` omitted | Fails if the path exists: that failure is the protection. A name already taken gets a more specific slug (`references/conventions-vault.md` §4); the note that exists is not written over |
 | Edit if unchanged | `nc_webdav_write_file` with the bare-hex etag as `if_match` | Refused if the file changed since the read |
 | Move without overwrite | `nc_webdav_move_resource`, `overwrite: false` | Refused if the destination exists |
 | List | `nc_webdav_list_directory` | One folder |
@@ -20,11 +20,11 @@ Every storage answers the same seven operations. In the vault:
 
 ## ✍️ Auto-writes
 
-Two writes need no confirmation, both because they can't destroy anything:
+A new note in the inbox, here `{Domain}/_inbox/`, needs no confirmation (`references/write-safety.md`).
+The vault has one more auto-write:
 
 | Auto-write (no confirmation) | Why it's safe |
 |---|---|
-| Creating a **new** note in `{Domain}/_inbox/` | It's the drop zone; fail-closed create can't clobber |
 | Regenerating `{Domain}/README.md` | Generated file; its config frontmatter and `## Notes` section are carried over |
 
 Creating a folder is confirmed like every other change.

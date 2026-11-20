@@ -25,7 +25,7 @@ says where it is written.
 | 3 | The settings area | Vault only: `conventions-vault.md` §3 |
 | 4 | How a note is named | The storage: `conventions-vault.md` §4 · `storage-app.md` → Create without a duplicate |
 | 5 | Fields | Here. How each is written: `conventions-vault.md` §5 · `storage-app.md` → Fields |
-| 6 | Status | Here. Where each status lives: `conventions-vault.md` §6 · `storage-app.md` → Status |
+| 6 | Status | Here. Where each status lives: `conventions-vault.md` §6 · `storage-app.md` → Status and filing |
 | 7 | Archive | The storage: `conventions-vault.md` §7 · `storage-app.md` → Archive, restore, delete |
 | 8 to 11 | Other files, the ignore list, templates, Obsidian settings | Vault only: `conventions-vault.md` §8 to §11 |
 | 12 | Note body shape | Here. The vault's link syntax: `conventions-vault.md` §12 |
@@ -75,7 +75,7 @@ tag the user added**. A note in the inbox is exempt until it is reviewed (`refer
 | Source | `chat` · `manual` · `meeting` · `email` · `migrated` | Where the content came from. `migrated` = moved in from another system (a repo, a wiki, another notes app, an older layout) by whichever step moves it; the original location goes in the body's first line |
 | Card | One Bandit Brain card | The card that tracks the work. A plan or a brief belongs to exactly one card |
 | Related notes | Other notes of the same domain | Each with its reason in the body's `## Related` (§12) |
-| Lane | The bare lane value (`feature`, not `lane/feature`) | Briefs and plans; bandit:tasks' vocabulary |
+| Lane | The repo's lane name; on a dev project the bare lane value (`feature`, not `lane/feature`) | Briefs and plans; bandit:tasks' vocabulary |
 | Handler | `claude-code` · `claude-design` · `claude-ai` | Briefs; bandit:tasks' Handler vocabulary |
 | Sprint | The sprint's name in the app | A sprint's records (§13) |
 
@@ -103,12 +103,15 @@ that state: two copies of one state drift the first time a card is ticked on the
 
 | Status | Means |
 |---|---|
-| `inbox` | In the inbox: the user's note in progress, or a helper's draft waiting for the user's review. Which is which, and what may be touched: `references/model.md`, *The inbox is the user's* |
-| `triaged` | Reviewed and structured; nothing pending on it |
+| `inbox` | The user's note in progress, in the inbox. What may be touched there: `references/model.md`, *The inbox is the user's* |
+| `triaged` | Structured; nothing pending on it |
 | `active` | Being worked on or referenced as current |
 | `waiting` | Blocked on someone else |
 | `done` | Finished: ready to be archived |
 | `archived` | Kept, out of the way. Each storage says how it holds an archived note |
+
+A helper's draft waiting for the user's review also sits in the inbox. Which status marks it is
+the storage's: `conventions-vault.md` §6 · `storage-app.md` → Status and filing.
 
 **The one exception: plan notes (§13).** A plan note's status tracks its card's **existence and
 completion** only: `active` while the card is open, `done` once it's complete. The card's stage

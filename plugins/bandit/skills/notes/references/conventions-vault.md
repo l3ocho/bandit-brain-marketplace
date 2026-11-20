@@ -60,8 +60,7 @@ in lowercase kebab-case (`Debut`, `sprint/debut` → `sprint-debut/`; `W44 e` �
 
 A sprint's records carry `sprint: {name}` (the sprint's name in the app) in place of `board-task`. An old-way sprint's records (planned with a sprint card) keep `board-task` = the sprint card.
 
-**Written straight in**, like the planning documents (`references/other-skills.md`): these records are
-worked on across many sessions while the sprint runs. They still follow §5 (frontmatter, `status`,
+**Written straight in** (the rule and its reason: `references/conventions.md` §13). They still follow §5 (frontmatter, `status`,
 YAML style), create fail-closed and edit only with the etag. A brief that already sits in the
 project folder or the inbox moves into the sprint folder when its card joins the sprint (`file`).
 

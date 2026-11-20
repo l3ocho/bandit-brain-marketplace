@@ -84,10 +84,18 @@ Report the breach. Propose what moves back to To Do or Stand By, starting from t
 
 ### `/bandit:tasks done`
 
-1. `update_tasks { items: [{ taskId, complete: true }] }` — this is what moves it to Done. Every
-   card another system made for one record: `{ originSystem, originReference, complete: true }`
-2. **If it was a recurring occurrence**, completion advances the series and creates the next occurrence. Say so, and report the next date
-3. If the whole series just ended because the rule ran out, say that too
+1. **Conclusions first** (bandit:notes `references/conclusions.md`): what each card's comments
+   taught goes into its linked note, one row a card in one proposal; a card with nothing worth
+   keeping gets no row. For an approved row bandit:notes writes the note, then, on a Workflow board
+   only, this skill writes the card's short description it drafted (`update_tasks`, read back as
+   `references/board.md` → Card descriptions says). A refused write is reported by card and never
+   stops the completion. Completing by origin (below) skips this step
+2. Once the rows are answered (all, a list or none): `update_tasks { items: [{ taskId, complete: true }] }`
+   — this is what moves it to Done. Every card another system made for one record:
+   `{ originSystem, originReference, complete: true }`. `ASSISTANT_CANNOT` (a card another member
+   made): report it; the member completes it in the app
+3. **If it was a recurring occurrence**, completion advances the series and creates the next occurrence. Say so, and report the next date
+4. If the whole series just ended because the rule ran out, say that too
 
 ⚠️ `reopen_tasks { taskIds }` returns the task to Backlog and makes it movable. On a recurring occurrence it also removes the next occurrence, and only when that one is an unedited fresh copy and this is the series' latest completion; otherwise it is refused (`references/errors.md`).
 
@@ -109,7 +117,8 @@ Bumping is a **date** change, not a column change.
 `executionState` and `complete` never share an entry.
 
 `update_tasks` with `complete: true` or `dueDate` — cap 100, one result per entry
-(`references/board.md` → Many cards in one call).
+(`references/board.md` → Many cards in one call). Completing several cards at once runs `done`'s
+step 1 first, the same way: one proposal, one row a card.
 
 **Completing blockers and their dependents:** entries apply in list order, so one call works with
 every blocker **listed before** its dependents (checked on the app 2026-10-20). A dependent listed

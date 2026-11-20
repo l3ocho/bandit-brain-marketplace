@@ -33,6 +33,6 @@ that month.
 ## ✍️ Saving it
 
 The review is a chat answer. When the user wants it kept as a note, hand the text to bandit:notes,
-which owns where and how notes are written. It looks for a note of that name first and updates the
-one it finds instead of making a second. A review too large for one note (the app's Notes refuses
+which owns where and how notes are written. It looks for a note of that name first and never makes
+a second: One found → it is shown and changed only on the user's yes; an inbox note that is not this conversation's own draft is left alone and named (bandit:notes' inbox rule). A review too large for one note (the app's Notes refuses
 one over 200 KB) is split by section into related notes, never cut.

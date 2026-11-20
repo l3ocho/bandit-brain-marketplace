@@ -104,7 +104,9 @@ metadata), resolved together with the domain:
 
 **On the app's Notes**, Project scope is the project's board: its notes, its Inbox, its archived
 notes and its notes in the Trash. Minutes and requests on the domain's workflow board are read when
-they name this project and never changed from here, like `Meetings/` and `Requests/` above. Domain
+they name this project and never changed from here, like `Meetings/` and `Requests/` above. A
+helper may create its new minutes or request drafts in that board's Inbox, as in `_inbox/` above;
+filing them is the workflow project's. Domain
 scope is every board in the domain's folder. Settings folders keep the vault rows above.
 
 Anything outside the scope (another project's folder or board, a domain-level rename, `init`, `home`,

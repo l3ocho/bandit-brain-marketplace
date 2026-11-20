@@ -44,10 +44,11 @@ After the spec, offer one line. **The destination follows the subject:**
 
 1. **Card first, through bandit:tasks `capture`.** Title = the spec's Summary; description names
    the note by its name. Scope comes from the `board:` line, exactly as bandit:tasks resolves it.
-2. **Then the note, through bandit:notes,** as a draft for the `domain:` that waits for review,
-   linked to the new card (bandit:notes links it; in the app's Notes that is `notes_link_card`).
-   bandit:notes looks for a note of that name first and updates the one it finds instead
-   of making a second. The card and the note point at each other; neither is ever left orphaned.
+2. **Then the note, through bandit:notes,** of kind `note`, as a draft that waits for review on
+   the card's board (a note linked to a card lives where its card is), linked to the new card
+   (bandit:notes links it; in the app's Notes that is `notes_link_card`). bandit:notes looks for a
+   note of that name first and never makes a second: One found → it is shown and changed only on the user's yes; an inbox note that is not this conversation's own draft is left alone and named (bandit:notes' inbox rule).
+   The card and the note point at each other; neither is ever left orphaned.
 3. **When one side can't be written,** say so in the offer itself instead of silently dropping it:
    `domain: none` or no Project Context → no note ("no domain here, card only?"); `board: none`
    or `pending` → no card ("no board here, note only?"). Both unavailable → no offer.

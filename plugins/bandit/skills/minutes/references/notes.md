@@ -8,8 +8,9 @@ MyNotes vault), where a draft waits and every write step are bandit:notes'
 (`references/model.md` there → Which storage, `references/other-skills.md` → Who writes what).
 This file says only what the minutes hold and when they are filed.
 
-**Names:** the minutes naming rule in bandit:notes conventions §4. The date in the name is the
-**meeting date**, and the full and short versions are written as a pair.
+**Names:** the minutes naming rule in bandit:notes conventions §4 (in the app's Notes, that name
+without `.md` is the title). The date in the name is the **meeting date**, and the full and short
+versions are written as a pair.
 
 **Fields** (bandit:notes conventions §5; how each storage holds them is bandit:notes'). Fields that
 don't apply are left out. Both versions carry the same ones:
@@ -32,12 +33,16 @@ don't apply are left out. Both versions carry the same ones:
 - Both versions name each other in their related notes and in a `## Related` line (see the
   formats), so neither is an orphan. With only one version, it has related notes only when the
   meeting is a project's.
+- In the app's Notes there is no Source field, and minutes sit on the workflow board, so a
+  project meeting names its project through the related hub note (bandit:notes'
+  `references/storage-app.md` → Fields).
 - Don't add fields bandit:notes conventions §5 doesn't define.
 
 **Write, then file** (each write through bandit:notes):
 1. **Look first.** bandit:notes looks for minutes of the same name before it creates any (its
    create without a duplicate). One found → show it and ask before replacing it; never write a
-   second pair.
+   second pair. Found minutes in the inbox that are not this conversation's own drafts are left
+   alone and named (bandit:notes' inbox rule).
 2. **Write both as drafts** that wait for review. Read each back and report its kind, summary and
    place.
 3. **Workflow project or no project metadata** (the bandit:notes domain scope): ask once "File them
@@ -54,6 +59,7 @@ don't apply are left out. Both versions carry the same ones:
    Discussion table in two parts, the Action Items with the second, each part its own minutes note
    related to the others. Nothing is cut or saved shorter.
 
-If the domain has no meetings place (bandit:notes says where it is), don't create one. Leave the
-minutes waiting for review and say that the `meetings` module isn't set up in this domain
-(`/bandit:notes onboard` handles it).
+If the domain has no meetings place (bandit:notes says where it is, per storage), don't create
+one. Leave the minutes waiting for review and say the domain has no place for meetings yet: in the
+vault, the `meetings` module isn't set up (`/bandit:notes onboard` handles it); in the app's
+Notes, the domain has no workflow board to file them on.

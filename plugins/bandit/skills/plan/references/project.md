@@ -58,11 +58,13 @@ Every save goes through bandit:notes, which writes it safely in either storage.
 
 - **First save:** bandit:notes looks for a note of that name first (its create without a
   duplicate). None → it creates the note with **every section heading and `_Pending_` under
-  each**, so each later save changes only its sections. One found → stop and ask, never
-  overwrite: it is the note to resume.
+  each**, so each later save changes only its sections, puts it in its place and sets its status
+  **`active`** (filing alone would mark it settled, and the state table would skip the phase).
+  One found → stop and ask, never overwrite: it is the note to resume.
 - **Every later save:** read the note right before, then save the confirmed sections one at a
-  time (bandit:notes → Edit). If it changed since you last read it (often the user editing it),
-  say what changed and ask.
+  time (bandit:notes `references/write-safety.md` → An edit starts from the note as it is now).
+  If it changed since you last read it (often the user editing it), say what changed and ask.
+  Only the phase's last save sets `triaged`.
 - Never delete. No version numbers or copies: the note is edited in place.
 - **Too large.** The app's Notes refuses a note over 200 KB. Keep one note until it is refused,
   then propose splitting it by section into notes of the same project, related to each other.

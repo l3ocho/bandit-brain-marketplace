@@ -385,7 +385,7 @@ anywhere else.
 |---|---|
 | No `{project}-wbs` note yet | It looks first (create without a duplicate), then creates it. One appeared meanwhile: stop and ask |
 | It exists | Show that it will be replaced, then on confirmation it replaces the note's whole text, read right before. **Carry its `## 🔗 Card links` rows over unchanged** |
-| Over 200 KB (the app's Notes refuses it) | One note until it is refused; then propose splitting it by section (its L1 phases), each part its own note related to the others, the overview and `## 🔗 Card links` in the first. Nothing cut |
+| Over 200 KB (the app's Notes refuses it) | One note until it is refused; then propose splitting it by section (its L1 phases), each part its own note related to the others, the overview and `## 🔗 Card links` in the first, which keeps the name `{project}-wbs`. A reader of the WBS takes that note and the parts related to it. Nothing cut |
 
 Kind `reference`, status `triaged`, its summary, the project linking its hub note (the
 bandit:notes conventions). No version numbers, no copies, no stored IDs (the one exception: card

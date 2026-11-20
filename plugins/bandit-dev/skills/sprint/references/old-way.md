@@ -43,7 +43,7 @@ resumes where it stopped.
 1. **Sprints on.** `get_sprints { boardId }` on the sprint card's board answers; `MODULE_DISABLED` →
    say so and stop.
 2. **Create the sprint:** `manage_sprints { action: "create", boardId, name: "{name}", papersUrl }`
-   (the sprint folder's path). A sprint of that name already on the board from an earlier attempt:
+   (where its papers are, as text: `references/templates.md` → The sprint in the app). A sprint of that name already on the board from an earlier attempt:
    use it.
 3. **Add its cards while they are open:** `manage_sprints { action: "add_cards", sprintId, taskIds }`
    with the batch cards that will close, in wave order. A card that stays open (detached, carried, not

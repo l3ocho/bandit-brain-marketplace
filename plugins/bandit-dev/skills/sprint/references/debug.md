@@ -6,7 +6,7 @@ Contents: Rules · Read first · Intake · Combined test · Fix loop · Pushing 
 
 ## Rules
 
-- **Documents first, then code.** Read the sprint folder before the diff, so each fix is judged against what was promised.
+- **Documents first, then code.** Read the sprint's papers before the diff, so each fix is judged against what was promised.
 - **The user's words are the baseline.** Each adjustment is judged against what they asked for, never against the plan's summary of it.
 - **Every adjustment is a row in the one decision table** (`references/plan.md` → Conventions), plain words, no numbers or codes: what the user saw, the card, the cause, the fix, the recommendation. A fix is applied only on the user's say-so, or under their standing "go with the recommendations".
 - **The debug list holds defects only:** what does not match its card's Spec or the project's approved design. A visual point is checked against the card's design handover (its files are found through the `Handover:` line: the design card's, or the build card's own Source without a design card; the `Design:` line is the page to look at) before it is called a defect. Anything new (more than the card asked for, a better layout, an idea) goes to the board as a card for a later sprint, through bandit:tasks capture, with no question about joining this one.
@@ -16,7 +16,7 @@ Contents: Rules · Read first · Intake · Combined test · Fix loop · Pushing 
 
 0. **The ledger and the board win over memory.** A memory note that disagrees with them is stale: use the documents and say so in one line.
 1. The sprint (`get_sprints { sprintId }`: status, cards in run order) and the ledger's Plan steps, Waves and Decisions log.
-2. In the sprint folder: plan, execution prompt, ledger (needs-the-user list, deviations, bug log, conventions applied), the handover report and every brief with its change log.
+2. The sprint's papers, through bandit:notes: plan, execution prompt, ledger (needs-the-user list, deviations, bug log, conventions applied), the handover report and every brief with its change log.
 3. The code changes: every card's branch and commit from the ledger, then the combined diff against the sprint's starting commit. Read the diff per card, not as one block.
 4. State what each card promised in one line, so adjustments can be checked against it.
 

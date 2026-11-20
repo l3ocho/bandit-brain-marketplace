@@ -28,7 +28,7 @@ Contents: Interview and pace · Scope · Cards and Specs · Agents and checks ·
 
 - Sized a card XL and found the L ceiling at the gate → check the boundary at step 4 and split then; the new card joins the sprint and blocks it.
 - Rewrote descriptions from memory after someone edited the Spec (a parenthetical on the `Brief:` line) → `get_task` right before every write; on `SPEC_LOCKED` re-read, never override to get past it.
-- Wrote `Brief:` lines with a folder in brackets → filename only.
+- Wrote `Brief:` lines with a folder in brackets → the brief's title only.
 - `tagIds` in `update_tasks` replaced the whole set → read, merge, write.
 - Sub-tasks added in parallel came out reversed → an added line always lands at the top: create the checklist with the card (`create_tasks` `subtasks`), or reorder after adds, then read back.
 - A due date given as "tomorrow" → convert to an absolute date from the session date and write it once.
@@ -45,7 +45,7 @@ Contents: Interview and pace · Scope · Cards and Specs · Agents and checks ·
 ## Notes and vault
 
 - Rewrote a 40 KB plan note several times for one-line changes → keep the plan stable after approval, put live state in the ledger, batch edits into one write.
-- Moved the briefs out of the inbox before the cards' `Brief:` lines were checked → the cards point by filename, so a move is safe, but check uniqueness first.
+- Moved the briefs out of the inbox before the cards' `Brief:` lines were checked → the cards name the brief by its link and title, so a move is safe, but check the title is unique first.
 - Edited a brief without a change log → every brief edit adds a dated change-log entry saying what and why.
 
 ## Repo and hooks

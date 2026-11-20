@@ -1463,9 +1463,9 @@ def check_wave_flow():
 SPRINT_DATA_TEXT = (("execute.md", "**Sprint data:** rebuild the project's data file"),
                     ("close.md", "The project's sprint data file"),
                     ("templates.md", "`{project}-sprint-data.csv`"),
-                    ("templates.md", "`{project}-sprint-targets.md`"),
+                    ("templates.md", "`{project}-sprint-targets`"),
                     ("templates.md", "**The measures list is the one place a measure lives**"),
-                    ("homes.md", "The project's sprint data file and its targets note"))
+                    ("homes.md", "The sprint map and the project's sprint data file"))
 
 
 def sprint_data_text_problems(files):

@@ -281,8 +281,8 @@ it fast.
    **Project scope:** only notes for this project's board get a row. Minutes, requests and notes
    for another project stay in their Inbox for the workflow project; list those in one line.
 2. Per note, work out the row: its place (the project's board and the column of the area it is
-   about; a meeting or a request, the domain's workflow board; a card's brief, its card; a plan, left
-   to the card workflow),
+   about; a meeting or a request, the domain's workflow board; a card's brief or plan, its card,
+   linked by the card workflow),
    its kind, a drafted summary shown in the row, the kind's fields, its tags with the user's kept,
    and `active` or `waiting` when the content says so. Body changes, open questions, notes too thin
    to classify and consumed drafts are handled as in the vault steps above, with an archive row
@@ -292,15 +292,17 @@ it fast.
    `notes_move` when its board changes → `notes_file` into its column (it leaves the Inbox,
    `triaged`) → `notes_set_status` when the row says `active` or `waiting` → any approved body row
    (`notes_get` right before, then `notes_update_section`). A card's brief is linked with
-   `notes_link_card`, then filed with `notes_file` into its card's column. A plan is not linked
-   here: when a plan is linked is the card workflow's (bandit:tasks), and a linked plan follows its
-   card (`references/storage-app.md` → Status and filing). A refused step stops that note's row;
+   `notes_link_card` when it is not linked yet, then filed with `notes_file` into its card's column.
+   A plan is linked by the card workflow when it is written: here its row gives it its summary and
+   fields (`notes_set_fields`), which takes it out of the Inbox with its card's state; no
+   `notes_file` and no status are set for it (`references/storage-app.md` → Status and filing). A
+   plan with no card link gets no row: say which card it seems to belong to and leave it to
+   `/bandit:tasks plan-tech`. A refused step stops that note's row;
    what ran is reported, and the note is read back.
 5. Report per row, with each note's kind, summary, status and place.
 
 A plan on the app's Notes needs no hub `## Docs` line: its link to its card is its inbound link. The
-report names the card and the same `/bandit:tasks stage {card} planned` prompt, where the card
-workflow links the plan.
+report names the card and the same `/bandit:tasks stage {card} planned` prompt.
 
 ---
 

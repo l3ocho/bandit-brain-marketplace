@@ -113,9 +113,10 @@ that state: two copies of one state drift the first time a card is ticked on the
 A helper's draft waiting for the user's review also sits in the inbox. Which status marks it is
 the storage's: `conventions-vault.md` §6 · `storage-app.md` → Status and filing.
 
-**The one exception: plan notes (§13).** A plan note's status tracks its card's **existence and
-completion** only: `active` while the card is open, `done` once it's complete. The card's stage
-(`stage/*`) and execution state are never copied. Every other note keeps "independent of the board".
+**A plan linked to its card follows that card** (§13): `active` while the card is open, `done`
+once it is complete, and never its stage or execution state. No helper sets it: the storage keeps
+it so. The app's Notes does it itself (`storage-app.md` → Status and filing); in the vault, `file`
+and `lint` do (`references/commands.md`).
 
 ---
 
@@ -148,7 +149,7 @@ Every other project keeps the rules above unchanged. Once written, a plan note c
 rules wherever `file` or `lint` meet it. The card workflow itself is bandit:tasks'
 (`references/dev-workflow.md` there).
 
-- **Plan notes** (kind `plan`, §5 fields, §6 status exception) hold a card's full technical plan:
+- **Plan notes** (kind `plan`, §5 fields, its status following its card, §6) hold a card's full technical plan:
   the plan itself and the landing/commit sequence for an L card (any WBS L4 lines: bandit-dev:sprint's
   rule). Body per §12. They're written **inbox-first** like any skill-written note; they are
   **not** part of the planning-docs exception.

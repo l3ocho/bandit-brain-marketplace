@@ -150,7 +150,7 @@ Lowercase kebab-case, `.md`, no spaces, no dates in the middle.
 
 Dated by type: `minutes`, `request`, `brief`, `log`. Evergreen: `note`, `reference`, `plan`.
 
-**Cards point to notes by filename, never by path.** The name survives the `_inbox/` →
+**Cards point to notes by the note's title, its filename without `.md`, never by path.** The name survives the `_inbox/` →
 `Projects/` move, and uniqueness (below) guarantees one match.
 
 **Minutes slugs** encode the meeting, so the README can group them without opening each file:
@@ -449,9 +449,9 @@ The rules are conventions §13 (`references/conventions.md`). In the vault:
 - **Plan notes:** `type: plan`, §4 filename, §5 keys. Inbox-first means `status: triaged` and
   `file-to: Projects/{slug}/`, or its `planning/` on a project with sprint folders (§1). The sprint
   plan is written straight into the sprint folder (§1), with `sprint` = the sprint's name (old way:
-  `board-task` = the sprint card). Each card's `Technical plan` names its filename.
+  `board-task` = the sprint card). Each card's `Technical plan` names its title (the filename without `.md`).
 - **Card briefs:** `type: brief`, §4 filename, §5 keys, `board-task` = the card's short id; the
-  card names the brief by filename. Inbox-first as for plan notes. A sprint's card briefs live in
+  card names the brief by its title (the filename without `.md`). Inbox-first as for plan notes. A sprint's card briefs live in
   its sprint folder (§1).
 - **WBS card links:** the WBS is `{slug}-wbs.md` (in `Projects/{slug}/`, or its `planning/` on a
   project with sprint folders, §1). An edit of it is an etag-guarded write with `updated` bumped.

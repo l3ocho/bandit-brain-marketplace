@@ -20,7 +20,7 @@ A WBS in the **bandit:plan** format. That format is fixed on purpose: this surfa
 | Source | How |
 |---|---|
 | Attached or pasted in the chat | Use it as given |
-| The project's vault folder | `MyNotes/{domain}/Projects/{project}/{project}-wbs.md`, `domain` and `project` from the Project Context. Read it with the WebDAV tools |
+| The project's WBS note | Named by bandit:plan and read through bandit:notes, in whichever storage holds the project's notes, with `domain` and `project` from the Project Context. A WBS split in parts is that note and the parts related to it |
 | Neither | Ask for it. Not a WBS at all → say so and offer bandit:plan |
 
 What load reads from it:

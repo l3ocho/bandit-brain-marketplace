@@ -86,11 +86,13 @@ The app creates a second note with the same title without complaint. So, before 
    and put an archived one up to the user before bringing it back. A same-titled note somewhere
    else is another note; say so when it could be confused.
 4. None found → `notes_create` on its board (`boardId`; left out for a private note), with its
-   kind, its summary, its tags, the kind's fields and its text. It starts in that place's Inbox.
+   kind, its summary (a card's plan: none, Status and filing), its tags, the kind's fields and its
+   text. It starts in that place's Inbox.
 5. Then its place: a draft for the user's review stays in the Inbox. A note written straight in
    (`references/other-skills.md`) is filed in the same step with `notes_file` into its column.
-   A note that belongs to a card is linked with `notes_link_card` and then filed into its card's
-   column (Status and filing says what a link does to a plan).
+   A note that belongs to a card is linked with `notes_link_card`; a draft of it stays in the Inbox
+   until the review files it into its card's column (Status and filing says what a link does to a
+   plan).
 
 Read the note back (`notes_get`) and report its kind, summary, status and place.
 
@@ -117,10 +119,12 @@ Read the note back (`notes_get`) and report its kind, summary, status and place.
 Leaving the Inbox needs the summary. A private note has no column. A plan linked to a card takes
 its card's state: its status is not set by hand.
 
-**A plan does not wait in the Inbox once it is linked.** A plan that has its summary leaves the
-Inbox the moment it is linked to its card, and a linked plan given a summary leaves it then. So a
-plan waits for review in the Inbox only while it is not linked. When a plan is linked is the card
-workflow's (bandit:tasks). A note of another kind keeps its status when it is linked: it leaves
+**A linked plan waits in the Inbox only while it has no summary.** A plan that has its summary
+leaves the Inbox the moment it is linked to its card, and a linked plan given a summary leaves it
+then, with its card's state. So the card workflow (bandit:tasks `plan-tech`) creates a plan linked
+to its card and with **no summary**: it waits in the Inbox for the user's review, and the review
+gives it its summary. A plan created with its summary and then linked would leave the Inbox
+unreviewed. A note of another kind keeps its status when it is linked: it leaves
 the Inbox by `notes_file` into its card's column, or by `notes_set_status`.
 
 Every write through these tools is marked as made by an assistant (`createdViaAssistant`,

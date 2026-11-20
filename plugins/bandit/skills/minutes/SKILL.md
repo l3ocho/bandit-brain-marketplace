@@ -1,13 +1,13 @@
 ---
 name: "minutes"
-description: "Turns a meeting audio or video recording into professional minutes (a two-column Subject Item / Summary table, full and/or short), saved by default to the MyNotes vault inbox and filed to Meetings/. Use when a recording comes with a request for minutes, action items or decisions."
+description: "Turns a meeting audio or video recording into professional minutes (a two-column Subject Item / Summary table, full and/or short), saved by default as two minutes notes through bandit:notes. Use when a recording comes with a request for minutes, action items or decisions."
 ---
 
 # 🎙️ Minutes
 
-Turns a meeting recording into professional, human-sounding minutes in markdown. Vault conventions
-are bandit:notes' (conventions §4 filenames, §5 frontmatter, §12 body): this skill adds only what is
-specific to minutes.
+Turns a meeting recording into professional, human-sounding minutes in markdown. Note conventions
+are bandit:notes' (conventions §4 names, §5 fields, §12 body), and so is every write, whichever
+storage holds the domain's notes: this skill adds only what is specific to minutes.
 
 ## 🧭 Router
 
@@ -18,7 +18,7 @@ specific to minutes.
 | Setup | Resolve the domain, ask version (full, short, both), location and meeting type in one question set | `references/workflow.md` |
 | Transcribe | Prepare the audio, transcribe in the background, optional speaker separation | `references/workflow.md` · `references/scripts.md` |
 | Write | Read the whole transcript, write the chosen versions | `references/formats.md` |
-| Verify and save | Re-check every number, date, name, owner; scrub customer data; save | `references/workflow.md` · `references/vault.md` |
+| Verify and save | Re-check every number, date, name, owner; scrub customer data; save | `references/workflow.md` · `references/notes.md` |
 
 ## ⛔ Hard limits (verified, don't re-test)
 
@@ -30,12 +30,12 @@ specific to minutes.
 
 ## 🔒 Hard rules
 
-1. **Ask the setup questions once, before processing**; with nobody to answer: both versions, the
-   vault when the domain is known, the meeting type inferred and said at the top
+1. **Ask the setup questions once, before processing**; with nobody to answer: both versions, saved
+   as notes when the domain is known, the meeting type inferred and said at the top
 2. **Meeting types are exactly three:** supervisors, department, project (bandit:notes conventions §5)
 3. **Verify before saving:** every figure against the transcript; shaky items marked *(to confirm)*
 4. **No customer data, ever,** even when spoken: describe the case or use a placeholder
-5. **Vault writes follow bandit:notes write safety:** new files in `_inbox/`, then filed (`references/vault.md`)
+5. **Notes are written through bandit:notes:** two drafts that wait for review, then filed (`references/notes.md`)
 
 ## ⚠️ Gotchas
 
@@ -46,6 +46,6 @@ None logged yet.
 - Put customer data in the minutes (names, account numbers, addresses, call contents)
 - Attribute statements from speaker labels on a single-mic room recording
 - Invent attendees, owners or deadlines, or a meeting type beyond the three
-- Overwrite an existing file without asking, or pass `if_match: "*"`
-- Create a `Meetings/` folder, or move minutes out of `_inbox` in a regular project's scope
+- Replace an existing note or file without asking
+- Create a meetings place, or file minutes from a regular project's scope
 - Clean up a text transcript or notes (bandit:rewrite), or file existing notes (bandit:notes)

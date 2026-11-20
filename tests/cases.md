@@ -94,6 +94,22 @@ the `bandit-staging` board only. `read` cases are checked by reading the shipped
 | C116 | Notes `delete` on a vault project | cli | same, one note named by its exact path | one row, the not-recoverable warning with archive offered; deleted only after the yes |
 | C117 | Vault-only commands on the app's Notes | read | `notes/references/commands.md`, a project whose notes are in the app, `init`, `home` and `settings` | each says in one line it is vault-only and stops; nothing is written |
 
+## ✍️ Writers: minutes, plan, clarify, rewrite, finance (BB-591)
+
+Staging cases run on a staging project whose Project Context puts its notes in the app, with notes and cards titled with the card id, removed after.
+
+| # | Item | Kind | Input | Expected |
+|---|---|---|---|---|
+| C118 | Minutes as app notes | staging | `/bandit:minutes` with a short made-up recording, both versions, saved as notes, from the domain's workflow project | two notes of kind `minutes` in the Inbox of the domain's workflow board, each with its summary, `meeting`, `meetingDate` and participants, related to each other; read back; on the yes to file, both in the meetings column, status `triaged` (BB-591) |
+| C119 | Minutes twice, one pair | staging | the same recording and meeting date again | the existing pair is found and shown; replaced only after the yes; `notes_list` of the board holds one pair |
+| C120 | Minutes from a regular project | staging | the same from a regular project's chat | the two drafts wait in the workflow board's Inbox; no filing offer; the reply says the workflow project files them |
+| C121 | Plan `project` as app notes | staging | `/bandit:plan project`, two sections confirmed, then a new chat | one note `{project}-project-plan` of kind `reference` on the project's board, filed, every heading present, the two confirmed sections written and the rest `_Pending_`; the new chat resumes at the first `_Pending_` section |
+| C122 | Plan `wbs` saved as a note | staging | `/bandit:plan wbs` on that project, saved, then saved again after a change | one `{project}-wbs` note of kind `reference`, status `triaged`; the second save replaces its text after the yes and keeps its Card links rows; no draft left in the Inbox |
+| C123 | Clarify note and card | staging | `/bandit:clarify` on a made-up non-skill idea, "yes" to the offer, then the same spec saved again | one card from `capture`; one note in its board's Inbox linked to it (`notes_list` shows the card); the second save updates that note, no second one |
+| C124 | Rewrite and finance kept as notes | staging | `/bandit:rewrite` on made-up text, "save it as a note"; `/bandit:finance review month`, "keep it as a note"; each asked twice | one note each, written through bandit:notes, read back with its kind and summary; the second time updates it |
+| C125 | Writers on a vault project | cli | the same five on a test vault domain whose project has no word on its storage | the vault steps as before, now in bandit:notes: minutes in `_inbox/` waiting to be filed to `Meetings/`; the plan documents straight into the project's folder with safe edits; the clarify note in the domain's inbox naming its card |
+| C126 | No storage steps in the writers | read | `grep -rnE 'nc_webdav\|_inbox\|file-to\|if_match\|etag'` over the five skills' folders | only the minutes lines kept on purpose: the audio size limit, and the two places that are not notes (beside the audio, another BanditCloud folder) |
+
 ## 🔧 Assistant tools and dependencies (BB-204, BB-205)
 
 | # | Item | Kind | Input | Expected |

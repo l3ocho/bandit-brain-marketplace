@@ -25,7 +25,7 @@ How the same note is written in each storage:
 | Skill | Kind | Place |
 |---|---|---|
 | bandit:minutes | `minutes` | Inbox first, then the domain's meetings place: created in the Inbox of the domain's workflow board (app), or `_inbox/` with `file-to: Meetings/` (vault) |
-| bandit:plan (both modes) | `reference`, or `plan` on a dev project | **Written straight in**, not to the Inbox, because they're worked on across many sessions: the project's board, in the column of the area it is about (app, Places), or `Projects/{slug}/`, its `planning/` on a project with sprint folders (vault, Part 2 §1 → Sprint project root). Still Part 2: kind, status, summary; in the vault create fail-closed and edit only with the etag |
+| bandit:plan (both modes) | `reference` (the project plan, the architecture, the WBS) | **Written straight in**, not to the Inbox, because they're worked on across many sessions: the project's board, in the column of the area it is about (app, Places), or `Projects/{slug}/`, its `planning/` on a project with sprint folders (vault, Part 2 §1 → Sprint project root). Still Part 2: kind, status, summary; in the vault create fail-closed and edit only with the etag |
 | bandit-dev:sprint | the sprint's records (plan, execution prompt, ledger, report, briefs) | **Written straight in**, for the same reason: the project's board with the tag `sprint-{name}` (app) or `Projects/{slug}/sprint-{name}/` (vault, Part 2 §1 → Sprint folders) |
 | bandit:tasks (dev projects) | a card's `brief` and `plan` | Inbox-first, then its card: linked to it (app) or the project's folder with `board-task` (vault). Part 2 §13 |
 

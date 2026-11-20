@@ -7,7 +7,7 @@
 ```
 # <Meeting type> — Minutes
 
-> <the frontmatter summary sentence>
+> <the summary sentence>
 
 | | |
 |---|---|
@@ -31,12 +31,12 @@
 
 ## Related
 
-- [[<full-version filename>]] — full minutes
-- [[<project slug>]] — project hub   (project meetings only)
+- <the other version's name> — full minutes
+- <project slug> — project hub   (project meetings only)
 ```
 
-The `## Related` section appears only when writing to the vault; other folders don't use
-wikilinks.
+The `## Related` section appears only when the minutes are saved as notes; how a link to another
+note is written there is bandit:notes' (conventions §12 and its storage). Other folders get none.
 
 Condensing rules: keep every subject (never merge topics), every decision, and every figure, date, name and amount. Cut the background, the path the discussion took, and anything the decision already implies. Rows carrying several decisions (schedules, policy changes) stay longer than the rest — that's correct, not a failure to condense. The header block collapses to one line and the caveat note is dropped; keep the *(to confirm)* markers.
 
@@ -47,7 +47,7 @@ Same subjects, same numbering, same action items, about a third of the words (ro
 ```
 # <Meeting type> — Minutes (Short)
 
-> <the frontmatter summary sentence>
+> <the summary sentence>
 
 **<Date> · <n> minutes · Source: `<audio file>`**
 Next checkpoint: <if stated>

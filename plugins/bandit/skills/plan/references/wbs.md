@@ -18,16 +18,15 @@ Phase 5: RECONCILE → Backport findings into the source document and deliver up
 
 ## 📥 Phase 1: Ingest the Documentation
 
-### Vault Document Source (Check First)
+### Planning Notes Source (Check First)
 
-When the chat has a `## 🧭 Project Context` with `domain` and `project`, look in the project's
-planning documents before asking for uploads (with `notes: app`, the project's notes, through
-bandit:notes; otherwise the vault folder): `MyNotes/{domain}/Projects/{project}/`, or its
-`planning/` on a project with sprint folders (bandit:notes conventions §1 names the folder):
+When the chat has a `## 🧭 Project Context` with `domain` and `project`, look for the project's
+planning documents before asking for uploads: ask bandit:notes for the notes by name in the
+project's place, in whichever storage holds its notes (`references/other-skills.md` there):
 
 | Found | Do |
 |---|---|
-| `{project}-project-plan.md` **and** `{project}-architecture.md` | Offer: *"This project has a plan and architecture in the vault. Read those, or do you have newer versions to upload?"* |
+| `{project}-project-plan` **and** `{project}-architecture` | Offer: *"This project has a plan and architecture in its notes. Read those, or do you have newer versions to upload?"* |
 | The plan only | Read it. Tell the user the WBS will be thinner on technical work without the architecture |
 | Neither, or no Project Context | Ask for uploaded docs as usual |
 
@@ -54,7 +53,7 @@ When the input is an existing breakdown rather than project docs (e.g. the Gitea
 `WBS: Home Reno Templates`), rewrite it into the Output Format below instead of generating from
 scratch: map its levels onto L1 phase · L2 deliverable · L3 work package · L4 sub-step, keep its
 IDs' meaning, and list everything that didn't map under **⚠️ Assumptions & Gaps** as a gap.
-Skip Phase 5 (the source isn't a file this skill edits). Save `{slug}-wbs.md` as below; the old page becomes a pointer, changed wherever it lives (Claude Code for a repo wiki).
+Skip Phase 5 (the source isn't a file this skill edits). Save the `{slug}-wbs` note as below; the old page becomes a pointer, changed wherever it lives (Claude Code for a repo wiki).
 
 ### Ingest Process
 
@@ -363,36 +362,37 @@ After the WBS is finalized, review the source document against these categories:
 - **Multiple source files**: Update each file that needs changes. If changes span files, note cross-file dependencies in the changelog.
 - **Binary/complex formats** (DOCX, PDF, PPTX): Read content, produce the updated version in markdown. Note in the output that the user may want to port changes back to their original format manually, or offer to produce the updated file in the original format if the appropriate skill is available.
 
-### Vault Source (Project Plan in the Vault)
+### Note Source (the Project Plan Note)
 
-When the source was `{project}-project-plan.md` from the vault, don't produce a copy. Show the
-backport as a short list of changes; on confirmation, edit the plan **in place**: read it for
-its etag, write with `if_match` = that bare-hex etag, never `"*"`. A 412 means it changed since
-you read it: re-read, say so, ask. The plan's format belongs to `project` mode and bandit:notes;
-change content only.
+When the source was the `{project}-project-plan` note, don't produce a copy. Show the backport
+as a short list of changes; on confirmation, edit the plan **in place** through bandit:notes:
+read it right before, then change only the sections the backport touches. If it changed since
+you read it: say so, ask. The plan's format belongs to `project` mode and bandit:notes; change
+content only.
 
 ---
 
-## 💾 Saving the WBS to the Vault
+## 💾 Saving the WBS as a Note
 
-**Ask bandit:notes for the folder**, never hard-code it: `Projects/{slug}/`, or
-`Projects/{slug}/planning/` on a project with sprint folders (its conventions §1). When that folder
-exists, offer: *"Save this WBS as `{project}-wbs.md` in {folder}?"*
+**Ask bandit:notes for the place**, never hard-code it: the project's place for planning
+documents, in whichever storage holds its notes (`references/other-skills.md` there). When that
+place exists, offer: *"Save this WBS as the `{project}-wbs` note in {place}?"*
 
-**Only the final file is saved.** Drafts stay in the chat: never written to `_inbox/` or anywhere
-else in the vault.
+**Only the final note is saved.** Drafts stay in the chat: never written to the inbox or
+anywhere else.
 
-| Case | Write |
+| Case | Write, through bandit:notes |
 |---|---|
-| No `{project}-wbs.md` yet | Create it with **no `if_match`** (fails closed if it appeared meanwhile: stop and ask) |
-| It exists | Show that it will be replaced, then on confirmation read its etag and write with `if_match` = that etag. **Carry its `## 🔗 Card links` rows over unchanged** |
+| No `{project}-wbs` note yet | It looks first (create without a duplicate), then creates it. One appeared meanwhile: stop and ask |
+| It exists | Show that it will be replaced, then on confirmation it replaces the note's whole text, read right before. **Carry its `## 🔗 Card links` rows over unchanged** |
+| Over 200 KB (the app's Notes refuses it) | One note until it is refused; then propose splitting it by section (its L1 phases), each part its own note related to the others, the overview and `## 🔗 Card links` in the first. Nothing cut |
 
-Frontmatter follows the bandit:notes conventions (`type: reference`, `status: triaged`, `project`
-linking the hub note). No version numbers, no copies, no stored IDs (the one exception: card ids
-in `## 🔗 Card links` on dev projects), never delete.
+Kind `reference`, status `triaged`, its summary, the project linking its hub note (the
+bandit:notes conventions). No version numbers, no copies, no stored IDs (the one exception: card
+ids in `## 🔗 Card links` on dev projects), never delete.
 
 **Card links rows for cards that already exist** (sprint mode): this chat writes them, through
-bandit:notes, as its own approval row on the saved file (an etag-guarded edit, `updated` bumped).
+bandit:notes, as its own approval row on the saved note (a safe edit of that section).
 The row format is this skill's; the write is bandit:notes'.
 
 Next step to offer: *"Want it on the board? `/bandit:tasks load` builds the project from it."*
@@ -432,4 +432,4 @@ Before presenting the final WBS, verify:
 - [ ] Source document has been updated with all gap resolutions from Phase 3 (not in migration or sprint mode)
 - [ ] Source document changelog lists every modification made
 - [ ] Updated source preserves original structure and formatting
-- [ ] Both files (WBS + updated source) are presented, or the vault plan was edited in place
+- [ ] Both files (WBS + updated source) are presented, or the plan note was edited in place

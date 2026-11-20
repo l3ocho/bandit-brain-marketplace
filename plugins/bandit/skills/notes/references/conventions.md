@@ -162,7 +162,8 @@ rules wherever `file` or `lint` meet it. The card workflow itself is bandit:task
   `## Scope` (**In scope** / **Out of scope** lists) · `## Requirements` (table: `#` · Requirement ·
   Priority `Must`/`Should`/`Could` · Notes) · `## Decisions` (dated) · `## Verified facts
   (YYYY-MM-DD)` (each with where it was checked: a file, a tool result) · `## Open questions` ·
-  `## Change log` (optional: one dated line per change to the brief and why) · `## Related`.
+  `## Change log` (optional: one dated line per change to the brief and why) · `## Conclusions`
+  (on the app's Notes, written when its card is completed: `references/conclusions.md`) · `## Related`.
   **No card state in the body** (column, lane, stage): the card holds it, so a copy goes stale. A
   `Card: {short id}` line under the summary is fine; it stays as written even when the card later
   gets a new id, since a former id still finds the card (bandit:tasks `references/board.md` → Card IDs).

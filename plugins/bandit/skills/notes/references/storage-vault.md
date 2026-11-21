@@ -6,8 +6,8 @@ Contents: The operations · Auto-writes · WebDAV mechanics · Obsidian and move
 
 ## 🧰 The operations
 
-A project whose Project Context says `notes: app` is frozen in the vault: read only, no write of any
-kind (`references/model.md` → The vault freeze).
+A project whose Project Context says `notes: app` is frozen in the vault: its notes are read only,
+and the only writes left are the ones `references/model.md` → The vault freeze lists.
 
 Every storage answers the same seven operations. In the vault:
 

@@ -329,7 +329,7 @@ CURRENT_TOOLS = (
     "get_context list_tasks get_task add_comment list_events create_tasks update_tasks reopen_tasks "
     "delete_tasks manage_subtasks manage_recurrence link_tasks manage_boards manage_columns_lanes "
     "manage_tags manage_folders set_visibility delete_board_items manage_sprints get_sprints manage_inbox_groups").split()
-# The 17 Finance tools (bandit:finance), from the app's finance descriptors.
+# The 18 Finance tools (bandit:finance), from the app's finance descriptors.
 FINANCE_TOOLS = (
     "finance_get_context finance_list_transactions finance_get_budget finance_list_schedules finance_get_report "
     "finance_list_rules finance_get_account_history finance_manage_accounts finance_manage_transactions "
@@ -363,7 +363,7 @@ def check_app_tools():
     fin = app_file("src/domains/finance/descriptors.ts") or ""
     fin_tools = set(re.findall(r"^\s{4}name: '(finance_[a-z_]+)'", fin.split("RAW_FINANCE_OPERATIONS", 1)[-1], re.M))
     notes_src = app_file("src/domains/notes/descriptors.ts") or ""
-    notes_tools = set(re.findall(r"^\s{4}name: '(notes_[a-z_]+)'", notes_src.split("NOTES_OPERATIONS", 1)[-1], re.M))
+    notes_tools = set(re.findall(r"^\s{4}name: '([a-z_]+)'", notes_src.split("NOTES_OPERATIONS", 1)[-1], re.M))
     search = re.search(r"SEARCH_TOOL_NAME = '([a-z_]+)'", notes_src)
     removed_src = app_file("src/domains/tasks/removedTools.ts") or ""
     app_removed = set(re.findall(r"^\s{2}([a-z_]+): \{ tool:", removed_src, re.M))

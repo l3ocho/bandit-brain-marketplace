@@ -9,7 +9,8 @@
 | A paid Claude plan (Pro, Max, Team or Enterprise) | Plugins on Claude.ai need one |
 | Claude.ai → Settings → Capabilities → **Code execution and file creation** on | Skills run in the code sandbox |
 | The **Bandit Brain** MCP server connected, on app v0.41.0 or later: the one with inbox groups (`manage_inbox_groups`) besides sprints as records (`get_sprints`, `manage_sprints`), board profiles and tag view, serving the 21 assistant tools under their Board names (`get_context`, `list_tasks`, `create_tasks`, `update_tasks`, `manage_boards` …) | The task board: `tasks`, `audit`, `project`, `sprint`, `testdata`; Finance (`finance`) needs app v0.31.0 or later, which serves the 17 `finance_*` tools; card reads in `notes` and `plan`; saving a spec as a card in `clarify`. After an app upgrade, reconnect the connector so it loads the new tool list |
-| A **Nextcloud** MCP server with WebDAV connected | The notes vault: `notes`, `minutes`, `plan`, `project`, `audit`, `sprint`; saving a spec as a note in `clarify` |
+| The **Bandit Brain** app on v0.55.0 or later for notes: the 17 `notes_*` tools and `search` | Every note a helper writes on a project whose Project Context says `notes: app` (`notes`, `minutes`, `plan`, `clarify`, `rewrite`, `finance` reviews, `tasks` briefs and plans, `sprint` papers, `audit` reports) |
+| A **Nextcloud** MCP server with WebDAV connected (BanditCloud) | Still needed for: a project with no `notes: app` line (its notes stay in the vault); every project's settings folder (`project` onboarding and sync, `notes` `home`, `settings`, `init`); the audit's stamp ledger (`audit check`); a meeting recording and the minutes saved beside it (`minutes`) |
 | Gmail connected (optional) | `/bandit:tasks email` |
 
 ### Works with Bandit Brain
@@ -22,6 +23,7 @@
 | 0.18.0 | v0.41.0 | same |
 | 0.19.0 | v0.41.0 | same |
 | 0.20.0 | v0.41.0 | same |
+| 1.0.0 | v0.55.0 | v0.55.0 |
 | 0.22.0 | v0.51.0 | v0.52.0 |
 | 0.21.0 | v0.51.0 | v0.52.0 |
 | 0.15.0 | v0.41.0 | same |

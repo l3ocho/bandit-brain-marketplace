@@ -10,6 +10,7 @@ type: claude_marketplace
 board: project "BanditBrain"
 prefix: bbm
 dev: true
+notes: app
 
 Read by every `bandit` skill.
 **Home board first. Read and write across the domain. Nothing outside it.**
@@ -66,7 +67,7 @@ scripts/done_check.py               lists each place a change since the last rel
 | G1 inert tree · G2 installed plugins off · G3 old copies denied · G4 new names denied · G5 no production deletes · G6 deny coverage checked · G7 read, never invoke · G8 tests from `.work/test/` · G9 hub safety | The build session never uses what it builds |
 
 - **Never invoke your own skills**, old or new names. Read their source as documents and follow it (G7).
-- **Nothing outside the repo.** Working files go in `.work/`. The only writes outside are vault rows in this project's folders and the Bandit CTO change log.
+- **Nothing outside the repo.** Working files go in `.work/`. The only writes outside are this project's notes in the app, its settings rows in the vault, and the Bandit CTO change log.
 - **Never edit `.claude/settings*.json`** in a build session, except an approved hook change.
 - **Branches:** work on `development`, push it. `main` and tags move only by `release.py`, which runs as the last step of done.
 - **The version number:** the one Leo gave, if he gave one. Otherwise the next one by the CHANGELOG's SemVer rule. Never ask.
@@ -85,15 +86,17 @@ python3 plugins/bandit-maker/skills/skill/scripts/house_lint.py plugins/bandit/s
 
 The checker must be green before every commit. **Done** = the checker green, `done_check.py` with nothing open (or each open row checked and named), app behaviour run on staging, and the release pushed to `main` with its tag; the outputs go in the report (`docs/dependencies.md`). A new kind of mistake becomes a new checker rule, not a new sentence.
 
-## 🗂️ Vault
+## 🗂️ Notes and vault
 
-| What | Where (`MyNotes/BanditLabs/`) |
+Notes are in the app's Notes (`notes: app`, since 1.0.0); this project's vault notes are frozen, read-only.
+
+| What | Where |
 |---|---|
-| Process docs, hub | `Projects/bandit-brain-marketplace/` (hub `bandit-brain-marketplace.md`) |
-| Sprint records | `Projects/bandit-brain-marketplace/sprint-{name}/` |
-| Audit stamp ledger | `Projects/bandit-brain-marketplace/.audit/stamps.json` |
-| Dev mirror | `Claude/code-bandit-brain-marketplace/` (written by the Stop hook through a synced folder) |
-| Claude.ai settings | `Claude/ai-bandit-brain-marketplace/` |
+| Process docs, hub | Notes on the BanditBrain board (hub `bandit-brain-marketplace`) |
+| Sprint records | Notes on the BanditBrain board tagged `sprint-{name}`; map and data files in `.sprint/` |
+| Audit stamp ledger | Vault: `MyNotes/BanditLabs/Projects/bandit-brain-marketplace/.audit/stamps.json` |
+| Dev mirror | Vault: `MyNotes/BanditLabs/Claude/code-bandit-brain-marketplace/` (written by the Stop hook through a synced folder) |
+| Claude.ai settings | Vault: `MyNotes/BanditLabs/Claude/ai-bandit-brain-marketplace/` |
 
 ## ⌨️ Aliases (Bandit Port)
 

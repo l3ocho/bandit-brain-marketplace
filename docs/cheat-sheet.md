@@ -54,7 +54,7 @@ updated: 2026-10-20
 ### 🗃️ bandit:notes
 
 > [!abstract] Owns the note conventions and their two storages, the app's Notes and the MyNotes vault: kinds, fields, status, places, archiving; in the vault also folders, filenames, frontmatter, home pages
-> `plugin` · [[bandit:notes/SKILL|open skill]] · the storage comes from the Project Context (no word on it: the vault) · domain comes from the Project Context `domain:`, from bandit:project during onboarding, or the command, or it asks
+> `plugin` · [[bandit:notes/SKILL|open skill]] · the storage comes from the Project Context (no word on it: the vault; with `notes: app` the project's vault notes are frozen, read-only) · domain comes from the Project Context `domain:`, from bandit:project during onboarding, or the command, or it asks
 
 | Command                  | ⚙️ Modifiers           | Does                                                                                                                                                                                                                       |        |
 |--------------------------|------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|

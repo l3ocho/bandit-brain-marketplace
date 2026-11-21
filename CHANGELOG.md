@@ -2,7 +2,7 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
-## Unreleased
+## 1.0.1 · 2026-11-21
 
 ### Fixed
 - **The sprint checks read a card id whose board prefix holds a digit** (debug of sprint 2026-w47). The app allows a board prefix of 2 to 4 letters or digits, but the card id pattern in `check_sprint.py`, `sprint_data.py` and `subtask_gate.py` took letters only, so a card like `WB5S-1` was missed and the sprint check failed. Checker rule ID1 now tests such an id, and that a date is never read as one; rule L4 also catches one in a skill.

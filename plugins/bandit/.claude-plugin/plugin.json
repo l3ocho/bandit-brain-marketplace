@@ -1,6 +1,6 @@
 {
   "name": "bandit",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Core Bandit Brain skills: tasks, notes, project, audit, clarify, rewrite, plan, minutes and finance.",
   "author": {
     "name": "l3ocho"

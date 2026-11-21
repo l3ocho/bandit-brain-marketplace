@@ -70,7 +70,26 @@ These start outside, so no file here triggers them. Each has its own check.
 A place the done check lists as open, checked and found to need nothing for this release. One line
 each: the path as the map writes it, then why. `scripts/release.py --write` empties this list.
 
-- none yet
+- `plugins/bandit-dev/hooks/hooks.json` — the hooks call the same scripts; no hook changed
+- `plugins/bandit-dev/skills/sprint/references/close.md` — only the card id regex widened to a prefix with digits; no text describes the id's shape (rules SP*, SD1, ES1, SB1, ID1 green)
+- `plugins/bandit-dev/skills/sprint/references/execute.md` — only the card id regex widened to a prefix with digits; no text describes the id's shape (rules SP*, SD1, ES1, SB1, ID1 green)
+- `plugins/bandit-dev/skills/sprint/references/homes.md` — only the card id regex widened to a prefix with digits; no text describes the id's shape (rules SP*, SD1, ES1, SB1, ID1 green)
+- `plugins/bandit-dev/skills/sprint/references/plan.md` — only the card id regex widened to a prefix with digits; no text describes the id's shape (rules SP*, SD1, ES1, SB1, ID1 green)
+- `plugins/bandit-dev/skills/sprint/references/templates.md` — only the card id regex widened to a prefix with digits; no text describes the id's shape (rules SP*, SD1, ES1, SB1, ID1 green); conclusions.md's change does not touch the brief change log
+- `plugins/bandit-dev/skills/sprint/references/*.md` — board.md and capture.md changes do not change any sprint step
+- `plugins/bandit/skills/audit/references/structure-rulebook.md` — what the sprint checker scores is unchanged
+- `plugins/bandit/skills/tasks/references/dev-workflow.md` — the sub-task gate's behaviour is unchanged
+- `plugins/bandit/skills/tasks/references/errors.md` — no new refusal or error code
+- `plugins/bandit/skills/tasks/references/execution.md` — done still calls conclusions.md the same way
+- `plugins/bandit/skills/notes/references/conventions.md` — §13's brief headings unchanged
+- `plugins/bandit/skills/notes/references/other-skills.md` — who writes what is unchanged: clarify still writes a draft linked to its new card
+- `README.md` — no gate, hook or requirement changed
+- `docs/cheat-sheet.md` — no command added, removed or renamed (CS1 green)
+- `docs/dependencies.md` — no new dependency row; ID1's row already names the patterns
+- `tests/fixture-notes/**` — fixtures pass unchanged; ID1 tests the new id shape
+- `tests/fixture-notes/SprintData/**` — rows unchanged (SD1 green)
+- `tests/fixture-expected/sprint-data.csv` — rows unchanged (SD1 green)
+- `tests/fixture-map/estimate.csv` — estimate unchanged (ES1 green)
 
 ## ✅ Before saying done
 

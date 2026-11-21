@@ -2,7 +2,7 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
-## Unreleased
+## 1.0.0 · 2026-11-20
 
 ### Changed
 - **The app's Notes is where helpers write; this marketplace switches over** (BB-596). This release needs the Bandit Brain app 0.55.0 or later (its note tools and search), named in the requirements and the compatibility table. A project whose Project Context says `notes: app` is frozen in the vault: its vault notes are read-only and no helper writes a new one there; the vault stays as it is. Nextcloud is now needed only for projects still on the vault, every project's settings folder, the audit's stamp ledger and meeting recordings. The repo checker reads the note tools, the search and the new settlements finance tool from the app clone at its new path, pinned to the app's 0.55.0, and `/bandit:project audit` now counts them as current tool names, not legacy ones. This repository's own Project Context carries `notes: app`. A major version because the Project Context format changed (BB-594).

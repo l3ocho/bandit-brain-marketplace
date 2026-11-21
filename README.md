@@ -68,8 +68,9 @@ Then `/plugin` → Marketplaces → `bandit-brain` → **Enable auto-update** (o
 
 | Connector | Used by | Needed |
 |---|---|---|
-| **Bandit Brain** MCP server (the task board), on app v0.41.0 or later: the one with inbox groups (`manage_inbox_groups`) besides sprints as records (`get_sprints`, `manage_sprints`), board profiles and tag view, serving the 21 assistant tools under their Board names (`get_context`, `list_tasks`, `create_tasks`, `update_tasks`, `manage_boards` …). For `finance`, app v0.31.0 or later (its 17 `finance_*` tools). After an app upgrade, reconnect the connector | `tasks`, `finance`, `audit`, `project`, `sprint`, `testdata`; card reads in `notes` and `plan`; saving a spec as a card in `clarify` | ✅ |
-| **Nextcloud** MCP server with WebDAV (the notes vault) | `notes`, `minutes`, `plan`, `project`, `audit`, `sprint`; saving a spec as a note in `clarify` | ✅ |
+| **Bandit Brain** MCP server (the task board), on app v0.41.0 or later: the one with inbox groups (`manage_inbox_groups`) besides sprints as records (`get_sprints`, `manage_sprints`), board profiles and tag view, serving the 21 assistant tools under their Board names (`get_context`, `list_tasks`, `create_tasks`, `update_tasks`, `manage_boards` …). For `finance`, app v0.31.0 or later (its 18 `finance_*` tools). After an app upgrade, reconnect the connector | `tasks`, `finance`, `audit`, `project`, `sprint`, `testdata`; card reads in `notes` and `plan`; saving a spec as a card in `clarify` | ✅ |
+| **Bandit Brain** app v0.55.0 or later for notes: the note tools (`notes_create`, `notes_get`, `notes_list`, `notes_update`, `notes_update_section`, `notes_set_status`, `notes_set_fields`, `notes_file`, `notes_move`, `notes_link_card`, `notes_unlink_card`, `notes_relate`, `notes_unrelate`, `notes_list_related`, `notes_delete`, `notes_restore`, `notes_list_trash`) and `search` | Every note a helper writes on a project whose Project Context says `notes: app`: `notes`, `minutes`, `plan`, `clarify`, `rewrite`, `finance` reviews, `tasks` briefs and plans, `sprint` papers, `audit` reports | ✅ |
+| **Nextcloud** MCP server with WebDAV (BanditCloud) | Still needed for: a project with no `notes: app` line (its notes stay in the vault); the settings folder of every project (`project` onboarding and sync); the domain-level vault commands (`notes init`, `home`, `settings`); `audit` (its snapshot reads the vault and the settings folders; `check` writes the stamp ledger); a meeting recording and the minutes saved beside it (`minutes`); `sprint` on a vault project | ✅ |
 | Gmail | `/bandit:tasks email` | Optional |
 | Code execution (Claude.ai: Settings → Capabilities) | Every skill on Claude.ai | ✅ |
 
@@ -83,6 +84,7 @@ Then `/plugin` → Marketplaces → `bandit-brain` → **Enable auto-update** (o
 | 0.18.0 | v0.41.0 | same |
 | 0.19.0 | v0.41.0 | same |
 | 0.20.0 | v0.41.0 | same |
+| 1.0.0 | v0.55.0 | same |
 | 0.22.0 | v0.51.0 | v0.52.0 |
 | 0.21.0 | v0.51.0 | v0.52.0 |
 | 0.15.0 | v0.41.0 | same |

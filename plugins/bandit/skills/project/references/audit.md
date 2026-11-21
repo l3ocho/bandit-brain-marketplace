@@ -98,7 +98,11 @@ template section. Note:
   `finance_list_rules`, `finance_get_account_history`, `finance_manage_accounts`,
   `finance_manage_transactions`, `finance_manage_budget`, `finance_manage_categories`,
   `finance_manage_payees`, `finance_manage_schedules`, `finance_import_transactions`,
-  `finance_manage_reconciliation`, `finance_manage_rules`, `finance_delete_items`. Any other board
+  `finance_manage_reconciliation`, `finance_manage_rules`, `finance_delete_items`,
+  `finance_manage_settlements`, the note tools `notes_list`, `notes_get`, `notes_create`, `notes_update`,
+  `notes_update_section`, `notes_link_card`, `notes_unlink_card`, `notes_set_status`, `notes_set_fields`,
+  `notes_move`, `notes_file`, `notes_delete`, `notes_restore`, `notes_list_trash`, `notes_relate`,
+  `notes_unrelate`, `notes_list_related`, and `search`. Any other board
   tool name → ⚠️ **Legacy tool name**: the
   updated version names the current call (bandit:tasks references give the shape). On Claude Code,
   check the twin or repo `CLAUDE.md` the same way and list each hit in the hand-over; on Claude.ai,

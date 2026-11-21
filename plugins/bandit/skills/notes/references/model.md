@@ -11,6 +11,15 @@ means the vault**, so a project nobody has switched keeps working as before. Wit
 `domain:` names the board folder of that name, whether or not a vault domain folder exists. Read it with the domain, before any command and before any other skill's
 note is written. A domain-level run with no Project Context (the scheduled `home`) is a vault run.
 
+**The vault freeze.** Once a project carries `notes: app`, its notes in the vault are read-only:
+a helper may read one, never writes, moves, archives or deletes it, and never creates a new note in
+the vault for that project (its `_inbox/` included). Its notes were moved into the app; the app holds
+the live copy. The only vault writes left for such a project are not notes: its settings files, its
+working-folder manifest (`Projects/{slug}/workdir-manifest.json`), the audit's stamp ledger
+(bandit:audit), and minutes saved beside their recording when the user picks that option
+(bandit:minutes). A domain's freeze date is recorded by Bandit CTO, on the request card that adds
+the line to its last project. The vault stays as it is until the user says otherwise.
+
 Settings files (`Claude/ai-{slug}/`, `Claude/code-{slug}/`), the working-folder manifest, a
 domain's home page, templates and Obsidian's settings stay in the vault whichever storage holds the
 notes (`references/other-skills.md`).

@@ -324,22 +324,29 @@ def check_board_type():
 
 
 # ── AT1 · the tool lists above are the app's: the app clone's tools and its removed list ──
-# The 21 board tools the app serves today. The project audit's list must match it with FINANCE_TOOLS (AT2).
+# The 21 board tools the app serves today. The project audit's list must match it with FINANCE_TOOLS, NOTES_TOOLS and the search (AT2).
 CURRENT_TOOLS = (
     "get_context list_tasks get_task add_comment list_events create_tasks update_tasks reopen_tasks "
     "delete_tasks manage_subtasks manage_recurrence link_tasks manage_boards manage_columns_lanes "
     "manage_tags manage_folders set_visibility delete_board_items manage_sprints get_sprints manage_inbox_groups").split()
-# The 17 Finance tools (bandit:finance), from the app's finance descriptors.
+# The 18 Finance tools (bandit:finance), from the app's finance descriptors.
 FINANCE_TOOLS = (
     "finance_get_context finance_list_transactions finance_get_budget finance_list_schedules finance_get_report "
     "finance_list_rules finance_get_account_history finance_manage_accounts finance_manage_transactions "
     "finance_manage_budget finance_manage_categories finance_manage_payees finance_manage_schedules "
-    "finance_import_transactions finance_manage_reconciliation finance_manage_rules finance_delete_items").split()
+    "finance_import_transactions finance_manage_reconciliation finance_manage_rules finance_delete_items "
+    "finance_manage_settlements").split()
+# The 17 note tools (bandit:notes and every helper that writes a note), from the app's notes descriptors (BB-590),
+# and the one search across cards and notes.
+NOTES_TOOLS = (
+    "notes_list notes_get notes_create notes_update notes_update_section notes_link_card notes_unlink_card "
+    "notes_set_status notes_set_fields notes_move notes_file notes_delete notes_restore notes_list_trash "
+    "notes_relate notes_unrelate notes_list_related").split()
+SEARCH_TOOL = "search"
 # The app clone on this host (read-only) and the branch the skills are built against.
-APP_REPO = Path(os.environ.get("BANDIT_APP_REPO") or ROOT.parent / "bandit_brain")
-# Held on the app commit before finance_manage_settlements (Leo, 2026-11-08, sprint mktplce-refining);
-# the new Finance tool gets its own card, which moves this back to origin/development.
-APP_REF = os.environ.get("BANDIT_APP_REF") or "639bdc44"
+APP_REPO = Path(os.environ.get("BANDIT_APP_REPO") or ROOT.parent / "dev")
+# The app's 0.55.0, the release that ships the note tools (BB-590; sprint 2026-w47, BB-596).
+APP_REF = os.environ.get("BANDIT_APP_REF") or "1e0170c1"
 
 
 def app_file(path):
@@ -355,6 +362,9 @@ def check_app_tools():
     app_tools = set(re.findall(r"^\s{4}name: '([a-z_]+)'", raw, re.M))
     fin = app_file("src/domains/finance/descriptors.ts") or ""
     fin_tools = set(re.findall(r"^\s{4}name: '(finance_[a-z_]+)'", fin.split("RAW_FINANCE_OPERATIONS", 1)[-1], re.M))
+    notes_src = app_file("src/domains/notes/descriptors.ts") or ""
+    notes_tools = set(re.findall(r"^\s{4}name: '([a-z_]+)'", notes_src.split("NOTES_OPERATIONS", 1)[-1], re.M))
+    search = re.search(r"SEARCH_TOOL_NAME = '([a-z_]+)'", notes_src)
     removed_src = app_file("src/domains/tasks/removedTools.ts") or ""
     app_removed = set(re.findall(r"^\s{2}([a-z_]+): \{ tool:", removed_src, re.M))
     bad = []
@@ -364,11 +374,16 @@ def check_app_tools():
     if fin_tools != set(FINANCE_TOOLS):
         bad.append(f"app finance tools ≠ FINANCE_TOOLS: new {sorted(fin_tools - set(FINANCE_TOOLS))}, "
                    f"gone {sorted(set(FINANCE_TOOLS) - fin_tools)}")
+    if notes_tools != set(NOTES_TOOLS):
+        bad.append(f"app note tools ≠ NOTES_TOOLS: new {sorted(notes_tools - set(NOTES_TOOLS))}, "
+                   f"gone {sorted(set(NOTES_TOOLS) - notes_tools)}")
+    if not search or search.group(1) != SEARCH_TOOL:
+        bad.append(f"app search tool ≠ {SEARCH_TOOL!r}: {search.group(1) if search else 'none'}")
     if removed_src and app_removed != set(REMOVED_TOOLS):
         bad.append(f"app removed list ≠ REMOVED_TOOLS: {sorted(app_removed ^ set(REMOVED_TOOLS))}")
     report("AT1", not bad, "; ".join(bad) + " — update the skills, then both lists (docs/dependencies.md)" if bad
            else f"skills' tool lists = the app's at {APP_REF} ({len(app_tools)} board, {len(fin_tools)} finance, "
-                f"{len(app_removed)} removed)")
+                f"{len(notes_tools)} notes + {SEARCH_TOOL}, {len(app_removed)} removed)")
 
 
 # ── AT2 · copies that must match: the project audit's tool list, the Project Context lines and keys ──
@@ -426,9 +441,10 @@ def check_copies():
     audit = PROJECT_AUDIT.read_text(encoding="utf-8")
     sec = audit.split("**Legacy tool names**", 1)[-1].split("- **Legacy lifecycle**", 1)[0]
     listed = re.findall(r"`([a-z_]+)`", sec.split("Any other", 1)[0])
-    if sorted(listed) != sorted(CURRENT_TOOLS + FINANCE_TOOLS):
-        bad.append(f"project audit's tool list ≠ CURRENT_TOOLS + FINANCE_TOOLS: "
-                   f"{sorted(set(listed) ^ set(CURRENT_TOOLS + FINANCE_TOOLS))}")
+    every_tool = CURRENT_TOOLS + FINANCE_TOOLS + NOTES_TOOLS + [SEARCH_TOOL]
+    if sorted(listed) != sorted(every_tool):
+        bad.append(f"project audit's tool list ≠ CURRENT_TOOLS + FINANCE_TOOLS + NOTES_TOOLS + search: "
+                   f"{sorted(set(listed) ^ set(every_tool))}")
     block = CONTEXT_BLOCK.read_text(encoding="utf-8")
     canon, canon_keys = context_lines(block), context_keys(block)
     if len(canon) != 3:

@@ -55,7 +55,7 @@ old-way sprint: follow `references/old-way.md`. No command → offer the table a
    except at its Close (`references/old-way.md`)
 4. **Repo state.** `git branch --show-current`, `git status --short`. Work on the deploy branch → say
    so and keep every commit for the trunk
-5. **Tools.** Board server, BanditCloud server, a browser tool. A missing server stops the run
+5. **Tools.** Board server and a browser tool; BanditCloud server only for a vault project (no `notes: app`). A missing server stops the run
 
 ## 🔄 The plan cycle
 

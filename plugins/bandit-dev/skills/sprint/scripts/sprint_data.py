@@ -110,10 +110,11 @@ def _debug(w):
 
 def _deviations(w):
     """Bullets of Plan deviations that name one of the wave's cards. A bullet naming no card cannot be placed on a
-    wave, so any such bullet leaves the cell empty rather than a count that might be short."""
+    wave, so any such bullet leaves the cell empty rather than a count that might be short. A section still `_Pending_`
+    (created with all its headings, not written yet) holds no record either: an empty cell, never 0."""
     body = section(w.ledger, "Plan deviations")
     bullets = re.findall(r"^-\s+(.*)$", body, re.M)
-    if not body.strip():
+    if not body.strip() or body.strip() == "_Pending_":
         return ""
     if any(not CARD_ID.search(b) for b in bullets):
         return ""

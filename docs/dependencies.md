@@ -70,7 +70,16 @@ These start outside, so no file here triggers them. Each has its own check.
 A place the done check lists as open, checked and found to need nothing for this release. One line
 each: the path as the map writes it, then why. `scripts/release.py --write` empties this list.
 
-- none yet
+- `tests/fixture-notes/SprintData/**` — rows unchanged: the fixture has no `_Pending_` Plan deviations (SD1 green)
+- `tests/fixture-expected/sprint-data.csv` — rows unchanged (SD1 green)
+- `plugins/bandit-dev/skills/sprint/references/homes.md` — where the data file lives is unchanged
+- `plugins/bandit-dev/skills/sprint/references/execute.md` — when the data file is rebuilt is unchanged
+- `plugins/bandit-dev/skills/sprint/references/close.md` — when the data file is rebuilt is unchanged
+- `docs/decisions.md` — RS27 already says a measure a record does not hold is an empty cell
+- `tests/fixture-map/estimate.csv` — estimate unchanged (ES1 green)
+- `docs/pipeline.md` — no pipeline step changed
+- `docs/cheat-sheet.md` — no command changed (CS1 green)
+- `CLAUDE.md` — the release rule and the approval line are unchanged
 
 ## ✅ Before saying done
 

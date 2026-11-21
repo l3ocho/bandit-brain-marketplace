@@ -1602,6 +1602,10 @@ def sprint_data_cases(mod, data, expected):
     if not (rows[0][:-1] == rows0[0] and rows[0][-1] == "probe" and all(a[:-1] == b for a, b in zip(rows[1:], rows0[1:]))
             and [r[-1] for r in rows[1:]] == [r[2] for r in rows0[1:]]):
         bad.append("a measure added to the list is not exactly one new column")
+    from types import SimpleNamespace
+    pending = SimpleNamespace(ledger="## Plan deviations\n\n_Pending_\n\n## Next\n", cards=["AB-1"])
+    if mod._deviations(pending) != "":
+        bad.append("a Plan deviations section still `_Pending_` counts as 0, not an empty cell")
     return bad, got
 
 

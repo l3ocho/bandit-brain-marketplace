@@ -8,7 +8,7 @@ Contents: Papers · Notes file · The sprint in the app · Step comment · Plan 
 
 A sprint's papers are notes, written and read through bandit:notes in the project's storage (`references/model.md` there → Which storage; `references/other-skills.md` → Who writes what). `{project}` is the project slug, `{name}` the sprint name in kebab-case.
 
-- **On the app's Notes:** each paper is a note on the project's board (`board:` in the Project Context) with the tag `sprint-{name}` and the kind below, written straight in. The sprint's papers are the board's notes with that tag (`notes_list`, and with `archived: true` once the sprint is closed). No folder.
+- **On the app's Notes:** each paper is a note on the project's board (`board:` in the Project Context) with the tag `sprint-{name}` and the kind below, written straight in: filed with `notes_file` into the column the sprint's cards sit in (the first card's in run order when they sit in several). The sprint's papers are the board's notes with that tag (`notes_list`, and with `archived: true` once the sprint is closed). No folder.
 - **In the vault:** each paper is a file named `{title}.md` in the sprint folder `Projects/{slug}/sprint-{name}/` (bandit:notes `references/conventions-vault.md` §1 → Sprint folders), as before.
 
 | Paper | Title | Kind |
@@ -62,7 +62,7 @@ Kind `plan`, status `active`, no lane and no card link: the sprint's tag in plac
 
 ## Brief change log
 
-Each brief ends, before Related, with `## Change log`: one dated entry per planning pass, saying what changed and why (requirements added or removed and the finding behind it, decisions, answered questions, a split). Keep the old wording out of the body; keep the reason in the log. On the app's Notes a brief then gets `## Conclusions`, after Change log and before Related, when its card is completed (bandit:notes `references/conclusions.md`).
+Each brief ends, before Related, with `## Change log`: one dated entry per planning pass, saying what changed and why (requirements added or removed and the finding behind it, decisions, answered questions, a split). Keep the old wording out of the body; keep the reason in the log. On the app's Notes a brief then gets `## Conclusions`, after Change log and before Related, when its card is completed: a heading the brief was not created with, added by a whole-text save (bandit:notes `references/conclusions.md` → Writing the section).
 
 ## Execution prompt
 

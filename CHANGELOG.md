@@ -2,6 +2,13 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
+## Unreleased
+
+### Fixed
+- **The sprint data file leaves an unwritten section empty** (debug of sprint 2026-w47, BB-601, found on staging). A ledger's Plan deviations still `_Pending_` gave the count 0; it now gives an empty cell, as for any record that is not there. Checker rule SD1 tests it.
+- **A sprint's papers in the app's Notes are filed in the column the sprint's cards sit in** (debug of sprint 2026-w47, BB-593, found on staging). `sprint/references/templates.md` named no column. It also says a brief's `Conclusions` heading is added by a whole-text save.
+- **Two test cases matched what the checks really print** (C68 has four errors, C144's sprint data fixture also prints SP1 and SP7 lines).
+
 ## 1.0.1 · 2026-11-21
 
 ### Fixed

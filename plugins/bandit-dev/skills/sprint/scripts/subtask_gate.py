@@ -35,7 +35,7 @@ PLAN = re.compile(r"<h2[^>]*>\s*Technical plan\s*</h2>(.*?)(?=<h2|\Z)", re.S | r
 PLACEHOLDER = "how it will be built"
 HTML = re.compile(r"<[^>]+>|&nbsp;")
 SKIP = ("Debug:", "Sprint ")
-SHORT = re.compile(r"^[A-Za-z]+-[Tt]?\d+$")  # a proper id ({prefix}-{n}) or a temporary one ({prefix}-T{n})
+SHORT = re.compile(r"^[A-Za-z0-9]*[A-Za-z][A-Za-z0-9]*-[Tt]?\d+$")  # a proper id ({prefix}-{n}) or a temporary one ({prefix}-T{n}); a prefix may hold digits
 
 
 def plan_filled(description):

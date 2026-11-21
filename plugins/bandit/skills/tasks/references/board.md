@@ -23,7 +23,8 @@ the creator from `get_context → boards → createdBy` and `members`, never ret
 
 ## 🆔 Card IDs
 
-A card's short id is its board's prefix and a number, `{prefix}-{n}`. It follows the card's place:
+A card's short id is its board's prefix and a number, `{prefix}-{n}`; a prefix is 2 to 4 letters or
+digits, so it can hold a digit. It follows the card's place:
 
 | Where the card is | Its id |
 |---|---|

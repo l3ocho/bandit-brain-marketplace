@@ -93,10 +93,12 @@ approves them by number (`references/model.md` → Scope).
 **On the app's Notes: the hub note only.** Folders, templates, frontmatter style and Obsidian
 settings have no counterpart in the app, so Stages A to D do not run. Project scope: look for the
 project's hub note on its board. The storage reference has no hub note yet, so it is defined here:
-a `reference` note titled with the project's slug, with its summary, in the column of the area it
-is about (`references/storage-app.md` → Places). Look for it first (Create without a duplicate).
-Missing → one create row naming its column, the summary drafted in the row for the user to edit;
-the column is asked when no area fits. Found without a summary → one `notes_set_fields` row.
+a `reference` note titled with the project's slug, with its summary and a `## Docs` list as its
+text (as the vault hub's), in the column of the area it is about (`references/storage-app.md` → Places). Look for it first (Create without a duplicate).
+Missing → one create row naming one column, the summary drafted in the row for the user to edit:
+the column of the area the hub is about; a new board's columns are the ones its board rows create,
+and with no area that fits, the board's first column. The row never leaves the place open ("this
+column or that", "or left in its Inbox"): the hub note is filed on approval. Found without a summary → one `notes_set_fields` row.
 Domain scope: the same for every project board in the domain's folder. On approval, create it with
 `notes_create` and file it with `notes_file` into the row's column, then read it back. The
 settings folders `Claude/ai-{slug}/` and `Claude/code-{slug}/` stay vault rows (`references/model.md`
@@ -291,15 +293,18 @@ it fast.
 4. On approval, per note: `notes_set_fields` (kind, summary, tags, the kind's fields) →
    `notes_move` when its board changes → `notes_file` into its column (it leaves the Inbox,
    `triaged`) → `notes_set_status` when the row says `active` or `waiting` → any approved body row
-   (`notes_get` right before, then `notes_update_section`). A card's brief is linked with
-   `notes_link_card` when it is not linked yet, then filed with `notes_file` into its card's column.
+   (`notes_get` right before, then `notes_update_section`). A card's brief: `notes_set_fields`, then
+   `notes_link_card` when it is not linked yet, then `notes_file` into its card's column.
    A plan is linked by the card workflow when it is written: here its row gives it its summary and
    fields (`notes_set_fields`), which takes it out of the Inbox with its card's state; no
    `notes_file` and no status are set for it (`references/storage-app.md` → Status and filing). A
    plan with no card link gets no row: say which card it seems to belong to and leave it to
    `/bandit:tasks plan-tech`. A refused step stops that note's row;
    what ran is reported, and the note is read back.
-5. Report per row, with each note's kind, summary, status and place.
+5. **Read back** each note with `notes_get` after its last step; the note a write tool returned is
+   not a read-back. Report per row, from that read, with each note's kind, summary, status and
+   place; say "read back" only after that call. The read gives the place as ids: the board and
+   column names come from `get_context`, and a brief's card from `notes_list` (`cards`).
 
 A plan on the app's Notes needs no hub `## Docs` line: its link to its card is its inbound link. The
 report names the card and the same `/bandit:tasks stage {card} planned` prompt.
@@ -411,7 +416,8 @@ still needs their approval.
    with `restore` for 30 days, and is then gone for good; offer `archive` for anything that isn't
    junk.
 4. On approval: `notes_get` each approved note again (it is still there and still the one named),
-   then `notes_delete`; report per row with the days the Trash keeps it.
+   then `notes_delete`; report per row with the days the Trash keeps it, read from
+   `notes_list_trash` (`daysLeft`).
 
 ---
 
@@ -463,7 +469,8 @@ status says it is archived (`references/storage-app.md` → Archive, restore, de
   versions stay a vault procedure. A sprint on the app's Notes has no folder: its records are
   archived by bandit-dev:sprint's close, not by a sprint row here.
 - **Restore:** find the named note in the place's archived notes (`notes_list` with
-  `archived: true`), then in the Trash (`notes_list_trash`). Exactly one match by title, or ask.
+  `archived: true`), then in the Trash (`notes_list_trash`, the whole account's: match the title
+  and the place, a row's `boardId`). Exactly one match, or ask.
   From the archive: propose `triaged`, or the status the user names, since the app does not keep the
   one it had; on approval `notes_set_status`. From the Trash: propose bringing it back as it was,
   with the days left; on approval `notes_restore`. Read the note back with `notes_get` and report

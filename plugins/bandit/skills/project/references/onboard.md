@@ -32,7 +32,10 @@ own rules: this skill loads them and runs their onboarding procedures, it never 
 ```
 
 For a project on the app's Notes, rows 1 and 2 become one row, step `notes`, action `create note`,
-target `"Home Reno" · {column}`: the hub note on its board, after the board row.
+target `"Home Reno" · {column}`: the hub note on its board, after the board row, with `{column}`
+one column of that board, named in the row (bandit:notes `onboard` on the app's Notes picks it).
+A twin (Claude Code, no `dev: true`) still gets its `Projects/` and `Projects/{slug}/` folder rows
+for its working-folder manifest, with no hub note there (bandit:notes Onboarding rows).
 
 **Findings come fixed.** Anything noticed along the way (a legacy folder elsewhere in the
 domain, a stale `board:` line) is a **row in the same table**, step `fix`, with its owner's exact

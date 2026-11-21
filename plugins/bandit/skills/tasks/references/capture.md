@@ -42,7 +42,8 @@ A titled task in Untriaged is a success. An interrogation that ends with a perfe
 
 **No board named** → Untriaged from the domain's workflow project or a plain chat; from any other
 project, the home board's Inbox (parked), so the card stays in this project's sight
-(`references/scope.md`). A board named in the request must be in the domain.
+(`references/scope.md`). A card that comes with a linked note (bandit:clarify's note and
+card) always gets a board, even from the workflow project: the caller names it. A board named in the request must be in the domain.
 
 🚫 **Never set `origin`.** It is only for a task created on behalf of another system, all three fields are required together, and none can ever be changed afterwards. A person asking for a task is not an origin.
 

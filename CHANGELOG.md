@@ -2,6 +2,18 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
+## Unreleased
+
+### Fixed
+- **The sprint checks read a card id whose board prefix holds a digit** (debug of sprint 2026-w47). The app allows a board prefix of 2 to 4 letters or digits, but the card id pattern in `check_sprint.py`, `sprint_data.py` and `subtask_gate.py` took letters only, so a card like `WB5S-1` was missed and the sprint check failed. Checker rule ID1 now tests such an id, and that a date is never read as one; rule L4 also catches one in a skill.
+- **A Workflow card whose description holds a Spec keeps it at close** (debug of sprint 2026-w47, BB-598). `notes/references/conclusions.md` now says so, and the row shows "kept" with that reason.
+- **A brief's and a plan's title in the app's Notes is the name the vault gives it** (debug of sprint 2026-w47, BB-592). `notes/references/storage-app.md` → Fields gains a Title row: never a kind label in front, so a card's line no longer reads "Brief: Brief: …".
+- **bandit:clarify's note and card always land on a board** (debug of sprint 2026-w47, BB-591). On the domain's workflow project the card used to go to Untriaged, which left its note private; it now goes to the `board:` line's board, or a board you pick in the offer.
+- **Onboarding names one column for the hub note** (debug of sprint 2026-w47, BB-594). The row no longer leaves its place open ("this column or that", "or left in its Inbox"). The app hub note's text is a `## Docs` list like the vault hub's, and a Claude Code twin on the app's Notes keeps its working-folder rows (found on staging).
+- **`/bandit:notes file` reads each note back for real** (debug of sprint 2026-w47, BB-600). The report comes from a `notes_get` after the last step, never from what a write tool returned, with the board and column named from `get_context` and a brief's card from the notes list. A brief's steps are in order: fields, link, file.
+- **`restore` from the Trash matches the place as well as the title, and `delete` reports the days left from the Trash list** (debug of sprint 2026-w47, BB-600, found on staging).
+- **A note found with the same title is updated, never doubled** (debug of sprint 2026-w47, BB-597). The row offers only update or leave it, never a second note with the same title in the same place.
+
 ## 1.0.0 · 2026-11-20
 
 ### Changed

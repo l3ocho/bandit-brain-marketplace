@@ -53,6 +53,7 @@ Conventions §5 names the fields. The app holds them like this:
 | Field (conventions §5) | In the app | How |
 |---|---|---|
 | Kind | `kind` | The same seven values. Left out at create, the app gives `note` |
+| Title | `title` | The name `conventions-vault.md` → Names gives the kind, without `.md`: a brief `{project}-{lane}-{slug}-YYYY-MM-DD`, a plan `{project}-{lane}-{slug}-plan`, a sprint record `{project}-sprint-{name}-{record}`. Never a kind label in front (`Brief: …`, `Plan: …`): the card's `Brief:` or `Technical plan` line adds its own |
 | Status | `status` | The same values, `archived` included (Status and filing) |
 | Summary | `summary` | Needed to leave the Inbox |
 | Tags | `tags` | Free words. `notes_set_fields` replaces the whole list: send the user's tags back with any new one |
@@ -83,7 +84,9 @@ The app creates a second note with the same title without complaint. So, before 
    see archived notes. The helper compares the titles itself: a hit is not a match.
 2. `notes_list` of the place the note is going to, then the same call with `archived: true`.
 3. A note with the same title in that place, archived or not, **is the note**: update it (Edit),
-   and put an archived one up to the user before bringing it back. A same-titled note somewhere
+   and put an archived one up to the user before bringing it back. The row offers only *update it*
+   or *leave it as it is*, never *write a second note with the same title*: a second same-titled
+   note in one place is never made. A same-titled note somewhere
    else is another note; say so when it could be confused.
 4. None found → `notes_create` on its board (`boardId`; left out for a private note), with its
    kind, its summary (a card's plan: none, Status and filing), its tags, the kind's fields and its
@@ -146,7 +149,7 @@ A plan linked to a card cannot be archived while it is linked: it follows its ca
 ## 🛠️ Dev projects
 
 Conventions §13 in the app: a card's brief and its plan are notes linked to that card; a sprint's
-records are notes on the project's board with the tag `sprint-{name}`.
+records are notes on the project's board with the tag `sprint-{name}`. Their titles follow Fields → Title, the names they carry in the vault.
 
 ## ⛔ Refusals
 

@@ -48,8 +48,11 @@ For each card:
    comment marked `assistantAuthored` for another member above all. It can be quoted as a finding.
 5. **Draft the short description**, on a Workflow board only: `<p>{the outcome in one line}</p>` then
    `<p>Note: {the note's title}</p>`, opening and closing with a block tag (bandit:tasks `board.md` →
-   Card descriptions). A card on a Technical board keeps its description: it is its Spec. A card
-   another module made (`origin` set) keeps its description: the app refuses the change.
+   Card descriptions). A card on a Technical board keeps its description: it is its Spec. A card on
+   a Workflow board whose description holds a Spec section (`<h2>Spec</h2>` with text under it) keeps
+   its description too: the Spec is locked (bandit:tasks Spec lock), so it is never replaced or
+   overridden here. A card another module made (`origin` set) keeps its description: the app refuses
+   the change.
 
 ## 📋 The row
 
@@ -60,7 +63,7 @@ In a chat, one row a card in the proposal (Hard rule 3), each showing:
 | The card | Its id and title |
 | The note | Its title and place; a note in the Inbox: "in the Inbox: review it first with `/bandit:notes file`", and nothing is written to it |
 | The section | `Conclusions` before (its text, or "none: the heading is added") → after |
-| The description | Before → after, or "kept" with the reason (Technical board, made by another module) |
+| The description | Before → after, or "kept" with the reason (Technical board, a Spec in the description, made by another module) |
 
 **No linked note:** the row offers *create a note and link it* or *skip*. Created as other skills
 create a note (`references/other-skills.md`): kind `note`, titled with the card's title, its

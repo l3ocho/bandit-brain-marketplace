@@ -44,6 +44,10 @@ After the spec, offer one line. **The destination follows the subject:**
 
 1. **Card first, through bandit:tasks `capture`.** Title = the spec's Summary; description names
    the note by its name. Scope comes from the `board:` line, exactly as bandit:tasks resolves it.
+   The card always gets a board, since its note lives where the card is: on the domain's workflow
+   project, where a card with no board named lands in Untriaged, capture is given the `board:`
+   line's board (the card waits in its Inbox); with no board on that line, the user picks one of
+   the domain's boards in the offer. A card left with no board would make its note private.
 2. **Then the note, through bandit:notes,** of kind `note`, as a draft that waits for review on
    the card's board (a note linked to a card lives where its card is), linked to the new card
    (bandit:notes links it; in the app's Notes that is `notes_link_card`). bandit:notes looks for a

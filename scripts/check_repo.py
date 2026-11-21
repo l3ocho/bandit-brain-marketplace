@@ -643,7 +643,7 @@ def check_t1():
 # ── L4 · no project details in skills: project names, stack tools, card ids, UUIDs ───────
 L4_TERMS = re.compile(
     r"\b(BanditLabs|Summitt|cs-notes|CS Notes|bandit-labs|banditbrain|BanditBrains|drizzle|npm|npx)\b"
-    r"|\b(?!WBS-|UTF-|SHA-)[A-Z]{2,4}-T?\d+\b"
+    r"|(?<!-)\b(?!WBS-|UTF-|SHA-)(?=[A-Z0-9]{0,3}[A-Z])[A-Z0-9]{2,4}-T?\d+\b"
     r"|\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b")
 # The house standards are data the owner approves, not skill procedure: their examples stay.
 L4_EXEMPT = {"structure-rulebook.md", "structure-rules.yaml", "rulebook.md"}
@@ -2205,7 +2205,7 @@ def check_todo_name():
            "execution.md maps To Do to the stored value `assigned`; \"Assigned to\" (the person) is left alone")
 
 
-# ── ID1 · every card id pattern reads a temporary id (AB-T7) too; board.md says ids change and old ones find the card (BB-482) ─
+# ── ID1 · every card id pattern reads a temporary id (AB-T7) and a prefix with a digit (WB5S-1, sprint 2026-w47) too; board.md says ids change and old ones find the card (BB-482) ─
 def check_card_ids():
     import importlib.util
     scripts = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts"
@@ -2220,23 +2220,29 @@ def check_card_ids():
     finally:
         sys.path.remove(str(scripts))
     cs, sg = mods["check_sprint"], mods["subtask_gate"]
-    if cs.CARD_ID.findall("AB-12, AB-T7") != ["AB-12", "AB-T7"]:
-        bad.append("check_sprint CARD_ID")
+    if cs.CARD_ID.findall("AB-12, AB-T7, WB5S-1, 5WB-T2") != ["AB-12", "AB-T7", "WB5S-1", "5WB-T2"]:
+        bad.append("check_sprint CARD_ID (a prefix may hold digits, WB5S-1)")
+    if cs.CARD_ID.findall("2026-11"):
+        bad.append("check_sprint CARD_ID reads a date as a card id")
     for name, rx, line in (("CARD_ROW", cs.CARD_ROW, "| Wave 1 | AB-T7, AB-12 |"), ("BATCH_CARD", cs.BATCH_CARD, "| AB-T7 |"),
-                           ("LANDS_PAIR", cs.LANDS_PAIR, "AB-T7 after AB-12")):
+                           ("LANDS_PAIR", cs.LANDS_PAIR, "AB-T7 after AB-12"),
+                           ("CARD_ROW", cs.CARD_ROW, "| Wave 1 | WB5S-1, 5WB-T2 |"), ("BATCH_CARD", cs.BATCH_CARD, "| WB5S-1 |"),
+                           ("LANDS_PAIR", cs.LANDS_PAIR, "WB5S-2 after WB5S-1")):
         if not rx.search(line):
             bad.append(f"check_sprint {name}")
-    if not (sg.SHORT.match("ab-t7") and sg.SHORT.match("AB-12")):
+    if not (sg.SHORT.match("ab-t7") and sg.SHORT.match("AB-12") and sg.SHORT.match("WB5S-1")):
         bad.append("subtask_gate SHORT")
-    if "[A-Z]+-T?\\d+" not in (scripts / "sprint_data.py").read_text(encoding="utf-8"):
+    if "[A-Z0-9]*[A-Z][A-Z0-9]*-T?\\d+" not in (scripts / "sprint_data.py").read_text(encoding="utf-8"):
         bad.append("sprint_data.py: the older ledger's card pattern")
     if not L4_TERMS.search("see AB-T7"):
         bad.append("L4 does not catch a temporary id in a skill")
+    if not L4_TERMS.search("see WB5S-1"):
+        bad.append("L4 does not catch an id whose prefix holds a digit")
     board = (PLUGINS / "bandit" / "skills" / "tasks" / "references" / "board.md").read_text(encoding="utf-8")
     bad += [f"board.md → Card IDs: missing {w!r}" for w in ("## 🆔 Card IDs", "`{prefix}-T{n}`", "Every id a card ever had still finds it")
             if w not in board]
     report("ID1", not bad, "; ".join(bad) or "the sprint checker, sub-task gate, sprint data and L4 read a temporary id "
-           "(AB-T7); board.md → Card IDs says an id follows its board and every former id still finds the card")
+           "(AB-T7) and a prefix with a digit (WB5S-1); board.md → Card IDs says an id follows its board and every former id still finds the card")
 
 
 # ── DF1 · a card description is HTML the app shows formatted, never raw tags (BB-464) ─

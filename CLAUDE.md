@@ -7,7 +7,7 @@ The Claude plugin marketplace of Bandit Brain.
 domain: BanditLabs
 project: bandit-brain-marketplace
 type: claude_marketplace
-board: project "BanditBrain"
+board: project "BB: Development"
 prefix: bbm
 dev: true
 notes: app

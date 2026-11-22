@@ -34,7 +34,7 @@ Read first. This wins over every other habit in this repo.
 
 ## 🗺️ What this repo is
 
-The single source of the skills, agents and hooks Claude uses with Bandit Brain: marketplace `bandit-brain`, three plugins. `bandit` (core skills, Claude.ai + Claude Code), `bandit-dev` (the sprint pipeline, Claude Code) and `bandit-maker` (building these skills, Bandit Port only). Marketplace cards live in the **Marketplace** column of the BanditBrain board. Decisions: `docs/decisions.md`. The pipeline: `docs/pipeline.md`.
+The single source of the skills, agents and hooks Claude uses with Bandit Brain: marketplace `bandit-brain`, three plugins. `bandit` (core skills, Claude.ai + Claude Code), `bandit-dev` (the sprint pipeline, Claude Code) and `bandit-maker` (building these skills, Bandit Port only). Marketplace cards live on the board **BB: Marketplace** (columns Bandit and Bandit Dev) since 2026-11-22; sprints and this project's notes are still on BB: Development until the skills and this Project Context are repointed (card BM-T5). Decisions: `docs/decisions.md`. The pipeline: `docs/pipeline.md`.
 
 ## 📁 Layout
 

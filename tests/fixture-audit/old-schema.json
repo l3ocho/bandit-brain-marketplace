@@ -1,0 +1,256 @@
+{
+ "board": {
+  "folders": [
+   {
+    "name": "Acme",
+    "parent": null
+   }
+  ],
+  "projects": [
+   {
+    "folder": "Acme",
+    "lanes": [],
+    "name": "Acme - wkflw",
+    "profile": "workflow",
+    "system_owner": null,
+    "visibility": "household"
+   },
+   {
+    "folder": "Acme",
+    "lanes": [
+     {
+      "matcher": {
+       "field": "tag",
+       "values": [
+        "lane/incident"
+       ]
+      },
+      "name": "Incident",
+      "position": 0
+     },
+     {
+      "matcher": {
+       "field": "tag",
+       "values": [
+        "lane/issue"
+       ]
+      },
+      "name": "Issue",
+      "position": 1
+     },
+     {
+      "matcher": {
+       "field": "tag",
+       "values": [
+        "lane/feature"
+       ]
+      },
+      "name": "Feature",
+      "position": 2
+     },
+     {
+      "matcher": {
+       "field": "tag",
+       "values": [
+        "lane/maintenance"
+       ]
+      },
+      "name": "Maintenance",
+      "position": 3
+     },
+     {
+      "matcher": {
+       "field": "tag",
+       "values": [
+        "lane/content"
+       ]
+      },
+      "name": "Content",
+      "position": 4
+     },
+     {
+      "matcher": {
+       "field": "tag",
+       "values": [
+        "lane/tech-debt"
+       ]
+      },
+      "name": "Tech-Debt",
+      "position": 5
+     }
+    ],
+    "name": "Home Reno",
+    "profile": "technical",
+    "system_owner": null,
+    "visibility": "household"
+   }
+  ],
+  "sprint_cards": [
+   {
+    "id": "00000000-0000-4000-8000-000000000012",
+    "short_id": "HR-12",
+    "sprints": [
+     "Staging 1"
+    ]
+   }
+  ]
+ },
+ "schema": 7,
+ "stamps": {
+  "Acme/acme": {
+   "board": "project \"Acme - wkflw\"",
+   "checked": "2026-11-10",
+   "claude_name": "A - Acme",
+   "folder": "MyNotes/Acme/Claude/ai-acme",
+   "prefix": "ac",
+   "type": "workflow",
+   "version": "1.0.0"
+  },
+  "Acme/home-reno": {
+   "board": "project \"Home Reno\"",
+   "checked": "2026-11-10",
+   "claude_name": "A - Home Reno",
+   "folder": "MyNotes/Acme/Claude/ai-home-reno",
+   "prefix": "hr",
+   "type": "product_service",
+   "version": "2.0.0"
+  }
+ },
+ "tags": [
+  "lane/incident",
+  "lane/issue",
+  "lane/feature",
+  "lane/maintenance",
+  "lane/content",
+  "lane/tech-debt",
+  "stage/spec",
+  "stage/planned",
+  "stage/ready",
+  "deep-work"
+ ],
+ "taken_at": "2026-11-20T15:00:00Z",
+ "vault": {
+  "domains": [
+   "Acme"
+  ],
+  "projects": {
+   "Acme": {
+    "home-reno": {
+     "board": "Home Reno",
+     "notes": [
+      {
+       "cards": [],
+       "id": "n-1",
+       "kind": "plan",
+       "status": "active",
+       "tags": null,
+       "title": "home-reno-sprint-staging-1-plan"
+      },
+      {
+       "cards": [
+        "HR-12"
+       ],
+       "id": "n-2",
+       "kind": "brief",
+       "status": "active",
+       "tags": [
+        "sprint-staging-1"
+       ],
+       "title": "home-reno-tiles-brief"
+      }
+     ],
+     "storage": "app"
+    }
+   }
+  },
+  "settings": {
+   "Acme": {
+    "ai-acme": {
+     "entries": [
+      {
+       "dir": false,
+       "modified": "2026-11-01",
+       "name": "ac-instructions-v2.md"
+      }
+     ],
+     "instructions": {
+      "ac-instructions-v2.md": {
+       "context": {
+        "board": "project \"Acme - wkflw\"",
+        "domain": "Acme",
+        "prefix": "ac",
+        "project": "acme",
+        "type": "workflow"
+       },
+       "text": "# Instructions\n\n**Version:** 1.0.0 · **Last Updated:** 2026-11-01\n\n## 🧭 Project Context\n\ndomain: Acme\nproject: acme\ntype: workflow\nboard: project \"Acme - wkflw\"\nprefix: ac\n\n## 🖥️ Environment\n\nClaude.ai.\n",
+       "version_line": "1.0.0 · **Last Updated:** 2026-11-01"
+      }
+     }
+    },
+    "ai-home-reno": {
+     "entries": [
+      {
+       "dir": false,
+       "modified": "2026-11-01",
+       "name": "hr-instructions-v2.md"
+      }
+     ],
+     "instructions": {
+      "hr-instructions-v2.md": {
+       "context": {
+        "board": "project \"Home Reno\"",
+        "dev": "true",
+        "domain": "Acme",
+        "notes": "app",
+        "prefix": "hr",
+        "project": "home-reno",
+        "type": "product_service"
+       },
+       "text": "# Instructions\n\n**Version:** 2.0.0 · **Last Updated:** 2026-11-01\n\n## 🧭 Project Context\n\ndomain: Acme\nproject: home-reno\ntype: product_service\nboard: project \"Home Reno\"\nprefix: hr\ndev: true\nnotes: app\n\n## 🖥️ Environment\n\nClaude.ai.\n",
+       "version_line": "2.0.0 · **Last Updated:** 2026-11-01"
+      }
+     }
+    }
+   }
+  },
+  "surfaces": {
+   "Acme": {
+    "code-home-reno": {
+     "entries": [
+      {
+       "dir": false,
+       "modified": "2026-11-01",
+       "name": "CLAUDE.md"
+      },
+      {
+       "dir": true,
+       "modified": "2026-11-01",
+       "name": "claude"
+      },
+      {
+       "dir": false,
+       "modified": "2026-11-01",
+       "name": "claude/settings.json"
+      },
+      {
+       "dir": true,
+       "modified": "2026-11-01",
+       "name": "claude/hooks"
+      },
+      {
+       "dir": false,
+       "modified": "2026-11-01",
+       "name": "claude/hooks/mirror-check.py"
+      }
+     ],
+     "files": {
+      "CLAUDE.md": "# Home Reno\n",
+      "claude/settings.json": "{\"hooks\": {\"Stop\": [{\"hooks\": [{\"type\": \"command\", \"command\": \"python3 .claude/hooks/mirror-check.py\"}]}]}}"
+     },
+     "repo": null,
+     "workdir": null
+    }
+   }
+  }
+ }
+}

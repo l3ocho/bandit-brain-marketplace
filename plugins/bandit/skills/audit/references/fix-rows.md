@@ -7,57 +7,54 @@
 The report assigns every fix row to an owner. This skill doesn't do the fix; it names the owner and
 the exact target.
 
-| Fix | Owner |
-|---|---|
-| Rename a board, switch its profile (its creator only), rename a board folder | `bandit:tasks` |
-| Missing dev lanes or `lane/*` / `stage/*` tags (S9) | `bandit:tasks` **dev board shape** procedure |
-| Dev lanes on a board without `dev: true` (S9) | One row, two options, recommended first: remove the lanes (`bandit:tasks`) or onboard the project as dev (`bandit:project`). The recommended one runs; the report names the other |
-| An invalid `dev:` or `notes:` value (S4) | `bandit:project` targeted update |
-| Move old settings versions into `_archive/Claude/ai-{slug}/` (S7) | `bandit:notes archive` |
-| Create a missing folder | `bandit:notes` |
-| Project Context keys, instructions version, re-paste into Claude.ai | `bandit:project` targeted update (paste: the user) |
-| Rename a Claude.ai project | The user, by hand |
-| Claude Code twin (any project without `dev: true`) missing, behind or its core differs (S10) | `bandit:project` (Claude Code twin) |
-| Dev mirror: hook or script missing (S11) | `bandit:project` (dev mirror) |
-| `code-{slug}/` folder missing (S11) | `bandit:notes` |
-| Working-folder guard missing or outdated (S12) | `bandit:project` (`references/workdir.md`) |
-| Working-folder layout rows (S12): move, rename, delete on the Claude Code machine | That project's Claude Code session: the rows are handed over, targets `{slug}:{path}` |
-| A sprint brief not with its sprint (S13), in the vault: outside its sprint folder | `bandit:notes`, the move its `lint` Sprint briefs row makes (`nc_webdav_move_resource`; owner key `brief_move`) |
-| A sprint brief not with its sprint (S13), on the app's Notes: without the tag `sprint-{name}` | `bandit:notes`, a field fix as its `lint` rows make on the app's Notes (`notes_set_fields`, the brief's other tags kept; owner key `brief_tag`) |
+| Fix | Owner | In reach of |
+|---|---|---|
+| Rename a board, switch its profile (its creator only), rename a board folder | `bandit:tasks` | Any chat |
+| Missing dev lanes or `lane/*` / `stage/*` tags (S9) | `bandit:tasks` **dev board shape** procedure | Any chat |
+| Dev lanes on a board without `dev: true` (S9) | One row, two options, recommended first: remove the lanes (`bandit:tasks`) or onboard the project as dev (`bandit:project`, in the project). The recommended one runs; the report names the other | Any chat (the first option) |
+| A sprint brief without the tag `sprint-{name}` (S13) | `bandit:notes`, a field fix as its `lint` rows make (`notes_set_fields`, the brief's other tags kept; owner key `brief_tag`) | Any chat |
+| Project Context keys or values (S4), a `board:` line (S3, S4) | `bandit:project`, by `/bandit:project audit` in that project | That project's chat only |
+| Working-folder guard missing or outdated (S12) | `bandit:project` (`references/workdir.md` there), by `/bandit:project audit` in that project | That project's chat only |
+| Working-folder layout rows (S12): move, rename, delete in its folder | That project's Claude Code session: the rows are handed over, targets `{slug}:{path}` | That project's chat only |
+| Rename a Claude.ai project (S1, S2) | The user, by hand | The user |
 
-S14, S15 and S16 are retired (rulebook → Retired): they make no rows.
+Retired rules (rulebook → Retired) make no rows.
 
 **The local checker stays separate.** bandit-dev:sprint's `scripts/check_sprint.py` checks a
 sprint's papers at write time, as a `Stop` hook, from the project's notes file: by title, tag and
-status, not by folder or filename (its SP2 is that file's form of S13).
-This skill's script needs a snapshot and can't run from a hook, so it never absorbs that checker; it
-scores S13 at audit time.
+status (its SP2 is that file's form of S13). This skill's script needs a snapshot and can't run
+from a hook, so it never absorbs that checker; it scores S13 at audit time.
 
 ---
 
 ## ▶️ Running the rows
 
-Every row runs in the same turn, no approval asked; this skill runs them **through their owners**,
-and the owner doesn't ask again. It loads the owner skill and
-follows that skill's own procedure for the row. It never renames, moves, switches profiles or writes
-instructions with its own calls. Its own writes are the report, the snapshot and the ledger, nothing else.
+Every row in reach runs in the same turn, no approval asked; this skill runs them **through their
+owners**, and the owner doesn't ask again. It loads the owner skill and follows that skill's own
+procedure for the row. It never renames, moves, switches profiles or writes instructions with its
+own calls. Its own writes are the report, the snapshot and the stamp, nothing else.
+
+**In reach.** `check` runs inside the project, so every row of that project is in reach. `audit`
+runs from one folder for a whole domain: board and notes rows are in reach; a row that changes
+another project's instructions or folder is not, and becomes a close-out line.
 
 **Linked rows.** A board or board-folder rename breaks every Project Context whose `board:` line
 names the old name: readers stop when the name no longer resolves. So when building fix rows,
-search every project's `board:` line for the old name. Each match gets a second row right after
-the rename: `bandit:project` targeted update of that project, `board:` → the new name.
+search every stamp's `board:` line for the old name. Each match gets a second row right after
+the rename: that project's `board:` → the new name.
 
-- A pair runs together, or not at all.
-- **Order:** notes rows (`bandit:notes`, the vault's or the app's) → settings rows
-  (`bandit:project`) → board rows (`bandit:tasks`). The new instructions version exists before the old board name stops
-  resolving.
+- A pair runs together, or not at all: a rename whose second row is out of reach is **not run**
+  from `audit`. It is handed over with its pair: the project's chat fixes its `board:` line and
+  renames the board in the same run.
+- **Order:** notes rows (`bandit:notes`) → settings rows (`bandit:project`) → board rows
+  (`bandit:tasks`). The new instructions exist before the old board name stops resolving.
 - A row whose owner refuses or fails → skip the rows that depend on it, and report both.
-- **S12 layout rows** live on the Claude Code machine, out of reach here. Hand them over as one
-  block for that project's Claude Code session, after the other rows. The block says it runs as
-  written, deletes included, with no question; it re-lists each folder first and skips any path
-  that changed. It ends by searching `Projects/{slug}/` for every path it moved and making the
-  note edits.
+- **S12 layout rows** run in the project's Claude Code session, as one block after the other rows.
+  The block says it runs as written, deletes included, with no question; it re-lists each folder
+  first and skips any path that changed. It ends by searching the project's notes (through
+  bandit:notes) for every path it moved and making the note edits.
 
-**Close the run** with one result line per row, then what the user still owes, per project:
-*paste `{prefix}-instructions-v{N}` into {Claude.ai name}, then run `/bandit:audit check` there.
-Until the paste, bandit:tasks stops in that project.*
+**Close the run** with one result line per row, then what is still owed, per project:
+*in {project}: run `/bandit:project audit` for {the change}, then `/bandit:audit check`. Until
+then {what stays broken}.* On Claude.ai the same line ends with the paste: *paste the new
+instructions, then run `/bandit:audit check` there.*

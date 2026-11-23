@@ -13,12 +13,13 @@ The project's working folder is the folder Claude Code runs from (`$CLAUDE_PROJE
 | Path | Holds |
 |---|---|
 | `CLAUDE.md`, `.claude/` | Instructions and settings, written by this skill's approved rows |
+| `REFERENCE.md` | The reference doc, only for a project whose Project Context says `notes: none` (`references/output.md`) |
 | `repos/` | Read-only clones |
 | `work/{prefix}-{task}/` | One folder per board task: drafts, SQL, scripts, analyses |
 | `data/{prefix}-{task}/` | That task's data files. Purged on close, never archived |
 | `scratch/` | Throwaway. Deleted after 7 days, as an approved row |
 | `_closed/{prefix}-{task}/` | Closed work, moved there by `/bandit:tasks done`. Deleted after 30 days, as an approved row |
-| `_backup/` | Settings rollback copies only, flat: `CLAUDE.md.{version}`, `settings.json.{version}`, `workdir.py.{version}`. No clock; deleted only by an approved row. A changelog's undo path points here |
+| `_backup/` | Settings rollback copies only, flat: `CLAUDE.md.{version}`, `REFERENCE.md.{version}`, `settings.json.{version}`, `workdir.py.{version}`. No clock; deleted only by an approved row. A changelog's undo path points here |
 | `{folder}/` with its own `CLAUDE.md` | A hosted project: its own settings apply, the guard leaves it alone |
 
 - `{prefix}` is the Project Context `prefix:`. `{task}` is the board task's title in kebab-case

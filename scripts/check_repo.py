@@ -691,32 +691,14 @@ def check_audit_contract():
                                     base / "references" / "structure-rulebook.md")
     except Exception as e:  # ContractError or a YAML error: either way the scorer would refuse
         return report("A1", False, f"audit rules refused by check_structure.py: {e}")
-    ok = bool(rules.get("paths", {}).get("stamps"))
-    report("A1", ok, f"audit rules load (sha {sha}, rulebook {rules['rulebook_updated']}), paths.stamps set"
-           if ok else "audit rules: paths.stamps missing")
+    ok = bool(rules.get("stamps", {}).get("note_title")) and bool(rules.get("paths", {}).get("snapshots"))
+    report("A1", ok, f"audit rules load (sha {sha}, rulebook {rules['rulebook_updated']}), the stamps note and the snapshot folder named"
+           if ok else "audit rules: stamps.note_title or paths.snapshots missing")
 
 
-# ── A2 · the audit scorer on its fixture snapshots (BB-595): each kept rule caught, the old shape as before ─
+# ── A2 · the audit scorer on its fixture snapshots: each kept rule caught, an old snapshot refused ─
 AUDIT_FIXTURES = ROOT / "tests" / "fixture-audit"
-AUDIT_RETIRED = ("S14", "S15", "S16")
-
-
-def audit_kept_rows(text):
-    """A report's rule rows and fix rows, the retired rules' rows left out, fix numbers and pairings dropped.
-    Two reports with the same kept rows score every rule that stays the same way."""
-    out, where = [], ""
-    for line in text.splitlines():
-        if line.startswith(("## ", "### ")):
-            where = line
-            continue
-        m = re.match(r"^\| (S\d+) \|", line)
-        if m and m.group(1) not in AUDIT_RETIRED:
-            out.append(f"{where} {line}")
-            continue
-        m = re.match(r"^\| \d+ \| (.*) \| (S\d+)(?: · with \d+)? \|$", line)
-        if m and m.group(2) not in AUDIT_RETIRED:
-            out.append(f"fix | {m.group(1)} | {m.group(2)}")
-    return out
+AUDIT_RETIRED = ("S5", "S7", "S8", "S10", "S11", "S14", "S15", "S16")
 
 
 def check_audit_fixtures():
@@ -754,15 +736,16 @@ def check_audit_fixtures():
                 bad.append(f"{c.name} not scored: {msg}")
             elif not statuses(text, rule) & {"❌", "⚠️"}:
                 bad.append(f"{c.name}: {rule} not caught")
-    text, msg = score("mismatch.json")
-    if text is None or "unchecked" not in statuses(text, "S13"):
-        bad.append("mismatch.json: S13 not unchecked when the Project Context and the snapshot disagree")
-    text, msg = score("old-shape.json")
-    want = (AUDIT_FIXTURES / "old-shape.kept.txt").read_text(encoding="utf-8").splitlines()
-    if text is None or audit_kept_rows(text) != want:
-        bad.append("old-shape.json: the rules that stay no longer score as the old script did (old-shape.kept.txt)")
+    if retired := sorted(set(rules["levels"]) & set(AUDIT_RETIRED)):
+        bad.append(f"structure-rules.yaml still lists retired rule(s) {', '.join(retired)}")
+    text, msg = score("old-schema.json")
+    if text is not None or "CONTRACT BROKEN" not in msg or "take a new one" not in msg:
+        bad.append("old-schema.json: a snapshot built from the storage that is gone is not refused by name")
+    for needle in ("MyNotes", "vault", "webdav"):
+        if needle in script.read_text(encoding="utf-8"):
+            bad.append(f"check_structure.py still names `{needle}`")
     report("A2", not bad, "; ".join(bad) or f"audit fixtures: good clean, each of {len(rules['levels'])} kept rules "
-           "caught, the mismatch unchecked, the old shape as before")
+           "caught, an old snapshot refused by name, no retired rule listed")
 
 
 # ── SP7 · the sprint checker refuses a committed sprint without its plan review (fixtures) ─

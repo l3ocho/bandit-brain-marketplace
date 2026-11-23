@@ -1,18 +1,24 @@
 #!/usr/bin/env python3
-"""Score the user's domains against the structure rules (S1–S13; S14–S16 retired 2026-11-20).
+"""Score the user's domains against the structure rules.
+
+Kept: S1 to S4, S6, S9, S12, S13. Retired, numbers not reused: S5, S7, S8, S10, S11 (2.0.0: they
+compared files of a settings folder and a second copy that no longer exist) and S14 to S16.
 
 Usage:
   check_structure.py --rules structure-rules.yaml --rulebook structure-rulebook.md \
-      --snapshot snapshot.json [--domain D ...] [--project D/slug] [--out DIR]
+      --snapshot snapshot.json [--domain D ...] [--out DIR]
   check_structure.py --replay report.md --rules ... --rulebook ... --snapshot ...
-  check_structure.py --project Personal/ai-fran --rules ... --rulebook ... --snapshot ...
+  check_structure.py --project Acme/home-reno --rules ... --rulebook ... --snapshot ...
       (one project only, for /bandit:audit check: its rows, no domain block, nothing written)
 
 Same inputs → same bytes. Exit 0 = scored, 2 = an input broke its contract
 (nothing scored), 3 = replay mismatch (the report is not what these inputs produce).
 The model never scores by hand: it builds the snapshot, runs this, and shows the output.
-Snapshots of schema 1 to 7 load. Schema 7 carries a project on the app's Notes (`notes: app`) as its
-notes list; every older schema scores the rules that stay exactly as before.
+
+A project is a self-check stamp: `{domain}/{project}`, written by `/bandit:audit check` inside the
+project, holding its Project Context, its surface and, for a working folder, its guard and
+manifest. A domain is a top-level board folder. Only snapshots of schema 8 load: an older one was
+built from a storage that is gone, and its report cannot be replayed.
 """
 import argparse, datetime, hashlib, json, re, sys
 from pathlib import Path
@@ -22,10 +28,11 @@ try:
 except ImportError:  # pragma: no cover
     sys.exit("PyYAML missing: pip install pyyaml")
 
-SCRIPT_VERSION = "6"
-S5_ORDER = ["no_stamp", "stamp_matches_newest", "stamp_matches_older",
-            "stamp_newer_than_all", "stamp_before_newest_file_date", "otherwise"]
-RETIRED = ("S14", "S15", "S16")   # one filename, frontmatter parses, sprint project root: retired 2026-11-20
+SCRIPT_VERSION = "7"
+SNAPSHOT_SCHEMA = 8
+RETIRED = ("S5", "S7", "S8", "S10", "S11", "S14", "S15", "S16")
+KEPT = ["S1", "S2", "S3", "S4", "S6", "S9", "S12", "S13"]
+SURFACES = ("claude-ai", "claude-code")
 MARK = {"ok": "✅", "warn": "⚠️", "fail": "❌", "na": "—", "unchecked": "unchecked"}
 
 
@@ -41,48 +48,41 @@ def sha12(data: bytes) -> str:
 def load_rules(path, rulebook_path):
     raw = Path(path).read_bytes()
     rules = yaml.safe_load(raw)
-    for key in ("schema", "rulebook_updated", "levels", "names", "workflow",
-                "project_context", "settings_files", "owners", "row_order", "s9",
-                "surfaces", "s10", "s11", "s12", "sprint_briefs"):
+    for key in ("schema", "rulebook_updated", "levels", "names", "workflow", "project_context",
+                "stamps", "owners", "row_order", "s9", "s12", "sprint_briefs"):
         if key not in rules:
             raise ContractError(f"rules: missing key `{key}`")
     # Parts of the rules that are logic, not settings: the script implements them in code,
     # so a change in the YAML without a script update is refused rather than ignored.
-    if [c.get("when") for c in rules.get("s5", [])] != S5_ORDER:
-        raise ContractError("rules.s5 order differs from what this script implements: update the script too")
+    if sorted(rules["levels"], key=lambda r: int(r[1:])) != KEPT:
+        retired = sorted(set(rules["levels"]) & set(RETIRED))
+        if retired:
+            raise ContractError(f"rules.levels: {', '.join(retired)} retired: this script no longer scores them")
+        raise ContractError(f"rules.levels must be exactly {', '.join(KEPT)}: update the script too")
     pc = rules["project_context"]
     if pc.get("optional_keys", []) != ["dev", "notes"] or pc.get("dev_values") != ["true"] \
-            or pc.get("notes_values") != ["app"]:
+            or pc.get("notes_values") != ["none", "app"]:
         raise ContractError("rules.project_context optional_keys/dev_values/notes_values changed: update the script too")
     for k in ("lane_tags", "stage_tags", "first_lane_tag", "dev_profile"):
         if k not in rules["s9"]:
             raise ContractError(f"rules.s9: missing `{k}`")
     if not rules["s9"]["lane_tags"] or rules["s9"]["first_lane_tag"] != rules["s9"]["lane_tags"][0]:
         raise ContractError("rules.s9.first_lane_tag must be the first of lane_tags")
-    for blk, keys in (("surfaces", ("twin_files", "mirror_files", "mirror_dir", "forbidden")),
-                      ("s10", ("file", "environment_heading")),
-                      ("s11", ("required_files", "settings_file", "hook_event", "hook_script")),
+    for blk, keys in (("stamps", ("note_title", "max_age_days")),
                       ("s12", ("hook_file", "hook_sha12", "settings_file", "hook_events", "hook_script",
                                "manifest", "manifest_max_age_days", "root_allowed", "task_dirs",
                                "task_folder_pattern", "data_extensions", "retention_days",
                                "backup_dir", "backup_name_pattern")),
-                      ("sprint_briefs", ("sprint_folder_pattern", "sprint_tag_prefix", "brief_kind"))):
+                      ("sprint_briefs", ("sprint_tag_prefix", "brief_kind"))):
         for k in keys:
             if k not in rules[blk]:
                 raise ContractError(f"rules.{blk}: missing `{k}`")
     if "board_profile" not in rules["workflow"]:
         raise ContractError("rules.workflow: missing `board_profile`")
-    for k in ("board_profile", "twin_update", "dev_mirror", "surface_folder", "workdir_guard", "workdir_fix",
-              "brief_move", "brief_tag"):
+    for k in ("board_profile", "board_rename", "board_folder_rename", "dev_board_shape", "context_update",
+              "claude_rename", "self_check", "decide", "workdir_guard", "workdir_fix", "brief_tag"):
         if k not in rules["owners"]:
             raise ContractError(f"rules.owners: missing `{k}`")
-    if "S13" not in rules["levels"]:
-        raise ContractError("rules.levels: missing `S13`")
-    retired = sorted(set(rules["levels"]) & set(RETIRED))
-    if retired:
-        raise ContractError(f"rules.levels: {', '.join(retired)} retired (2026-11-20): this script no longer scores them")
-    if rules.get("s7", {}).get("prompt_reference_keep") != "highest":
-        raise ContractError("rules.s7.prompt_reference_keep changed: update the script too")
     m = re.search(r"^updated:\s*(\S+)", Path(rulebook_path).read_text(), re.M)
     if not m:
         raise ContractError("rulebook: no `updated:` in frontmatter")
@@ -92,118 +92,81 @@ def load_rules(path, rulebook_path):
     return rules, sha12(raw)
 
 
-def optional_note(ctx):
-    """The S4 note's optional keys. Unchanged for a project without `notes`, so old reports read the same."""
-    return " (+ optional `dev`, `notes`)" if "notes" in ctx else " (+ optional `dev`)"
-
-
 def kebab(name):
-    """A sprint name as its folder word: lower case, runs of anything but letters and digits as one hyphen."""
+    """A sprint name as its tag word: lower case, runs of anything but letters and digits as one hyphen."""
     return re.sub(r"[^a-z0-9]+", "-", str(name).lower()).strip("-")
+
+
+def manifest_ok(wd):
+    return (isinstance(wd, dict) and wd.get("schema") == 1 and isinstance(wd.get("generated_at"), str)
+            and all(isinstance(wd.get(k), list) for k in ("root", "hosted", "loose", "scratch", "misplaced_data", "backup"))
+            and isinstance(wd.get("task_folders"), dict)
+            and all(isinstance(v, list) for v in wd["task_folders"].values())
+            and isinstance(wd.get("truncated"), bool))
 
 
 def load_snapshot(path):
     raw = Path(path).read_bytes()
     s = json.loads(raw)
+    if s.get("schema") != SNAPSHOT_SCHEMA:
+        raise ContractError(f"snapshot: schema {s.get('schema')} is not {SNAPSHOT_SCHEMA}. A snapshot of an earlier "
+                            "schema read a storage that is gone: take a new one (`references/snapshot.md`); "
+                            "its report cannot be replayed and is archived as it is")
     errs = []
     need = lambda cond, msg: None if cond else errs.append(msg)
-    need(s.get("schema") in (1, 2, 3, 4, 5, 6, 7), "snapshot.schema must be 1 to 7")
     need(isinstance(s.get("taken_at"), str), "snapshot.taken_at missing")
-    b, v = s.get("board", {}), s.get("vault", {})
+    b = s.get("board", {})
     need(isinstance(b.get("folders"), list), "board.folders must be a list")
     need(isinstance(b.get("projects"), list), "board.projects must be a list")
+    need(isinstance(s.get("tags"), list) and all(isinstance(x, str) for x in s.get("tags", [])),
+         "tags must be a list of tag names")
     for i, p in enumerate(b.get("projects", [])):
-        # Schema 6: the board's profile (workflow | technical) replaced the app's old type.
-        for k in ("name", "profile" if s.get("schema", 0) >= 6 else "type", "folder", "visibility", "system_owner"):
+        for k in ("name", "profile", "folder", "visibility", "system_owner"):
             need(k in p, f"board.projects[{i}] missing `{k}`")
-    if s.get("schema", 0) >= 2:
-        need(isinstance(s.get("tags"), list) and all(isinstance(x, str) for x in s.get("tags", [])),
-             "tags must be a list of tag names (schema 2)")
-        for i, p in enumerate(b.get("projects", [])):
-            need(isinstance(p.get("lanes"), list), f"board.projects[{i}].lanes must be a list (schema 2)")
-            for j, ln in enumerate(p.get("lanes") or []):
-                for k in ("name", "position", "matcher"):
-                    need(k in ln, f"board.projects[{i}].lanes[{j}] missing `{k}`")
-                m = ln.get("matcher") or {}
-                need("field" in m and isinstance(m.get("values"), list),
-                     f"board.projects[{i}].lanes[{j}].matcher needs `field` and `values`")
+        need(isinstance(p.get("lanes"), list), f"board.projects[{i}].lanes must be a list")
+        for j, ln in enumerate(p.get("lanes") or []):
+            for k in ("name", "position", "matcher"):
+                need(k in ln, f"board.projects[{i}].lanes[{j}] missing `{k}`")
+            m = ln.get("matcher") or {}
+            need("field" in m and isinstance(m.get("values"), list),
+                 f"board.projects[{i}].lanes[{j}].matcher needs `field` and `values`")
     for i, f in enumerate(b.get("folders", [])):
         for k in ("name", "parent"):
             need(k in f, f"board.folders[{i}] missing `{k}`")
-    need(isinstance(v.get("domains"), list), "vault.domains must be a list")
-    need(isinstance(v.get("settings"), dict), "vault.settings must be an object")
-    for dom, folders in v.get("settings", {}).items():
-        for fname, fd in folders.items():
-            need(isinstance(fd.get("entries"), list), f"vault.settings.{dom}.{fname}.entries missing")
-            need(isinstance(fd.get("instructions"), dict), f"vault.settings.{dom}.{fname}.instructions missing")
-            listed = {e["name"] for e in fd.get("entries", [])}
-            for file in fd.get("instructions", {}):
-                need(file in listed, f"vault.settings.{dom}.{fname}: {file} read but not in the listing")
-    if s.get("schema", 0) >= 3:
-        for dom, folders in v.get("settings", {}).items():
-            for fname, fd in folders.items():
-                for file, meta in (fd.get("instructions") or {}).items():
-                    need(isinstance(meta.get("text"), str),
-                         f"vault.settings.{dom}.{fname}.instructions[{file}].text missing (schema 3)")
-        need(isinstance(v.get("surfaces"), dict), "vault.surfaces must be an object (schema 3)")
-        for dom, folders in (v.get("surfaces") or {}).items():
-            for fname, fd in folders.items():
-                need(fname.startswith(("code-", "design-")), f"vault.surfaces.{dom}.{fname}: not a code-/design- folder")
-                need(isinstance(fd.get("entries"), list), f"vault.surfaces.{dom}.{fname}.entries missing")
-                need(isinstance(fd.get("files"), dict) and all(isinstance(t, str) for t in (fd.get("files") or {}).values()),
-                     f"vault.surfaces.{dom}.{fname}.files must map names to text")
-                listed = {e["name"] for e in fd.get("entries", [])}
-                for file in fd.get("files") or {}:
-                    need(file in listed, f"vault.surfaces.{dom}.{fname}: {file} read but not in the listing")
-                repo = fd.get("repo")
-                need(repo is None or (isinstance(repo, dict) and isinstance(repo.get("pushed_at"), str)
-                                      and isinstance(repo.get("name"), str)),
-                     f"vault.surfaces.{dom}.{fname}.repo must be null or {{name, pushed_at}}")
-                if s.get("schema") >= 4:
-                    need("workdir" in fd, f"vault.surfaces.{dom}.{fname}.workdir missing (schema 4: null when no manifest)")
-                    wd = fd.get("workdir")
-                    if wd is not None:
-                        ok = (isinstance(wd, dict) and wd.get("schema") == 1 and isinstance(wd.get("generated_at"), str)
-                              and all(isinstance(wd.get(k), list) for k in ("root", "hosted", "loose", "scratch", "misplaced_data", "backup"))
-                              and isinstance(wd.get("task_folders"), dict)
-                              and all(isinstance(v, list) for v in wd["task_folders"].values())
-                              and isinstance(wd.get("truncated"), bool))
-                        need(ok, f"vault.surfaces.{dom}.{fname}.workdir isn't a schema-1 manifest")
-    if s.get("schema", 0) >= 5:
-        sc = b.get("sprint_cards")
-        need(isinstance(sc, list) and all(isinstance(c, dict) and isinstance(c.get("id"), str)
-                                          and (c.get("short_id") is None or isinstance(c.get("short_id"), str))
-                                          and isinstance(c.get("sprints"), list) for c in (sc or [])),
-             "board.sprint_cards must be a list of {id, short_id, sprints} (schema 5)")
-        need(isinstance(v.get("projects"), dict), "vault.projects must be an object (schema 5)")
-        # Schema 7 no longer reads the inbox (S14 retired); schemas 5 and 6 still carry it.
-        need(isinstance(v.get("inbox"), dict) or (s.get("schema") >= 7 and v.get("inbox") is None),
-             "vault.inbox must be an object (schema 5 and 6)")
-        for dom, names in (v.get("inbox") or {}).items():
-            need(isinstance(names, list) and all(isinstance(n, str) for n in names),
-                 f"vault.inbox.{dom} must be a list of filenames")
-        for dom, projs in (v.get("projects") or {}).items():
-            for slug_, pd in projs.items():
-                ev_ = f"vault.projects.{dom}.{slug_}"
-                if s.get("schema") >= 7:
-                    need(pd.get("storage") in ("vault", "app"), f"{ev_}.storage must be `vault` or `app` (schema 7)")
-                    if pd.get("storage") == "app":
-                        errs.extend(app_entry_errors(ev_, pd))
-                        continue
-                need(isinstance(pd.get("entries"), list), f"{ev_}.entries missing")
-                need(isinstance(pd.get("frontmatter"), dict), f"{ev_}.frontmatter missing (an empty object when none was read)")
-                listed = {e.get("name"): e.get("dir") for e in pd.get("entries") or []}
-                for f, raw_ in (pd.get("frontmatter") or {}).items():
-                    need(listed.get(f) is False, f"{ev_}: frontmatter of `{f}` read but `{f}` not listed as a file")
-                    need(raw_ is None or isinstance(raw_, str), f"{ev_}.frontmatter[{f}] must be text or null")
-                sprinty = any(e.get("dir") and "/" not in e.get("name", "") and e["name"].startswith("sprint-")
-                              for e in pd.get("entries") or [])
-                if sprinty:
-                    for f, is_dir in listed.items():
-                        if not is_dir and f.endswith(".md"):
-                            need(f in (pd.get("frontmatter") or {}),
-                                 f"{ev_}: sprint project, but the frontmatter of `{f}` wasn't read (schema 5 reads every note)")
-    need(isinstance(s.get("stamps"), dict), "stamps must be an object (empty if the ledger is missing)")
+    sc = b.get("sprint_cards")
+    need(isinstance(sc, list) and all(isinstance(c, dict) and isinstance(c.get("id"), str)
+                                      and (c.get("short_id") is None or isinstance(c.get("short_id"), str))
+                                      and isinstance(c.get("sprints"), list) for c in (sc or [])),
+         "board.sprint_cards must be a list of {id, short_id, sprints}")
+    need(isinstance(s.get("stamps"), dict), "stamps must be an object (empty when no project has checked in)")
+    for key, st in (s.get("stamps") or {}).items():
+        ev = f"stamps.{key}"
+        if not isinstance(st, dict):
+            errs.append(f"{ev} must be an object")
+            continue
+        need(re.fullmatch(r"[^/]+/[^/]+", key) is not None, f"{ev}: the key is `{{domain}}/{{project}}`")
+        need(st.get("surface") in SURFACES, f"{ev}.surface must be one of {', '.join(SURFACES)}")
+        need(st.get("name") is None or isinstance(st.get("name"), str), f"{ev}.name must be text or null")
+        need(isinstance(st.get("version"), str) and st.get("version"), f"{ev}.version must be text")
+        need(isinstance(st.get("checked"), str) and re.fullmatch(r"\d{4}-\d{2}-\d{2}", st.get("checked") or "") is not None,
+             f"{ev}.checked must be a date")
+        ctx = st.get("context")
+        need(ctx is None or (isinstance(ctx, dict) and all(isinstance(v, str) for v in ctx.values())),
+             f"{ev}.context must map keys to text, or be null when the instructions have no block")
+        guard = st.get("guard")
+        need("guard" in st, f"{ev}.guard missing (null when the project has no working folder)")
+        if guard is not None:
+            need(isinstance(guard, dict)
+                 and (guard.get("script_sha12") is None or isinstance(guard.get("script_sha12"), str))
+                 and isinstance(guard.get("settings_parses"), bool)
+                 and isinstance(guard.get("hooks"), list) and all(isinstance(h, str) for h in guard["hooks"]),
+                 f"{ev}.guard must be {{script_sha12, settings_parses, hooks}}")
+        need("workdir" in st, f"{ev}.workdir missing (null when there is no manifest)")
+        need(st.get("workdir") is None or manifest_ok(st.get("workdir")), f"{ev}.workdir isn't a schema-1 manifest")
+    need(isinstance(s.get("notes"), dict), "notes must be an object (one entry per domain)")
+    for dom, projs in (s.get("notes") or {}).items():
+        for slug_, pd in (projs or {}).items():
+            errs.extend(notes_entry_errors(f"notes.{dom}.{slug_}", pd))
     folder_names = {f.get("name") for f in b.get("folders", [])}
     for i, p in enumerate(b.get("projects", [])):
         need(p.get("folder") in folder_names or p.get("folder") is None,
@@ -213,12 +176,12 @@ def load_snapshot(path):
     return s, sha12(raw)
 
 
-def app_entry_errors(ev_, pd):
-    """Schema 7: a project on the app's Notes, as its board's notes (`notes_list`, briefs read with `notes_get`)."""
+def notes_entry_errors(ev_, pd):
+    """A project's notes, as its board's list (`notes_list`, card-linked briefs read with `notes_get`)."""
     errs = []
-    notes = pd.get("notes")
+    notes = pd.get("notes") if isinstance(pd, dict) else None
     if not isinstance(notes, list):
-        return [f"{ev_}.notes must be a list (schema 7, storage app)"]
+        return [f"{ev_}.notes must be a list"]
     for i, n in enumerate(notes):
         if not isinstance(n, dict):
             errs.append(f"{ev_}.notes[{i}] must be an object")
@@ -241,15 +204,6 @@ def slug(name):
     return re.sub(r"-+", "-", re.sub(r"[^a-z0-9]+", "-", name.lower())).strip("-")
 
 
-def vtoken(line):
-    return line.split()[0] if line and line.split() else None
-
-
-def vkey(tok):
-    parts = re.findall(r"\d+", tok or "")
-    return tuple(int(p) for p in parts) if parts else (-1,)
-
-
 def parse_board(value):
     """`project "X"` → ("project", "X"); `none` → ("none", None)."""
     if value is None:
@@ -258,30 +212,6 @@ def parse_board(value):
     if m:
         return (m.group(1), m.group(2))
     return (value.strip(), None)
-
-
-def vnum(filename):
-    m = re.search(r"-v(\d+)\.md$", filename)
-    return int(m.group(1)) if m else None
-
-
-def version_of(text):
-    m = re.search(r"^\*\*Version:\*\*\s*(.*)$", text, re.M)
-    return vtoken(m.group(1)) if m else None
-
-
-def core_sha(text, heading):
-    """sha12 of the text with the `heading` section (up to the next `## ` heading) removed."""
-    out, skip = [], False
-    for line in text.split("\n"):
-        if line.rstrip() == heading:
-            skip = True
-            continue
-        if skip and line.startswith("## "):
-            skip = False
-        if not skip:
-            out.append(line)
-    return sha12("\n".join(out).encode("utf-8"))
 
 
 class Row:
@@ -309,10 +239,9 @@ class Domain:
         self.rows = []
         self.unchecked = []
         self.claimed = set()
-        self.surfaces = snap["vault"].get("surfaces", {}).get(name, {}) if snap["schema"] >= 3 else {}
-        self.vprojects = snap["vault"].get("projects", {}).get(name, {}) if snap["schema"] >= 5 else {}
+        self.notes = snap["notes"].get(name, {})
         self.sprint_of = {}
-        for c in (snap["board"].get("sprint_cards") or []) if snap["schema"] >= 5 else []:
+        for c in snap["board"].get("sprint_cards") or []:
             for key in (c["id"], (c.get("short_id") or "").upper()):
                 if key:
                     self.sprint_of[key] = sorted(c["sprints"])
@@ -323,127 +252,55 @@ class Domain:
         return {"rule": rule, "status": status, "note": note, "evidence": evidence}
 
     def score(self):
-        s = self.snap
-        settings = s["vault"]["settings"].get(self.name, {})
-        stamps = s["stamps"]
-        for folder in sorted(settings):
-            self.projects.append(self.score_project(folder, settings[folder], stamps))
-        # stamped projects with no vault folder
-        known = {f"MyNotes/{self.name}/Claude/{f}" for f in settings}
+        stamps = self.snap["stamps"]
         for key in sorted(stamps):
-            st = stamps[key]
-            if key.split("/")[0] == self.name and st.get("folder") not in known:
-                self.unchecked.append(f"{key}: stamped ({st.get('claude_name')}) but `{st.get('folder')}` "
-                                      f"is not in the vault → S6 finding")
-                self.domain_results.append(self.res("S6", "bad",
-                    f"Stamp `{key}` points to `{st.get('folder')}`, which doesn't exist",
-                    f"stamps.{key}.folder"))
-                self.rows.append(Row(f"Decide: create the settings folder for `{key}` or drop its stamp",
-                                     st.get("folder"), self.rules["owners"]["decide"], "S6"))
-        slugs = {f[3:] for f in settings if f.startswith("ai-")}
-        for ps in sorted(self.vprojects):
-            pd = self.vprojects[ps]
-            if ps not in slugs and pd.get("storage", "vault") == "vault" and self.is_sprint_project(pd):
-                self.unchecked.append(f"Projects/{ps}/: sprint folders but no `ai-{ps}/` project → S13 not scored")
-        for sf in sorted(self.surfaces):
-            if sf.split("-", 1)[1] not in slugs:
-                self.unchecked.append(f"{sf}: no `ai-{sf.split('-', 1)[1]}/` project → surface not scored")
+            if key.split("/", 1)[0] == self.name:
+                prod = self.score_project(key, stamps[key])
+                self.projects.append(prod)
+                self.rows += prod["rows"]
+                self.unchecked += prod["unchecked"]
+                if prod["mine"]:
+                    self.claimed.add(prod["mine"])
         self.score_domain()
         return self
 
     # ---------- per project ----------
-    def score_project(self, folder, fd, stamps):
-        prod = self._project(folder, fd, stamps, use_newest=False)
-        if prod["newest_pending"]:
-            alt = self._project(folder, fd, stamps, use_newest=True)
-            alt_status = {r["rule"]: r["status"] for r in alt["results"]}
-            fixed = set()
-            for r in prod["results"]:
-                if r["rule"] in ("S1", "S2", "S3", "S4", "S6", "S8", "S9") and r["status"] in ("fail", "warn") \
-                        and alt_status.get(r["rule"]) in ("ok", "na"):
-                    r["status"] = "warn"
-                    r["note"] += f" — fixed in `{prod['newest_pending']}`, paste pending"
-                    fixed.add(r["rule"])
-            prod["rows"] = [row for row in prod["rows"] if row.rule not in fixed]
-            prod["wf_after_paste"] = alt["is_wf"]
-        self.rows += prod["rows"]
-        self.unchecked += prod["unchecked"]
-        if prod["mine"]:
-            self.claimed.add(prod["mine"])
-        return prod
-
-    def _project(self, folder, fd, stamps, use_newest):
+    def score_project(self, key, stamp):
         R, rows, unchecked = [], [], []
-        ev = f"vault.settings.{self.name}.{folder}"
-        files = {}
-        for name, meta in fd["instructions"].items():
-            files[name] = {"n": vnum(name), "tok": vtoken(meta["version_line"]), "ctx": meta["context"]}
-        dates = {e["name"]: e["modified"] for e in fd["entries"]}
-        path = f"MyNotes/{self.name}/Claude/{folder}"
-        stamp_key, stamp = None, None
-        for k in sorted(stamps):
-            if stamps[k].get("folder") == path:
-                stamp_key, stamp = k, stamps[k]
-        if stamp is None:
-            projs = {f["ctx"]["project"] for f in files.values() if f["ctx"]}
-            for p in sorted(projs):
-                k = f"{self.name}/{p}"
-                if k in stamps:
-                    stamp_key, stamp = k, stamps[k]
-        by_n = sorted(files.items(), key=lambda kv: (kv[1]["n"] if kv[1]["n"] is not None else -1))
-        newest = by_n[-1] if by_n else None
-        prod = None
-        if stamp:
-            matches = [kv for kv in by_n if kv[1]["tok"] == str(stamp["version"])]
-            prod = matches[-1] if matches else None
-        chosen = newest if use_newest else (prod or newest)
-        pending = newest[0] if (stamp and prod and newest and prod[0] != newest[0]) else None
-        ctx = chosen[1]["ctx"] if chosen else None
-        title = (stamp or {}).get("claude_name") or folder
-
-        # ── S5 ──
-        s5 = None
-        if not stamp:
-            s5 = self.res("S5", "unchecked", "No stamp", "stamps")
-            unchecked.append(f"{folder}: no stamp → run `/bandit:audit check` inside it")
-        elif prod and prod[0] == newest[0]:
-            s5 = self.res("S5", "ok", f"Runs {stamp['version']} = `{prod[0]}`", f"stamps.{stamp_key}")
-        elif prod:
-            s5 = self.res("S5", "warn", f"Vault `{newest[0]}` ({newest[1]['tok']}) not pasted yet; "
-                          f"Claude.ai runs {stamp['version']}", f"stamps.{stamp_key}")
-            rows.append(Row(f"Paste `{newest[0]}` into {title}, then run `/bandit:audit check` there",
-                                 f"{path}/{newest[0]}", self.rules["owners"]["self_check"], "S5"))
-        elif newest and vkey(str(stamp["version"])) > max(vkey(f["tok"]) for f in files.values()):
-            s5 = self.res("S5", "bad", f"Critical: Claude.ai runs {stamp['version']}, newer than every vault file",
-                          f"stamps.{stamp_key}")
-            rows.append(Row("Recover the vault copy of the running instructions", path,
-                                 self.rules["owners"]["decide"], "S5"))
-        elif newest and stamp.get("checked", "") < max(dates.get(n, "") for n in files):
-            s5 = self.res("S5", "unchecked", f"Stamp {stamp['version']} ({stamp.get('checked')}) is older than "
-                          f"the newest file and matches none", f"stamps.{stamp_key}")
-            unchecked.append(f"{folder}: stamp {stamp['version']} matches no file → run `/bandit:audit check` inside it")
-        else:
-            s5 = self.res("S5", "warn", f"Drift: stamp {stamp['version']}, vault newest {newest[1]['tok'] if newest else '—'}",
-                          f"stamps.{stamp_key}")
-        s5_known = s5["status"] in ("ok", "warn") and prod is not None
+        ev = f"stamps.{key}"
+        pslug = key.split("/", 1)[1]
+        ctx = stamp.get("context")
+        cname = stamp.get("name")
+        on_ai = stamp["surface"] == "claude-ai"
+        title = cname or pslug
+        target = f"{key} ({'Claude.ai' if on_ai else 'Claude Code'})"
+        own = self.rules["owners"]
+        taken = datetime.date.fromisoformat(self.snap["taken_at"][:10])
+        age = (taken - datetime.date.fromisoformat(stamp["checked"])).days
+        if age > self.rules["stamps"]["max_age_days"]:
+            unchecked.append(f"{key}: checked in on {stamp['checked']}, {age} days ago → run `/bandit:audit check` inside it")
 
         # ── S4 ──
         pc = self.rules["project_context"]
         board_kind, board_name = parse_board(ctx.get("board")) if ctx else (None, None)
         s4_board_problems = []
         if ctx is None:
-            R.append(self.res("S4", "bad", f"No Project Context in `{chosen[0] if chosen else '—'}`", ev))
-            rows.append(Row("Add the Project Context block", path, self.rules["owners"]["context_update"], "S4"))
+            R.append(self.res("S4", "bad", "No Project Context in its instructions", ev + ".context"))
+            rows.append(Row("Add the Project Context block", target, own["context_update"], "S4"))
         else:
             problems = [f"missing `{k}`" for k in pc["required_keys"] if not ctx.get(k)]
             if ctx.get("domain") and ctx["domain"] != self.name:
                 problems.append(f"domain `{ctx['domain']}` ≠ `{self.name}`")
+            if ctx.get("project") and ctx["project"] != pslug:
+                problems.append(f"project `{ctx['project']}` ≠ the stamp's `{pslug}`")
             if ctx.get("type") and ctx["type"] not in pc["types"]:
                 problems.append(f"type `{ctx['type']}` unknown")
             if "dev" in ctx and ctx["dev"] not in pc["dev_values"]:
                 problems.append(f"dev `{ctx['dev']}` must be `true` or absent")
             if "notes" in ctx and ctx["notes"] not in pc["notes_values"]:
-                problems.append(f"notes `{ctx['notes']}` must be `app` or absent")
+                problems.append(f"notes `{ctx['notes']}` must be `none`, `app` or absent")
+            if ctx.get("prefix") and not re.fullmatch(pc["prefix_pattern"], ctx["prefix"]):
+                problems.append(f"prefix `{ctx['prefix']}` isn't 2–3 letters or `none`")
             if board_kind not in pc["board_forms"]:
                 problems.append(f"board form `{board_kind}` not allowed ({', '.join(pc['board_forms'])})")
             elif board_kind == "project" and board_name not in self.all_board_names:
@@ -452,94 +309,74 @@ class Domain:
                     and board_name not in {b["name"] for b in self.boards}:
                 problems.append(f"board `{board_name}` is outside the `{self.name}` folder")
             R.append(self.res("S4", "bad" if problems else "ok",
-                              "; ".join(problems) or f"5 required keys{optional_note(ctx)}, board `{ctx['board']}` resolves",
-                              f"{ev}.instructions[{chosen[0]}].context"))
+                              "; ".join(problems) or f"5 required keys (+ optional `dev`, `notes`), board `{ctx['board']}` resolves",
+                              ev + ".context"))
             s4_board_problems = [p for p in problems if p.startswith("board")]
             for p in problems:
                 if not p.startswith("board"):
-                    rows.append(Row(f"Project Context: {p}", path, self.rules["owners"]["context_update"], "S4"))
-        if not s5_known and stamp is None:
-            R[-1]["note"] += " (read from the highest v{N}: no stamp)"
+                    rows.append(Row(f"Project Context: {p}", target, own["context_update"], "S4"))
 
         # which board is this project's?
+        suf = self.rules["names"]["workflow_suffix"]
         is_wf = bool(ctx and ctx.get("type") == self.rules["workflow"]["project_type"])
+        is_dev = bool(ctx and ctx.get("dev") == "true")
         mine = None
         if board_kind == "project" and board_name in {b["name"] for b in self.boards}:
             mine = board_name
         else:
-            fslug = folder[3:] if folder.startswith("ai-") else folder
             for b in self.boards:
-                bn = b["name"][:-len(self.rules["names"]["workflow_suffix"])] if b["name"].endswith(self.rules["names"]["workflow_suffix"]) else b["name"]
-                if slug(bn) == fslug:
+                bn = b["name"][:-len(suf)] if b["name"].endswith(suf) else b["name"]
+                if slug(bn) == pslug:
                     mine = b["name"]
-
         wf_rule = is_wf and self.rules["workflow"]["context_board_is_wkflw"]
         if ctx is not None and s4_board_problems and not wf_rule:
             if mine:
-                rows.append(Row(f'`board:` → `project "{mine}"` ({s4_board_problems[0]})', path,
-                                self.rules["owners"]["context_update"], "S4"))
+                rows.append(Row(f'`board:` → `project "{mine}"` ({s4_board_problems[0]})', target,
+                                own["context_update"], "S4"))
             else:
-                rows.append(Row(f"Decide `{folder}`'s board: an existing board or `none` ({s4_board_problems[0]})",
-                                path, self.rules["owners"]["decide"], "S4"))
+                rows.append(Row(f"Decide `{pslug}`'s board: an existing board or `none` ({s4_board_problems[0]})",
+                                target, own["decide"], "S4"))
 
-        # ── S1 (project part) ──
-        cname = (stamp or {}).get("claude_name")
-        if cname is None:
-            R.append(self.res("S1", "unchecked", "Claude.ai name unknown (no stamp)", "stamps"))
+        # ── S1 (project part) and S2: a Claude.ai project's name ──
+        if not on_ai:
+            R.append(self.res("S1", "na", "Runs in Claude Code: no Claude.ai name", ev + ".surface"))
+            R.append(self.res("S2", "na", "Runs in Claude Code: no second name to match", ev + ".surface"))
+        elif cname is None:
+            R.append(self.res("S1", "unchecked", "Claude.ai name not in the stamp", ev + ".name"))
+            R.append(self.res("S2", "unchecked", "Claude.ai name not in the stamp", ev + ".name"))
+            unchecked.append(f"{key}: the session did not show the project's name → run `/bandit:audit check` and give it")
         else:
             R.append(self.res("S1", "ok" if cname.startswith(self.L) else "bad",
                               f"Claude.ai `{cname}`" + ("" if cname.startswith(self.L) else f" doesn't start with {self.L}"),
-                              f"stamps.{stamp_key}.claude_name"))
+                              ev + ".name"))
             if not cname.startswith(self.L):
                 rows.append(Row(f"Rename Claude.ai project `{cname}` to start with `{self.L}`", cname,
-                                     self.rules["owners"]["claude_rename"], "S1"))
-
-        # ── S2 ──
-        suf = self.rules["names"]["workflow_suffix"]
-        if cname is None:
-            R.append(self.res("S2", "unchecked", "Claude.ai name unknown (no stamp)", "stamps"))
-        else:
+                                own["claude_rename"], "S1"))
             pre = self.rules["names"]["claude_prefix"].replace("{L}", self.L)
             name = cname[len(pre):] if cname.startswith(pre) else cname
-            fslug = folder[3:] if folder.startswith("ai-") else folder
-            bname = mine[:-len(suf)] if (mine and mine.endswith(suf)) else mine
-            votes = {"claude": slug(name), "vault": fslug, "board": slug(bname) if bname else None}
             want_board = name + (suf if is_wf else "")
             issues = []
-            if mine is None:
+            if board_kind == "none":
+                pass
+            elif mine is None:
                 issues.append("no board found")
             elif mine != want_board:
                 issues.append(f"board `{mine}` ≠ `{want_board}`")
-            if fslug != slug(name):
-                issues.append(f"vault `{folder}` ≠ `ai-{slug(name)}`")
             R.append(self.res("S2", "bad" if issues else "ok",
-                              "; ".join(issues) or f"`{name}` everywhere", f"stamps.{stamp_key}.claude_name + board + {ev}"))
-            if issues:
-                vals = [x for x in votes.values() if x]
-                majority = max(set(vals), key=vals.count) if vals else None
-                if majority and vals.count(majority) >= 2:
-                    if votes["claude"] != majority:
-                        rows.append(Row(f"Rename Claude.ai `{cname}` to match `{majority}` (board and vault agree)",
-                                             cname, self.rules["owners"]["claude_rename"], "S2"))
-                    if votes["vault"] != majority:
-                        rows.append(Row(f"Rename settings folder `{folder}` → `ai-{majority}`", path,
-                                             self.rules["owners"]["vault_folder_rename"], "S2"))
-                    if mine and votes["board"] != majority:
-                        rows.extend(self.rename_board(mine, want_board, "S2"))
-                else:
-                    rows.append(Row(f"Pick the one name: Claude.ai `{name}`, board `{mine}`, vault `{folder}`",
-                                         path, self.rules["owners"]["decide"], "S2"))
+                              "; ".join(issues) or f"`{name}` on Claude.ai and on the board", ev + ".name + board"))
+            if issues and mine:
+                rows.append(Row(f"Pick the one name: Claude.ai `{name}` or board `{mine}`; the other is renamed",
+                                target, own["decide"], "S2"))
 
         # ── S3 (project part: workflow board line) ──
-        if is_wf and self.rules["workflow"]["context_board_is_wkflw"]:
+        if wf_rule:
             wf_boards = [b["name"] for b in self.boards if b["name"].endswith(suf)]
             ok = board_kind == "project" and board_name in wf_boards
             R.append(self.res("S3", "ok" if ok else "bad",
                               f"`board:` is `{ctx.get('board')}`" + ("" if ok else f", should name {wf_boards or 'the - wkflw board'}"),
-                              f"{ev}.instructions[{chosen[0]}].context.board"))
+                              ev + ".context.board"))
             if not ok and wf_boards:
-                rows.append(Row(f"`board:` → `project \"{wf_boards[0]}\"`", path,
-                                     self.rules["owners"]["context_update"], "S3"))
+                rows.append(Row(f"`board:` → `project \"{wf_boards[0]}\"`", target, own["context_update"], "S3"))
         else:
             R.append(self.res("S3", "na", "Not the workflow project", ev))
 
@@ -549,49 +386,9 @@ class Domain:
         else:
             R.append(self.res("S6", "ok" if mine else "bad", f"Board `{mine}`" if mine else "No board and no `board: none`", ev))
 
-        # ── S8 ──
-        prefix = (ctx or {}).get("prefix") or ""
-        sf = self.rules["settings_files"]
-        pat_i = re.compile(sf["instructions"].replace("{prefix}", re.escape(prefix)))
-        pat_r = re.compile(sf["prompt_reference"].replace("{prefix}", re.escape(prefix)))
-        bad = []
-        if not re.fullmatch(pc["prefix_pattern"], prefix):
-            bad.append(f"prefix `{prefix}` isn't 2–3 letters")
-        for e in sorted(fd["entries"], key=lambda e: e["name"]):
-            if e["dir"]:
-                bad.append(f"subfolder `{e['name']}/`")
-                continue
-            base = e["name"].rsplit("/", 1)[-1]
-            if not (pat_i.match(base) or pat_r.match(base)):
-                bad.append(f"`{e['name']}`")
-                rows.append(Row(f"Move `{e['name']}` out of the settings folder (not a settings file)",
-                                     f"{path}/{e['name']}", self.rules["owners"]["vault_move"], "S8"))
-        if any(e["dir"] for e in fd["entries"]):
-            rows.append(Row(f"Flatten `{folder}`: settings files belong directly in it", path,
-                                 self.rules["owners"]["vault_move"], "S8"))
-        R.append(self.res("S8", "bad" if bad else "ok", "; ".join(bad) or "Filenames and depth OK", f"{ev}.entries"))
-
-        # ── S7 ──
-        if not s5_known:
-            R.append(self.res("S7", "unchecked", "S5 not known: nothing moves", ev))
-        else:
-            pn = prod[1]["n"]
-            olds = sorted(n for n, f in files.items() if f["n"] is not None and f["n"] < pn)
-            refs = sorted([e["name"] for e in fd["entries"] if re.search(r"-prompt-reference-v\d+\.md$", e["name"])],
-                          key=lambda x: vnum(x) or -1)
-            olds += refs[:-1]
-            R.append(self.res("S7", "bad" if olds else "ok",
-                              f"{len(olds)} old version file(s)" if olds else "Only production (+ not pasted)", ev))
-            for o in olds:
-                rows.append(Row(f"Archive `{o}` → `_archive/Claude/{folder}/`", f"{path}/{o}",
-                                     self.rules["owners"]["settings_archive"], "S7"))
-
         # ── S9 ──
-        is_dev = bool(ctx and ctx.get("dev") == "true")
         if board_kind == "none" or mine is None:
             R.append(self.res("S9", "na", "No board of its own", ev))
-        elif self.snap["schema"] < 2:
-            R.append(self.res("S9", "unchecked", "Snapshot schema 1 has no lanes", "snapshot.schema"))
         else:
             probs = self.s9_problems(self.all_board_names[mine], is_dev)
             what = "dev board shape" if is_dev else "no dev lanes"
@@ -599,197 +396,61 @@ class Domain:
                               f"board.projects[{mine}].lanes + tags"))
             if probs and is_dev:
                 rows.append(Row(f"Dev board shape on `{mine}`: {'; '.join(probs)}", f"Bandit Brain project \"{mine}\"",
-                                self.rules["owners"]["dev_board_shape"], "S9"))
+                                own["dev_board_shape"], "S9"))
             elif probs:
                 fix = "remove them" if is_wf else "remove them, or set `dev: true`"
                 rows.append(Row(f"`{mine}` has dev lanes without `dev: true`: {fix}",
-                                f"Bandit Brain project \"{mine}\"", self.rules["owners"]["decide"], "S9"))
+                                f"Bandit Brain project \"{mine}\"", own["decide"], "S9"))
 
-        # ── surfaces: S8 (code-{slug}/ per kind), S10, S11 ──
-        fslug = folder[3:] if folder.startswith("ai-") else folder
-        code_name = f"code-{fslug}"
-        code = self.surfaces.get(code_name)
-        cpath = f"MyNotes/{self.name}/Claude/{code_name}"
-        sfr, s10r, s11r = self.rules["surfaces"], self.rules["s10"], self.rules["s11"]
-        own = self.rules["owners"]
-        schema3 = self.snap["schema"] >= 3
-        if code is not None:
-            s8 = next(r for r in R if r["rule"] == "S8")
-            allowed = set()
-            if not is_dev:  # Claude Code twin: any project without `dev: true`
-                allowed |= set(sfr["twin_files"])
-                allowed |= {f.rsplit("/", 1)[0] for f in sfr["twin_files"] if "/" in f}
-            if is_dev:
-                allowed |= set(sfr["mirror_files"])
-            mdir = sfr["mirror_dir"]
-            hard, soft = [], []
-            for e in sorted(code["entries"], key=lambda e: e["name"]):
-                n = e["name"]
-                top, base = n.split("/", 1)[0], n.rsplit("/", 1)[-1]
-                if top in sfr["forbidden"] or base in sfr["forbidden"]:
-                    if top == ".claude" and n != ".claude":
-                        continue  # reported once, on the folder itself
-                    hard.append(f"`{code_name}/{n}`")
-                    if base == "settings.local.json":
-                        rows.append(Row(f"Remove `{n}` from the vault (a local secrets file, never mirrored)",
-                                        f"{cpath}/{n}", own["decide"], "S8"))
-                    else:
-                        rows.append(Row(f"Rename `{n}/` → `{mdir}/` (Obsidian hides dot-folders)",
-                                        f"{cpath}/{n}", own["vault_folder_rename"], "S8"))
-                elif n in allowed or (is_dev and (n == mdir or n.startswith(mdir + "/"))):
-                    continue
-                else:
-                    soft.append(f"`{code_name}/{n}`")
-                    if not e["dir"]:
-                        rows.append(Row(f"Move `{n}` out of `{code_name}/` (not a settings file)",
-                                        f"{cpath}/{n}", own["vault_move"], "S8"))
-            if hard or soft:
-                extra = "; ".join(hard + soft)
-                s8["note"] = extra if s8["status"] == "ok" else s8["note"] + "; " + extra
-                if hard:
-                    s8["status"] = "fail"
-                elif s8["status"] == "ok":
-                    s8["status"] = "warn"
+        R.append(self.s12(key, pslug, stamp, ctx, is_dev, target, rows, unchecked))
+        R.append(self.sprint_briefs(key, pslug, ctx, rows))
 
-        # S10 · Claude Code twin (any project without `dev: true`)
-        if is_dev:
-            R.append(self.res("S10", "na", "Dev project: its Claude Code surface is the dev mirror (S11)", ev))
-        elif not schema3:
-            R.append(self.res("S10", "unchecked", f"Snapshot schema {self.snap['schema']} has no surfaces", "snapshot.schema"))
-        elif code is None:
-            R.append(self.res("S10", "na", f"No `{code_name}/`: no Claude Code surface", ev))
-        elif s10r["file"] not in code["files"]:
-            R.append(self.res("S10", "bad", f"`{code_name}/{s10r['file']}` missing", f"vault.surfaces.{self.name}.{code_name}"))
-            rows.append(Row(f"Write the Claude Code twin `{s10r['file']}` at production version", cpath,
-                            own["twin_update"], "S10"))
-        elif not s5_known:
-            R.append(self.res("S10", "unchecked", "S5 not known: no production version to compare", ev))
-        else:
-            h = s10r["environment_heading"]
-            ttext = code["files"][s10r["file"]]
-            tv = version_of(ttext)
-            pv = prod[1]["tok"]
-            ptext = fd["instructions"][prod[0]]["text"]
-            tcore, pcore = core_sha(ttext, h), core_sha(ptext, h)
-            sev = f"vault.surfaces.{self.name}.{code_name}.files[{s10r['file']}]"
-            if tv == pv and tcore == pcore:
-                R.append(self.res("S10", "ok", f"Twin at {tv}, core `{tcore}` matches `{prod[0]}`", sev))
-            elif tv == pv:
-                R.append(self.res("S10", "bad", f"Same version {tv}, core differs: twin `{tcore}` ≠ `{prod[0]}` `{pcore}`", sev))
-                rows.append(Row(f"Reconcile the twin cores at {tv}: the user says which copy is right, then the other is rewritten",
-                                cpath + "/" + s10r["file"], own["twin_update"], "S10"))
-            elif pending and tv == newest[1]["tok"]:
-                R.append(self.res("S10", "warn", f"Twin at {tv} = `{newest[0]}`: paste pending (S5)", sev))
-            elif tv is not None and vkey(tv) < vkey(pv):
-                R.append(self.res("S10", "warn", f"Twin at {tv}, production {pv}: not applied yet", sev))
-                rows.append(Row(f"Update the Claude Code twin to {pv} (`{prod[0]}`)", cpath + "/" + s10r["file"],
-                                own["twin_update"], "S10"))
-            else:
-                R.append(self.res("S10", "warn", f"Twin at {tv or 'no **Version:**'}, production {pv}: "
-                                  "twin matches no vault version", sev))
-                rows.append(Row(f"Twin version {tv or 'missing'} vs production {pv}: the user says which is right",
-                                cpath + "/" + s10r["file"], own["twin_update"], "S10"))
+        R.sort(key=lambda r: KEPT.index(r["rule"]))
+        for r in rows:
+            if not hasattr(r, "proj"):
+                r.proj = key
+        return {"key": key, "title": title, "results": R, "rows": rows, "unchecked": unchecked,
+                "mine": mine, "is_wf": is_wf, "board_line": (ctx or {}).get("board"), "target": target}
 
-        # S11 · dev mirror
-        if not is_dev:
-            R.append(self.res("S11", "na", "Not a `dev: true` project", ev))
-        elif not schema3:
-            R.append(self.res("S11", "unchecked", f"Snapshot schema {self.snap['schema']} has no surfaces", "snapshot.schema"))
-        elif code is None:
-            R.append(self.res("S11", "bad", f"No `{code_name}/`: no dev mirror", ev))
-            rows.append(Row(f"Create `{code_name}/`", cpath, own["surface_folder"], "S11"))
-            rows.append(Row("Install the dev mirror in the repo (Stop hook + mirror-check.py)", cpath,
-                            own["dev_mirror"], "S11"))
-        else:
-            sev = f"vault.surfaces.{self.name}.{code_name}"
-            names = {e["name"] for e in code["entries"]}
-            probs = [f"`{f}` missing" for f in s11r["required_files"] if f not in names]
-            sj = code["files"].get(s11r["settings_file"])
-            if s11r["settings_file"] in names and sj is None:
-                probs.append(f"`{s11r['settings_file']}` not read")
-            elif sj is not None:
-                try:
-                    cfg = json.loads(sj)
-                    cmds = [h.get("command", "") for g in (cfg.get("hooks", {}) or {}).get(s11r["hook_event"], []) or []
-                            for h in (g.get("hooks") or []) if h.get("type") == "command"]
-                    if not any(s11r["hook_script"] in c for c in cmds):
-                        probs.append(f"no `{s11r['hook_event']}` hook running `{s11r['hook_script']}`")
-                except (ValueError, AttributeError, TypeError):
-                    probs.append(f"`{s11r['settings_file']}` doesn't parse")
-            # Freshness isn't scored (2026-09-30): GitHub's pushed_at lags the real remote, and the
-            # hook itself reports a failed copy in the Claude Code session. `repo` is still accepted
-            # so older snapshots load, and ignored.
-            if probs:
-                R.append(self.res("S11", "bad", "; ".join(probs), sev))
-                rows.append(Row(f"Install or repair the dev mirror in the repo: {'; '.join(probs)}", cpath,
-                                own["dev_mirror"], "S11"))
-            else:
-                R.append(self.res("S11", "ok", "Hook, script and mirrored files in place", sev))
-
-        # S12 · Claude Code working folder (twin projects)
-        R.append(self.s12(folder, fslug, ctx, is_dev, code, code_name, cpath, rows, unchecked))
-
-        # S13 · a sprint card's brief is with its sprint (vault folder or app tag)
-        R.append(self.sprint_briefs(folder, fslug, ctx, rows, unchecked))
-
-        R.insert(0, s5)
-        order = ["S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8", "S9", "S10", "S11", "S12", "S13"]
-        R.sort(key=lambda r: order.index(r["rule"]))
-        return {"folder": folder, "title": title, "results": R, "rows": rows, "unchecked": unchecked,
-                "mine": mine, "is_wf": is_wf, "newest_pending": None if use_newest else pending,
-                "wf_after_paste": is_wf, "board_line": (ctx or {}).get("board"), "path": path,
-                "surface_path": cpath}
-
-    def s12(self, folder, fslug, ctx, is_dev, code, code_name, cpath, rows, unchecked):
+    # ---------- S12 · the working folder of a project in Claude Code without dev: true ----------
+    def s12(self, key, fslug, stamp, ctx, is_dev, target, rows, unchecked):
         r12, own = self.rules["s12"], self.rules["owners"]
-        ev = f"vault.surfaces.{self.name}.{code_name}"
+        ev = f"stamps.{key}"
+        if stamp["surface"] != "claude-code":
+            return self.res("S12", "na", "Runs on Claude.ai: no working folder", ev + ".surface")
         if is_dev:
-            return self.res("S12", "na", "Dev project: the repo keeps its own layout", ev)
-        if code is None:
-            return self.res("S12", "na", f"No `{code_name}/`: no Claude Code working folder", ev)
-        if self.snap["schema"] < 4:
-            return self.res("S12", "unchecked", f"Snapshot schema {self.snap['schema']} has no working-folder manifest",
-                            "snapshot.schema")
+            return self.res("S12", "na", "Dev project: the repository keeps its own layout", ev)
         probs = []
-        # the guard: file, hash, hooks
-        names = {e["name"] for e in code["entries"]}
         guard = []
-        src = code["files"].get(r12["hook_file"])
-        if r12["hook_file"] not in names:
+        g = stamp.get("guard")
+        if g is None or g.get("script_sha12") is None:
             guard.append(f"`{r12['hook_file']}` missing")
-        elif src is None:
-            guard.append(f"`{r12['hook_file']}` not read")
-        elif sha12(src.encode("utf-8")) != str(r12["hook_sha12"]):
-            guard.append(f"`{r12['hook_file']}` outdated ({sha12(src.encode('utf-8'))} ≠ {r12['hook_sha12']})")
-        sj = code["files"].get(r12["settings_file"])
-        if sj is None:
+        elif g["script_sha12"] != str(r12["hook_sha12"]):
+            guard.append(f"`{r12['hook_file']}` outdated ({g['script_sha12']} ≠ {r12['hook_sha12']})")
+        if g is None:
             guard.append(f"`{r12['settings_file']}` missing")
+        elif not g["settings_parses"]:
+            guard.append(f"`{r12['settings_file']}` doesn't parse")
         else:
-            try:
-                cfg = json.loads(sj)
-                for evn in r12["hook_events"]:
-                    cmds = [h.get("command", "") for g in (cfg.get("hooks", {}) or {}).get(evn, []) or []
-                            for h in (g.get("hooks") or []) if h.get("type") == "command"]
-                    if not any(r12["hook_script"] in c for c in cmds):
-                        guard.append(f"no `{evn}` hook running `{r12['hook_script']}`")
-            except (ValueError, AttributeError, TypeError):
-                guard.append(f"`{r12['settings_file']}` doesn't parse")
+            for evn in r12["hook_events"]:
+                if evn not in g["hooks"]:
+                    guard.append(f"no `{evn}` hook running `{r12['hook_script']}`")
         if guard:
             probs += guard
-            rows.append(Row(f"Install or update the working-folder guard: {'; '.join(guard)}", cpath,
-                            own["workdir_guard"], "S12"))
-        # the manifest
-        man = code.get("workdir")
-        mpath = r12["manifest"].replace("{domain}", self.name).replace("{slug}", fslug)
+            r = Row(f"Install or update the working-folder guard: {'; '.join(guard)}", target,
+                    own["workdir_guard"], "S12")
+            r.proj = key
+            rows.append(r)
+        man = stamp.get("workdir")
         taken = datetime.date.fromisoformat(self.snap["taken_at"][:10])
         age = lambda d: (taken - datetime.date.fromisoformat(d[:10])).days
         if man is None or age(man["generated_at"]) > r12["manifest_max_age_days"]:
             why = "no manifest" if man is None else f"manifest from {man['generated_at']}, older than {r12['manifest_max_age_days']} days"
-            unchecked.append(f"{code_name}: {why} at `{mpath}` → start a Claude Code session in it; "
-                             "its SessionStart hook asks for the upload")
+            unchecked.append(f"{key}: {why} (`{r12['manifest']}`) → start a Claude Code session in its folder, "
+                             "then run `/bandit:audit check` there")
             if probs:
-                return self.res("S12", "bad", "; ".join(probs) + f"; layout unchecked ({why})", ev)
-            return self.res("S12", "unchecked", f"Guard in place; layout unchecked ({why})", ev)
+                return self.res("S12", "bad", "; ".join(probs) + f"; layout unchecked ({why})", ev + ".guard")
+            return self.res("S12", "unchecked", f"Guard in place; layout unchecked ({why})", ev + ".workdir")
         prefix = (ctx or {}).get("prefix") or ""
         pat = re.compile(r12["task_folder_pattern"].replace("{prefix}", re.escape(prefix)))
         fix = lambda action, path: rows.append(Row(action, f"{fslug}:{path}", own["workdir_fix"], "S12"))
@@ -839,28 +500,14 @@ class Domain:
                 probs.append(f"`_closed/{f['name']}/` closed {f['modified']}, older than {ret['_closed']} days")
                 fix(f"Delete `_closed/{f['name']}/` (closed {f['modified']})", f"_closed/{f['name']}")
         for r in rows[n0:]:
-            r.proj = folder
+            r.proj = key
         note = "; ".join(probs) or f"Guard current, layout clean (manifest {man['generated_at']})"
         if man["truncated"]:
             note += " · manifest truncated: fix these, then re-run"
         return self.res("S12", "bad" if probs else "ok", note, ev + ".workdir")
 
-    # ---------- S13 · sprint briefs (vault: schema 5; app: schema 7) ----------
-    def is_sprint_project(self, pd):
-        pat = re.compile(self.rules["sprint_briefs"]["sprint_folder_pattern"])
-        return any(e["dir"] and "/" not in e["name"] and pat.match(e["name"]) for e in pd["entries"])
 
-    @staticmethod
-    def parse_fm(raw):
-        """The frontmatter as a mapping, or None when it is missing or doesn't parse (S15 retired: not scored)."""
-        if raw is None:
-            return None
-        try:
-            data = yaml.safe_load(raw)
-        except yaml.YAMLError:
-            return None
-        return data if isinstance(data, dict) else None
-
+    # ---------- S13 · a sprint card's brief carries its sprint's tag ----------
     def want_tags(self, card):
         """The sprint-{name} words of the sprints holding a card (a real sprint's name, or its old tag), or []."""
         prefix = self.rules["sprint_briefs"]["sprint_tag_prefix"]
@@ -868,53 +515,14 @@ class Domain:
         # A real sprint's name is free text; its folder and its tag are the name in kebab-case (bandit:notes).
         return [f"sprint-{kebab(s[len(prefix):] if s.startswith(prefix) else s)}" for s in sprints]
 
-    def sprint_briefs(self, folder, fslug, ctx, rows, unchecked):
+    def sprint_briefs(self, key, fslug, ctx, rows):
         rules, own = self.rules["sprint_briefs"], self.rules["owners"]
-        ev = f"vault.projects.{self.name}.{fslug}"
-        if self.snap["schema"] < 5:
-            return self.res("S13", "unchecked", f"Snapshot schema {self.snap['schema']} has no project files", "snapshot.schema")
-        pd = self.vprojects.get(fslug)
-        on_app = bool(ctx and ctx.get("notes") in self.rules["project_context"]["notes_values"])
-        if self.snap["schema"] >= 7:
-            held = None if pd is None else pd["storage"]
-            if on_app != (held == "app"):
-                unchecked.append(f"{folder}: the Project Context and the snapshot disagree on where its notes are "
-                                 "→ rebuild the snapshot (`references/snapshot.md`)")
-            if on_app and held != "app":
-                return self.res("S13", "unchecked", "Project Context says `notes: app`, the snapshot "
-                                + ("has no notes for it" if pd is None else "holds vault files") + ": rebuild the snapshot", ev)
-            if not on_app and held == "app":
-                return self.res("S13", "unchecked", "The snapshot holds app notes, the Project Context has no "
-                                "`notes: app`: rebuild the snapshot", ev)
-            if held == "app":
-                return self.sprint_briefs_app(folder, pd, ev, rows)
+        ev = f"notes.{self.name}.{fslug}"
+        if ctx and ctx.get("notes") == "none":
+            return self.res("S13", "na", "`notes: none`: the helpers keep no notes for it", ev)
+        pd = self.notes.get(fslug)
         if pd is None:
-            return self.res("S13", "na", f"No `Projects/{fslug}/`", ev)
-        if not self.is_sprint_project(pd):
-            return self.res("S13", "na", "No sprint folders", ev)
-        base = f"MyNotes/{self.name}/Projects/{fslug}"
-        misplaced = []
-        for f in sorted(pd["frontmatter"]):
-            fm = self.parse_fm(pd["frontmatter"][f])
-            if fm is None or fm.get("type") != rules["brief_kind"]:
-                continue
-            bt = str(fm.get("board-task") or "")
-            want = self.want_tags(bt) if bt else []
-            if not want:
-                continue
-            top = f.split("/", 1)[0] if "/" in f else ""
-            if top not in want:
-                misplaced.append(f"`{f}` (card {bt} → `{want[0]}/`)")
-                r = Row(f"Move the brief `{f}` into `{want[0]}/` (its card's sprint)", f"{base}/{f}",
-                        own["brief_move"], "S13")
-                r.proj = folder
-                rows.append(r)
-        return self.res("S13", "bad" if misplaced else "ok",
-                        "; ".join(misplaced) or "Every sprint card's brief is in its sprint folder", ev)
-
-    def sprint_briefs_app(self, folder, pd, ev, rows):
-        """A brief of a card in sprint {name} carries the tag sprint-{name} (notes on the app's Notes)."""
-        rules, own = self.rules["sprint_briefs"], self.rules["owners"]
+            return self.res("S13", "na", "No notes read for it (no board of its own)", ev)
         board = pd.get("board") or "its board"
         missing, seen = [], 0
         for n in sorted(pd["notes"], key=lambda n: (n["title"], n["id"])):
@@ -928,16 +536,12 @@ class Domain:
                 missing.append(f"`{n['title']}` (card {', '.join(n['cards'])} → tag `{want[0]}`)")
                 r = Row(f"Tag the brief `{n['title']}` `{want[0]}` (its card's sprint), keeping its other tags",
                         f"Bandit Brain note \"{n['title']}\" ({n['id']}) on \"{board}\"", own["brief_tag"], "S13")
-                r.proj = folder
+                r.proj = key
                 rows.append(r)
         if not seen:
             return self.res("S13", "na", "No brief of a sprint card", ev)
         return self.res("S13", "bad" if missing else "ok",
                         "; ".join(missing) or "Every sprint card's brief carries its sprint's tag", ev)
-
-    def kind(self, board):
-        """The board's profile (schema 6); older snapshots carry the app's old type in its place."""
-        return board["profile"] if self.snap["schema"] >= 6 else board["type"]
 
     def s9_problems(self, board, is_dev):
         s9 = self.rules["s9"]
@@ -949,7 +553,7 @@ class Domain:
                          if any(v.startswith(("lane/", "stage/")) or v in dev_tags for v in tag_vals(ln)))
             return [f"dev lane(s) {', '.join(f'`{h}`' for h in hit)}"] if hit else []
         probs = []
-        if self.snap["schema"] >= 6 and board["profile"] != s9["dev_profile"]:
+        if board["profile"] != s9["dev_profile"]:
             probs.append(f"profile `{board['profile']}`, a dev project's board is `{s9['dev_profile']}`")
         missing = [x for x in s9["lane_tags"] + s9["stage_tags"] if x not in self.snap["tags"]]
         if missing:
@@ -962,12 +566,6 @@ class Domain:
             probs.append(f"first lane `{lanes[0]['name']}` isn't `{s9['first_lane_tag']}`")
         return probs
 
-    def rename_board(self, old, new, rule):
-        r = Row(f"Rename board `{old}` → `{new}`", f"Bandit Brain project \"{old}\"",
-                self.rules["owners"]["board_rename"], rule)
-        r.linked_old, r.linked_new = old, new
-        return [r]
-
     # ---------- domain-wide ----------
     def score_domain(self):
         suf = self.rules["names"]["workflow_suffix"]
@@ -979,28 +577,19 @@ class Domain:
                                  self.rules["owners"]["board_folder_rename"], "S1"))
         wf = [b for b in self.boards if b["name"].endswith(suf)]
         wkind = self.rules["workflow"]["board_profile"]
-        # Before schema 6 the type marked the one workflow board; a profile is every everyday board's.
-        wtype = [b for b in self.boards if b["type"] == wkind] if self.snap["schema"] < 6 else []
         wf_projects = [p for p in self.projects if any(r["rule"] == "S3" and r["status"] != "na" for r in p["results"])]
         probs = []
         if len(wf) != 1:
             probs.append(f"{len(wf)} boards end in `{suf}`")
         for b in wf:
-            if self.kind(b) != wkind:
-                probs.append(f"`{b['name']}` is {'profile' if self.snap['schema'] >= 6 else 'type'} `{self.kind(b)}`")
+            if b["profile"] != wkind:
+                probs.append(f"`{b['name']}` is profile `{b['profile']}`")
                 self.rows.append(Row(f"Switch board `{b['name']}` → profile {wkind} (its creator)",
                                      f"Bandit Brain project \"{b['name']}\"", self.rules["owners"]["board_profile"], "S3"))
-        for b in wtype:
-            if not b["name"].endswith(suf):
-                probs.append(f"`{b['name']}` is type workflow without `{suf}`")
-        after = [p for p in self.projects if p["wf_after_paste"]]
         if len(wf_projects) != 1:
-            note = (f"{len(wf_projects)} projects have `type: workflow`: "
-                    + ", ".join(f"`{p['folder']}`" for p in wf_projects))
-            if len(after) == 1:
-                note += f" — fixed once pending pastes land (only `{after[0]['folder']}` after)"
-            probs.append(note)
-            if len(wf_projects) > 1 and len(after) != 1:
+            probs.append(f"{len(wf_projects)} projects have `type: workflow`: "
+                         + ", ".join(f"`{p['key']}`" for p in wf_projects))
+            if len(wf_projects) > 1:
                 self.rows.append(Row("Pick the one workflow project; retype the others", self.name,
                                      self.rules["owners"]["decide"], "S3"))
         D.insert(1, self.res("S3", "bad" if probs else "ok", "; ".join(probs) or f"`{wf[0]['name']}`", "board.projects"))
@@ -1008,27 +597,21 @@ class Domain:
         for b in self.boards:
             if any(p.search(b["name"]) for p in pats):
                 D.append(self.res("S2", "bad", f"Board `{b['name']}` has a banned prefix/suffix", "board.projects"))
+                self.rows.append(Row(f"Rename board `{b['name']}`: no such prefix or suffix",
+                                     f"Bandit Brain project \"{b['name']}\"", self.rules["owners"]["board_rename"], "S2"))
         for b in self.boards:
             if b["name"] not in self.claimed:
-                D.append(self.res("S6", "bad", f"Board `{b['name']}` has no vault project", "board.projects"))
-                if self.snap["schema"] >= 2 and self.s9_problems(b, False):
+                D.append(self.res("S6", "bad", f"Board `{b['name']}`: no project has checked in for it", "board.projects"))
+                self.unchecked.append(f"board `{b['name']}`: no stamp names it → run `/bandit:audit check` in its project, "
+                                      "or archive the board if it has none")
+                if self.s9_problems(b, False):
                     D.append(self.res("S9", "bad", f"Board `{b['name']}` has dev lanes and no dev project",
                                       "board.projects"))
                     self.rows.append(Row(f"`{b['name']}` has dev lanes and no `dev: true` project: remove them, or onboard it",
                                          f"Bandit Brain project \"{b['name']}\"", self.rules["owners"]["decide"], "S9"))
-        # linked rows: every board rename → settings row for each board: line naming the old name
-        final = []
-        for r in self.rows:
-            final.append(r)
-            if getattr(r, "linked_old", None):
-                for p in self.projects:
-                    if p["board_line"] == f'project "{r.linked_old}"':
-                        final.append(Row(f'`board:` → `project "{r.linked_new}"`, next version', p["path"],
-                                         self.rules["owners"]["context_update"], r.rule))
-                        final[-1].pair_with = r
         order = self.rules["row_order"]
-        # stable sort by owner order, keep pairs adjacent (settings before board)
-        self.rows = sorted(final, key=lambda r: (order.index(r.owner) if r.owner in order else 99))
+        # stable sort by owner order
+        self.rows = sorted(self.rows, key=lambda r: (order.index(r.owner) if r.owner in order else 99))
 
 
 # ───────────────────────── output ─────────────────────────
@@ -1053,7 +636,7 @@ def render(dom, date, rules_sha, snap_sha, script_sha, rulebook_updated):
     for p in dom.projects:
         mo, mt = count(p["results"], "must", L)
         so, st = count(p["results"], "should", L)
-        out += [f"### {p['title']}", f"`{p['folder']} · musts {mo}/{mt} · shoulds {so}/{st}`", "",
+        out += [f"### {p['title']}", f"`{p['key']} · musts {mo}/{mt} · shoulds {so}/{st}`", "",
                 "| Rule | Result | Note | Evidence |", "|---|---|---|---|"]
         for r in p["results"]:
             out.append(f"| {r['rule']} | {MARK[r['status']]} | {r['note']} | `{r['evidence']}` |")
@@ -1073,6 +656,10 @@ def render(dom, date, rules_sha, snap_sha, script_sha, rulebook_updated):
     return "\n".join(out)
 
 
+def top_folders(snap):
+    return sorted(f["name"] for f in snap["board"]["folders"] if f["parent"] is None)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--rules", required=True)
@@ -1081,7 +668,7 @@ def main():
     ap.add_argument("--domain", action="append")
     ap.add_argument("--out", default=".")
     ap.add_argument("--replay")
-    ap.add_argument("--project", help="Domain/ai-folder: print one project's scores and rows")
+    ap.add_argument("--project", help="Domain/project: print one project's scores and rows")
     a = ap.parse_args()
     try:
         rules, rsha = load_rules(a.rules, a.rulebook)
@@ -1092,30 +679,30 @@ def main():
     script_sha = sha12(Path(__file__).read_bytes())
     date = snap["taken_at"][:10]
     if a.project:
-        dom, _, folder = a.project.partition("/")
-        if dom not in snap["vault"]["domains"] or folder not in snap["vault"]["settings"].get(dom, {}):
-            print(f"CONTRACT BROKEN — `{a.project}` is not a settings folder in the snapshot")
+        dom = a.project.partition("/")[0]
+        if a.project not in snap["stamps"]:
+            print(f"CONTRACT BROKEN — `{a.project}` has no stamp in the snapshot")
             return 2
         d = Domain(dom, snap, rules).score()
-        p = next(x for x in d.projects if x["folder"] == folder)
-        mine = [r for r in d.rows if p["path"] in r.target or p["surface_path"] in r.target
-                or getattr(r, "proj", None) == folder
-                or r.target == p["title"]
+        p = next(x for x in d.projects if x["key"] == a.project)
+        mine = [r for r in d.rows if getattr(r, "proj", None) == a.project
                 or (p["mine"] and r.target == f"Bandit Brain project \"{p['mine']}\"")]
         L = d.levels
         mo, mt = count(p["results"], "must", L)
         so, st = count(p["results"], "should", L)
-        out = [f"### {p['title']}", f"`{folder} · musts {mo}/{mt} · shoulds {so}/{st} · {date}`", "",
+        out = [f"### {p['title']}", f"`{a.project} · musts {mo}/{mt} · shoulds {so}/{st} · {date}`", "",
                "| Rule | Result | Note |", "|---|---|---|"]
         out += [f"| {r['rule']} | {MARK[r['status']]} | {r['note']} |" for r in p["results"]]
         out += ["", "| # | Action | Target | Owner | Rule |", "|---|---|---|---|---|"]
         out += [f"| {i} | {r.action} | `{r.target}` | {r.owner} | {r.rule} |" for i, r in enumerate(mine, 1)] or []
         print("\n".join(out))
         return 0
-    domains = a.domain or sorted(snap["vault"]["domains"])
+    known = top_folders(snap)
+    stamped = sorted({k.split("/", 1)[0] for k in snap["stamps"]})
+    domains = a.domain or sorted(set(known) | set(stamped))
     for d in domains:
-        if d not in snap["vault"]["domains"]:
-            print(f"CONTRACT BROKEN — `{d}` is not a vault domain ({', '.join(snap['vault']['domains'])})")
+        if d not in known and d not in stamped:
+            print(f"CONTRACT BROKEN — `{d}` is neither a top-level board folder nor a stamped domain ({', '.join(known)})")
             return 2
     reports = {d: render(Domain(d, snap, rules).score(), date, rsha, ssha, script_sha,
                          rules["rulebook_updated"]) for d in domains}

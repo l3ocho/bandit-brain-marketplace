@@ -13,13 +13,14 @@ bandit:project. Two modes:
                        machine: bandit:audit reads it there.
 
 Layout (root = $CLAUDE_PROJECT_DIR):
-  CLAUDE.md  .claude/   settings, owned by bandit:project
+  CLAUDE.md  .claude/   instructions and settings, written by bandit:project's approved rows
+  REFERENCE.md          the reference doc, only for a project with `notes: none`
   repos/                read-only clones
   work/{prefix}-{task}/ one folder per board task
   data/{prefix}-{task}/ data files for that task, purged on close
   scratch/              throwaway
   _closed/              closed work, written only by `/bandit:tasks done`
-  _backup/              rollback copies of settings only: CLAUDE.md.*, settings.json.*, workdir.py.*
+  _backup/              rollback copies of settings only: CLAUDE.md.*, REFERENCE.md.*, settings.json.*, workdir.py.*
 Superseded work stays in its task folder (work/{prefix}-{task}/superseded/), never _backup/.
 A folder with its own CLAUDE.md is a hosted project: its own settings apply.
 
@@ -29,8 +30,8 @@ Change one, change the other: bandit:audit checks this file's hash.
 import datetime, json, os, re, sys
 from pathlib import Path
 
-ROOT_ALLOWED = {"CLAUDE.md", ".claude", "repos", "work", "data", "scratch", "_closed", "_backup"}
-BACKUP_NAME = re.compile(r"^(CLAUDE\.md|settings\.json|workdir\.py)\..+$")
+ROOT_ALLOWED = {"CLAUDE.md", "REFERENCE.md", ".claude", "repos", "work", "data", "scratch", "_closed", "_backup"}
+BACKUP_NAME = re.compile(r"^(CLAUDE\.md|REFERENCE\.md|settings\.json|workdir\.py)\..+$")
 TASK_DIRS = ("work", "data", "_closed")
 DATA_EXT = {".csv", ".tsv", ".xls", ".xlsx", ".xlsm", ".parquet", ".feather", ".jsonl",
             ".ndjson", ".db", ".sqlite", ".sqlite3", ".duckdb"}
@@ -93,8 +94,8 @@ def guard():
         return 0  # outside this project: its own rules apply
     if not rel:
         return 0
-    if rel == ("CLAUDE.md",) or rel[0] == ".claude":
-        return 0  # settings, handed over by bandit:project
+    if rel in (("CLAUDE.md",), ("REFERENCE.md",)) or rel[0] == ".claude":
+        return 0  # instructions and settings: bandit:project's approved rows
     if hosted(root, rel):
         return 0
     top, ext = rel[0], p.suffix.lower()

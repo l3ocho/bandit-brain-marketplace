@@ -60,7 +60,7 @@ After the spec, offer one line. **The destination follows the subject:**
 **Marketplace card plus brief** (only after the user says yes): the **Note + card** steps above, aimed at
 the bandit-brain-marketplace project instead of the current one. The card goes through bandit:tasks
 `capture` into that project's **Marketplace** column; the brief goes through bandit:notes as a draft
-for that project, linked to the card, in whichever storage holds that project's notes. The spec's
+for that project, linked to the card (bandit:notes names its place). The spec's
 Requirements name each skill touched and the change for it.
 
 **Too large.** The app's Notes refuses a note over 200 KB: propose splitting the spec by section:

@@ -1,175 +1,108 @@
 # 🧭 Storage, domain and scope
 
-> Read before any command: which storage holds the project's notes, what a domain is, how this project's scope is resolved, and why the inbox is the user's.
+> Read before any command: where a project's notes are, what a domain is, how this project's scope is resolved, and why the inbox is the user's.
 
-## 🗄️ Which storage
+## 🗄️ Where the notes are
 
-A project's notes live in one of two storages: **the app's Notes** (`references/storage-app.md`) or
-**the MyNotes vault** (`references/storage-vault.md`). The project's Project Context says which:
-a `notes: app` line means the app's Notes (the key and its format are bandit:project's). **No line
-means the vault**, so a project nobody has switched keeps working as before. With `notes: app`,
-`domain:` names the board folder of that name, whether or not a vault domain folder exists. Read it with the domain, before any command and before any other skill's
-note is written. A domain-level run with no Project Context (the scheduled `home`) is a vault run.
+A project's notes live in **the app's Notes** (`references/storage-app.md`), on the project's
+board. That is the only storage: no helper keeps a copy of a note anywhere else.
 
-**The vault freeze.** Once a project carries `notes: app`, its notes in the vault are read-only:
-a helper may read one, never writes, moves, archives or deletes it, and never creates a new note in
-the vault for that project (its `_inbox/` included). Its notes were moved into the app; the app holds
-the live copy. The only vault writes left for such a project are not notes: its settings files, its
-working-folder manifest (`Projects/{slug}/workdir-manifest.json`), the audit's stamp ledger
-(bandit:audit), and minutes saved beside their recording when the user picks that option
-(bandit:minutes). A domain's freeze date is recorded by Bandit CTO, on the request card that adds
-the line to its last project. The vault stays as it is until the user says otherwise.
+The project's Project Context can say one thing about it (the key and its format are
+bandit:project's):
 
-Settings files (`Claude/ai-{slug}/`, `Claude/code-{slug}/`), the working-folder manifest, a
-domain's home page, templates and Obsidian's settings stay in the vault whichever storage holds the
-notes (`references/other-skills.md`).
+| `notes:` line | Means |
+|---|---|
+| absent, or `app` | The notes are in the app's Notes |
+| `none` | The helpers keep no notes for this project: its records are kept elsewhere, by its own rules. Asked to write, file, lint or archive a note for it, a helper says so in one line and stops; nothing is created, in the Inbox either |
 
----
+Read it with the domain, before any command and before any other skill's note is written.
 
-## 🧭 Model in one screen
-
-```
-MyNotes/                         ← BanditCloud root of all domains
-├── _{name}/                     ← any root "_" folder: NOT a domain, ignored by every scan
-├── .templates/                  ← any dot folder: ignored
-└── {Domain}/                    ← one domain = one Obsidian vault (has its own .obsidian/)
-    ├── README.md                ← generated home page; frontmatter = domain config
-    ├── _inbox/                  ← the user's working space: no rules, no edits until they ask for review
-    ├── _templates/              ← input structures
-    ├── _archive/                ← done notes and old settings versions, original path mirrored
-    ├── _attachments/            ← every image, PDF, audio file embedded by a note
-    ├── Claude/                  ← SETTINGS ONLY (instructions + reference doc; no logs/notes/journals): {ai|code|design}-{slug}/
-    ├── Projects/{slug}/         ← hub note {slug}.md; the rest of the layout belongs to the project
-    ├── Meetings/                ← module
-    └── Requests/                ← module
-```
-
-- **Domain** = a top-level folder of `MyNotes` whose name doesn't start with `_` or `.`.
-- **`_` at root** means "not a domain". **`_` inside a domain** means "system folder this skill
-  knows by name". Same prefix, different level — never confuse the two.
-- **Each domain is its own Obsidian vault.** Wikilinks resolve inside the domain only, so never
-  link across domains with `[[…]]`.
+**What is not a note.** A project's instructions file and settings, its working files (data,
+scripts, outputs) and any file that is not text are not notes. They stay with the project: in its
+folder on the machine it runs on. The one exception is bandit:project's two reference notes, which
+are notes like any other (`references/other-skills.md`).
 
 ---
 
 ## 📍 Resolve the domain before anything else
 
-1. **Project Context first.** Read the `## 🧭 Project Context` section: in the Claude.ai
-   project instructions, or in the repo's `CLAUDE.md` on Claude Code. `domain:` names the
-   domain and `project:` the project slug. The block's format is owned by bandit:project.
-   - `domain: none` → this project has no vault. Say so and stop.
-   - **Legacy fallback:** no Project Context section → read `vault_domain` and `vault_project`
-     from the line-1 metadata comment (any label: bandit:project `references/reference-template.md` → Marker) instead.
-2. **Run by bandit:project (onboarding).** The project's instructions aren't pasted yet, so take
+1. **Project Context first.** Read the `## 🧭 Project Context` section of the project's
+   instructions: the Claude.ai project instructions, or the folder's `CLAUDE.md` in Claude Code.
+   `domain:` names the domain and `project:` the project slug. The block's format is owned by
+   bandit:project.
+   - `domain: none` → the project has no board folder. Its notes are private notes with the tag
+     `{slug}` (`references/storage-app.md` → Places).
+2. **Run by bandit:project (onboarding).** The project's instructions aren't written yet, so take
    `domain`, `project` and `type` from bandit:project instead. See *Onboarding* below.
-3. **Explicit argument.** `/bandit:notes home Acme` — the scheduled home refresh always passes it.
-4. **Otherwise ask**, listing the live domains from `nc_webdav_list_directory("MyNotes")`.
+3. **Explicit argument.** `/bandit:notes lint Acme`.
+4. **Otherwise ask**, listing the live top-level board folders from `get_context`.
 
-Never guess the nearest match. If the named domain isn't in the listing, stop and say so.
-
-**On the app's Notes** the same names are read live from `get_context`: the domain is the board
-folder of that name, the project is its board (`board:` in the Project Context), an area is a column
-of that board (`references/storage-app.md` → Places). A board or folder that isn't there: stop and
-say so, as for the vault.
+The names are read live from `get_context`: the **domain** is the top-level board folder of that
+name, with its subfolders; the **project** is its board (`board:` in the Project Context); an
+**area** is a column of that board (`references/storage-app.md` → Places). Never guess the nearest
+match. A board or folder that isn't there: stop and say so.
 
 ---
 
 ## 🎯 Scope — what this project may see and change
 
-**One project, one slug.** `project:` is the project's own name as a slug (`home-reno`), not
-the Claude.ai project's display name. The same slug names every folder of that project:
+**One project, one slug.** `project:` is the project's own name as a slug (`home-reno`). The same
+slug names its hub note and tags its private notes.
 
-```
-Projects/home-reno/        ← the shared docs: one source, one set of rules, for both surfaces
-Claude/ai-home-reno/       ← Claude.ai settings (higher-level implementation discussion)
-Claude/code-home-reno/     ← Claude Code settings: the repo mirror (CLAUDE.md + claude/)
-```
-
-The Claude Code side reaches `Projects/{slug}/` through the same `## 🧭 Project Context` section,
-placed in the repo's `CLAUDE.md`: with it, `/bandit:notes` gets the same project scope in Claude Code
-as in Claude.ai. That file is configured in the repo, not by this skill.
-
-**Scope comes from the Project Context `type:`** (legacy fallback: `project_type` in the
-metadata), resolved together with the domain:
+**Scope comes from the Project Context `type:`**, resolved together with the domain:
 
 | Situation | Scope |
 |---|---|
-| `type: workflow` (e.g. Acme Workflow) | **Domain**: the whole domain. Oversees every project, and like every project has its own `Claude/ai-{slug}/` and `Projects/{slug}/` with its hub note |
-| `type: product_service` or `type: claude_marketplace`, with `project:` | **Project**: the table below |
-| No Project Context and no project metadata (e.g. the scheduled `/bandit:notes home Acme`) | **Domain** |
+| `type: workflow` (e.g. Acme Workflow) | **Domain**: every board in the domain's folder. Oversees every project, and like every project has its own board and hub note |
+| `type: product_service` or `type: claude_marketplace` | **Project**: the table below |
+| No Project Context, a domain given as the argument | **Domain** |
 
 **Project scope:**
 
 | Area | Read | Change (on approval) |
 |---|---|---|
-| `_inbox/` | All of it (the user's inputs) | Create new notes; review (`file`) notes **only** into `Projects/{slug}/`, and only the ones the user puts up for review |
-| `Projects/{slug}/` | ✓ | ✓ |
-| `Claude/ai-{slug}/`, `Claude/code-{slug}/` | ✓ | Create the folder only; the twin belongs to bandit:project, the mirror to the repo's Stop hook |
-| `_templates/` | ✓ | ✓ Edit templates directly, no need to switch to the workflow project |
-| `_archive/Projects/{slug}/` | ✓ | Archive and restore its own notes |
-| `Meetings/`, `Requests/` | Only notes with `project: "[[{slug}]]"` | ✗ read-only |
-| Missing core structure of the domain | ✓ | **Onboarding only:** create the missing core folders, `_templates/new-note.md` and the README, as approved rows |
-| Everything else | ✗ | ✗ |
+| The project's board: its notes, its Inbox, its archived notes, its notes in the Trash | ✓ | ✓ |
+| Minutes and requests on the domain's workflow board | Only the ones that name this project (related to its hub note) | ✗ read-only. A helper may create its new minutes or request drafts in that board's Inbox; filing them is the workflow project's |
+| Every other board | ✗ | ✗ |
 
-**On the app's Notes**, Project scope is the project's board: its notes, its Inbox, its archived
-notes and its notes in the Trash. Minutes and requests on the domain's workflow board are read when
-they name this project and never changed from here, like `Meetings/` and `Requests/` above. A
-helper may create its new minutes or request drafts in that board's Inbox, as in `_inbox/` above;
-filing them is the workflow project's. Domain
-scope is every board in the domain's folder. Settings folders keep the vault rows above.
-
-Anything outside the scope (another project's folder or board, a domain-level rename, `init`, `home`,
-`settings`) that the user asks for: stop and say it's a domain-level action to run from the workflow
-project. Never widen scope on your own. Two exceptions: onboarding's approved rows may create the
-domain's missing core structure (and `home` then builds the README), and a **`domain` fix row**
-(below) runs when the user approves that row by number. Their yes is the widening, for that row only.
+Anything outside the scope (another project's board, a note on the workflow board) that the user
+asks for: stop and say it's a domain-level action to run from the workflow project. Never widen
+scope on your own. One exception: a **`domain` fix row** runs when the user approves that row by
+number. Their yes is the widening, for that row only.
 
 ---
 
 ## 📥 The inbox is the user's
 
-`_inbox/` is where the user writes, pastes and thinks. **While a note is in `_inbox/`, no convention
-applies to it** — any filename, any frontmatter or none, any structure, any date format. And **no
-skill or chat edits, renames, reformats or moves a note there** unless the user puts that note up for
-review in the current conversation. Not `lint`, not `onboard`, not another skill tidying up, not
-a chat that is using the note as input. Reading is always fine. The user's yes to a row that archives
-or deletes a consumed draft by name (*Other skills* → Leftovers) is putting that note up.
+The Inbox is where the user writes, pastes and thinks: a board's Inbox, or the private one. A note
+in it has status `inbox`. **While a note is there, no convention applies to it** — any title, any
+fields or none, any structure, any date format. And **no skill or chat edits, renames, reformats
+or moves a note there** unless the user puts that note up for review in the current conversation.
+Not `lint`, not `onboard`, not another skill tidying up, not a chat that is using the note as
+input. Reading is always fine. The user's yes to a row that archives or deletes a consumed draft by
+name (*Other skills* → Leftovers) is putting that note up.
 
-**Exception: a skill-written draft, changed on the user's request.** A note in `_inbox/` with
-`status: triaged` that was written by a skill **in the current conversation** may be edited in
-place when the user explicitly asks for that change. Conditions: etag-guarded write, `updated` bumped,
-`status` and `file-to` unchanged, and the change summarised back to them. The user's own notes (`inbox`
-or no status) stay untouchable, and so does any skill-written note from an earlier conversation.
-
-**The rules apply at review.** Review is `/bandit:notes file`: the user runs it (for the whole inbox or for
-named notes) when they want a note processed. That is the only moment the conventions touch it,
-and the note leaves the inbox in the same step. The status says which side of that line a note
-is on:
-
-| Status | Whose | Rules |
-|---|---|---|
-| `inbox` (or no status at all) | The user's, in progress | None. Untouchable |
-| `triaged` + `file-to`, in `_inbox/` | Written by a skill, waiting for the user's review | The skill wrote it compliant; not edited again until review, except on the user's explicit request in the conversation that wrote it (the exception above) |
-| anything, outside `_inbox/` | Reviewed | All of Part 2 |
-
-**In the app's Notes** the same rule reads from who created the note, not from a folder. The Inbox
-there is a board's Inbox or the private one, and a note in it has status `inbox`:
+Whose a note is reads from who created it:
 
 | Note in status `inbox` | Whose | Rules |
 |---|---|---|
 | `createdViaAssistant` false | The user's, in progress | None. Untouchable until they put it up for review |
-| `createdViaAssistant` true | A helper's draft, waiting for the user's review | The helper wrote it compliant (kind, summary, fields); not edited again until review, except on the user's explicit request in the conversation that wrote it. In the app's Notes a plan linked to its card waits here with no summary until the review gives it one (`references/storage-app.md` → Status and filing) |
+| `createdViaAssistant` true | A helper's draft, waiting for the user's review | The helper wrote it compliant (kind, summary, fields); not edited again until review, except on the user's explicit request in the conversation that wrote it. A plan linked to its card waits here with no summary until the review gives it one (`references/storage-app.md` → Status and filing) |
 | any other status | Reviewed | All of the conventions |
 
 A helper's own draft is one it created. It stays in the Inbox, status `inbox`, until the user
-reviews it; nothing marks it but who created it. The tools and the filing steps are
-`references/storage-app.md`.
+reviews it; nothing marks it but who created it. A draft from an earlier conversation is as
+untouchable as the user's own.
+
+**The rules apply at review.** Review is `/bandit:notes file`: the user runs it (for the whole
+inbox or for named notes) when they want a note processed. That is the only moment the conventions
+touch it, and the note leaves the Inbox in the same step.
 
 **Review is all or nothing per note.** Every question a note needs answered (which project,
 which meeting type, what an ambiguous date means) is asked before its row is final. A row with
 an open question is not executed, and **a note is never left half-edited in the inbox**: it is
-either still exactly as the user left it, or reviewed and in its home folder.
+either still exactly as the user left it, or reviewed and in its place.
 
-**The user's words stay the user's.** At review, the frontmatter is the skill's job. The body is not: any
+**The user's words stay the user's.** At review, the fields are the skill's job. The body is not: any
 body change (removing a duplicated block, rewriting a date, fixing structure) is its own row
 showing before → after, and happens only if the user approves that row.

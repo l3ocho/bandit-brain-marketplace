@@ -32,11 +32,11 @@ there: no questions, no new ideas.
 
 - Adds ideas, opinions or recommendations that weren't in the source → expand only what's there; flag gaps instead of filling them.
 - Drops content during the merge → the final pass checks every inventory item made it in.
-- Writes straight into BanditCloud with a hard-coded path → deliver the file; a save as a note goes through bandit:notes.
+- Writes straight into a storage with a hard-coded path → deliver the file; a save as a note goes through bandit:notes.
 - Treats a bare "clarify" with no content as its job → that's bandit:clarify.
 
 ## 🚫 Never
 
 - Invent new points, facts or decisions
 - Rewrite code inside code blocks
-- Save a note directly: bandit:notes writes notes, in whichever storage holds them
+- Save a note directly: bandit:notes writes notes

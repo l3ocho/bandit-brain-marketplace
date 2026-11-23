@@ -1,35 +1,28 @@
 # Part 2 — Conventions
 
-> What a note is, whichever storage holds it: its kind, its status, its one-line summary, its fields
-> and its body. Where a note sits and how it is written down belong to the storage.
+> What a note is: its kind, its status, its one-line summary, its fields, its name and its body.
+> Where a note sits and how it is saved is `references/storage-app.md`.
 
-Two storages keep these conventions: the app's Notes (`references/storage-app.md`) and the MyNotes
-vault (`references/storage-vault.md`, with the vault's own conventions in
-`references/conventions-vault.md`). A helper follows this file for what a note holds, and the
-storage's reference for where it goes and how it is saved.
-
-Contents: Section map · Modules (§2) · Fields (§5) · Status (§6) · Note body shape (§12) ·
+Contents: Section map · Modules (§2) · Names (§4) · Fields (§5) · Status (§6) · Note body shape (§12) ·
 Dev projects (§13)
 
 ---
 
 ### Section map
 
-The section numbers are fixed. "Conventions §N" names the same subject in every storage; this table
-says where it is written.
+The section numbers are fixed: other skills say "conventions §N". Numbers no longer used (3, and 8
+to 11) named parts of a storage that is gone and are never reused.
 
 | § | Subject | Written in |
 |---|---|---|
-| 1 | Where notes sit | The storage: `conventions-vault.md` §1 · `storage-app.md` → Places |
-| 2 | Modules | Here. The vault's side: `conventions-vault.md` §2 |
-| 3 | The settings area | Vault only: `conventions-vault.md` §3 |
-| 4 | How a note is named | The storage: `conventions-vault.md` §4 · `storage-app.md` → Create without a duplicate |
-| 5 | Fields | Here. How each is written: `conventions-vault.md` §5 · `storage-app.md` → Fields |
-| 6 | Status | Here. Where each status lives: `conventions-vault.md` §6 · `storage-app.md` → Status and filing |
-| 7 | Archive | The storage: `conventions-vault.md` §7 · `storage-app.md` → Archive, restore, delete |
-| 8 to 11 | Other files, the ignore list, templates, Obsidian settings | Vault only: `conventions-vault.md` §8 to §11 |
-| 12 | Note body shape | Here. The vault's link syntax: `conventions-vault.md` §12 |
-| 13 | Dev projects | Here. The storage's side: `conventions-vault.md` §13 · `storage-app.md` → Dev projects |
+| 1 | Where notes sit | `storage-app.md` → Places |
+| 2 | Modules | Here |
+| 4 | How a note is named | Here. Looking for a note of that name first: `storage-app.md` → Create without a duplicate |
+| 5 | Fields | Here. How the app holds each: `storage-app.md` → Fields |
+| 6 | Status | Here. Filing and the Inbox: `storage-app.md` → Status and filing |
+| 7 | Archive | `storage-app.md` → Archive, restore, delete |
+| 12 | Note body shape | Here |
+| 13 | Dev projects | Here. In the app: `storage-app.md` → Dev projects |
 
 ---
 
@@ -51,6 +44,41 @@ Two optional sets of records, switched on per domain. Both are dated.
 
 ---
 
+### 4. Names
+
+A note's name is its **title**. Lowercase kebab-case, no spaces, no dates in the middle, no file
+extension. Never a kind label in front (`Brief: …`, `Plan: …`): a card's `Brief:` or
+`Technical plan` line adds its own.
+
+| Kind of note | Pattern | Example |
+|---|---|---|
+| **Dated** (something that happened or arrived on a day) | `{slug}-YYYY-MM-DD` | `department-minutes-2026-09-23` |
+| **Evergreen** (reference, living document) | `{slug}` | `genesys-queue-map` |
+| **Project hub** | `{slug}`, the project's slug | `home-reno` |
+| **Brief** | `{project}-{lane}-{slug}-YYYY-MM-DD` | `home-reno-feature-export-button-2026-09-23` |
+| **Plan** (dev projects, §13) | `{project}-{lane}-{slug}-plan`, `{lane}` the bare value (`feature`, not `lane/feature`) | `home-reno-feature-export-button-plan` |
+| **Sprint records** (dev projects, §13) | `{project}-sprint-{name}-{record}`, `{record}` = `plan` · `handover-prompt` · `progress` · `handover-report`; the review record is dated: `{project}-review-sprint-{name}-YYYY-MM-DD` | `home-reno-sprint-debut-plan` |
+
+Dated by kind: `minutes`, `request`, `brief`, `log`. Evergreen: `note`, `reference`, `plan`.
+
+**Cards point to notes by the note's title.** A line written before, ending in `.md`, has it
+stripped first.
+
+**Minutes names** carry the meeting, so a list groups them without opening each note:
+`{meeting}-minutes-YYYY-MM-DD` (`supervisors-minutes-…`, `department-minutes-…`), and for project
+meetings `{project}-minutes-YYYY-MM-DD` (`home-reno-minutes-…`). The short version of minutes adds
+`-short` before the date.
+
+**One name, one note in a place.** The app accepts two notes with the same title, so the helper
+looks first (`storage-app.md` → Create without a duplicate). On a collision with another note, make
+the slug more specific (`department-minutes-pm-2026-09-23`, `genesys-queue-map-billing`). Never
+add `-2` style counters.
+
+Inbox notes keep whatever title the user gave them ("Untitled", "Meeting - Project Updates")
+until review renames them on the way out.
+
+---
+
 ### 5. Fields
 
 A helper adds missing fields and fixes malformed values; it **never removes a field value or a
@@ -65,8 +93,8 @@ tag the user added**. A note in the inbox is exempt until it is reviewed (`refer
 | Status | `inbox` · `triaged` · `active` · `waiting` · `done` · `archived` | §6 |
 | Summary | One sentence, ≤ 25 words | What the note covers, written so an agent can decide from the summary alone whether to open it. Not needed in the inbox; **required once reviewed** |
 | Tags | Free words | The user's own. Untouched |
-| Domain and project | The domain, and the project when the note is about one | Given by where the note sits (§1) |
-| Created and updated | Dates | Kept by the storage |
+| Domain and project | The domain, and the project when the note is about one | Given by the board the note is on (§1) |
+| Created and updated | Dates | Kept by the app, never written by a helper |
 
 #### When they apply
 
@@ -108,15 +136,14 @@ that state: two copies of one state drift the first time a card is ticked on the
 | `active` | Being worked on or referenced as current |
 | `waiting` | Blocked on someone else |
 | `done` | Finished: ready to be archived |
-| `archived` | Kept, out of the way. Each storage says how it holds an archived note |
+| `archived` | Kept, out of the way: in its place, out of the lists and the search (§7) |
 
-A helper's draft waiting for the user's review also sits in the inbox. Which status marks it is
-the storage's: `conventions-vault.md` §6 · `storage-app.md` → Status and filing.
+A helper's draft waiting for the user's review also sits in the Inbox, with status `inbox`: who
+created it tells it from the user's own (`references/model.md`, *The inbox is the user's*).
 
 **A plan linked to its card follows that card** (§13): `active` while the card is open, `done`
-once it is complete, and never its stage or execution state. No helper sets it: the storage keeps
-it so. The app's Notes does it itself (`storage-app.md` → Status and filing); in the vault, `file`
-and `lint` do (`references/commands.md`).
+once it is complete, and never its stage or execution state. No helper sets it: the app keeps it
+so (`storage-app.md` → Status and filing).
 
 ---
 
@@ -163,11 +190,11 @@ rules wherever `file` or `lint` meet it. The card workflow itself is bandit:task
   Priority `Must`/`Should`/`Could` · Notes) · `## Decisions` (dated) · `## Verified facts
   (YYYY-MM-DD)` (each with where it was checked: a file, a tool result) · `## Open questions` ·
   `## Change log` (optional: one dated line per change to the brief and why) · `## Conclusions`
-  (on the app's Notes, written when its card is completed: `references/conclusions.md`) · `## Related`.
+  (written when its card is completed: `references/conclusions.md`) · `## Related`.
   **No card state in the body** (column, lane, stage): the card holds it, so a copy goes stale. A
   `Card: {short id}` line under the summary is fine; it stays as written even when the card later
   gets a new id, since a former id still finds the card (bandit:tasks `references/board.md` → Card IDs).
-  A sprint's card briefs sit with that sprint's records.
+  A sprint's card briefs sit with that sprint's records: they carry the tag `sprint-{name}`.
 - **A sprint's records** are its plan, execution prompt, ledger, handover report and review record,
   plus the briefs of its cards. Kinds: the plan is a `plan`; the execution prompt, the ledger and
   the report are `reference`; the review record is a `log`; each carries the sprint's name in place
@@ -177,7 +204,7 @@ rules wherever `file` or `lint` meet it. The card workflow itself is bandit:task
   bandit:plan: WBS id · card id · card title at creation · created). A row is added when its card
   is created, or, for a card that already exists, when bandit:plan builds a WBS over it (sprint
   mode). Writer: the chat that ran `/bandit:tasks spec` or bandit:plan, through this skill, as an
-  edit of an existing note: its own approval row, written by the storage's safe edit.
+  edit of an existing note: its own approval row, read right before it is written.
 - **WBS levels:** the names are bandit:plan's; L3 = one card is bandit:tasks'
   (`references/dev-workflow.md`); where L4 lines go is bandit-dev:sprint's.
 

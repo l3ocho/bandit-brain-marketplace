@@ -7,7 +7,7 @@ bandit:project. Two keys set the scope:
 | Key | Gives | Example |
 |---|---|---|
 | `board:` | The **home board**: the project's own board, the default for new cards, shown first | `board: project "Home Reno"` |
-| `domain:` | The **domain**: the board's top-level folder with that name, **with every subfolder in it** (structure rule S1 makes the names match), whichever storage holds the project's notes | `domain: Acme` → folder `Acme` + its subfolder `Clients` |
+| `domain:` | The **domain**: the board's top-level folder with that name, **with every subfolder in it** (structure rule S1 makes the names match) | `domain: Acme` → folder `Acme` + its subfolder `Clients` |
 
 ```
 board: project "Home Reno"

@@ -22,7 +22,7 @@ Phase 5: RECONCILE → Backport findings into the source document and deliver up
 
 When the chat has a `## 🧭 Project Context` with `domain` and `project`, look for the project's
 planning documents before asking for uploads: ask bandit:notes for the notes by name in the
-project's place, in whichever storage holds its notes (`references/other-skills.md` there):
+project's place (`references/other-skills.md` there):
 
 | Found | Do |
 |---|---|
@@ -375,7 +375,7 @@ content only.
 ## 💾 Saving the WBS as a Note
 
 **Ask bandit:notes for the place**, never hard-code it: the project's place for planning
-documents, in whichever storage holds its notes (`references/other-skills.md` there). When that
+documents (`references/other-skills.md` there). When that
 place exists, offer: *"Save this WBS as the `{project}-wbs` note in {place}?"*
 
 **Only the final note is saved.** Drafts stay in the chat: never written to the inbox or

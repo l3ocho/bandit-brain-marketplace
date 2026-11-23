@@ -1,18 +1,16 @@
 # 🗃️ Saving the minutes as notes
 
-> Read when the minutes are saved as notes: names, fields, write then file, in either storage.
+> Read when the minutes are saved as notes: names, fields, write then file.
 
 
-Applies when Q2 resolved to a domain's notes. Which storage holds them (the app's Notes or the
-MyNotes vault), where a draft waits and every write step are bandit:notes'
-(`references/model.md` there → Which storage, `references/other-skills.md` → Who writes what).
+Applies when Q2 resolved to a domain's notes. Where a draft waits and every write step are
+bandit:notes' (`references/other-skills.md` there → Who writes what).
 This file says only what the minutes hold and when they are filed.
 
-**Names:** the minutes naming rule in bandit:notes conventions §4 (in the app's Notes, that name
-without `.md` is the title). The date in the name is the **meeting date**, and the full and short
+**Names:** the minutes naming rule in bandit:notes conventions §4: that name is the note's title. The date in the name is the **meeting date**, and the full and short
 versions are written as a pair.
 
-**Fields** (bandit:notes conventions §5; how each storage holds them is bandit:notes'). Fields that
+**Fields** (bandit:notes conventions §5; how the app holds them is bandit:notes'). Fields that
 don't apply are left out. Both versions carry the same ones:
 
 | Field | Value |
@@ -28,12 +26,12 @@ don't apply are left out. Both versions carry the same ones:
 | Related notes | The other version (full ↔ short), and the project hub on a project meeting |
 | Tags | `doc-minutes` |
 
-- `summary` is what the domain's home page lists next to the minutes, and what an agent reads to
-  decide whether to open them.
+- `summary` is what a list shows next to the minutes, and what an agent reads to decide whether
+  to open them.
 - Both versions name each other in their related notes and in a `## Related` line (see the
   formats), so neither is an orphan. With only one version, it has related notes only when the
   meeting is a project's.
-- In the app's Notes there is no Source field, and minutes sit on the workflow board, so a
+- There is no Source field, and minutes sit on the workflow board, so a
   project meeting names its project through the related hub note (bandit:notes'
   `references/storage-app.md` → Fields).
 - Don't add fields bandit:notes conventions §5 doesn't define.
@@ -55,11 +53,9 @@ don't apply are left out. Both versions carry the same ones:
    clearly says otherwise.
 4. Minutes of that name already in the meetings place when filing: stop and report. Don't replace
    them, and don't rename on your own.
-5. **Too large.** The app's Notes refuses a note over 200 KB. Then propose a split by section: the
+5. **Too large.** The app refuses a note over 200 KB. Then propose a split by section: the
    Discussion table in two parts, the Action Items with the second, each part its own minutes note
    related to the others. Nothing is cut or saved shorter.
 
-If the domain has no meetings place (bandit:notes says where it is, per storage), don't create
-one. Leave the minutes waiting for review and say the domain has no place for meetings yet: in the
-vault, the `meetings` module isn't set up (`/bandit:notes onboard` handles it); in the app's
-Notes, the domain has no workflow board to file them on.
+If the domain has no meetings place (bandit:notes says where it is), don't create one. Leave the
+minutes waiting for review and say the domain has no workflow board to file them on yet.

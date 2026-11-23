@@ -1,9 +1,9 @@
 # 🗄️ Storage: the app's Notes
 
-> How a note is read and written in Bandit Brain's Notes, through the app's note tools. The rules every storage shares are `references/write-safety.md`; what a note holds is `references/conventions.md`.
+> How a note is read and written in Bandit Brain's Notes, through the app's note tools. The rules that protect the user's notes are `references/write-safety.md`; what a note holds is `references/conventions.md`.
 
-Contents: The operations · Places · Fields · Create without a duplicate · Edit · Status and
-filing · Archive, restore, delete · Dev projects · Refusals
+Contents: The operations · Places · The hub note · Fields · Create without a duplicate · Edit ·
+Status and filing · Archive, restore, delete · Dev projects · Refusals
 
 A note here is known by its **id**. Its title is a field of its own and can repeat, so a helper
 never takes a title as proof of which note it has. Ids are read live (`get_context`, `notes_list`,
@@ -11,7 +11,7 @@ never takes a title as proof of which note it has. Ids are read live (`get_conte
 
 ## 🧰 The operations
 
-Every storage answers the same seven operations. In the app:
+The seven operations every helper uses:
 
 | Operation | Tool | How |
 |---|---|---|
@@ -42,9 +42,17 @@ are read from `get_context`.
 | A project with `board: none` | Private, with the tag `{slug}` |
 | Something still to review | The Inbox of its board, or the private Inbox, status `inbox` |
 
-Settings files, a domain's home page, templates, Obsidian's own settings and files that are not
-text are not notes here:
-they stay where the vault storage keeps them.
+A project's instructions file and settings, its working files and any file that is not text are
+not notes: they stay in the project's folder on the machine it runs on (`references/model.md` →
+What is not a note).
+
+## 🏠 The hub note
+
+Every project has one: a `reference` note titled with the project's slug, with its summary and a
+`## Docs` list as its text (one line per document of the project: its title and what it is), in
+the column of the area it is about, or the board's first column when no area fits. It is how a
+note on another board names the project: related to its hub note. A project with `board: none`
+keeps it private, with the tag `{slug}`.
 
 ## 🏷️ Fields
 
@@ -53,7 +61,7 @@ Conventions §5 names the fields. The app holds them like this:
 | Field (conventions §5) | In the app | How |
 |---|---|---|
 | Kind | `kind` | The same seven values. Left out at create, the app gives `note` |
-| Title | `title` | The name `conventions-vault.md` → Names gives the kind, without `.md`: a brief `{project}-{lane}-{slug}-YYYY-MM-DD`, a plan `{project}-{lane}-{slug}-plan`, a sprint record `{project}-sprint-{name}-{record}`. Never a kind label in front (`Brief: …`, `Plan: …`): the card's `Brief:` or `Technical plan` line adds its own |
+| Title | `title` | The name conventions §4 gives the kind: a brief `{project}-{lane}-{slug}-YYYY-MM-DD`, a plan `{project}-{lane}-{slug}-plan`, a sprint record `{project}-sprint-{name}-{record}`. Never a kind label in front (`Brief: …`, `Plan: …`): the card's `Brief:` or `Technical plan` line adds its own |
 | Status | `status` | The same values, `archived` included (Status and filing) |
 | Summary | `summary` | Needed to leave the Inbox |
 | Tags | `tags` | Free words. `notes_set_fields` replaces the whole list: send the user's tags back with any new one |
@@ -66,12 +74,12 @@ Conventions §5 names the fields. The app holds them like this:
 | Related notes | The pair | `notes_relate`, read from both sides |
 | Project, domain | The board the note is on, and that board's folder | Places |
 | Created, updated | The app's own dates | Never written by a helper |
-| Source | No field | A moved note says so in its first line |
+| Source | No field | A note moved in from somewhere else says so in its first line |
 
 A field the note's kind does not carry is refused. A kind change empties the fields the new kind
 does not carry.
 
-**A note moved in from another storage** keeps its history in its first line: `Moved from {path} ·
+**A note moved in from somewhere else** (a file, another notes app, an older layout) keeps its history in its first line: `Moved from {path} ·
 created {date} · updated {date}`. In the text, a link to another note is that note's title as
 plain words, and the two notes are related with `notes_relate`.
 
@@ -149,7 +157,7 @@ A plan linked to a card cannot be archived while it is linked: it follows its ca
 ## 🛠️ Dev projects
 
 Conventions §13 in the app: a card's brief and its plan are notes linked to that card; a sprint's
-records are notes on the project's board with the tag `sprint-{name}`. Their titles follow Fields → Title, the names they carry in the vault.
+records are notes on the project's board with the tag `sprint-{name}`. Their titles follow conventions §4.
 
 ## ⛔ Refusals
 

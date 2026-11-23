@@ -6,7 +6,16 @@ All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace s
 
 Version 2.0.0 when released: the Project Context format changes and commands are removed (card BM-15).
 
+### Removed
+- **The MyNotes vault as a notes storage.** `bandit:notes` keeps one storage, the app's Notes. Gone with it: the commands `/bandit:notes init`, `home` and `settings`, the vault conventions (folders, filenames, frontmatter, Obsidian settings) and the WebDAV write rules. The naming rules that lived in the vault file are now conventions §4, as note titles.
+- **Saving minutes to a file-storage folder.** `bandit:minutes` saves its minutes as notes, or hands them over in the chat; the options "same folder as the audio" and "another BanditCloud folder" are gone.
+
+### Added
+- **Taking a card.** `bandit:tasks`: a card taken to work on gets today's date when it has none, and follows the work in Execution (Doing, Stand By, complete). `/bandit:tasks doing` sets the date in the same step.
+- **`/bandit:notes lint` checks names and the hub note:** a title that breaks conventions §4, two notes with one title in one place, a project board with no hub note or with two, customer data in a note's text.
+
 ### Changed
+- **A finished card's conclusions are written on every project**, except one whose Project Context says `notes: none`.
 - **A project's notes are in the app's Notes unless its Project Context says `notes: none`.** A missing `notes:` line used to mean the MyNotes vault; it now means the app. `notes: app`, written before this version, stays valid and says the same thing. `notes: none` is new: the helpers write no note for that project. Checker rule AT2 accepts `none` and `app` and refuses any other value.
 - **The instruction templates no longer start with a settings line.** The comment on line 1 named a vault settings folder; a project now has one instructions file and no second copy to track. The `dev` template describes a project that runs in Claude Code from capture to close.
 

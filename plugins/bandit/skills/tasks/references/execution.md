@@ -78,14 +78,26 @@ Report the breach. Propose what moves back to To Do or Stand By, starting from t
 ### `/bandit:tasks doing`
 
 1. Resolve the named task — `list_tasks` or the board just read
-2. `update_tasks { items: [{ taskId, executionState: "doing" }] }`
+2. `update_tasks { items: [{ taskId, executionState: "doing" }] }`. **A card with no due date gets
+   today's** in the same entry (`dueDate`): work that is started is dated (Taking a card, below).
+   A card in an Inbox lands in its board's first column when it is dated
 3. The card still has an incomplete blocker (`get_task` → `blockedBy`) → say so: it can be worked,
    not completed, until the blocker is. A refusal → report its reason and stop
 
+### Taking a card
+
+Whoever takes a card to work on it, a person or an agent, with `doing` or without typing it:
+
+1. **The due date first.** Read the card. No due date → set today's. A date it already has stays.
+2. **The card follows the work** in Execution: `doing` while it is worked, `standby` when it waits
+   on someone else, complete (`done`) when it is finished. One `update_tasks` entry at each change,
+   never at the end for all of them.
+3. Not for cards a sprint moves: bandit-dev:sprint sets its batch's dates and states itself.
+
 ### `/bandit:tasks done`
 
-1. **Conclusions first, on a project whose notes are in the app's Notes** (`notes: app` in its
-   Project Context; a vault project skips this step and completes as before). bandit:notes
+1. **Conclusions first** (a project whose Project Context says `notes: none` skips this step and
+   completes its cards with no note). bandit:notes
    `references/conclusions.md`: what each card's comments taught goes into its linked note, one row
    a card in one proposal; a card with nothing worth keeping gets no row. For an approved row
    bandit:notes writes the note, then, on a Workflow board only, this skill writes the description

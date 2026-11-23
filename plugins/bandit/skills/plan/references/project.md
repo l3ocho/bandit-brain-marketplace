@@ -23,7 +23,7 @@ This skill does NOT do these. It tells the user when to invoke them:
 
 | What | Where |
 |---|---|
-| Place | The project's place for planning documents, from `domain` and `project` in the `## 🧭 Project Context` section (owned by bandit:project). bandit:notes names it, in the app's Notes or the vault (`references/other-skills.md` there → Who writes what). Missing, or `domain: none` → ask once where they go. Never guess |
+| Place | The project's place for planning documents, from `domain` and `project` in the `## 🧭 Project Context` section (owned by bandit:project). bandit:notes names it (`references/other-skills.md` there → Who writes what). `notes: none` in the Project Context → the documents are handed over in the chat, no note is written. Missing, or `domain: none` → ask once where they go. Never guess |
 | Project plan | A note named `{project}-project-plan` |
 | Architecture | A note named `{project}-architecture` |
 | WBS | A note named `{project}-wbs`, written by `wbs` mode (`references/wbs.md`), not this mode |
@@ -54,7 +54,7 @@ When resuming, greet with the state:
 
 ### ✍️ Writing safely
 
-Every save goes through bandit:notes, which writes it safely in either storage.
+Every save goes through bandit:notes, which writes it safely.
 
 - **First save:** bandit:notes looks for a note of that name first (its create without a
   duplicate). None → it creates the note with **every section heading and `_Pending_` under

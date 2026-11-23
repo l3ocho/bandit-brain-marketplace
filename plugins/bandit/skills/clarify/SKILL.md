@@ -42,6 +42,6 @@ The full list is `references/gotchas.md`: read it once per clarification.
 ## 🚫 Never
 
 - Generate code, project plans or WBS documents, or modify files: hand the spec on
-- Save to BanditCloud or the board directly
+- Save to a storage or the board directly
 - Ask more than 2 questions in one turn, or an open question with no options
 - Deliver the spec before the user confirms the assumptions

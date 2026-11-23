@@ -1,6 +1,6 @@
 # 🏁 A finished card's conclusions
 
-> Read when a card is completed (bandit:tasks `done`, bandit-dev:sprint `close`) on a project whose notes are in the app's Notes: what its comments taught goes into its linked note, under one `Conclusions` section that a later close replaces.
+> Read when a card is completed (bandit:tasks `done`, bandit-dev:sprint `close`): what its comments taught goes into its linked note, under one `Conclusions` section that a later close replaces.
 
 Contents: Where it runs · Who runs it · The steps · The row · Unattended · Writing the section · Refusals · Never
 
@@ -10,9 +10,9 @@ completed: that stays bandit:tasks'.
 
 ## 🗄️ Where it runs
 
-**Only on a project whose Project Context carries `notes: app`** (`references/model.md` → Which
-storage). On a vault project nothing here runs: its `done`, completing several cards at once and
-its sprint close work as before.
+On every project, except one whose Project Context says `notes: none` (`references/model.md` →
+Where the notes are): there nothing here runs, and its `done`, completing several cards at once
+and its sprint close complete the cards and write no note.
 
 ## 🤝 Who runs it
 
@@ -103,7 +103,7 @@ card is still completed.
 
 ## 🚫 Never
 
-- Run on a vault project.
+- Run on a project whose Project Context says `notes: none`.
 - Write into a note in the Inbox.
 - Edit or delete a comment.
 - Add a second `Conclusions` section, or append to the one there.

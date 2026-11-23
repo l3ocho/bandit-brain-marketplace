@@ -22,9 +22,9 @@ storage holds the domain's notes: this skill adds only what is specific to minut
 
 ## ⛔ Hard limits (verified, don't re-test)
 
-- **The BanditCloud MCP can't carry audio**: `nc_webdav_read_file` returns empty content over 5 MB
-  (hard-coded in the server); downloads over 100 MB fail. **The Google Drive MCP** caps at 10 MB.
-  So the audio comes in as a chat attachment; BanditCloud finds the folder and takes the result
+- **Connectors can't carry audio**: a file-storage connector returns empty content for a large
+  file (5 MB on the one tested), and the Google Drive connector caps at 10 MB. So the audio comes
+  in as a chat attachment, or as a file in the folder Claude Code runs from
 - Workspace: 2 CPU cores, no GPU. Transcription ~0.27× real time; diarization ~0.3× and unreliable
   on single-mic room recordings
 

@@ -32,7 +32,7 @@ updated: 2026-10-20
 |-----|----------------------------------------------|-------------------------------|----------------------------------------------------------------------------------|
 | 🗃️ | [[#🗃️ bandit:notes\|bandit:notes]]         | `/bandit:notes {command}`     | Note conventions, filing the inbox, lint, archive                                |
 | ✅   | [[#✅ bandit:tasks\|bandit:tasks]]           | `/bandit:tasks {command}`     | The Bandit Brain task board, plus the dev card workflow on Technical boards  |
-| 🎙️ | [[#🎙️ bandit:minutes\|bandit:minutes]]   | `/bandit:minutes` + the audio | Meeting recording → two minutes notes                                            |
+| 🎙️ | [[#🎙️ bandit:minutes\|bandit:minutes]]   | `/bandit:minutes [transcript]` | Meeting transcript → two minutes notes (a recording: the fallback)              |
 | 💰  | [[#💰 bandit:finance\|bandit:finance]]      | `/bandit:finance {command}`   | The Finance module: log, import, sort, the budget month, bills, reconcile, review, investments |
 | 🛠️ | [[#🛠️ bandit:project\|bandit:project]] | `/bandit:project {command}`   | Onboarding (instructions + notes + board, one approval) and project instructions |
 | 📐  | [[#📐 bandit:audit\|bandit:audit]]          | `/bandit:audit {command}`     | Domain and project structure: each project's stamp ↔ the boards                  |
@@ -160,16 +160,16 @@ updated: 2026-10-20
 
 ### 🎙️ bandit:minutes
 
-> [!abstract] Meeting recording → professional minutes, saved as notes through bandit:notes
-> `plugin` · [[bandit:minutes/SKILL|open skill]] · `/bandit:minutes` with the recording attached, or 💬 attach the audio and ask for minutes
+> [!abstract] Meeting transcript → professional minutes, saved as notes through bandit:notes. It starts from a transcript made where the recording is kept; transcribing a recording in the chat is the fallback. Runs unattended when a transcript arrives
+> `plugin` · [[bandit:minutes/SKILL|open skill]] · `/bandit:minutes [transcript]`, or 💬 name or attach the transcript and ask for minutes
 
 | Asks up front | ⚙️ Options                                                       | Default             |
 |---------------|------------------------------------------------------------------|---------------------|
 | Version       | `Both` · `Full only` · `Short only`                              | Both                |
 | Location      | `{Domain} notes` · `In the chat only`                            | Notes               |
 | Meeting       | `Supervisors` · `Department` · `Project` (notes only)            | From the transcript |
-| Speakers      | Separate voices, only if you ask                                 | Off                 |
-| Model         | `small` · `medium` for poor audio (≈3× slower)                   | small               |
+| Speakers (fallback only) | Separate voices, only if you ask                      | Off                 |
+| Model (fallback only)    | `small` · `medium` for poor audio (≈3× slower)        | small               |
 
 📚 **References:** `references/workflow.md` (setup, transcription, verify and save) · `references/scripts.md` (the scripts) · `references/formats.md` (the full and short formats) · `references/notes.md` (saving and filing as notes).
 📚 **Scripts:** `scripts/transcribe.py` · `scripts/diarize.py` · `scripts/merge.py`, copied to the working directory before running.

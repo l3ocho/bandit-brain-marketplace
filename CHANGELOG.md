@@ -8,6 +8,7 @@ Version 2.0.0 when released: the Project Context format changes and commands are
 
 ### Removed
 - **The MyNotes vault as a notes storage.** `bandit:notes` keeps one storage, the app's Notes. Gone with it: the commands `/bandit:notes init`, `home` and `settings`, the vault conventions (folders, filenames, frontmatter, Obsidian settings) and the WebDAV write rules. The naming rules that lived in the vault file are now conventions §4, as note titles.
+- **Minutes start from a transcript** (Changed, not removed: listed here with its pair). `bandit:minutes` takes a transcript named, attached or waiting in the folder the project's instructions name, and writes the minutes from it, unattended when nobody is there to answer; a handled transcript moves to that folder's `done/`. Transcribing a recording in the chat is the fallback, announced with its expected time.
 - **Saving minutes to a file-storage folder.** `bandit:minutes` saves its minutes as notes, or hands them over in the chat; the options "same folder as the audio" and "another BanditCloud folder" are gone.
 
 - **The settings folder, the second copy for another surface and the dev mirror.** `bandit:project` no longer keeps a project's instructions and reference doc in a vault folder, no longer builds a Claude Code copy of Claude.ai instructions (or the reverse), and no longer installs a Stop hook that copies a repository's settings out. Gone with them: the commands `/bandit:project sync` and `update`, the settings line at the top of the instructions, and checker rule DM1.

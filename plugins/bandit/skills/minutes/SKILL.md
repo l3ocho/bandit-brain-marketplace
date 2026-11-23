@@ -1,37 +1,42 @@
 ---
 name: "minutes"
-description: "Turns a meeting audio or video recording into professional minutes (a two-column Subject Item / Summary table, full and/or short), saved by default as two minutes notes through bandit:notes. Use when a recording comes with a request for minutes, action items or decisions."
+description: "Turns a meeting transcript, or a recording when there is none, into professional minutes (a two-column Subject Item / Summary table, full and/or short), saved as two minutes notes through bandit:notes. Use when a transcript or a recording comes with a request for minutes, action items or decisions."
 ---
 
 # 🎙️ Minutes
 
-Turns a meeting recording into professional, human-sounding minutes in markdown. Note conventions
-are bandit:notes' (conventions §4 names, §5 fields, §12 body), and so is every write, whichever
-storage holds the domain's notes: this skill adds only what is specific to minutes.
+Turns a meeting into professional, human-sounding minutes in markdown. **It starts from a
+transcript.** A recording is transcribed where recordings are kept, by whatever does that there,
+and the transcript is what reaches this skill; transcribing in the chat is the fallback for a
+recording that has no transcript yet. Note conventions are bandit:notes' (conventions §4 names,
+§5 fields, §12 body), and so is every write: this skill adds only what is specific to minutes.
 
 ## 🧭 Router
 
-`/bandit:minutes`, with the recording attached. One flow:
+`/bandit:minutes [transcript]`. One flow, and it runs unattended (rule 1):
 
 | Step | Does | Reference |
 |---|---|---|
+| Input | Find the transcript: named, attached, or waiting in the folder the project's instructions name. None, and a recording given → the fallback | `references/workflow.md` |
 | Setup | Resolve the domain, ask version (full, short, both), location and meeting type in one question set | `references/workflow.md` |
-| Transcribe | Prepare the audio, transcribe in the background, optional speaker separation | `references/workflow.md` · `references/scripts.md` |
+| Transcribe (fallback only) | Prepare the audio, transcribe in the background, optional speaker separation | `references/workflow.md` · `references/scripts.md` |
 | Write | Read the whole transcript, write the chosen versions | `references/formats.md` |
 | Verify and save | Re-check every number, date, name, owner; scrub customer data; save | `references/workflow.md` · `references/notes.md` |
 
 ## ⛔ Hard limits (verified, don't re-test)
 
 - **Connectors can't carry audio**: a file-storage connector returns empty content for a large
-  file (5 MB on the one tested), and the Google Drive connector caps at 10 MB. So the audio comes
-  in as a chat attachment, or as a file in the folder Claude Code runs from
-- Workspace: 2 CPU cores, no GPU. Transcription ~0.27× real time; diarization ~0.3× and unreliable
-  on single-mic room recordings
+  file (5 MB on the one tested), and the Google Drive connector caps at 10 MB. A transcript is
+  text and has no such limit
+- The fallback is slow: on a 2-core workspace with no GPU, transcription runs at ~0.27× real time
+  and diarization at ~0.3×, unreliable on single-mic room recordings. Say the expected time before
+  starting it, and that a transcript made where the recording is kept avoids it
 
 ## 🔒 Hard rules
 
-1. **Ask the setup questions once, before processing**; with nobody to answer: both versions, saved
-   as notes when the domain is known, the meeting type inferred and said at the top
+1. **Ask the setup questions once, before processing**; with nobody to answer (an unattended
+   run started by a transcript's arrival): both versions, saved as notes when the domain is known,
+   the meeting type inferred and said at the top. No question is ever a reason to stop such a run
 2. **Meeting types are exactly three:** supervisors, department, project (bandit:notes conventions §5)
 3. **Verify before saving:** every figure against the transcript; shaky items marked *(to confirm)*
 4. **No customer data, ever,** even when spoken: describe the case or use a placeholder

@@ -415,7 +415,7 @@ def context_keys(text):
         m = CONTEXT_KEY_RE.match(l)
         if not m:
             keys.append("?")
-        elif m.group(1) == "notes" and not m.group(2).startswith("app"):
+        elif m.group(1) == "notes" and not m.group(2).startswith(("none", "app")):
             keys.append("notes=?")
         else:
             keys.append(m.group(1))
@@ -466,13 +466,14 @@ def check_copies():
             bad.append(f"the key check passes a broken block {keys}")
     head = "## 🧭 Project Context\n\ndomain: Acme\nproject: home-reno\ntype: workflow\nboard: none\nprefix: hr\n"
     for sample, ok in ((head + "notes: app\n\nRead by every skill.", True),
+                       (head + "notes: none\n\nRead by every skill.", True),
                        (head + "notes: vault\n\nRead by every skill.", False),
                        (head + "  bogus: 1\n\nRead by every skill.", False),
                        ("domain: Acme\n## 🧭 Project Context section\nRead by every skill.", False)):
         if (not context_keys_bad(context_keys(sample), canon_keys)) != ok:
             bad.append(f"the key parser {'refuses a good' if ok else 'passes a broken'} block: {sample[:60]!r}")
     report("AT2", not bad, "; ".join(bad) or "project audit lists the current tools; Project Context lines and keys "
-           "match in CLAUDE.md, the templates and their shipped copies (4 broken key lists and 3 broken blocks refused, a good one passes)")
+           "match in CLAUDE.md, the templates and their shipped copies (4 broken key lists and 3 broken blocks refused, the two good ones pass)")
 
 
 # ── CL1 · a plugin change since the last release has an Unreleased CHANGELOG entry ──────

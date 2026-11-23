@@ -2,6 +2,14 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
+## Unreleased
+
+Version 2.0.0 when released: the Project Context format changes and commands are removed (card BM-15).
+
+### Changed
+- **A project's notes are in the app's Notes unless its Project Context says `notes: none`.** A missing `notes:` line used to mean the MyNotes vault; it now means the app. `notes: app`, written before this version, stays valid and says the same thing. `notes: none` is new: the helpers write no note for that project. Checker rule AT2 accepts `none` and `app` and refuses any other value.
+- **The instruction templates no longer start with a settings line.** The comment on line 1 named a vault settings folder; a project now has one instructions file and no second copy to track. The `dev` template describes a project that runs in Claude Code from capture to close.
+
 ## 1.0.2 · 2026-11-21
 
 ### Fixed

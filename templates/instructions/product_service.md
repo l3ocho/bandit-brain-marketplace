@@ -1,4 +1,3 @@
-<!-- bandit-project: {"storage_backend": "webdav", "webdav_folder": "MyNotes/{Domain}/Claude/ai-{slug}", "instructions_etag": null, "prompt_ref_etag": null, "instructions_version": null, "prompt_ref_version": null, "ref_version": "1.4", "last_sync": null} -->
 ## {Emoji} {Project Name} — Project Instructions
 **Version:** {X.Y.Z}
 **Last Updated:** {YYYY-MM-DD}
@@ -14,7 +13,7 @@ project: {slug}
 type: product_service
 board: project "{Board Name}"
 prefix: {pf}
-{notes: app — this line only when the project's notes are in the app's Notes}
+{notes: none — this line only when the helpers keep no notes for this project}
 
 Read by every `bandit` skill.
 **Home board first. Read and write across the domain. Nothing outside it.**

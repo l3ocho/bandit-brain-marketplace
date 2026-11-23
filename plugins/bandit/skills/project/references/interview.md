@@ -24,11 +24,13 @@ Each phase may take 1–2 messages when mixing both question types — that's fi
      `workflow`) — *"Is this a technical development project that should use the dev card
      workflow (lanes, stages, plan notes)? 1. Yes 2. No (recommended unless there's a code
      repo)"*. Yes → the Project Context gets `dev: true`. No → no `dev` line at all.
-   - **Claude Code surface** (whenever the project has no `dev: true`: every `workflow` project,
-     and a `product_service` or `claude_marketplace` project that answered No to the dev question)
-     — *"Will this project also run in Claude Code? 1. Yes 2. No"*. Yes → onboarding creates
-     `Claude/code-{slug}/` (bandit:notes) and this skill produces the Claude Code twin (`references/project-context.md` → Claude Code twin). No → neither.
-     No Project Context key: the answer goes to the onboarding hand-off only.
+   - **The surface is not asked.** It is the one this chat runs on (`references/surfaces.md`):
+     the instructions go to the folder's `CLAUDE.md` in Claude Code, or are handed over to paste
+     on Claude.ai. A `dev: true` project is a Claude Code project: asked for on Claude.ai, say
+     that sprints run in Claude Code and that onboarding should be run from the repository.
+   - **Notes** — *"Should the helpers keep this project's notes in the app? 1. Yes (recommended)
+     2. No, its records are kept elsewhere"*. Yes → no `notes:` line. No → the Project Context
+     gets `notes: none`.
    - **Finance accounts** (only when the user says this project works with money) — *"Should
      Finance in this project see only some accounts? Name them, or say all."* Names → the Project
      Context gets `finance: accounts "…"`, each checked live with `finance_get_context`. All → no
@@ -42,8 +44,9 @@ Each phase may take 1–2 messages when mixing both question types — that's fi
 5. **Task board scope** (single select via `ask_user_input`) — Does this project's work live on
    a Bandit Brain board?
 
-   Call `get_context` first and present its `boards` in the domain's folder (the domain not
-   known yet → ask the Phase 4 Domain question now, once). Options:
+   Call `get_context` first. **Domain** (single select): its top-level board folders, plus "A new
+   folder" (its name is asked; bandit:tasks' board step creates it) and "None" (`domain: none`).
+   Then present the `boards` in the domain's folder. Options:
    - "One existing board" — pick from the domain's live board list
    - "New board" — ask its name and, optionally, a subfolder of the domain's folder. Its profile
      is not asked: `technical` with `dev: true` (the dev rules and the dev board shape go
@@ -55,9 +58,10 @@ Each phase may take 1–2 messages when mixing both question types — that's fi
    becomes, the `board:` line it returns and what it may create are bandit:tasks' rules
    (`references/onboard.md`), not this skill's. Write back the `board:` line it returns.
 
-   **Slug and prefix** are asked in Phase 4 (folder backend). When the output is artifact-only,
-   suggest a kebab-case slug from the project name for the Project Context `project:` and
-   confirm it; `prefix:` is then `none`.
+   **Slug and prefix.** Suggest a kebab-case slug from the project name for the Project Context
+   `project:` (the project's own name, not a Claude.ai display name) and confirm it. Then the
+   prefix: a 2–3 character abbreviation (e.g. `kf` for KeyForge), or `none` for a project with no
+   working folder.
 
 ## Phase 2: Role & Decision Authority
 
@@ -102,9 +106,9 @@ For each selected conditional, ask a focused follow-up:
 - **Change Workflows:** "When area X changes, what needs to happen downstream?"
 - **Conventions:** "What patterns do you follow consistently? (naming, branches, output format, etc.)"
 
-## Phase 4: Optional Sections & Output
+## Phase 4: Optional Sections
 
-Quick resolution of optionals and output preference.
+Quick resolution of the optionals.
 
 1. **Optional sections** (multi-select):
    - **Tool & Integration Rules** — "Strong opinions about which tools to use or avoid"
@@ -112,63 +116,6 @@ Quick resolution of optionals and output preference.
    - **Mission Statement** — "A north-star statement for tone and decision-making"
 
    **Project Context** is not offered here — it is always included (see `references/project-context.md`). Phase 1 question 5 fills its `board:` line, whatever the answer.
-
-2. **Output target** (single select):
-   - "Artifact only" (default)
-   - "Artifact + vault folder (WebDAV)"
-   - "Vault folder (WebDAV) only"
-
-   Record it as `storage_backend`: `"webdav"` for either vault option, `null` for
-   artifact-only. The Nextcloud Notes app is **not** a destination any more (see
-   ⚠️ Legacy Notes backend in the audit flow).
-
-3. **Folder, slug and prefix** — only when the output includes the vault folder. The folder is
-   **derived, not typed**. Settings live in the project's settings folder of the MyNotes vault,
-   as defined by the `bandit:notes` skill: `MyNotes/{domain}/Claude/ai-{project}`. Ask:
-   - **Domain** (single select via `ask_user_input`) — list the live domains with
-     `nc_webdav_list_directory("MyNotes")`: every folder whose name doesn't start with `_` or
-     `.`. Add a last option, "Outside MyNotes (custom path)". Store the choice as the Project
-     Context `domain:`.
-   - **Project slug** (single select + free text) — the **project's own name** as a slug, not
-     the Claude.ai project's display name: "Acme Notes Templates" in Claude.ai is the
-     `home-reno` project. One slug names all of the project's folders in the vault, and the
-     Claude Code settings reuse it, so both surfaces share the same docs. Offer the existing
-     `Projects/` folders of the domain first (`nc_webdav_list_directory`), then a free-text
-     option for a new one. Store it as the Project Context `project:`.
-   - **File prefix** (open-ended) — a 2–3 character abbreviation (e.g. `kf` for KeyForge).
-     Store it as the Project Context `prefix:`.
-
-   Then show the derived paths and confirm, e.g. for a regular project:
-   - Settings (this skill writes here): `MyNotes/Acme/Claude/ai-home-reno`
-   - Shared project docs (read by Claude.ai and Claude Code): `MyNotes/Acme/Projects/home-reno`,
-     for a project on the vault (the Notes question below); on the app's Notes, its board
-   - Claude Code settings (configured in the repo): `MyNotes/Acme/Claude/code-home-reno`
-
-   Every project type, **workflow included**, gets both folders (settings and shared project
-   docs) on the vault; on the app's Notes, the settings folder and the hub note on its board. Which
-   folders a project has is bandit:notes' rule, not this skill's. Show the paths that apply.
-   Store the settings path as `webdav_folder`. The `Projects/` and `Claude/` folders are **vault rows** from bandit:notes'
-   onboarding procedure (see **🚀 Onboarding** (`references/onboard.md`)), never created outside the approved proposal.
-
-   **"Outside MyNotes"** is the escape hatch for folders the vault conventions don't cover:
-   ask for the full path (relative to the Nextcloud root, no leading slash), store it verbatim
-   as `webdav_folder`, set the Project Context `domain: none`, and still ask the project slug
-   for `project:`.
-
-   Derived filenames (**`.md` extension** — these are real files and want to open as markdown):
-   - Instructions: `{prefix}-instructions-v{N}.md` (e.g., `bi-instructions-v0.md`)
-   - Prompt reference: `{prefix}-prompt-reference-v{N}.md` (e.g., `bi-prompt-reference-v0.md`)
-
-   Version numbers are integers appended without dots. Initial version is always `v0`. See
-   **Vault Folder (WebDAV)** in `references/output.md` for the full rules.
-
-4. **Notes** (single select), asked for every project, whatever the output target: where the
-   project's notes live (plans, minutes, briefs, reports). The domain is asked first if no answer
-   gave it yet (the Domain question above, without the custom path).
-   - "The app's Notes" (recommended: documents for AI work live in the app) → the Project Context
-     line `notes: app`. The project's docs are notes on its board, not `Projects/{slug}/`; any
-     settings path above stays in the vault
-   - "The MyNotes vault" → no `notes:` line
 
 For each selected optional, ask its focused follow-up (same pattern as Phase 3).
 
@@ -182,9 +129,8 @@ After the interview completes:
 4. **Dedup check** — scan for any information repeated across sections. Merge or cut.
 5. **Token budget check** — compare against the target for the project's complexity tier. If over,
    suggest what to offload to External References.
-6. **Add metadata block** — `<!-- bandit-project: {...} -->` as first line, in the shape the
-   reference template defines. Always set `storage_backend`; with vault output, populate the
-   storage fields (see **Metadata Storage Fields** in `references/output.md`).
+6. **No settings line.** The instructions start at their header (`references/output.md` → No
+   settings line).
 7. **Generate the Project Context** — always insert a `## 🧭 Project Context` section,
    immediately after Project Overview. See `references/project-context.md` for the exact
    format and how each key is filled.
@@ -198,8 +144,7 @@ After the interview completes:
    - **Open questions** (anything flagged during interview that wasn't resolved)
    Even minimal projects get this document. It keeps a consistent structure from day one and
    gives future audits a baseline to compare against. Format as markdown with ND-friendly
-   formatting. Title: "Project Reference — {project name}". With vault output, the file name is
-   the versioned one (e.g., `bi-prompt-reference-v0.md`).
-9. **Onboarding proposal** — with a vault target, run steps 2–7 of **🚀 Onboarding** (`references/onboard.md`): the vault
-   and board rows plus the two settings files, in one proposal. Artifact-only → just the board
-   rows (if any), then output the two files (see **Output Handling** in `references/output.md`).
+   formatting. Title: "Project Reference — {project name}". It is saved as the note
+   `{slug}-reference` (`references/output.md`).
+9. **Onboarding proposal** — run steps 2–7 of **🚀 Onboarding** (`references/onboard.md`): the
+   notes, board and settings rows in one proposal.

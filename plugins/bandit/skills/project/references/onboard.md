@@ -1,6 +1,6 @@
 # 🚀 Onboarding: one command for the whole project
 
-> Read for `/bandit:project onboard`. New projects also read `references/interview.md`; existing ones run `references/audit.md` first.
+> Read for `/bandit:project onboard`. New projects also read `references/interview.md`; existing ones run `references/audit.md` first. `references/surfaces.md` comes before both.
 
 ## 🚀 Onboarding — one command for the whole project
 
@@ -10,57 +10,53 @@ own rules: this skill loads them and runs their onboarding procedures, it never 
 
 | Step | What | Who |
 |---|---|---|
-| 1 | Interview (new project) or audit (existing project): the five Project Context values (+ optional `dev`, `finance` and `notes`), the hub-note summary, and the modules when the domain is new | This skill |
-| 2 | **Notes rows:** load the `bandit:notes` skill and run its *Onboarding rows* (Part 3) with `domain`, `project`, `type`, `dev` (when set), `notes` (when set), whether the project has a Claude Code surface, the summary and the modules. A project on the app's Notes gets its hub note on its board and no vault folder for notes; its settings folders stay vault rows | bandit:notes |
+| 1 | The surface and the kind of agent (`references/surfaces.md`), then the interview (new project) or the audit (existing project): the five Project Context values (+ optional `dev`, `finance` and `notes`) and the hub-note summary | This skill |
+| 2 | **Notes rows:** load the `bandit:notes` skill and run its *Onboarding rows* (Part 3) with `domain`, `project`, `type`, `dev` and `notes` (when set) and the summary | bandit:notes |
 | 3 | **Board rows:** load the `bandit:tasks` skill and run `references/onboard.md` with the board answer, project name, board profile and folder, plus `dev: true` when set (onboard then adds its dev board shape rows to the same proposal) | bandit:tasks |
-| 4 | **Settings rows:** the instructions and reference doc files in `Claude/ai-{slug}/` (see **Vault Folder**) | This skill |
+| 4 | **Settings rows.** Claude Code: `CLAUDE.md`, `.claude/settings.json`, and for a workflow agent the working-folder guard and its folders (`references/surfaces.md`, `references/workdir.md`). Both surfaces: the reference notes (`references/output.md`) | This skill |
 | 5 | **One proposal** with every row from steps 2–4 and a fix row for every finding, then the closing line | This skill |
-| 6 | Execute exactly the approved rows, in order: vault → board → hub note on the app's Notes (it needs its board) → settings files. Report per row | Each owner's procedure |
-| 7 | Hand over the instructions to paste | This skill |
+| 6 | Execute exactly the approved rows, in order: board → hub note (it needs its board) → files in the folder → reference notes. Report per row, each file read back | Each owner's procedure |
+| 7 | Claude.ai only: hand over the instructions to paste | This skill |
 
-**The one proposal:**
+**The one proposal** (a workflow agent in Claude Code):
 
 ```
 | # | Step | Action | Target | Why |
 |---|---|---|---|---|
-| 1 | vault | create folder | MyNotes/Acme/Projects/home-reno/ | project folder |
-| 2 | vault | create note | …/Projects/home-reno/home-reno.md | hub note: summary below |
-| 3 | vault | create folder | MyNotes/Acme/Claude/ai-home-reno/ | settings folder |
-| 4 | board | create board | "Home Reno" · workflow · folder "Acme" | board: project "Home Reno" |
-| 5 | settings | create file | …/Claude/ai-home-reno/hr-instructions-v0.md | instructions |
-| 6 | settings | create file | …/Claude/ai-home-reno/hr-prompt-reference-v0.md | reference doc |
+| 1 | board | create board | "Home Reno" · workflow · folder "Acme" | board: project "Home Reno" |
+| 2 | notes | create note | "Home Reno" · Docs · home-reno | hub note: summary below |
+| 3 | settings | create file | CLAUDE.md | instructions v1.0.0, from the product_service template (text below) |
+| 4 | settings | add keys | .claude/settings.json | the working-folder guard: 2 hooks, 3 allow rules (listed below) |
+| 5 | settings | copy file | .claude/hooks/workdir.py | the guard script |
+| 6 | settings | create folders | work/ data/ scratch/ _closed/ _backup/ | the layout |
+| 7 | notes | create note | "Home Reno" · Docs · home-reno-reference | reference doc |
 ```
 
-For a project on the app's Notes, rows 1 and 2 become one row, step `notes`, action `create note`,
-target `"Home Reno" · {column}`: the hub note on its board, after the board row, with `{column}`
-one column of that board, named in the row (bandit:notes `onboard` on the app's Notes picks it).
-A twin (Claude Code, no `dev: true`) still gets its `Projects/` and `Projects/{slug}/` folder rows
-for its working-folder manifest, with no hub note there (bandit:notes Onboarding rows).
+On Claude.ai, rows 3 to 6 do not exist; a row for the note `{slug}-instructions` is added, and the
+instructions are handed over after the proposal runs.
 
-**Findings come fixed.** Anything noticed along the way (a legacy folder elsewhere in the
-domain, a stale `board:` line) is a **row in the same table**, step `fix`, with its owner's exact
-action (vault fixes come from bandit:notes as `domain` rows). Never a bare list. Two valid fixes →
-one row with both, recommended first. Then: *Nothing is created or changed until you answer all,
-a list, or none.*
+**Findings come fixed.** Anything noticed along the way (a stale `board:` line, a settings line
+left at the top of the instructions, a second hub note) is a **row in the same table**, step
+`fix`, with its owner's exact action. Never a bare list. Two valid fixes → one row with both,
+recommended first. Then: *Nothing is created or changed until you answer all, a list, or none.*
 
 **Rules:**
-- **Length gate first.** Before any interview, audit, targeted update or version write, count
-  the instructions' words without the metadata comment (`sed 1d {file} | wc -w`), and both copies
-  for a twin. Over the tier's target in **Token Budget Targets** (`references/reference-template.md`,
+- **Length gate first.** Before any interview, audit or write, count the instructions' words
+  (`wc -w`). Over the tier's target in **Token Budget Targets** (`references/reference-template.md`,
   never above 1,000) → the trim is built first and is row 1 of the same proposal: cut what the
   reference doc already holds, move detail there. Never write or hand over a version over the budget.
 - **Step 3 is bandit:tasks' procedure, loaded and run.** Never swap it for a quick check of your
   own. Each board row cites the `get_context → boards` entry it came from.
 - **Approval covers the approved rows and nothing else.** Every finding has its own row, so one
-  "all" fixes everything; a row the user didn't approve never runs. Nothing outside this project's own
-  folders is touched except by a `fix` row they approved.
-- A row that depends on a declined row is skipped and reported (the hub note without its folder,
-  or on the app's Notes without its board; the settings files without `Claude/ai-{slug}/`).
+  "all" fixes everything; a row the user didn't approve never runs. Nothing outside this project's
+  own folder and board is touched except by a `fix` row they approved.
+- A row that depends on a declined row is skipped and reported (the hub note without its board;
+  the guard script without its settings keys).
 - The Project Context written into the instructions reflects what was approved: `domain:` is the
-  real domain whenever a vault or a board folder is used (`none` only for a custom path or
-  artifact-only), `board:` is the line bandit:tasks returned, and `notes: app` is written only when
-  the project's notes are in the app's Notes.
+  board folder's real name (`none` only for a project with no board folder), `board:` is the line
+  bandit:tasks returned, and a `notes:` line is written only when the answer was `none`.
 - **Existing projects run the same flow.** Audit the instructions, then steps 2–7 propose only
-  what's missing (a wrong `domain:`, a missing folder, no board scope). Nothing missing → say so.
-- bandit:notes' `init`/`onboard` and bandit:tasks' `onboard`, typed directly in a project chat to
-  set up a project, point back here.
+  what's missing (a wrong `domain:`, a missing hub note, no board scope, no guard). Nothing
+  missing → say so.
+- bandit:notes' `onboard` and bandit:tasks' `onboard`, typed directly in a project chat to set up
+  a project, point back here.

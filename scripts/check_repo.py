@@ -994,23 +994,6 @@ def check_code_changed():
            "implementation paths, a code line and an unknown base say needed)")
 
 
-# ── DM1 · the dev mirror prunes .claude/worktrees/, and this repo runs the reference copy ─
-def check_dev_mirror():
-    ref = (PLUGINS / "bandit" / "skills" / "project" / "references" / "dev-mirror.md").read_text(encoding="utf-8")
-    m = re.search(r"\*\*3\. `\.claude/hooks/mirror-check\.py`\*\*[^\n]*\n\n```python\n(.*?)\n```", ref, re.S)
-    code = m.group(1) if m else ""
-    bad = []
-    if not code:
-        bad.append("dev-mirror.md has no mirror-check.py block")
-    elif "rglob(" in code or "dirnames[:]" not in code or '".claude/worktrees"' not in code:
-        bad.append("the reference script walks .claude/ without pruning .claude/worktrees")
-    own = ROOT / ".claude" / "hooks" / "mirror-check.py"
-    if code and own.is_file() and own.read_text(encoding="utf-8").rstrip("\n") != code.rstrip("\n"):
-        bad.append(".claude/hooks/mirror-check.py differs from the dev-mirror.md copy")
-    report("DM1", not bad, "; ".join(bad) + " (BB-373)" if bad else
-           "dev mirror: the reference prunes .claude/worktrees, this repo runs the same copy")
-
-
 # ── SP12 · a done wave is drawn done in the sprint map (temporary, decisions RS16) ─
 def check_sp12():
     script = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts" / "check_sprint.py"
@@ -2439,7 +2422,6 @@ def main(argv):
     check_sp11()
     check_design_handover()
     check_gate_order()
-    check_dev_mirror()
     check_sprint_map()
     check_sp12()
     check_sp13()

@@ -1,9 +1,9 @@
 # 📋 Project Instructions Reference Template
 
-> Canonical definition of what well-formed Claude.ai project instructions contain.
+> Canonical definition of what well-formed project instructions contain, on either surface: a Claude.ai project's instructions, or a folder's `CLAUDE.md` in Claude Code.
 > Drives both interview questions (new project mode) and audit criteria (existing project mode).
 >
-> **Reference Version:** 1.4 — 1.4 dropped the Notes-app storage fields and the lifecycle block.
+> **Reference Version:** 2.0 — 2.0 dropped the settings line, the settings folder and the second copy for another surface.
 
 ---
 
@@ -33,7 +33,7 @@ These appear in every project instruction set, regardless of project size or com
 **Purpose:** Version tracking and quick identification.
 
 **Must contain:**
-- Project name (matches Claude.ai project name)
+- Project name (on Claude.ai, the project's name there)
 - Version number (semver)
 - Last updated date
 
@@ -98,38 +98,38 @@ State the project classification at the top of the overview. It shapes smart def
 ### 2b. Project Context
 
 **Concern:** Context
-**Purpose:** Tell every other skill which project this is: domain, slug, type, board scope, prefix, and where its notes live.
+**Purpose:** Tell every other skill which project this is: domain, slug, type, board scope and prefix.
 
-**Must contain:** the five required keys (plus the optional `dev: true`, `finance:`, `design:` and `notes: app` lines), in the fixed format defined in **Project Context Section** (SKILL.md — not restated here).
+**Must contain:** the five required keys (plus the optional `dev: true`, `finance:`, `design:` and `notes:` lines), in the fixed format defined in `references/project-context.md` (not restated here).
 
 **Audit criteria:**
 - Present, directly after Project Overview
-- All five required keys, valid values; `domain` exists in `MyNotes`, or with `notes: app` as a board folder (or `none`); `board` resolves (or `none` / `pending`)
+- All five required keys, valid values; `domain` is a top-level board folder (or `none`); `board` resolves (or `none` / `pending`)
 - `dev`, when present, is `true`; anything else → fix or remove the line. Absent is valid
-- `notes`, when present, is `app`; anything else → fix or remove the line. Absent is valid (the vault)
-- Missing on legacy instructions → ⚠️ Legacy context, migrated from the metadata
+- `notes`, when present, is `none` or the older `app`; anything else → remove the line. Absent is valid (the app's Notes)
+- Missing → built from what the instructions say, as a fix row
 
 **Length:** 5 lines (6 with `dev`) plus the 2 closing lines.
 
 ---
 
-### 2c. Environment (Claude Code twins only)
+### 2c. Environment (Claude Code projects only)
 
 **Concern:** Context
-**Purpose:** The one section where a project's Claude.ai instructions and its Claude Code `CLAUDE.md` differ (`references/project-context.md` → Claude Code twin). Each copy states its surface outright, so nothing is guessed at runtime.
+**Purpose:** Say where the project runs, so nothing is guessed at runtime.
 
 **Heading:** exactly `## 🖥️ Environment`, directly after Project Context.
 
 **Must contain:**
-- Claude.ai copy: planning surface, no local files
-- Claude Code copy: the machine it runs on, local working files, execution, and where it reads the reference doc: its vault path in `ai-{slug}/`, through BanditCloud; plus the **Working folder** line from `references/workdir.md` (S12)
-- Both: notes and output go to `{Domain}/Projects/{project}/`; working files stay local on the Claude Code machine
+- The machine it runs on and the folder it runs from
+- Where its reference doc is: the note `{slug}-reference` on its board (`references/output.md`); with `notes: none`, the file `REFERENCE.md` in the folder
+- Notes go to the app's Notes on its board; working files (data, scripts, outputs) stay in the folder
+- A workflow agent: the **Working folder** line from `references/workdir.md` (S12), with the project's real `prefix`
 
 **Audit criteria:**
-- Present only for a project without `dev: true` that has a Claude Code surface
-- The Claude Code copy names the reference doc's vault path; without it, content moved to the reference doc is unreachable there
-- Everything outside it is byte-identical between the twins, `**Version:**` included
-- The Claude Code copy has the Working folder line, with the project's real `prefix`
+- Present in a `CLAUDE.md`; absent from Claude.ai instructions
+- Names the reference doc's home; without it, detail moved to the reference doc is unreachable
+- A workflow agent's has the Working folder line
 
 **Length:** 3–7 lines.
 
@@ -189,10 +189,6 @@ This default can be customized (e.g., scoped to architecture-only decisions) but
 > **Always:** When a scope is agreed, propose the card and, on the user's yes, write it through `/bandit:tasks spec`. `/bandit:tasks stage … ready` (on their approval) and `/bandit:tasks pick-ready` write the board the same way. These need no separate standing instruction.
 
 Any other Hard Rule that forbids board writes is scoped to exclude them ("…except the dev commands `spec`, `stage … ready` and `pick-ready`").
-
-**Projects with a `Claude/code-{slug}/` (Claude Code twin or dev mirror) also get, on both surfaces:**
-
-> **Never:** put anything but settings into `Claude/code-{slug}/` (the twin `CLAUDE.md`, its `claude/settings.json` and `claude/hooks/workdir.py`, or the dev mirror). Work output goes to `Projects/{project}/`.
 
 **Audit criteria:**
 - Every rule passes the verifiability test: could Claude check whether it violated this?
@@ -375,7 +371,7 @@ These govern how the reference is applied across all sections.
 1. Project Header
 2. Project Overview
 3. Project Context
-   - Environment (Claude Code twins only)
+   - Environment (Claude Code projects only)
 4. Role Definition
 5. Hard Rules
 6. *Conditional sections (by relevance to this project)*
@@ -424,38 +420,13 @@ These are always present in generated instructions regardless of interview answe
 2. **Formatting standard:** Generated instructions follow ND-friendly formatting (emoji anchors, tables, scannable structure).
 3. **Anti-redundancy:** No repeated information across sections.
 
-### Metadata Block
+### No settings line
 
-Every generated instruction set includes this HTML comment as the first line:
+Generated instructions start at their header: no HTML comment on line 1. The project's identity is
+the `## 🧭 Project Context` section (`references/project-context.md`); its version is the
+`**Version:**` line. Instructions written before reference 2.0 start with a comment of the form
+`<!-- …: {…} -->` holding storage fields: the audit flags it (⚠️ Legacy settings line) and its row
+removes it, after taking a slug or prefix found only there into the Project Context.
 
-```
-<!-- bandit-project: {"storage_backend": null, "webdav_folder": null, "instructions_etag": null, "prompt_ref_etag": null, "instructions_version": null, "prompt_ref_version": null, "ref_version": "1.4", "last_sync": null} -->
-```
-
-- **Marker.** The comment's label is `bandit-project:`. Instructions written before the marketplace
-  (2026-10-13) carry the previous skill's name as the label, with the same JSON: read them exactly
-  the same way, and write `bandit-project:` on the next version.
-- `storage_backend` — `"webdav"` when the files live in the vault folder, `null` for
-  artifact-only. Read it before any other storage field.
-- `webdav_folder` — full folder path, relative to the Nextcloud root with no leading slash
-  (e.g., `MyNotes/Personal/Claude/ai-bandit-infra`). Derived as
-  `MyNotes/{domain}/Claude/ai-{project}` (Project Context) unless a custom path was chosen.
-  `null` when artifact-only.
-- `instructions_etag` — etag of the current instructions file, captured from the WebDAV write.
-  Used to detect edits made outside this skill. `null` when artifact-only.
-- `prompt_ref_etag` — etag of the current prompt reference file, same purpose. `null` when
-  artifact-only.
-- `instructions_version` — integer version of the instructions file (e.g., `0`, `1`, `2`), `null` if artifact-only
-- `prompt_ref_version` — integer version of the prompt reference file, `null` if artifact-only
-- `ref_version` — which reference template version generated these instructions
-- `last_sync` — ISO timestamp of the last vault write
-- Audit mode reads this to detect version drift between instructions and the current reference
-- **The project's identity is not in this block.** Domain, slug, type, board and prefix live in
-  the `## 🧭 Project Context` section (see `references/project-context.md`). Instructions
-  written before reference 1.3 carry them here as `vault_domain`, `vault_project`,
-  `project_type`, `note_prefix` and `taskops_scope`; the audit migrates them (⚠️ Legacy context).
-- **Legacy fields.** Instructions written before 1.4 may carry `note_id`, `ref_doc_note_id`,
-  `note_category` (Notes-app storage) and `lifecycle` (old bandit:plan state). The audit
-  flags them (⚠️ Legacy Notes backend, ⚠️ Legacy lifecycle) and drops them on the updated version.
-- **Naming fields (`webdav_folder`, the Project Context `prefix:`) are set once during the first
-  write and reused on every version bump.** The user must explicitly request changes.
+**The Project Context `project:` and `prefix:` are set once** and reused on every version. The user
+must explicitly request a change.

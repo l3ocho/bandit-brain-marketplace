@@ -6,13 +6,13 @@
 
 Determine which mode to operate in based on the current project state.
 
-**Check the current project instructions** (they're visible as the system prompt in this conversation):
+**Find the current instructions** on this chat's surface (`references/surfaces.md`): the folder's `CLAUDE.md` in Claude Code, the system prompt's project instructions on Claude.ai:
 
 | Condition | Mode | Action |
 |-----------|------|--------|
 | No instructions, or only a project name / placeholder text | **New Project** | Run the interview flow |
 | Substantive instructions already present | **Existing Project** | Run the audit flow |
-| The change is for **another** project (bandit:audit runs a settings row, or the user names a project that isn't this one) | **Vault update** | Run **🎯 Targeted update from the vault** (`references/update.md`). Never interview: this chat's own instructions aren't the target |
+| The change is for **another** project (bandit:audit runs a settings row, or the user names a project that isn't this one) | **Not from here** | Only a project can change its own instructions. Say which project to run `/bandit:project audit` in, with the exact change to make, and stop |
 
 If ambiguous (e.g., a few lines that might be intentional or might be a stub), ask the user:
 > "I see some brief instructions already in this project. Should I treat this as a fresh start
@@ -23,7 +23,7 @@ If ambiguous (e.g., a few lines that might be intentional or might be a stub), a
 ## 🆕 New Project Mode — Interview Flow
 
 No instructions yet → read `references/interview.md` and follow it: four chunked phases
-(context and stack, role and authority, conditional sections, optional sections and output),
+(context and stack, role and authority, conditional sections, optional sections),
 then generation. It fills every Project Context key, and its board question hands off to
 bandit:tasks exactly like **🚀 Onboarding** (`references/onboard.md`) step 3.
 
@@ -44,15 +44,13 @@ of open-ended and structured input:
 2. **What do you want to do?** (single select via `ask_user_input`) — Options:
    - "Full audit — check everything against the reference standard"
    - "Targeted update — I know what I want to change"
-   - "Just sync to the vault — instructions are fine, just save them"
+   - "Just the reference notes — instructions are fine, bring their copies in the app up to date"
 
 If "Targeted update": ask what specifically they want to change, then skip to Step 5
-(generate updated version) incorporating their changes without running the full audit. For
-another project's instructions, use **🎯 Targeted update from the vault** (`references/update.md`) instead.
+(generate updated version) incorporating their changes without running the full audit.
 
-If "Just sync to the vault": read `storage_backend` from the metadata. `"webdav"` → go to
-**Vault Folder (WebDAV)** (`references/output.md`). `"notes"` → run the ⚠️ Legacy Notes backend migration first.
-`null` or absent → ask the output target question first.
+If "Just the reference notes": propose the rows of `references/output.md` → The two reference
+notes, and nothing else.
 
 If "Full audit": incorporate any updates they shared into the analysis and continue below.
 
@@ -64,31 +62,26 @@ template section. Note:
 - **Present sections** — which reference sections are covered?
 - **Missing sections** — which required sections are absent?
 - **Unmapped content** — any content that doesn't fit a reference section?
-- **Metadata block** — is it present? What reference version was used?
+- **Kind of agent and readiness** (Claude Code) — the checks of `references/surfaces.md`, each failing one a row.
 - **Project Context** — is the `## 🧭 Project Context` section present, right after Project
   Overview, with all five required keys and valid values? A `dev:` line must say `true`; any
   other value → propose fixing or removing the line. No `dev:` line is never a finding. A
   `finance:` line must read `accounts "…"` with each name an account `finance_get_context` returns;
   a name that doesn't resolve → propose the fix. No `finance:` line is never a finding. A
   `design:` line must read `column "…"` (optionally `on board "…"`) with a column that resolves on
-  that board via `get_context`; one that doesn't → propose the fix. No `design:` line is never a finding. Check them live: `domain` is a folder in
-  `MyNotes`, or with `notes: app` a board folder (or `none`); `notes`, when present, is `app`; `board` resolves via `get_context → boards` (or is `none` / `pending`).
+  that board via `get_context`; one that doesn't → propose the fix. No `design:` line is never a finding. A `notes:` line, when present, is `none` or the older `app`; any other value → propose removing the line. No `notes:` line is never a finding. Check them live: `domain` is a top-level board folder (or `none`); `board` resolves via `get_context → boards` (or is `none` / `pending`).
   Naming, board profile and footprint aren't judged here: run `/bandit:audit check` in this project
   and carry its rows into the proposal (skip it for `domain: none`: bandit:audit scores domain
   projects only).
-  - **Missing (legacy instructions)** → flag ⚠️ **Legacy context** and build the block from what
-    the old instructions carry: `vault_domain` → `domain` (`null` → `none`), `vault_project` →
-    `project`, `project_type` → `type`, `note_prefix` → `prefix` (`null` → `none`), and the
-    `scope:` line of a `## 🗺️ Task Board Scope` section (or a `taskops_scope` metadata field) →
-    `board` (neither → `none`). Propose it as a fix, and on the updated version drop those
-    five fields from the metadata comment and the old scope section.
+  - **Missing** → build the block from what the instructions say (the project's name, its board,
+    its type) and propose it as a fix row; ask only for what they do not say.
 - **Project Context lines** — the three lines under the keys must read word for word as the block in
   `references/project-context.md` (who reads it, the scope line, the names-only line). Any other
   wording (old skill names, an old scope line, an old lookup tool) → ⚠️ **Legacy context lines**:
   the updated version carries the current three lines.
-- **Claude Code settings** (`dev: true` projects) — read `references/code-settings.md` and follow it:
-  the Claude Code settings copy in the vault is read, and each new tool or architecture change that
-  fits Claude.ai's job becomes a row in this proposal; Claude Code–only features get none.
+- **Two copies** — the same project's instructions found in a second place (a Claude.ai project
+  beside a `CLAUDE.md`, named by the user or by the instructions themselves) → ⚠️ **Two copies**:
+  the row names the one this chat runs on as live and asks the user to retire the other.
 - **Legacy tool names** — every Bandit Brain tool the instructions name, anywhere, must be a current
   one: `get_context`, `list_tasks`, `get_task`, `add_comment`, `list_events`, `create_tasks`,
   `update_tasks`, `reopen_tasks`, `delete_tasks`, `manage_subtasks`, `manage_recurrence`,
@@ -104,21 +97,15 @@ template section. Note:
   `notes_move`, `notes_file`, `notes_delete`, `notes_restore`, `notes_list_trash`, `notes_relate`,
   `notes_unrelate`, `notes_list_related`, and `search`. Any other board
   tool name → ⚠️ **Legacy tool name**: the
-  updated version names the current call (bandit:tasks references give the shape). On Claude Code,
-  check the twin or repo `CLAUDE.md` the same way and list each hit in the hand-over; on Claude.ai,
-  the hand-over adds one line: *check the Claude Code `CLAUDE.md` for board tool names that aren't current.*
-- **Legacy lifecycle** — a `lifecycle` object in the metadata, or a `## 🔄 Project Lifecycle
-  Workflow` section, is left over from the old planning skill. `/bandit:plan project` now keeps its
-  plan, architecture and WBS in the vault's `Projects/{project}/` and reads its state from those
-  files. Flag ⚠️ **Legacy lifecycle** and, on the updated version, drop both. Take `project_slug`
-  and `prefix` into the Project Context `project:` / `prefix:` if those are still empty. Old
-  lifecycle notes in the Notes app stay where they are; this skill never touches them.
-- **Legacy Notes backend** — `storage_backend: "notes"`, or a `note_id` with no
-  `storage_backend`. The Notes app is no longer a destination. Flag ⚠️ **Legacy Notes backend**
-  and offer to migrate: ask the Phase 4 domain, slug and prefix questions (`references/interview.md`), then do a **First
-  Write** into the vault folder (next version numbers after the ones in the metadata), and on
-  the updated metadata set `storage_backend: "webdav"` and drop `note_id`, `ref_doc_note_id`
-  and `note_category`. The old notes stay in the Notes app. Declined → artifact-only.
+  updated version names the current call (bandit:tasks references give the shape).
+- **Legacy lifecycle** — a `## 🔄 Project Lifecycle Workflow` section is left over from an old
+  planning skill. `/bandit:plan project` keeps its plan, architecture and WBS as notes and reads
+  its state from them. Flag ⚠️ **Legacy lifecycle** and drop the section on the updated version.
+- **Legacy settings line** — a first line of the form `<!-- …: {…} -->` (any label) is left over
+  from the settings folder this skill used to keep. Flag ⚠️ **Legacy settings line**: its row
+  removes the line. A slug or prefix found only there goes into the Project Context first. A
+  reference doc found only in an old place is brought into its note by a row of its own
+  (`references/output.md`), from the text the user gives or the session can read.
 
 ### Step 2: Audit Against Criteria
 
@@ -144,7 +131,7 @@ Output the audit as a structured report:
 ## 📋 Audit Report
 
 **Reference Version:** 1.0
-**Instructions Version:** [from metadata or "none found"]
+**Instructions Version:** [from the `**Version:**` line or "none found"]
 **Overall:** [X/Y sections pass] · [N redundancies found] · [Token count vs. target]
 
 ### Section Scores
@@ -168,15 +155,13 @@ Output the audit as a structured report:
 ### Step 5: Generate Updated Version
 
 Don't ask whether to fix. Build the updated version straight away and show it with the report;
-its version files are rows in the one proposal, so the user's answer to the proposal is the approval.
+its file or note rows are in the one proposal, so the user's answer to the proposal is the approval.
 
 1. Preserve all existing content that passes audit
 2. Fill gaps identified in the audit
 3. Resolve redundancies (keep in the most specific section)
 4. Apply ND-friendly formatting
-5. Update metadata block (bump version, set ref_version to current)
-6. Run steps 2–7 of **🚀 Onboarding** (`references/onboard.md`): propose whatever the vault and board are missing
-   together with the new version files, in one proposal (artifact-only → board rows only)
-
-If the existing instructions already have a vault destination (`webdav_folder`), default to a
-version bump using the existing naming convention; the new version files are rows, never written before the user's yes.
+5. Bump `**Version:**` and `**Last Updated:**`
+6. Run steps 2–7 of **🚀 Onboarding** (`references/onboard.md`): propose whatever the notes, the board and the
+   settings are missing together with the new version, in one proposal. Nothing is written before
+   the user's yes.

@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
-"""Working-folder guard for a Claude Code twin (structure rule S12).
+"""Working-folder guard for a project that runs in Claude Code without `dev: true`
+(structure rule S12).
 
-Installed as `.claude/hooks/workdir.py` in the twin's working folder
-(vault copy: `code-{slug}/claude/hooks/workdir.py`). Two modes:
+Installed as `.claude/hooks/workdir.py` in the project's folder, byte for byte from
+bandit:project. Two modes:
 
   workdir.py guard     PreToolUse on Write|Edit|NotebookEdit. Exit 2 blocks a write
                        outside the layout, with the reason on stderr.
   workdir.py manifest  SessionStart. Writes `.claude/workdir-manifest.json` (paths,
                        dates, counts; never file contents, never file names under
-                       data/) and, once a day, asks Claude to upload it to the vault.
+                       data/) and prints one line of counts. The manifest stays on the
+                       machine: bandit:audit reads it there.
 
 Layout (root = $CLAUDE_PROJECT_DIR):
   CLAUDE.md  .claude/   settings, owned by bandit:project
@@ -41,7 +43,7 @@ def root_dir():
 
 
 def context(root):
-    """Project Context values from the twin's CLAUDE.md, e.g. {'prefix': 'sw', ...}."""
+    """Project Context values from the folder's CLAUDE.md, e.g. {'prefix': 'sw', ...}."""
     try:
         text = (root / "CLAUDE.md").read_text(encoding="utf-8")
     except OSError:
@@ -210,17 +212,6 @@ def manifest():
     stray = [r["name"] for r in m["root"] if r["name"] not in ROOT_ALLOWED]
     print(f"Working folder (S12): {len(stray)} outside the layout, {len(m['loose'])} loose, "
           f"{len(m['misplaced_data'])} data file(s) outside data/. Details: .claude/workdir-manifest.json")
-    stamp = cdir / "workdir-manifest.requested"
-    today = m["generated_at"]
-    try:
-        last = stamp.read_text().strip()
-    except OSError:
-        last = ""
-    if last != today and m["domain"] and m["project"]:
-        stamp.write_text(today + "\n")
-        print(f"Upload .claude/workdir-manifest.json, as-is, to MyNotes/{m['domain']}/Projects/{m['project']}/"
-              f"workdir-manifest.json through BanditCloud (new file: omit if_match; existing: its bare-hex etag). "
-              f"It feeds /bandit:audit S12. One line to the user when done, nothing else.")
     return 0
 
 

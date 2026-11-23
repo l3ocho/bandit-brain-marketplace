@@ -113,7 +113,7 @@ s12:
   # Claude Code working folder (any project with a twin, no dev: true). The guard's
   # constants (bandit:project scripts/workdir.py) mirror this block: change both.
   hook_file: claude/hooks/workdir.py
-  hook_sha12: 98e137245f12          # sha256[:12] of bandit:project's scripts/workdir.py; a twin copy that differs is outdated
+  hook_sha12: 2406501573d8          # sha256[:12] of bandit:project's scripts/workdir.py; a twin copy that differs is outdated
   settings_file: claude/settings.json
   hook_events: [PreToolUse, SessionStart]   # each needs a command hook running hook_script
   hook_script: workdir.py

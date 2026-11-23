@@ -1,18 +1,18 @@
-# 📁 Working folder — the S12 guard for a Claude Code twin
+# 📁 Working folder — the S12 guard for a workflow agent in Claude Code
 
-> Read when onboarding a project with a Claude Code twin, on any twin version change, and for a
-> bandit:audit S12 row. Holds the layout, the guard (`scripts/workdir.py` in this skill), its
-> settings, the Environment line, and the rollout. The rule itself is S12 in
-> bandit:audit `references/structure-rulebook.md`. Hook format checked against the Claude Code hooks docs
-> (https://code.claude.com/docs/en/hooks) on 2026-09-29. Settings storage, not notes storage: `references/vault-storage.md` → Settings storage.
+> Read when onboarding or auditing a project that runs in Claude Code without `dev: true` (a
+> workflow agent, `references/surfaces.md`), and for a bandit:audit S12 row. Holds the layout, the
+> guard (`scripts/workdir.py` in this skill), its settings, the Environment line, and the rollout.
+> The rule itself is S12 in bandit:audit `references/structure-rulebook.md`. Hook format checked
+> against the Claude Code hooks docs (https://code.claude.com/docs/en/hooks) on 2026-09-29.
 
 ## 🗂️ Layout
 
-The twin's working folder is the folder Claude Code runs from (`$CLAUDE_PROJECT_DIR`).
+The project's working folder is the folder Claude Code runs from (`$CLAUDE_PROJECT_DIR`).
 
 | Path | Holds |
 |---|---|
-| `CLAUDE.md`, `.claude/` | Settings, handed over by this skill |
+| `CLAUDE.md`, `.claude/` | Instructions and settings, written by this skill's approved rows |
 | `repos/` | Read-only clones |
 | `work/{prefix}-{task}/` | One folder per board task: drafts, SQL, scripts, analyses |
 | `data/{prefix}-{task}/` | That task's data files. Purged on close, never archived |
@@ -36,21 +36,21 @@ The twin's working folder is the folder Claude Code runs from (`$CLAUDE_PROJECT_
 |---|---|
 | `PreToolUse` hook on `Write\|Edit\|NotebookEdit` → `workdir.py guard` | Exit 2 blocks a write outside the layout, a badly named task folder, or a data file outside `data/`, with the reason Claude sees. Settings (`CLAUDE.md`, `.claude/`) and hosted projects pass |
 | `\|\| exit 2` after the command | `python3` missing or the script failing → the write is refused, never waved through |
-| `SessionStart` hook → `workdir.py manifest` | Writes `.claude/workdir-manifest.json` (paths, dates, counts; never contents, never a file name under `data/`), prints a one-line count, and once a day asks Claude to upload the manifest to `MyNotes/{Domain}/Projects/{project}/workdir-manifest.json` |
+| `SessionStart` hook → `workdir.py manifest` | Writes `.claude/workdir-manifest.json` (paths, dates, counts; never contents, never a file name under `data/`), and prints a one-line count. The manifest stays on the machine; bandit:audit reads it there |
 | `permissions.allow` | `Edit(/work/**)`, `Edit(/data/**)`, `Edit(/scratch/**)`: allowed writes don't prompt. They never widen the guard: exit 2 wins over allow rules |
 
 **What it can't catch:** a script that writes files itself, or Bash (`mv`, `>`, `tee`). The
 manifest shows those, and bandit:audit S12 turns them into fix rows. Content isn't scanned:
 customer names pasted into a `.md` draft stay a prose rule.
 
-## 📦 The twin change (vault rows, then handed to Claude Code)
+## 📦 The change (rows of the proposal, written into the folder on approval)
 
-**1. `code-{slug}/claude/hooks/workdir.py`** — this skill's `scripts/workdir.py`, byte for byte.
-Never edited per project: `domain`, `project` and `prefix` come from the twin's `CLAUDE.md`.
+**1. `.claude/hooks/workdir.py`** — this skill's `scripts/workdir.py`, byte for byte.
+Never edited per project: `domain`, `project` and `prefix` come from the folder's `CLAUDE.md`.
 bandit:audit compares its hash with `s12.hook_sha12` in `structure-rules.yaml`.
 
-**2. `code-{slug}/claude/settings.json`** — merge into what's there (keep existing `permissions`
-and hooks):
+**2. `.claude/settings.json`** — add to what's there (keep every existing `permissions` rule
+and hook):
 
 ```json
 {
@@ -79,27 +79,24 @@ and hooks):
 }
 ```
 
-**3. The Claude Code `## 🖥️ Environment`** gets this line (it sits inside Environment, so the
-twin core and S10 are untouched):
+**3. The `## 🖥️ Environment`** of `CLAUDE.md` gets this line:
 
 ```
 - **Working folder** (S12, enforced by `.claude/hooks/workdir.py`): `work/{prefix}-{task}/` per board task, data files only in `data/{prefix}-{task}/`, throwaway in `scratch/`. `/bandit:tasks done` closes a task's folders.
 ```
 
-Written with the project's real `prefix`. The Never line about `code-{slug}/` (reference
-template, Hard Rules) names the guard too, so it changes in both twins in the same version.
+Written with the project's real `prefix`.
 
-**4. Hand-over line:** *Claude Code: copy `claude/settings.json` → `.claude/settings.json` and
-`claude/hooks/workdir.py` → `.claude/hooks/workdir.py` from the vault, create `work/`, `data/`,
-`scratch/`, `_closed/`, `_backup/`, then move existing loose files into task folders (the first
-manifest lists them), and search the project's notes for every old path moved (through bandit:notes,
-in whichever storage holds them), proposing the note edits.*
+**4. The layout folders:** `work/`, `data/`, `scratch/`, `_closed/`, `_backup/`, one row. Then
+existing loose files move into task folders (the first manifest lists them), each move a row, and
+the project's notes are searched for every old path moved (through bandit:notes), proposing the
+note edits.
 
-All three vault files are rows of one proposal, with the twin version bump. The length gate
+Every item is a row of one proposal, with the instructions' version bump. The length gate
 (`references/onboard.md` rules) runs first: the Environment line counts toward the budget.
 
-## 🔁 Rollout to an existing twin
+## 🔁 Rollout to an existing project
 
 A targeted update with the change above. The first `SessionStart` after it writes the manifest;
-the next `/bandit:audit` scores S12 from it. Until a manifest reaches the vault, S12 is
+the next `/bandit:audit check` in that folder scores S12 from it. Until a manifest exists, S12 is
 **unchecked** for that project.

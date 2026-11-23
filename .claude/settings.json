@@ -40,17 +40,5 @@
     "anthropic-skills:wbs-generator": "off",
     "anthropic-skills:meeting-minutes": "off",
     "anthropic-skills:myskill-creator": "off"
-  },
-  "hooks": {
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "if command -v python3 >/dev/null 2>&1; then exec python3 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/mirror-check.py\"; else exec python \"${CLAUDE_PROJECT_DIR}/.claude/hooks/mirror-check.py\"; fi"
-          }
-        ]
-      }
-    ]
   }
 }

@@ -10,7 +10,12 @@ Version 2.0.0 when released: the Project Context format changes and commands are
 - **The MyNotes vault as a notes storage.** `bandit:notes` keeps one storage, the app's Notes. Gone with it: the commands `/bandit:notes init`, `home` and `settings`, the vault conventions (folders, filenames, frontmatter, Obsidian settings) and the WebDAV write rules. The naming rules that lived in the vault file are now conventions §4, as note titles.
 - **Saving minutes to a file-storage folder.** `bandit:minutes` saves its minutes as notes, or hands them over in the chat; the options "same folder as the audio" and "another BanditCloud folder" are gone.
 
+- **The settings folder, the second copy for another surface and the dev mirror.** `bandit:project` no longer keeps a project's instructions and reference doc in a vault folder, no longer builds a Claude Code copy of Claude.ai instructions (or the reverse), and no longer installs a Stop hook that copies a repository's settings out. Gone with them: the commands `/bandit:project sync` and `update`, the settings line at the top of the instructions, and checker rule DM1.
+- **The working-folder manifest is no longer uploaded.** The guard writes it in `.claude/` and prints its counts; nothing asks for an upload.
+
 ### Added
+- **One configuration per project.** `bandit:project` works on the surface the chat runs on: in Claude Code it reads the folder's `CLAUDE.md` and `.claude/`, says whether the project is a workflow agent or a technical one, checks it is ready for Bandit Brain, and proposes every change as a row; a file is written only for an approved row, with a way back first. On Claude.ai the instructions are handed over to paste. It never writes the user's own settings and never removes a permission rule or a hook.
+- **Two reference notes.** The reference doc is the note `{slug}-reference` on the project's board; a Claude.ai project's instructions also get a copy, `{slug}-instructions`. One note each, updated in place.
 - **Taking a card.** `bandit:tasks`: a card taken to work on gets today's date when it has none, and follows the work in Execution (Doing, Stand By, complete). `/bandit:tasks doing` sets the date in the same step.
 - **`/bandit:notes lint` checks names and the hub note:** a title that breaks conventions §4, two notes with one title in one place, a project board with no hub note or with two, customer data in a note's text.
 

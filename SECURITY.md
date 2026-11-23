@@ -8,7 +8,7 @@ Useful in a report: the plugin and skill involved, what a skill could be made to
 
 ## What's in scope
 
-- A skill writing outside its declared scope (another domain's board, another project's vault folders, the `.obsidian/` settings)
+- A skill writing outside its declared scope (another domain's board, another project's notes or folder, the user's own settings)
 - A skill deleting or overwriting without the confirmation its rules require
 - Scripts shipped in the plugins (`scripts/` folders) and the sprint-checker hook
 

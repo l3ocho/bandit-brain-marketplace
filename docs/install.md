@@ -9,8 +9,8 @@
 | A paid Claude plan (Pro, Max, Team or Enterprise) | Plugins on Claude.ai need one |
 | Claude.ai → Settings → Capabilities → **Code execution and file creation** on | Skills run in the code sandbox |
 | The **Bandit Brain** MCP server connected, on app v0.41.0 or later: the one with inbox groups (`manage_inbox_groups`) besides sprints as records (`get_sprints`, `manage_sprints`), board profiles and tag view, serving the 21 assistant tools under their Board names (`get_context`, `list_tasks`, `create_tasks`, `update_tasks`, `manage_boards` …) | The task board: `tasks`, `audit`, `project`, `sprint`, `testdata`; Finance (`finance`) needs app v0.31.0 or later, which serves the 18 `finance_*` tools; card reads in `notes` and `plan`; saving a spec as a card in `clarify`. After an app upgrade, reconnect the connector so it loads the new tool list |
-| The **Bandit Brain** app on v0.55.0 or later for notes: the 17 `notes_*` tools and `search` | Every note a helper writes on a project whose Project Context says `notes: app` (`notes`, `minutes`, `plan`, `clarify`, `rewrite`, `finance` reviews, `tasks` briefs and plans, `sprint` papers, `audit` reports) |
-| A **Nextcloud** MCP server with WebDAV connected (BanditCloud) | Still needed for: a project with no `notes: app` line (its notes stay in the vault); every project's settings folder (`project` onboarding and sync); the domain-level vault commands (`notes init`, `home`, `settings`); `audit` (its snapshot reads the vault and the settings folders; `check` writes the stamp ledger); a meeting recording and the minutes saved beside it (`minutes`); `sprint` on a vault project |
+| The **Bandit Brain** app on v0.55.0 or later for notes: the 17 `notes_*` tools and `search` | Every note a helper writes (`notes`, `minutes`, `plan`, `clarify`, `rewrite`, `finance` reviews, `tasks` briefs and plans, `sprint` papers, `audit` reports) |
+| A file storage connector (Nextcloud, a drive) | Not needed. Since 2.0.0 no skill reads or writes one |
 | Gmail connected (optional) | `/bandit:tasks email` |
 
 ### Works with Bandit Brain
@@ -90,9 +90,9 @@ What changed in each release: [CHANGELOG.md](../CHANGELOG.md). After a release t
 
 ## 5. First project
 
-1. In the project's Claude.ai chat: `/bandit:project onboard`. One proposal covers the vault folders, the board and the instructions, with the **Project Context** block every skill reads. Answer all, a list, or none.
-2. Paste the instructions it hands over into the project, then run `/bandit:audit check` there.
-3. **Dev projects** (`dev: true`): put the same Project Context block in the repo's `CLAUDE.md`, add a [`bandit.yaml`](bandit-yaml.md) at the repo root, and run the **🪞 Dev repo alignment** prompt from the [cheat sheet](cheat-sheet.md) in Claude Code.
+1. Where the project runs: a Claude.ai project's chat, or Claude Code in the project's folder. Run `/bandit:project onboard` there. One proposal covers the hub note, the board and the instructions, with the **Project Context** block every skill reads; in Claude Code it also lists each change to `CLAUDE.md` and `.claude/`. Answer all, a list, or none: nothing is written before.
+2. On Claude.ai, paste the instructions it hands over into the project. Then, on either surface, run `/bandit:audit check` there: the project checks in.
+3. **Dev projects** (`dev: true`) run in Claude Code, from their repository: add a [`bandit.yaml`](bandit-yaml.md) at the repo root and install the `bandit-dev` plugin.
 
 ## 6. Moving from the old standalone skills
 

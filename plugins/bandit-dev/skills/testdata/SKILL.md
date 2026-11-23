@@ -64,7 +64,7 @@ data, and the data each card's acceptance lines need to be tested. The app build
    Account the record created is removed whole, the app's rows in it included, by the project's own command
    (`testdata.owner`), never by a delete the guard writes
 5. **Records stay local.** Run records live in `.testdata/` at the app repo root, git-ignored, never
-   committed or copied to the vault
+   committed or copied into a note
 
 ## ⚠️ Gotchas
 

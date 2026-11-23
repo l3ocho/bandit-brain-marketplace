@@ -15,10 +15,13 @@ Sources (BanditCloud vault, `MyNotes/BanditLabs/`): `banditbrain-structure-discu
 | R3 | The implementation is done after at least 3 full-size sprints have run through it |
 | R4 | Then a retroactive process-improvement workflow, so the skills keep adapting to Claude's model and product updates |
 | R5 | Claude.ai is the target for every AI feature, for now and for some time |
-| R6 | Storage: the app's Notes for every project whose Project Context says `notes: app` (BB-590's note tools, app 0.55.0); the MyNotes vault on Nextcloud stays as the second storage for a project with no such line, and for the settings folders, the audit's stamp ledger and meeting recordings (sprint 2026-w47, released in 1.0.0). A switched project's vault notes are frozen, read-only (BB-596) |
-| R7 | One storage contract (read, create-if-absent, edit-if-unchanged, move-without-overwrite, list, find, delete), held by references only, no code (Leo, 2026-11-20, BB-597): `notes/references/storage-app.md` and `storage-vault.md` each give the tool for every operation; the app has no create-if-absent or edit-if-unchanged, so a helper searches then lists before a create, and reads before one section is changed |
+| R6 | Storage: the app's Notes is the only notes storage (2.0.0, card BM-15, Leo 2026-11-21: "everything locked into BanditBrain"). A project's notes are on its board unless its Project Context says `notes: none`. Before 2.0.0 a file storage on Nextcloud was a second storage, and held the settings folders, the audit's stamps and the minutes saved beside a recording: all of that is gone from the skills |
+| R7 | One set of note operations (read, create-if-absent, edit-if-unchanged, move-without-overwrite, list, find, delete), held by one reference, no code: `notes/references/storage-app.md` gives the tool for every operation; the app has no create-if-absent or edit-if-unchanged, so a helper searches then lists before a create, and reads before one section is changed |
 | R8 | Rebrand, free of the old names, as light as possible: four owners, three plugins, one skill per area with the verb as argument, rules L1–L7 enforced by the checker, the app's recipe in `bandit.yaml` |
-| R9 | The Notes decisions of 2026-11-15 (decision 4: conventions split from storage; L1: the app defines the structure once; F2: the plugin side done by the agent on Bandit Port) delivered in sprint 2026-w47 (BB-597 to BB-602, BB-596), released in 1.0.0: bandit:notes has two storages behind one set of conventions, every helper writes through it, the vault's notes were moved once by a script |
+| R9 | The Notes decisions of 2026-11-15 (conventions split from storage; the app defines the structure once) were delivered in sprint 2026-w47 with two storages behind one set of conventions; 2.0.0 keeps the conventions and removes the second storage (R6) |
+| R10 | One configuration per project (2.0.0, card BM-15, Leo 2026-11-21: "stop with the shared project settings idea … it showed inefficient"; "the project settings should adjust the claude.md and any other settings in the project regardless of Claude.ai or Claude Code"). A project runs on one surface and has one instructions file: a Claude.ai project's instructions, or `CLAUDE.md` and `.claude/` in its folder. `/bandit:project` works on the surface the chat runs on, proposes every change as a row and writes nothing before the yes; it never writes the user's own settings. No settings folder, no second copy for another surface, no dev mirror |
+| R11 | A project is known to the audit by its stamp, written by `/bandit:audit check` run inside it, in the note `{domain}-audit-stamps` on the domain's workflow board; a domain is a top-level board folder. A project changes only itself: a row inside another project is handed over as a line, never run from outside (2.0.0, card BM-15) |
+| R12 | Whoever takes a card to work on it sets today's date when it has none and moves it through Execution as the work goes (Leo, 2026-11-21; bandit:tasks `execution.md` → Taking a card) |
 
 ---
 
@@ -29,7 +32,7 @@ Sources (BanditCloud vault, `MyNotes/BanditLabs/`): `banditbrain-structure-discu
 | Layer | Owns | Lives in |
 |---|---|---|
 | Product | Architecture, data model, domain rules, branch model, release and migration recipe | The app repo, its `docs/`, its `.claude/` and `bandit.yaml` |
-| Project configuration | Project Context, board shape, vault folder, which command applies at which stage | Claude.ai project instructions and the repo `CLAUDE.md` block, written by `/bandit:project` |
+| Project configuration | Project Context, board shape, which command applies at which stage | The project's one instructions file: its Claude.ai project instructions, or the `CLAUDE.md` in its folder; written by `/bandit:project` (R10) |
 | Behaviour | How Claude works with the tool, the same in every project: capture, triage, spec, sprint, release as stages and gates | This repo's skills |
 | Enforcement | Rules that must hold | The app's MCP refusals (both surfaces); `bandit-dev` hooks and repo hooks (Claude Code); `scripts/check_repo.py` (this repo) |
 
@@ -71,7 +74,7 @@ Stages 1–4 are core (stage 4, design, runs Claude Design); stages 5–11 are `
 | L1 | Description ≤ 300 characters: what the skill does and when to use it; at most one "not for X" clause | `check_repo.py` |
 | L2 | `SKILL.md` ≤ 150 lines: a router table (command → `references/{command}.md`) plus hard rules | `check_repo.py` |
 | L3 | A rule lives in one place, in the skill that owns it; others name that skill | house lint (judgment) |
-| L4 | No project details in skills: no project names, stack tools, IDs or fixed vault paths | `check_repo.py` denylist |
+| L4 | No project details in skills: no project names, stack tools, IDs or fixed storage paths | `check_repo.py` denylist |
 | L5 | Project instructions template ≤ 1 page: Project Context, stage → command map, modes | `check_repo.py` on `templates/` |
 | L6 | App repo `CLAUDE.md` ≤ 10 KB | App repo hook (BB-149) |
 | L7 | No top-level `bin/` in any plugin | `check_repo.py` |
@@ -112,7 +115,7 @@ Skills define the gate; the project provides the recipe in `bandit.yaml` at the 
 | G2 | Installed `bandit` and `bandit-dev` are off in this repo (`bandit-maker` stays on: it is the build tool) | `enabledPlugins` in `.claude/settings.json` |
 | G3 | The old Claude.ai copies can't be used | A `Skill(anthropic-skills:…)` deny per old skill, plus `skillOverrides: "off"` |
 | G4 | The new names can't be called either | A `Skill(bandit:…)` / `Skill(bandit-dev:…)` deny per skill |
-| G5 | Nothing is deleted in production without the user's yes | The vault delete tool is denied (`settings.local.json`). The BanditBrain `delete_*` deny was removed on Leo's order on 2026-10-14 (host change log); board deletes (`delete_tasks`, `delete_board_items`) are confirmed per entry by the tasks skill's safety rule |
+| G5 | Nothing is deleted in production without the user's yes | The file storage's delete tool is denied (`settings.local.json`). The BanditBrain `delete_*` deny was removed on Leo's order on 2026-10-14 (host change log); board deletes (`delete_tasks`, `delete_board_items`) are confirmed per entry by the tasks skill's safety rule |
 | G6 | New skills are covered automatically | `check_repo.py` fails if a skill in `bandit` or `bandit-dev` has no deny rule |
 | G7 | Conventions are followed by reading, never invoking | Session rule |
 | G8 | Tests run from `.work/test/`, where the shared skill denies don't apply and `settings.local.json` still does | Folder layout |
@@ -170,14 +173,14 @@ The tables marked for the checker (`denylist:off`) are the only place the old sk
 | D4 | Two plugins | **Superseded** by brief §2 (three plugins) |
 | D5 | A skill that depends on a marketplace skill lives in the marketplace | Kept |
 | D6 | prompt-engineer and data-tools stay outside, untouched | Kept |
-| D7 | Every plugin skill usable on Claude.ai; only sprint is Claude Code only | Kept (sprint now in `bandit-dev`) |
-| D8 | Surface split: Claude.ai plans, Claude Code develops; Claude.ai's agent is the project instructions | Kept |
+| D7 | Every plugin skill usable on Claude.ai; only sprint is Claude Code only | Kept: the core skills run on either surface, `bandit-dev` in Claude Code only |
+| D8 | Surface split: Claude.ai plans, Claude Code develops; Claude.ai's agent is the project instructions | **Superseded** by R10 (2.0.0): a project runs on one surface; a `dev: true` project runs in Claude Code from capture to close |
 | D9 | Developed in Claude Code on Bandit Port | Kept |
 | D10 | Claude Code tests write against the staging MCP; Claude.ai tests are read-only on production | Kept |
-| D11 | Marketplace cards live in the Marketplace column of the BanditBrain board | Kept |
+| D11 | Marketplace cards live in the Marketplace column of the BanditBrain board | **Superseded** 2026-11-22: they live on the board BB: Marketplace (card BM-T5 repoints this project's own settings) |
 | D12 | A plugin release is its own version bump (`plugin.json` + CHANGELOG + tag) | Kept |
-| D13 | `MyNotes/_skills` retired; sources here, process docs in `Projects/bandit-brain-marketplace/`, mirror in `Claude/code-bandit-brain-marketplace/` | Kept (homes updated by the brief) |
-| D14 | Process documents in the vault, working files in the repo | Kept |
+| D13 | The standalone skills folder retired; sources here; process docs and a settings mirror kept in a file storage | **Superseded** by R6 and R10 (2.0.0): process docs are notes, and there is no mirror |
+| D14 | Process documents in the file storage, working files in the repo | **Superseded** by R6: process documents are notes in the app; working files stay in the repo |
 | D15 | wbs-generator standalone, two modes | **Superseded**: merged into `plan`; sprint mode kept as `plan wbs` sprint mode |
 | D16 | project-planner and `tasks load` stay | **Superseded** in part: planner merged into `plan`; `tasks load` kept |
 | D17 | text-rewriter and meeting-minutes in the plugin | Kept (as `rewrite`, `minutes`) |

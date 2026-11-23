@@ -52,7 +52,7 @@ A convention lives in exactly one skill. Other skills name that owner and never 
 
 | Convention | Owner |
 |---|---|
-| Notes: kinds, fields, status, the inbox, and both storages (the app's Notes; the MyNotes vault's folders, filenames, frontmatter) | `bandit:notes` |
+| Notes: kinds, fields, status, names, the inbox, and their storage, the app's Notes | `bandit:notes` |
 | BanditBrains task vocabulary and board rules | `bandit:tasks` |
 | Claude.ai project instructions and metadata | `bandit:project` |
 | Project Context block (`## 🧭 Project Context`: keys and format, on Claude.ai and in `CLAUDE.md`) | `bandit:project` |
@@ -61,10 +61,10 @@ A convention lives in exactly one skill. Other skills name that owner and never 
 
 ### R5 · Safe writes
 
-Applies to any skill that writes outside the chat (BanditCloud, boards, mail).
+Applies to any skill that writes outside the chat (notes, boards, files in a project's folder, mail).
 
 - **New files fail closed** (no overwrite). **Edits** carry the etag from the read. **Never force-overwrite.**
-- **Notes** are written through `bandit:notes`, which holds each storage's safe write: in the vault the rules above; in the app's Notes, which takes no etag, look before creating and read before editing (its `storage-app.md`).
+- **Notes** are written through `bandit:notes`, which holds the safe write: the app's Notes takes no etag, so look before creating and read before editing (its `storage-app.md`).
 - **Delete** only what the user named or approved by exact path; never in an unattended run.
 - **Resolve names live**; never store IDs.
 - **Check:** each write path in the skill states which of these it uses.
@@ -137,7 +137,7 @@ Every section either moves Claude off a default or holds a the user-specific fac
 
 - Skill folders are **read-only** in Claude.ai. Nothing the skill learns or stores goes inside them.
 - **User-specific values** (domain, project slug, type, board scope, prefix) come from the `## 🧭 Project Context` section, owned by `bandit:project`; other paths from a clearly marked section. If one is missing, **ask**. Never guess.
-- **Persistent state** goes to BanditCloud, in a location the skill names.
+- **Persistent state** goes to a note the skill names (through `bandit:notes`), or to a file in the project's folder: never to a storage of the skill's own.
 - **Check:** no instruction writes into the skill folder; no hardcoded ID.
 
 ### R11 · House format
@@ -157,7 +157,7 @@ These don't apply to Claude.ai skills. They apply only to a plugin skill used in
 | Article rule | Why it's excluded here |
 |---|---|
 | `config.json` inside the skill folder | Skill folders are read-only in Claude.ai. R10 covers settings instead |
-| Plugin data folder for memory | Claude Code plugin feature. R10 sends state to BanditCloud |
+| Plugin data folder for memory | Claude Code plugin feature. R10 sends state to a note or the project's folder |
 | On-demand hooks | Hooks don't exist in Claude.ai |
 
 ---

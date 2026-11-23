@@ -30,12 +30,12 @@ updated: 2026-10-20
 
 |     | Skill                                        | Start it with                 | Use it for                                                                       |
 |-----|----------------------------------------------|-------------------------------|----------------------------------------------------------------------------------|
-| 🗃️ | [[#🗃️ bandit:notes\|bandit:notes]]         | `/bandit:notes {command}`     | Vault rules, filing the inbox, domain home pages                                 |
+| 🗃️ | [[#🗃️ bandit:notes\|bandit:notes]]         | `/bandit:notes {command}`     | Note conventions, filing the inbox, lint, archive                                |
 | ✅   | [[#✅ bandit:tasks\|bandit:tasks]]           | `/bandit:tasks {command}`     | The Bandit Brain task board, plus the dev card workflow on Technical boards  |
 | 🎙️ | [[#🎙️ bandit:minutes\|bandit:minutes]]   | `/bandit:minutes` + the audio | Meeting recording → two minutes notes                                            |
 | 💰  | [[#💰 bandit:finance\|bandit:finance]]      | `/bandit:finance {command}`   | The Finance module: log, import, sort, the budget month, bills, reconcile, review, investments |
 | 🛠️ | [[#🛠️ bandit:project\|bandit:project]] | `/bandit:project {command}`   | Onboarding (instructions + notes + board, one approval) and project instructions |
-| 📐  | [[#📐 bandit:audit\|bandit:audit]]          | `/bandit:audit {command}`     | Domain and project structure: Claude.ai ↔ vault ↔ board                          |
+| 📐  | [[#📐 bandit:audit\|bandit:audit]]          | `/bandit:audit {command}`     | Domain and project structure: each project's stamp ↔ the boards                  |
 | 🧭  | [[#🧭 bandit:plan\|bandit:plan]]            | `/bandit:plan {mode}`         | `project`: plan → architecture doc · `wbs`: docs or cards → work breakdown       |
 | 🔍  | [[#🔍 bandit:clarify\|bandit:clarify]]      | `/bandit:clarify [idea]`      | A thought, no text yet → questions → clear spec                                  |
 | ✨   | [[#✨ bandit:rewrite\|bandit:rewrite]]         | `/bandit:rewrite` + the text  | Text you already have → readable markdown, no questions                          |
@@ -53,49 +53,46 @@ updated: 2026-10-20
 
 ### 🗃️ bandit:notes
 
-> [!abstract] Owns the note conventions and their two storages, the app's Notes and the MyNotes vault: kinds, fields, status, places, archiving; in the vault also folders, filenames, frontmatter, home pages
-> `plugin` · [[bandit:notes/SKILL|open skill]] · the storage comes from the Project Context (no word on it: the vault; with `notes: app` the project's vault notes are frozen, read-only) · domain comes from the Project Context `domain:`, from bandit:project during onboarding, or the command, or it asks
+> [!abstract] Owns the note conventions and their storage, the app's Notes: kinds, fields, status, names, places, archiving
+> `plugin` · [[bandit:notes/SKILL|open skill]] · every project's notes are on its board, unless its Project Context says `notes: none` (then no helper writes a note for it) · the domain comes from the Project Context `domain:` (a top-level board folder), from bandit:project during onboarding, or the command, or it asks
 
 | Command                  | ⚙️ Modifiers           | Does                                                                                                                                                                                                                       |        |
 |--------------------------|------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|
 | `/bandit:notes`          | —                      | Lists the commands and asks which one                                                                                                                                                                                      | 👀     |
-| `/bandit:notes onboard`  | `[Domain]`             | Audits a domain against the conventions, proposes the migration in stages A→D. App's Notes: checks only each project's hub note. New project → use `/bandit:project onboard`                                                                                                          | ✋      |
-| `/bandit:notes init`     | `{Domain}`             | Scaffolds a new domain: core folders, modules, templates, README. Vault only                                                                                                                                                           | ✋      |
-| `/bandit:notes home`     | `[Domain]`             | Rebuilds the domain README home page. Safe to schedule. Vault only                                                                                                                                                                     | ⚡      |
-| `/bandit:notes file`     | `[Domain]` `[note…]`   | Reviews inbox notes you put up: destination, filename, frontmatter. Body edits only as separate rows. A plan note → `active`, linked from the hub's `## Docs`, and the report prompts `/bandit:tasks stage {card} planned`. A consumed inbox draft gets an archive row, on proof the filed copy exists. App's Notes: place, kind, summary and fields, then filed into its column (a card's plan is already linked: its summary takes it out of the Inbox with its card's state); with no notes named, only helpers' drafts get rows and your own Inbox notes are listed until you name them | ✋      |
-| `/bandit:notes lint`     | `[Domain]`             | Reports every convention breach, each as a numbered fix row (the report is the proposal). Plus plan-note checks: no `board-task`, card done but note not, card deleted. Plus frontmatter that doesn't parse, a filename also in `_inbox`, sprint briefs outside their sprint folder, a sprint project's root, triaged notes whose card is gone (asked, never acted on). App's Notes: the fields only (summary, the kind's fields, status, card link, sprint tag), the Inbox skipped                                                     | 👀 → ✋ |
-| `/bandit:notes settings` | `[Domain]` · `restore` | Checks Obsidian settings and proposes changes. `restore` rolls back from backup. Obsidian closed on every device. Vault only                                                                                                           | ✋      |
-| `/bandit:notes archive`  | `[Domain]`             | Moves `status: done` notes into `_archive/`, a whole sprint folder at close, and old settings versions named by a structure audit (S7). App's Notes: sets done notes to archived, where they are                                                                                                                     | ✋      |
-| `/bandit:notes restore`  | `{note}`               | Moves an archived note back to where it came from. App's Notes: brings a note back from the archive (status `triaged` or the one you name) or from the Trash (as it was)                                                                                                                                                                          | ✋      |
-| `/bandit:notes delete`   | `{note…}`              | Deletes exactly the notes named (in the vault, also paths). App's Notes: to the Trash for 30 days, `restore` brings it back                                                                                                                                                                                            | ✋      |
+| `/bandit:notes onboard`  | `[Domain]`             | Checks each project board of the scope for its hub note and proposes the missing ones, each filed in one named column. New project → use `/bandit:project onboard`                                                        | ✋      |
+| `/bandit:notes file`     | `[Domain]` `[note…]`   | Reviews inbox notes you put up: place, kind, name, summary and fields, then filed into its column. Body edits only as separate rows. A card's plan is already linked: its summary takes it out of the Inbox with its card's state, and the report prompts `/bandit:tasks stage {card} planned`. A consumed inbox draft gets an archive row, on proof the filed note exists. With no notes named, only helpers' drafts get rows and your own Inbox notes are listed until you name them | ✋      |
+| `/bandit:notes lint`     | `[Domain]`             | Reports every convention breach, each as a numbered fix row (the report is the proposal): summary, name, the kind's fields, status, card link, sprint tag, the hub note, customer data. The Inbox is skipped                 | 👀 → ✋ |
+| `/bandit:notes archive`  | `[Domain]`             | Sets done notes to archived, where they are. A plan linked to its card follows the card; a sprint's records are archived by the sprint's close                                                                              | ✋      |
+| `/bandit:notes restore`  | `{note}`               | Brings a note back from the archive (status `triaged` or the one you name) or from the Trash (as it was)                                                                                                                    | ✋      |
+| `/bandit:notes delete`   | `{note…}`              | Deletes exactly the notes named: to the Trash for 30 days, `restore` brings it back                                                                                                                                         | ✋      |
 
 > [!tip] Scope
-> `type: workflow` projects see the whole domain. Other projects see only their own `Projects/{slug}/` (in the app, their board), inbox and settings. `init`, `home` and `settings` are domain-only and vault-only. A finding outside the scope still comes as a fix row marked `domain`; your yes to that row by number runs it.
+> `type: workflow` projects see every board of the domain's folder. Other projects see only their own board and its Inbox. A finding outside the scope still comes as a fix row marked `domain`; your yes to that row by number runs it.
 
 > [!warning] Only approved rows run
 > "Yes" or "create it" approves the rows on the table, nothing else. Every finding is its own fix row in the same proposal, never a bare list.
 
+> [!tip] Names (conventions §4)
+> A note's name is its title, lowercase kebab-case: dated `{slug}-YYYY-MM-DD` (minutes, requests, briefs, logs), evergreen `{slug}` (notes, references, plans). A brief `{project}-{lane}-{slug}-YYYY-MM-DD`, a plan `{project}-{lane}-{slug}-plan`, a sprint record `{project}-sprint-{name}-{record}`. Never a kind label in front, never a `-2` counter.
+
 > [!tip] Dev projects (`dev: true`, conventions §13)
-> Plan notes: kind `plan`, linked to their card from the start and waiting in the Inbox for review (app: linked with no summary, its status then follows its card; vault: `type: plan`, named `{project}-{lane}-{slug}-plan.md`, in `_inbox/` with `board-task` = the card's id). The WBS note gets a `## 🔗 Card links` table, one row per card created.
-> Card briefs: one `brief` per card, linked to it (app: one card only; vault: `board-task` = the card's short id), H2s Summary · Scope · Requirements · Decisions · Verified facts · Open questions · Change log (optional) · Related. No card state (column, lane, stage) in the body; a `Card: {short id}` line is fine.
-> A sprint's records: on the app's Notes, notes on the project's board with the tag `sprint-{name}` (the plan a `plan` with no card link, the review record a `log`, the rest `reference`; the sprint map and data file in `.sprint/` at the root of the repository the helper runs from). Sprint folders (vault): `Projects/{slug}/sprint-{name}/` holds `{project}-sprint-{name}-plan.md` (no `lane`, `sprint` = the sprint's name; old way `board-task` = the sprint card), `-handover-prompt.md`, `-progress.md`, `-handover-report.md` and the sprint's briefs, written straight in. Once a project has one, its root holds only the hub, `sprint-*` and `planning/` (WBS, plan, architecture, notes not yet in a sprint). A closed sprint archives as one folder.
+> Plan notes: kind `plan`, linked to their card from the start and waiting in the Inbox for review (linked with no summary; its status then follows its card). The WBS note gets a `## 🔗 Card links` table, one row per card created.
+> Card briefs: one `brief` per card, linked to it, H2s Summary · Scope · Requirements · Decisions · Verified facts · Open questions · Change log (optional) · Conclusions (written at close) · Related. No card state (column, lane, stage) in the body; a `Card: {short id}` line is fine.
+> A sprint's records: notes on the project's board with the tag `sprint-{name}` (the plan a `plan` with no card link, the review record a `log`, the rest `reference`); the sprint map and data file in `.sprint/` at the root of the repository the helper runs from.
 
 📚 **References:**
 
-- `references/model.md`: before any command (which storage, the vault model, resolving the domain, the project's scope, the inbox)
-- `references/write-safety.md`: before any write of a note, by this skill or any other (the rules both storages share)
-- `references/conventions.md`: before any write (kinds, fields, status, body shape, dev projects, and the map of conventions §1–§13)
-- `references/conventions-vault.md`: before any write into the vault (folders, filenames, frontmatter, archive, Obsidian settings)
-- `references/storage-vault.md`: before any write into the vault (the WebDAV mechanics)
-- `references/storage-app.md`: before any write into the app's Notes (the tool for each operation, places, fields, refusals)
-- `references/commands.md`: the procedure of the command being run, including *Onboarding rows* (run by bandit:project; it adds `Claude/code-{slug}/` for `dev: true` projects and for any other project that runs in Claude Code, and returns domain findings as `domain` fix rows)
+- `references/model.md`: before any command (where the notes are, `notes: none`, resolving the domain, the project's scope, the inbox)
+- `references/write-safety.md`: before any write of a note, by this skill or any other
+- `references/conventions.md`: before any write (kinds, fields, status, names, body shape, dev projects)
+- `references/storage-app.md`: before any write (the tool for each operation, places, the hub note, fields, refusals)
+- `references/commands.md`: the procedure of the command being run, including *Onboarding rows* (run by bandit:project)
 - `references/onboarding.md`: when bandit:project runs the notes step of onboarding
 - `references/other-skills.md`: when another skill or a chat writes a note
-- `references/conclusions.md`: when a card is completed (`/bandit:tasks done`, `/bandit-dev:sprint close`) on a project on the app's Notes: its conclusions into its linked note
-- `references/readme-template.md`: for `home` and `init` (vault only)
+- `references/conclusions.md`: when a card is completed (`/bandit:tasks done`, `/bandit-dev:sprint close`): its conclusions into its linked note
 - `references/gotchas.md`: once, before a session's first note write
 
-🔗 **Works with:** bandit:project (runs its onboarding rows) · bandit:minutes · bandit:tasks · bandit:clarify (saves its spec as a note) · bandit:plan (writes planning docs straight into the project's place: `Projects/{slug}/`, or its `planning/` on a sprint project, in the vault; the project's board in the app) · bandit:audit (runs its vault fix rows) · bandit-dev:sprint (sprint folders, archived at close)
+🔗 **Works with:** bandit:project (runs its onboarding rows; its two reference notes) · bandit:minutes · bandit:tasks · bandit:clarify (saves its spec as a note) · bandit:plan (writes planning docs straight onto the project's board) · bandit:audit (its report and stamps notes; runs its notes fix rows) · bandit-dev:sprint (a sprint's records, archived at close)
 
 ---
 
@@ -110,8 +107,8 @@ updated: 2026-10-20
 | `/bandit:tasks triage` · `/bandit:tasks inbox` | —                                   | Sorts the Inbox board: untriaged → board, parked → column. Counts first; each card with the app's Size, band and Rank, a split proposed for a card banded split                                                                                                                                                                                                                                          | ✋      | `triage.md`          |
 | `/bandit:tasks capture`                        | `{text or brain dump}`              | Creates tasks, subtasks, dependencies, repeat rules                                                                                                                                                                                                                                                                | ⚡      | `capture.md`         |
 | `/bandit:tasks today`                          | —                                   | Reads Execution: Doing, Next, To Do, each board in the app's rank order (blocked and unsized cards named after). Flags cap breach, overdue, stale Stand By (sprint cards exempt)                                                                                                                                                                                                                                 | 👀     | `execution.md`       |
-| `/bandit:tasks doing`                          | `{task}`                            | Moves a task to Doing (a blocked card can be worked, not completed)                                                                                                                                                                                                                                                                     | ⚡      | `execution.md`       |
-| `/bandit:tasks done`                           | `{task}`                            | Completes it. On a project on the app's Notes, first what its comments taught goes into the `Conclusions` section of its linked note, replaced at each close, and a Workflow card keeps a short summary naming the note: one row a card, none when there is nothing to keep (no note: create one or skip; a note in the Inbox: review it first). A vault project as before. Recurring → reports the next date | ✋      | `execution.md` · bandit:notes `conclusions.md` |
+| `/bandit:tasks doing`                          | `{task}`                            | Moves a task to Doing and dates it today when it has no date (a blocked card can be worked, not completed). Taking a card: it then follows the work, Stand By when it waits, complete when done                                                                                                                                                                                                                                                                  | ⚡      | `execution.md`       |
+| `/bandit:tasks done`                           | `{task}`                            | Completes it. First what its comments taught goes into the `Conclusions` section of its linked note, replaced at each close, and a Workflow card keeps a short summary naming the note: one row a card, none when there is nothing to keep (no note: create one or skip; a note in the Inbox: review it first). Skipped on a project with `notes: none`. Recurring → reports the next date | ✋      | `execution.md` · bandit:notes `conclusions.md` |
 | `/bandit:tasks bump`                           | `{task…}` `{date}`                  | Changes the due date. Recurring → offers a skip instead                                                                                                                                                                                                                                                            | ⚡      | `execution.md`       |
 | `/bandit:tasks week`                           | —                                   | Reads the week, day by day, with each card's Size; workload stays counts. Projections marked                                                                                                                                                                                                                                                                     | 👀     | `week.md`            |
 | `/bandit:tasks week`                           | `[board]`                           | Proposes dates for undated tasks, in the app's rank order                                                                                                                                                                                                                                                                                   | ✋      | `week.md`            |
@@ -169,14 +166,14 @@ updated: 2026-10-20
 | Asks up front | ⚙️ Options                                                       | Default             |
 |---------------|------------------------------------------------------------------|---------------------|
 | Version       | `Both` · `Full only` · `Short only`                              | Both                |
-| Location      | `{Domain} notes` · `Same folder as the audio` · `Another BanditCloud folder` | Notes |
+| Location      | `{Domain} notes` · `In the chat only`                            | Notes               |
 | Meeting       | `Supervisors` · `Department` · `Project` (notes only)            | From the transcript |
 | Speakers      | Separate voices, only if you ask                                 | Off                 |
 | Model         | `small` · `medium` for poor audio (≈3× slower)                   | small               |
 
 📚 **References:** `references/workflow.md` (setup, transcription, verify and save) · `references/scripts.md` (the scripts) · `references/formats.md` (the full and short formats) · `references/notes.md` (saving and filing as notes).
 📚 **Scripts:** `scripts/transcribe.py` · `scripts/diarize.py` · `scripts/merge.py`, copied to the working directory before running.
-🔗 **Works with:** bandit:notes (its conventions and every note write: two drafts wait for review, then are filed to the domain's meetings place, in the app's Notes or the vault)
+🔗 **Works with:** bandit:notes (its conventions and every note write: two drafts wait for review, then are filed on the domain's workflow board)
 
 ---
 
@@ -214,20 +211,21 @@ updated: 2026-10-20
 
 ### 🛠️ bandit:project
 
-> [!abstract] The one onboarding command, plus Claude.ai project instructions and the Project Context block
+> [!abstract] The one onboarding command, plus a project's one instructions file and the Project Context block. It works on the surface the chat runs on: a Claude.ai project, or a folder in Claude Code
 > `plugin` · [[bandit:project/SKILL|open skill]] · 💬 "onboard this project", "project settings", "audit these instructions"
 
 | Command                            | ⚙️ Modifiers | Does                                                                                                                                                                                                                                  |        | 📚 Reads                                   |
 |------------------------------------|--------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|--------------------------------------------|
-| `/bandit:project`                  | —            | No command: picks the mode from the project's state (no instructions → new project, instructions → audit, another project named → vault update)                                                                                       | —      | `audit.md` → Mode Detection                |
-| `/bandit:project onboard`          | —            | New or existing project: interview or audit, then **one proposal** of notes rows (bandit:notes: vault folders, or the hub note on the app's Notes), board rows (`/bandit:tasks onboard`) and settings files, plus a fix row for every finding. Only approved rows run; you get the instructions to paste | ✋      | `onboard.md` · `interview.md` (new)        |
-| `/bandit:project audit`            | —            | Scores every section of this project's instructions against the template, flags old Project Context lines and board tool names that aren't current (on Claude.ai, the hand-over adds a line to check the Claude Code `CLAUDE.md` too), on a dev project brings over the tool and architecture changes from its Claude Code settings copy (nothing Claude Code–only), finds duplicates, builds the fixed version straight away and adds whatever the vault or board is missing, all as rows in one proposal. Naming, board and footprint → `/bandit:audit check` (skip for `domain: none`) | 👀 → ✋ | `audit.md`                                 |
-| `/bandit:project update`           | `{project}`  | Targeted change to **another** project's instructions from its vault copy (bandit:audit settings rows use it): only that change → the next version in that project's vault folder; anything else noticed comes back as an extra fix row (on a dev project, so do new tool and architecture changes from its Claude Code settings). You paste it there, then `/bandit:audit check` (skip for `domain: none`) | ✋      | `update.md`                                |
+| `/bandit:project`                  | —            | No command: picks the mode from the project's state (no instructions → new project, instructions → audit; another project named → says to run it there)                                                                              | —      | `audit.md` → Mode Detection                |
+| `/bandit:project onboard`          | —            | New or existing project: interview or audit, then **one proposal** of notes rows (bandit:notes: the hub note), board rows (`/bandit:tasks onboard`) and settings rows, plus a fix row for every finding. In Claude Code the settings rows are the exact changes to `CLAUDE.md` and `.claude/`; on Claude.ai you get the instructions to paste. Only approved rows run | ✋      | `surfaces.md` · `onboard.md` · `interview.md` (new) |
+| `/bandit:project audit`            | —            | Says which kind of agent the project is (technical or workflow agent), checks it is ready for Bandit Brain, scores every section of its instructions against the template, flags old Project Context lines, tool names that aren't current, a leftover settings line and a second copy, finds duplicates, and builds the fixed version straight away, all as rows in one proposal. Naming, board and footprint → `/bandit:audit check` (skip for `domain: none`) | 👀 → ✋ | `surfaces.md` · `audit.md`                 |
 | `/bandit:project instructions`     | —            | Generates the instructions from the one-page template for the project's type (`workflow`, `product_service`, or `dev` for any `dev: true` project), as one proposal row                                                              | ✋      | `instructions.md`                          |
-| `/bandit:project sync`             | —            | Saves the current instructions and reference doc to the vault settings folder                                                                                                                                                        | ✋      | `output.md` · `vault-storage.md`           |
+
+> [!warning] It proposes; you decide
+> Every change to a project's instructions or settings is a row showing the file and the exact change. Nothing is written before your yes. It never writes your own settings (`~/.claude/`, a `settings.local.json`, a permission mode, a model), never removes or loosens a rule or a hook a project has, and never writes outside the project's folder.
 
 > [!note]- 🔀 What `audit` asks first
-> Before auditing it asks what changed and what you want: **Full audit** (above), **Targeted update** (you know the change: skips the audit, writes the next version) or **Just sync** (the same as `sync`).
+> Before auditing it asks what changed and what you want: **Full audit** (above), **Targeted update** (you know the change: skips the audit, builds the next version) or **Just the reference notes** (their copies in the app brought up to date).
 
 > [!example]- ⚙️ Answers it records
 >
@@ -235,50 +233,50 @@ updated: 2026-10-20
 > |----------------------------|-------------------------------------------------------------------------------------------------------------------------------------|
 > | Project type → `type:`     | `product_service` · `workflow` · `claude_marketplace`                                                                               |
 > | Dev workflow → `dev: true` | Yes · No. Asked only for `product_service` and `claude_marketplace`; No = no `dev` line                                             |
-> | Claude Code surface        | Yes · No. Asked for every project without `dev: true`. Yes → `Claude/code-{slug}/` + the Claude Code twin. No Project Context key   |
-> | Task board → `board:`      | existing `project "{name}"` in the domain's folder · a new board (created empty, in the domain's folder) · `none` · `pending` |
-> | Output                     | Artifact · + vault folder · vault folder only                                                                                       |
-> | Folder backend             | Domain (or custom path → `domain: none`) · project slug · prefix                                                                    |
-> | Notes → `notes: app`       | The app's Notes (recommended) · the MyNotes vault (no `notes` line). Asked for every project; settings stay in the vault either way |
+> | Domain → `domain:`         | A top-level board folder · a new one · none                                                                                         |
+> | Task board → `board:`      | existing `project "{name}"` in the domain's folder · a new board (created empty, in the domain's folder) · `none` · `pending`       |
+> | Slug and prefix            | The project's own slug · 2–3 letters, or `none`                                                                                     |
+> | Notes → `notes: none`      | Yes, in the app (no line; recommended) · No, its records are kept elsewhere (`notes: none`)                                         |
+>
+> The surface is not asked: it is the one the chat runs on.
 
-> [!note] Audits flag and migrate legacy projects: Nextcloud Notes app storage → vault folder, and old `lifecycle` blocks are dropped.
+> [!tip] One configuration
+> A project runs on one surface and has one instructions file: a Claude.ai project's instructions, or `CLAUDE.md` and `.claude/` in its folder. No second copy for another surface is built or kept in step. The reference doc is the note `{slug}-reference` on the project's board; a Claude.ai project's instructions also have a copy there, `{slug}-instructions`.
 
-> [!tip] `dev: true` projects: onboarding adds the dev board shape, the instructions allow `/bandit:tasks spec`, and you get the exact Project Context block to put in the repo's `CLAUDE.md` for Claude Code.
-
-> [!tip] Claude Code surfaces live in `Claude/code-{slug}/`, settings only. Any project without `dev: true` that also runs in Claude Code gets a **twin** `CLAUDE.md` (same core and version; only `## 🖥️ Environment` differs), plus an optional `claude/settings.json` for the agent's permission rules. The twin keeps its type's scope. A `dev: true` repo gets a **dev mirror**: a `Stop` hook has Claude copy `CLAUDE.md` + `.claude/` (stored as `claude/`) into the vault.
+> [!tip] Kinds of agent (Claude Code)
+> **Technical** (`dev: true`, a Technical home board, a repository): the `dev` template, sprints through `bandit-dev`, its own layout. **Workflow agent** (no `dev` line): the working-folder guard (`.claude/hooks/workdir.py`, two hooks, three allow rules) and the layout `work/` `data/` `scratch/` `_closed/` `_backup/`.
 
 📚 **References** (besides each command's file in the table):
 
-- `references/reference-template.md`: before anything else (the section standard, v1.4: every section, its audit criteria, the metadata block, the token budget)
-- `references/project-context.md`: the Project Context block (keys, including the optional `notes: app` line; format, repo copy, dev mirror, Claude Code twin)
-- `references/vault-storage.md`: before any write to, or audit of, the settings folder
-- `references/dev-mirror.md`: onboarding or auditing a `dev: true` project (the Stop hook and mirror script; the sprint checker is `bandit-dev`'s own hook, not wired here)
-- `references/code-settings.md`: auditing or updating a `dev: true` project's Claude.ai instructions (what comes over from its Claude Code settings)
-- `references/workdir.md`: a Claude Code twin (onboarding, a twin version change, an S12 row)
+- `references/surfaces.md`: first (which surface, where the instructions and settings live, the kind of agent, what a row may write)
+- `references/reference-template.md`: before an interview or an audit (the section standard, v2.0: every section, its audit criteria, the token budget)
+- `references/project-context.md`: the Project Context block (keys, including the optional `notes: none` line; format; the one copy)
+- `references/output.md`: the deliverables and the two reference notes
+- `references/workdir.md`: a workflow agent in Claude Code (the guard, onboarding, an S12 row)
 - `references/gotchas.md`: once, before onboarding or an audit
 - `assets/instructions/`: the one-page templates (`workflow.md` · `product_service.md` · `dev.md`)
 
-🔗 **Works with:** bandit:notes and bandit:tasks (it runs their onboarding steps) · every `bandit` skill (reads its Project Context) · bandit:audit (runs its settings rows through `update`)
+🔗 **Works with:** bandit:notes and bandit:tasks (it runs their onboarding steps) · every `bandit` skill (reads its Project Context) · bandit:audit (hands it the rows that change a project's instructions or folder: they are run here, inside that project)
 
 ---
 
 ### 📐 bandit:audit
 
-> [!abstract] Audits domain and project structure across Claude.ai, the vault, the app's Notes and the board, against the structure rulebook. Scored by a script, never by hand. `check` runs anywhere; `audit` and `close` run from Claude Code (the snapshot lives in the folder it runs from)
-> `plugin` · [[bandit:audit/SKILL|open skill]] · 💬 "audit the BanditLabs domain", "audit all domains", "is this project in sync with the vault"
+> [!abstract] Audits domain and project structure across the boards, each project's Project Context and its working folder, against the structure rulebook. Scored by a script, never by hand. `check` runs inside the project; `audit` and `close` run from Claude Code (the snapshot lives in the folder it runs from)
+> `plugin` · [[bandit:audit/SKILL|open skill]] · 💬 "audit the Acme domain", "audit all domains", "check this project in"
 
 | Command               | ⚙️ Modifiers       | Does                                                                                                                                                                                                                    |        | 📚 Reads                          |
 |-----------------------|--------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|-----------------------------------|
 | `/bandit:audit`       | —                  | Lists the commands and asks which one                                                                                                                                                                                   | 👀     | —                                 |
-| `/bandit:audit check` | —                  | Run inside the project, on any surface: stamps its running instructions version, scores that project with the script, runs its fix rows. No question                                                                                    | ⚡      | `self-check.md`                   |
-| `/bandit:audit audit` | `{domain}` · `all` | From Claude Code. One snapshot of board + vault + app notes + stamps → `check_structure.py` → report with numbered fix rows, shown unedited, plus **Extra fix rows** below it for findings the rules don't cover. `all` = every domain, same snapshot. Runs every row, archives the old report, writes the new one (a `log` note on the app's Notes, else a vault file) and its snapshot in `.audit/`. No question | ⚡      | `domain-audit.md` · `snapshot.md` |
-| `/bandit:audit close` | `{domain}`         | From Claude Code. Replays the report; valid → archives it, snapshot to `.audit/_archive/`                                                                                                                                                       | ⚡      | `domain-audit.md`                 |
+| `/bandit:audit check` | —                  | Run inside the project, on its surface: writes its stamp (version, Project Context and, in Claude Code, the working-folder guard and manifest) into the domain's stamps note, scores that project with the script, runs its fix rows. No question | ⚡      | `self-check.md`                   |
+| `/bandit:audit audit` | `{domain}` · `all` | From Claude Code. One snapshot of the boards + the stamps + each project's notes → `check_structure.py` → report with numbered fix rows, shown unedited, plus **Extra fix rows** below it for findings the rules don't cover. `all` = every domain, same snapshot. Runs every row in reach, archives the old report, writes the new one (a `log` note) and its snapshot in `.audit/`. No question | ⚡      | `domain-audit.md` · `snapshot.md` |
+| `/bandit:audit close` | `{domain}`         | From Claude Code. Replays the report; valid → archives it, snapshot to `.audit/_archive/`                                                                                                                              | ⚡      | `domain-audit.md`                 |
 
 > [!warning] Findings come fixed, through their owners
-> Every finding is a fix row, never a bare note; S9 (dev lanes without `dev: true`) is one row with both options; the recommended one runs. It never changes anything with its own calls: every row runs through its owner, no question, in order: notes rows, the vault's or the app's (bandit:notes) → settings (bandit:project) → board (bandit:tasks). A board rename always comes paired with its `board:` update.
+> Every finding is a fix row, never a bare note; S9 (dev lanes without `dev: true`) is one row with both options; the recommended one runs. It never changes anything with its own calls: every row in reach runs through its owner, no question, in order: notes (bandit:notes) → settings (bandit:project) → board (bandit:tasks). A project changes only itself: a row inside another project comes back as one line saying where to run what.
 
-📚 **Rules:** `structure-rulebook.md` + `structure-rules.yaml` (read-only): 13 rules (S14–S16 retired 2026-11-20). S4 accepts `dev: true` and `notes: app` · S9 = dev board shape (`dev: true` boards have the six dev lanes, others have none) · S10 = Claude Code twin of any project without `dev: true` · S11 = dev mirror (`code-{slug}/` has the Stop hook and script) · S12 = Claude Code working folder · S13 = a sprint card's brief is with its sprint (vault: in `sprint-{name}/`; app: tagged `sprint-{name}`; bandit-dev:sprint's SP2 is the same at write time). **Script:** `scripts/check_structure.py`, snapshot schema 7 (lanes + tags + surfaces + working-folder manifests + vault project files and frontmatter, or a project's app notes + sprint cards); older snapshots score the rules that stay as before. **Ledger:** `paths.stamps` in the rules (BanditCloud). **Snapshot:** `.audit/` at the root of the folder Claude Code runs from (`paths.snapshots`), git-ignored. Reports go where the workflow project keeps its notes, never a settings folder.
-📚 **Also reads:** `references/fix-rows.md` (building and running fix rows: owners, linked rows, order) · `references/gotchas.md` (once, before a `check` or an `audit`).
+📚 **Rules:** `structure-rulebook.md` + `structure-rules.yaml` (read-only): 8 rules. S1 domain alignment · S2 one name · S3 one workflow per domain · S4 Project Context (accepts `dev: true`, `notes: none`) · S6 complete footprint · S9 dev board shape · S12 working folder · S13 a sprint card's brief carries the tag `sprint-{name}` (bandit-dev:sprint's SP2 is the same at write time). Retired: S5, S7, S8, S10, S11 (2026-11-22) and S14–S16. **Script:** `scripts/check_structure.py`, snapshot schema 8; an older snapshot is refused and its report is superseded. **Stamps:** the note `{domain}-audit-stamps` on the domain's workflow board, one section per project. **Snapshot:** `.audit/` at the root of the folder Claude Code runs from (`paths.snapshots`), git-ignored.
+📚 **Also reads:** `references/fix-rows.md` (building and running fix rows: owners, what is in reach, linked rows, order) · `references/gotchas.md` (once, before a `check` or an `audit`).
 🔗 **Works with:** bandit:notes · bandit:tasks · bandit:project (they carry out its fix rows)
 🚫 Auditing a skill → `/bandit-maker:skill lint` · board hygiene → `/bandit:tasks audit` · note lint → `/bandit:notes lint`.
 
@@ -287,7 +285,7 @@ updated: 2026-10-20
 ### 🧭 bandit:plan
 
 > [!abstract] Plans a project in two modes: `project` (idea → project plan → architecture document) and `wbs` (docs or a batch of cards → a numbered, gap-checked work breakdown structure)
-> `plugin` · [[bandit:plan/SKILL|open skill]] · 💬 "plan a project", "architecture document", "create a WBS", "break down this project" · saves notes of kind `reference` in the project's place through bandit:notes (the app's Notes or the vault)
+> `plugin` · [[bandit:plan/SKILL|open skill]] · 💬 "plan a project", "architecture document", "create a WBS", "break down this project" · saves notes of kind `reference` in the project's place through bandit:notes
 
 | Command               | ⚙️ Modifiers | Does                                                                                                                  |    | 📚 Reads     |
 |-----------------------|--------------|-----------------------------------------------------------------------------------------------------------------------|----|--------------|
@@ -440,7 +438,7 @@ The order is `project` → `wbs` → the board (`/bandit:tasks load`, or the dev
 > Database writes happen only when you ask for a named target. An approved `review` fix row counts as that ask, for file edits only. Summaries come back to the chat, not raw personal data.
 
 📚 **References:** every command reads its file in `references/` first (column above). `assets/data-reviewer.md` is the agent template.
-🚫 Spreadsheet files → xlsx · charts in HTML artifacts → dataviz · vault notes → bandit:notes.
+🚫 Spreadsheet files → xlsx · charts in HTML artifacts → dataviz · notes → bandit:notes.
 
 ---
 
@@ -516,19 +514,19 @@ The order is `project` → `wbs` → the board (`/bandit:tasks load`, or the dev
 ## 🔎 Full review prompts
 
 > [!tip] How these run
-> Paste one, with the `{…}` placeholder filled in. **Phase 1** runs every audit read-only. **Phase 2** asks every question once: your single answer approves every fix row. **Phase 3** runs everything with no more stops. What's left for you at the end: pasting instructions into Claude.ai, and running `/bandit:audit check` inside those projects.
+> Paste one, with the `{…}` placeholder filled in. **Phase 1** runs every audit read-only. **Phase 2** asks every question once: your single answer approves every fix row. **Phase 3** runs everything in reach with no more stops. What's left for you at the end: the rows that belong to another project (run there), and on Claude.ai the paste.
 
 ### 📁 One project
 
-Paste into that project's own chat.
+Paste into that project's own chat: its Claude.ai project, or Claude Code in its folder.
 
 ```
 Full setup review of this project: {Project name}. Work in three phases.
 
 PHASE 1 — DISCOVERY (read-only, write nothing)
 Run each of these with its own skill and procedure. No shortcuts, and no scoring by hand:
-  a. /bandit:project audit, as a full audit ("audit these instructions"). It includes /bandit:audit check and the vault and board rows. Build the updated instructions version, but don't write it yet.
-  b. /bandit:notes lint, limited to this project's folders.
+  a. /bandit:project audit, as a full audit ("audit these instructions"). It includes /bandit:audit check and the notes and board rows. Build the updated instructions version, but don't write it yet.
+  b. /bandit:notes lint, limited to this project's board.
   c. /bandit:tasks audit.
 Collect every fix row from a–c into ONE numbered table: | # | Skill | Action | Target | Recommended option |.
 
@@ -537,21 +535,21 @@ Show the table, then every decision any row needs (either/or choices, deletes, a
 My single answer approves everything: "all", a list of row numbers, or "none", plus my answers to the questions. After that, ask me nothing.
 
 PHASE 3 — AUTONOMOUS RUN (no more stops)
-- Run exactly the approved rows, through their owner skills, in this order: notes rows, the vault's or the app's (bandit:notes), then settings (bandit:project, which writes the new instructions version), then board (bandit:tasks).
+- Run exactly the approved rows, through their owner skills, in this order: notes rows (bandit:notes), then settings (bandit:project: the instructions and, in Claude Code, the files in the folder), then board (bandit:tasks).
 - My Phase 2 answer is the approval each skill would normally ask for. Don't ask again.
 - A row that depends on a declined or failed row is skipped, and the reason is recorded.
 - If something new turns up during the run, don't act on it. Add it to the final report as a fix row.
-- Never delete anything I didn't approve by exact path. Never pass if_match "*".
+- Never delete anything I didn't approve by name.
 
 FINAL REPORT
 One result line per row, then the fix rows for anything new, then my hand-off:
-  1. The file name and the full instructions text to paste into this project.
-  2. After the paste: run /bandit:audit check in this chat.
+  1. On Claude.ai: the full instructions text to paste into this project. In Claude Code: the files changed, for my own commit.
+  2. Then: run /bandit:audit check in this chat.
 ```
 
 ### 🌐 Whole domain
 
-Paste into a Claude Code session (the audit's snapshot lives in the folder it runs from): a repository or an agent's folder, not a Claude Code twin's working folder.
+Paste into a Claude Code session (the audit's snapshot lives in the folder it runs from): a repository, or an agent's folder without the working-folder guard.
 
 ```
 Full setup review of the {Domain} domain. Work in three phases.
@@ -568,84 +566,20 @@ Show the table, then every decision any row needs (either/or choices such as S9 
 My single answer approves everything: "all", a list of row numbers, or "none", plus my answers to the questions. After that, ask me nothing.
 
 PHASE 3 — AUTONOMOUS RUN (no more stops)
-- Write the audit report where the workflow project keeps its notes, and its snapshot to `.audit/`.
-- Run exactly the approved rows through their owner skills, in this order: notes rows, the vault's or the app's (bandit:notes), then settings (bandit:project writes each project's new instructions version), then board (bandit:tasks).
-- Then run /bandit:notes home {Domain}.
+- Write the audit report as a note on the domain's workflow board, and its snapshot to `.audit/`.
+- Run exactly the approved rows in reach through their owner skills, in this order: notes rows (bandit:notes), then board (bandit:tasks). A row that changes another project's instructions or folder is not run from here: it goes to the hand-off list.
 - My Phase 2 answer is the approval each skill would normally ask for. Don't ask again.
 - A row that depends on a declined or failed row is skipped, and the reason is recorded. Half of a linked pair never runs alone.
 - If something new turns up during the run, don't act on it. Add it to the final report as a fix row.
-- Never delete anything I didn't approve by exact path. Never pass if_match "*".
-- Don't run /bandit:audit close. Pastes and checks are still pending.
+- Never delete anything I didn't approve by name.
+- Don't run /bandit:audit close. Checks are still pending.
 
 FINAL REPORT
 One result line per row, then the fix rows for anything new, then my hand-off list:
-  1. For each project with a new instructions version: the Claude.ai project name, the file name and the full text to paste.
-  2. The projects where I run /bandit:audit check after pasting.
+  1. For each project with rows of its own: the project, and the line to run there (/bandit:project audit for {the change}).
+  2. The projects where I run /bandit:audit check afterwards.
   3. The last step: /bandit:audit close {Domain} in this chat, once 1 and 2 are done.
 ```
-
-### 🪞 Dev repo alignment (Claude Code)
-
-Paste into Claude Code at the repo root of a `dev: true` project, as is: no placeholders. It reads the domain and project from the repo's own `CLAUDE.md`. It doesn't use the three phases above: read-only pre-flight, one approval, then the install and the first mirror. The hook and script come from bandit:project `references/dev-mirror.md`, read from the vault mirror, so this prompt never goes stale. Existing settings and permissions stay as they are: the only change to them is one added `Stop` hook.
-
-```
-# Align this repo with the dev mirror (bandit:project standard)
-
-## Goal
-Install the dev mirror so every Claude Code session mirrors this repo's Claude settings
-(`CLAUDE.md` + everything under `.claude/`) into `MyNotes/{domain}/Claude/code-{project}/`.
-Add to what exists. Existing settings and permissions stay exactly as they are.
-
-## Source of truth
-- Domain and project: the `## 🧭 Project Context` block in this repo's `CLAUDE.md`.
-- Hook, `.gitignore` line and script: bandit:project `references/dev-mirror.md` (the installed
-  `bandit` plugin, or the marketplace repo), section "📦 The repo change". Byte for byte. Never retype or "improve" it.
-- Claude.ai side: the highest-numbered `{prefix}-instructions-v{N}.md` in `MyNotes/{domain}/Claude/ai-{project}/`.
-
-## Pre-flight (read-only; any ❌ → stop and report, change nothing)
-1. BanditCloud WebDAV tools are available in this session.
-2. `CLAUDE.md` has a `## 🧭 Project Context` block (exact heading: the hook parses it) with `domain`,
-   `project` and `dev: true`. No block or no `dev: true` → stop (no `dev: true` = a Claude Code twin, not this).
-3. Compare that block with the Project Context block in the Claude.ai instructions file. Different →
-   show both side by side and ask which one is right. Never edit it without my answer.
-4. `MyNotes/{domain}/Claude/code-{project}/` exists. List it. Missing → stop: bandit:notes creates it.
-5. Inventory the whole settings set: `CLAUDE.md` + every file under `.claude/` (settings.json, agents/,
-   commands/, skills/, hooks/, anything else), with a sha256 each. Mark which ones the mirror will copy
-   (everything except `settings.local.json` and the stamp). Also list any Claude files it won't copy
-   (`CLAUDE.local.md`, `.mcp.json`, `CLAUDE.md` in subfolders): report them, don't change anything.
-6. `.gitignore` doesn't ignore `.claude/` or `.claude/settings.json` wholesale. Report if it does; don't fix it.
-
-Show the pre-flight table and the planned changes as rows `| # | File | Change |`. Wait for my approval.
-
-## Changes (only the approved rows, nothing else)
-1. `.claude/settings.json`: copy it to `.claude/settings.json.bak` first. Add the Stop hook entry to
-   `hooks.Stop`. That is the only change: `permissions`, every other hook and every other key stay
-   byte-identical. Skip it if a Stop hook already runs `mirror-check.py`. The file doesn't exist → create
-   it with only the hook. Check that the result parses as JSON.
-2. `.gitignore`: append `.claude/mirror-stamp.json` if it isn't there.
-3. `.claude/hooks/mirror-check.py`: create it exactly as in the source.
-4. `CLAUDE.md` Project Context: only if pre-flight 3 found a difference and I said which side is right.
-   Replace that block only; the rest of the file stays as is.
-
-## Never
-- Change permissions, other hooks, agents, commands, skills or any settings file not in an approved row.
-- Touch `.claude/settings.local.json`, or mirror it.
-- Add `workdir.py` or the S12 working-folder hooks (twin-only; a dev repo keeps its own layout).
-- Create, move or delete anything in the vault except the files the hook tells you to mirror.
-- Pass `if_match: "*"`. New files: omit `if_match`. Existing: read, strip the etag to bare hex, send it.
-- Commit or push without my yes.
-
-## After the changes
-- Prove nothing else moved: rerun the step-5 inventory. Every sha256 matches, except the approved files
-  and the new ones. For `settings.json`, show the diff: only the one added Stop entry.
-- Delete `.claude/settings.json.bak` only after I approve that diff.
-- The first Stop hook fires with no stamp and lists every settings file. Mirror them all as the hook says
-  (`.claude/` → `claude/`), then run the `--stamp` command it prints.
-- Verify: list `MyNotes/{domain}/Claude/code-{project}/`. It matches the step-5 "mirrored" list.
-- Report: pre-flight, the diffs, the vault listing, and anything skipped with the reason.
-```
-
----
 
 ## 🔁 Keeping this page current
 

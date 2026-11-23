@@ -20,16 +20,17 @@ The third is the rule that enforces it, if one does.
 | `plugins/bandit/skills/tasks/references/*.md` | `plugins/bandit/skills/tasks/references/errors.md` · `plugins/bandit-dev/skills/sprint/references/*.md` | — |
 | `plugins/bandit/skills/tasks/references/board.md` | `plugins/bandit-dev/skills/sprint/scripts/check_sprint.py` · `plugins/bandit-dev/skills/sprint/scripts/subtask_gate.py` · `plugins/bandit-dev/skills/sprint/scripts/sprint_data.py` (the card id patterns, Card IDs) | 🔒 ID1 |
 | `plugins/bandit-dev/skills/sprint/references/*.md` | `docs/pipeline.md` · `docs/cheat-sheet.md` · `CLAUDE.md` (the "Done means released" rule, the approval line) · `docs/decisions.md` | 🔒 EX1 (plan step 12 checks the Execution board by date) · AP1 (the approval line) · DK1 (the debug card, its moves and Process lines) |
-| `plugins/bandit/skills/notes/references/conventions.md` | `plugins/bandit/skills/notes/references/conventions-vault.md` (the same section numbers; how the vault writes each field) · `plugins/bandit/skills/notes/references/storage-app.md` (Places, Fields) · `plugins/bandit/skills/notes/references/model.md` (the inbox rule) | — |
-| `plugins/bandit/skills/notes/references/conventions-vault.md` | `plugins/bandit/skills/notes/references/conventions.md` (the section map) · `plugins/bandit/skills/notes/references/storage-vault.md` · `tests/cases.md` | — |
+| `plugins/bandit/skills/notes/references/conventions.md` | `plugins/bandit/skills/notes/references/storage-app.md` (Places, Fields) · `plugins/bandit/skills/notes/references/model.md` (the inbox rule) · `plugins/bandit/skills/notes/references/commands.md` (lint's Name check) | — |
 | `plugins/bandit/skills/notes/references/other-skills.md` | `plugins/bandit/skills/minutes/references/notes.md` · `plugins/bandit/skills/plan/references/project.md` · `plugins/bandit/skills/plan/references/wbs.md` · `plugins/bandit/skills/clarify/references/deliver.md` (who writes what: the kinds, places and draft rules these writers follow) | — |
 | `plugins/bandit/skills/notes/references/conclusions.md` | `plugins/bandit/skills/tasks/references/execution.md` (done and Bulk call it) · `plugins/bandit-dev/skills/sprint/references/close.md` (step 1, unattended) · `plugins/bandit/skills/notes/references/other-skills.md` (who writes what) · `plugins/bandit/skills/notes/references/conventions.md` (§13, the brief's headings) · `plugins/bandit-dev/skills/sprint/references/templates.md` (Brief change log) · `tests/cases.md` | — |
-| `plugins/bandit/skills/notes/references/write-safety.md` | `plugins/bandit/skills/notes/references/storage-app.md` · `plugins/bandit/skills/notes/references/storage-vault.md` | — |
+| `plugins/bandit/skills/notes/references/write-safety.md` | `plugins/bandit/skills/notes/references/storage-app.md` | — |
 | `plugins/bandit/skills/project/references/project-context.md` | `templates/instructions/*.md` · `plugins/bandit/skills/project/assets/instructions/*.md` · `CLAUDE.md` · `plugins/bandit/skills/finance/references/scope.md` | 🔒 AT2 |
 | `templates/instructions/*.md` | `plugins/bandit/skills/project/assets/instructions/*.md` | 🔒 L5 |
 | `plugins/bandit/skills/project/references/audit.md` | `docs/cheat-sheet.md` | 🔒 AT2 (tool list) |
 | `plugins/bandit/skills/audit/references/structure-rulebook.md` | `plugins/bandit/skills/audit/references/structure-rules.yaml` · `plugins/bandit/skills/audit/scripts/check_structure.py` | 🔒 A1 |
-| `plugins/bandit/skills/audit/scripts/check_structure.py` | `tests/fixture-audit/**` (the fixture snapshots, and the kept rows the script before BB-595 printed, never regenerated) · `plugins/bandit/skills/audit/references/snapshot.md` (the snapshot schema) · `tests/cases.md` (C145 to C148) | 🔒 A2 |
+| `plugins/bandit/skills/audit/scripts/check_structure.py` | `tests/fixture-audit/**` (the fixture snapshots) · `plugins/bandit/skills/audit/references/snapshot.md` (the snapshot schema) · `plugins/bandit/skills/audit/references/self-check.md` (the stamp format) · `tests/cases.md` | 🔒 A2 |
+| `plugins/bandit/skills/project/scripts/workdir.py` | `plugins/bandit/skills/audit/references/structure-rules.yaml` (its s12 block: the constants and the pinned hash) · `tests/fixture-audit/**` (the pinned hash) · `plugins/bandit/skills/project/references/workdir.md` · `plugins/bandit/skills/audit/references/structure-rulebook.md` (S12) | 🔒 X1 |
+| `plugins/bandit/skills/project/references/surfaces.md` | `plugins/bandit/skills/project/references/onboard.md` · `plugins/bandit/skills/project/references/output.md` · `plugins/bandit/skills/audit/references/self-check.md` (how a surface is told) · `docs/install.md` | — |
 | `plugins/bandit-dev/skills/sprint/scripts/recipe.py` | `plugins/bandit-dev/skills/sprint/references/bandit-yaml.md` · `docs/bandit-yaml.md` · `bandit.yaml` · `tests/fixture-app/**` | 🔒 Y1 · Y2 |
 | `plugins/bandit-dev/skills/sprint/references/bandit-yaml.md` | `plugins/bandit-dev/skills/sprint/scripts/recipe.py` · `docs/bandit-yaml.md` | 🔒 Y2 |
 | `docs/bandit-yaml.md` | `plugins/bandit-dev/skills/sprint/references/bandit-yaml.md` · `bandit.yaml` | — |
@@ -68,7 +69,8 @@ These start outside, so no file here triggers them. Each has its own check.
 A place the done check lists as open, checked and found to need nothing for this release. One line
 each: the path as the map writes it, then why. `scripts/release.py --write` empties this list.
 
-- none yet
+- `plugins/bandit/skills/tasks/references/errors.md`: no refusal code was added, removed or changed; Taking a card uses `update_tasks` as before.
+- `plugins/bandit/skills/finance/references/scope.md`: the `finance:` key of the Project Context is unchanged; only the `notes:` key changed.
 
 ## ✅ Before saying done
 

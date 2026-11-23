@@ -59,7 +59,7 @@ Each rule is written as one line with its `file:line`, in plain words.
 
 ## The map
 
-Shown in the chat, never saved to the repo or the vault:
+Shown in the chat, never saved to the repo or to a note:
 
 | Table | Owner path | Columns that matter | Links | Rules (`file:line`) |
 |---|---|---|---|---|

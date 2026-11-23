@@ -4,7 +4,7 @@
 
 # Bandit Brain Marketplace
 
-**Claude skills, agents and hooks that run your task board, your notes vault and your delivery pipeline: from an idea in the inbox to a tagged release.**
+**Claude skills, agents and hooks that run your task board, your notes and your delivery pipeline: from an idea in the inbox to a tagged release.**
 
 [![Release](https://img.shields.io/github/v/tag/l3ocho/bandit-brain-marketplace?label=release&sort=semver&color=1a1918)](CHANGELOG.md)
 [![Gate](https://github.com/l3ocho/bandit-brain-marketplace/actions/workflows/check.yml/badge.svg?branch=development)](https://github.com/l3ocho/bandit-brain-marketplace/actions/workflows/check.yml)
@@ -25,7 +25,7 @@
 - 📥 **Capture and triage**: brain dumps become cards; every card leaves the inbox with its fields answered and its date set last
 - 🗺️ **Domain-aware**: each project works its own board first, reads and writes across its domain, and never sees anything outside it
 - 💰 **Money from chat**: log spending in plain words, import a bank CSV with a preview, sort the uncategorised, run the budget month, bills and reconciliation, track investments (room, market values, goals), and see net worth as the app's labelled estimate, never a figure Claude converted
-- 🗂️ **Notes that file themselves**: one set of vault conventions (Obsidian over WebDAV), meeting minutes from a recording, clean rewrites of messy text
+- 🗂️ **Notes that file themselves**: one set of note conventions in the app's Notes, meeting minutes from a recording, clean rewrites of messy text
 - 🧭 **From idea to plan**: clarify a fuzzy idea, write a project plan and architecture, break it into a gap-checked WBS
 - 🏃 **A sprint pipeline with gates**: plan in waves, an independent plan review, one subagent per wave, test, debug, release on your word
 - 🧱 **Rules as code**: structure audits are scored by a script, sprints by a checker, and this repo by its own gate
@@ -69,8 +69,8 @@ Then `/plugin` → Marketplaces → `bandit-brain` → **Enable auto-update** (o
 | Connector | Used by | Needed |
 |---|---|---|
 | **Bandit Brain** MCP server (the task board), on app v0.41.0 or later: the one with inbox groups (`manage_inbox_groups`) besides sprints as records (`get_sprints`, `manage_sprints`), board profiles and tag view, serving the 21 assistant tools under their Board names (`get_context`, `list_tasks`, `create_tasks`, `update_tasks`, `manage_boards` …). For `finance`, app v0.31.0 or later (its 18 `finance_*` tools). After an app upgrade, reconnect the connector | `tasks`, `finance`, `audit`, `project`, `sprint`, `testdata`; card reads in `notes` and `plan`; saving a spec as a card in `clarify` | ✅ |
-| **Bandit Brain** app v0.55.0 or later for notes: the note tools (`notes_create`, `notes_get`, `notes_list`, `notes_update`, `notes_update_section`, `notes_set_status`, `notes_set_fields`, `notes_file`, `notes_move`, `notes_link_card`, `notes_unlink_card`, `notes_relate`, `notes_unrelate`, `notes_list_related`, `notes_delete`, `notes_restore`, `notes_list_trash`) and `search` | Every note a helper writes on a project whose Project Context says `notes: app`: `notes`, `minutes`, `plan`, `clarify`, `rewrite`, `finance` reviews, `tasks` briefs and plans, `sprint` papers, `audit` reports | ✅ |
-| **Nextcloud** MCP server with WebDAV (BanditCloud) | Still needed for: a project with no `notes: app` line (its notes stay in the vault); the settings folder of every project (`project` onboarding and sync); the domain-level vault commands (`notes init`, `home`, `settings`); `audit` (its snapshot reads the vault and the settings folders; `check` writes the stamp ledger); a meeting recording and the minutes saved beside it (`minutes`); `sprint` on a vault project | ✅ |
+| **Bandit Brain** app v0.55.0 or later for notes: the note tools (`notes_create`, `notes_get`, `notes_list`, `notes_update`, `notes_update_section`, `notes_set_status`, `notes_set_fields`, `notes_file`, `notes_move`, `notes_link_card`, `notes_unlink_card`, `notes_relate`, `notes_unrelate`, `notes_list_related`, `notes_delete`, `notes_restore`, `notes_list_trash`) and `search` | Every note a helper writes: `notes`, `minutes`, `plan`, `clarify`, `rewrite`, `finance` reviews, `tasks` briefs and plans, `sprint` papers, `audit` reports | ✅ |
+| A file storage (Nextcloud, a drive) | Nothing. Since 2.0.0 no skill reads or writes one: notes are in the app, a project's instructions and working files in its own folder | Not needed |
 | Gmail | `/bandit:tasks email` | Optional |
 | Code execution (Claude.ai: Settings → Capabilities) | Every skill on Claude.ai | ✅ |
 

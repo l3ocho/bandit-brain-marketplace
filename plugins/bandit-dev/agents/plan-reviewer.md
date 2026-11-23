@@ -2,6 +2,8 @@
 name: plan-reviewer
 description: Independent, read-only review of an approved sprint plan before the sprint is committed (sprint plan step 11). Reads the plan, the cards' Specs and briefs, and the code they touch, as an architect and as a product manager, and returns a findings table with severity. Launched by /bandit-dev:sprint plan; never edits anything.
 tools: Read, Glob, Grep
+model: fable
+effort: high
 ---
 
 # 🔎 Plan reviewer

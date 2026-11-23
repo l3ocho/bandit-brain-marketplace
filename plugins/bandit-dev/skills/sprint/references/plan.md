@@ -114,17 +114,19 @@ Present the state in a short summary (cards, waves, plan, risks, what needs the 
 Automatic, after the approval and before the commit. It stops the user only on a blocker.
 
 1. **Launch the `plan-reviewer` agent** (the Agent tool, `bandit-dev` agent `plan-reviewer`) and wait
-   for it. Its prompt carries: the sprint's name, the plan note's full text, each batch card's
+   for it. Its definition names its model and effort (the top model, high effort), whatever model this chat
+   uses: launch it with no model or effort of your own. Its prompt carries: the sprint's name, the plan note's full text, each batch card's
    Spec and brief, the WBS, the Migration tail table, the repo path and the project's `bandit.yaml`.
 2. **Write the review record**, a paper of the sprint: `{project}-review-sprint-{name}-YYYY-MM-DD`,
    kind `log`, with the sprint's tag (`references/templates.md` → Papers). Body: the agent's
-   verdict and findings table as returned, then the risk additions.
+   verdict and findings table as returned, then the risk additions. Its first line names the model that ran
+   the review, read from the agent's log (the model on its replies), never assumed from the definition.
 3. **Apply** every major finding, and each minor one that is cheap, to the plan (read, then the edit of
    its section, through bandit:notes) and fill the record's "Applied via" column (`plan §…`, `card {id} Technical plan`). Notes stay.
 4. **A blocker stops the step:** put the blockers to the user in one list, each with its recommendation;
    apply their answers, record them in the review, and re-run the review once if they change the plan's
    approach. This is the only stop the review adds.
-5. Step 11's row: the verdict, counts by severity and the record's title.
+5. Step 11's row: the verdict, counts by severity, the model that ran the review and the record's title.
 
 **Done when** the review record is with the sprint's papers, every major finding is applied and no
 blocker is open. `run` and `execute` refuse a sprint whose step 11 row is not done; the checker

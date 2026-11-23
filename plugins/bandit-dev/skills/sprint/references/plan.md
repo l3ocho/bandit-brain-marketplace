@@ -2,7 +2,7 @@
 
 Part of `bandit-dev:sprint`. Read before running `/bandit-dev:sprint plan`. Card sections, lanes, stages and the Spec lock are owned by bandit:tasks (`references/dev.md`); note places, storage and write rules by bandit:notes. This file only says how the steps run.
 
-Contents: Conventions · Steps 1 to 12 · Investigator brief · Handover
+Contents: Conventions · The twelve steps · Steps 1 to 12 · Investigator brief · Handover
 
 ## Conventions for every step
 
@@ -15,6 +15,25 @@ Contents: Conventions · Steps 1 to 12 · Investigator brief · Handover
 - **"What is missing"** is answered with that list only: each missing item and who owes it. No summaries, no housekeeping, no recap.
 - **Decisions** go on the card they concern as a comment starting `Planning decisions {date}`. The Spec and the brief are edited only when the user asks.
 - **Date.** Today is in the session context. Convert "tomorrow" to an absolute date.
+
+## The twelve steps
+
+The ledger's **Plan steps** table carries the steps in this order (`references/templates.md` → Ledger), with these names.
+
+| # | Step | Done when |
+|---|---|---|
+| 1 | Select and freeze the batch | The sprint created in Planning with the batch as its cards, in no other sprint; the previous open sprint blocks it |
+| 2 | Spec completeness check, per card | Every card read against its brief; gaps as fix rows |
+| 3 | Close the open questions | The open questions the cards list answered and recorded; none listed: "none", no stop |
+| 4 | Size and classify | Every card at most L (XL split), lane and boundaries checked |
+| 5 | Cross-card analysis | Migrations, shared files, hidden order, docs regeneration written down |
+| 6 | Sequence | Waves with reasons, split with the WBS (`/bandit:plan wbs`, sprint mode) |
+| 7 | Write the one technical plan | Plan note filed; every card's Technical plan filled |
+| 8 | Risk and rollback | Per card and for the sprint, in the plan |
+| 9 | Definition of ready, per card | Each card checked; stage moved on; fix rows for failures |
+| 10 | Approval gate | The user's explicit approval, quoted in the ledger |
+| 11 | Independent plan review | The `plan-reviewer` agent's record with the sprint's papers; majors applied; no blocker open (the only stop) |
+| 12 | Commit the sprint | Assignee, undated cards given the sprint date and checked against this week's Sunday, the sprint's expected date, Ready to execute, execution prompt, ledger with `Committed:` and its Waves table, one wave note per wave, the debug card, the sprint map |
 
 ## 1 · Select and freeze the batch
 
@@ -116,11 +135,12 @@ blocker is open. `run` and `execute` refuse a sprint whose step 11 row is not do
 1. **Batch cards:** assign each to the user (the signed-in member, live lookup) and set `stage/ready`. No tag. **A card with no due date gets the sprint date** (`update_tasks { dueDate }`); a card with its own due date keeps it. A refused date names the links responsible: the card keeps no date and is named as not on the Execution board yet, with the reason. The Execution board shows an open card only by its own due date, on or before this week's Sunday; the sprint's date is not read there.
 2. **The sprint:** `manage_sprints { action: "update", expectedDate }` = the sprint date, then `move` to `ready_to_execute` (it needs the date and a card; a refusal names what is missing). Read it back. The sub-task gate refuses the move while a card has no build step (step 7): write them, read them back, move again.
 3. **Ledger:** the **Waves** table, one row per wave in order (`| Wave {n} | {card ids} | | |`), the Decisions log, `Committed: {date}` in At a glance (the line SP7, SP9 and SP10 read; SP9 then needs steps 1 to 11 done) and the Status line `Committed {date}; next: Wave 1`. Write the execution prompt (templates).
-4. **Briefs and leftovers:** bring every batch brief to the sprint's papers through bandit:notes (on the app's Notes the brief stays linked to its card and gets the sprint's tag, the user's tags kept; in the vault it moves into `Projects/{slug}/sprint-{name}/`) and archive every source the planning consumed (inbox drafts, spec notes, a superseded WBS draft; `references/homes.md` → Leftovers).
-5. **Seed the Execution board:** every batch card to `assigned` with `update_tasks { items: [{ taskId, executionState: "assigned" }, …] }`, reading `results` per card, so the user sees the whole sprint before work starts. **Verify by date, not by column:** `get_task` each batch card and compare its due date with this week's Sunday. On or before it: on the Execution board. After it, or none: not on the board yet. The step's row lists every card and where it stands; the sprint's columns alone never prove the board shows a card.
-6. **Create the debug card** (`references/templates.md` → Debug card): one `create_tasks` on the home board, assigned to the user, with the sprint date, then `manage_sprints { action: "add_cards" }` after the batch (in no wave) and `executionState: "assigned"` so it shows on the Execution board; write `Debug card: {short id}` in At a glance.
-7. **Draw the sprint map, the pre-sprint report** (`references/templates.md` → Sprint map), with each wave's time estimate, and write it to its home (`references/templates.md` → Papers).
-8. Build the notes file (`references/templates.md` → Notes file), run `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py` and paste its output into the Milestone log; only once it prints OK, mark step 12's row done ("committed, checker OK").
+4. **Wave notes:** one note per wave (`references/templates.md` → Wave note), written after the review's changes are in the plan: that wave's plan sections, the shared execution rules and the ledger lines it needs, copied word for word, each note read back. A wave starts from its note and never reads the whole plan or ledger to begin (`execute.md` → Start).
+5. **Briefs and leftovers:** bring every batch brief to the sprint's papers through bandit:notes (on the app's Notes the brief stays linked to its card and gets the sprint's tag, the user's tags kept; in the vault it moves into `Projects/{slug}/sprint-{name}/`) and archive every source the planning consumed (inbox drafts, spec notes, a superseded WBS draft; `references/homes.md` → Leftovers).
+6. **Seed the Execution board:** every batch card to `assigned` with `update_tasks { items: [{ taskId, executionState: "assigned" }, …] }`, reading `results` per card, so the user sees the whole sprint before work starts. **Verify by date, not by column:** `get_task` each batch card and compare its due date with this week's Sunday. On or before it: on the Execution board. After it, or none: not on the board yet. The step's row lists every card and where it stands; the sprint's columns alone never prove the board shows a card.
+7. **Create the debug card** (`references/templates.md` → Debug card): one `create_tasks` on the home board, assigned to the user, with the sprint date, then `manage_sprints { action: "add_cards" }` after the batch (in no wave) and `executionState: "assigned"` so it shows on the Execution board; write `Debug card: {short id}` in At a glance.
+8. **Draw the sprint map, the pre-sprint report** (`references/templates.md` → Sprint map), with each wave's time estimate, and write it to its home (`references/templates.md` → Papers).
+9. Build the notes file (`references/templates.md` → Notes file), run `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py` and paste its output into the Milestone log; only once it prints OK, mark step 12's row done ("committed, checker OK").
 
 ## Investigator brief
 
@@ -150,4 +170,4 @@ End of step 12: ten lines at most. **First line: the pre-sprint report**, the sp
 
 ## Handover
 
-At step 12 write `references/templates.md` → Execution prompt and Ledger as the sprint's papers. The execution prompt runs one wave per run without questions, merges passing cards into the local development branch, pushes `development` once at the end of the last code wave (never `main`, never a deploy), keeps the ledger after every milestone and writes the handover test report. A new chat resumes from the ledger. The commands that run it are `execute`, `debug` and `close` (`references/execute.md`, `debug.md`, `close.md`). The prompt points to `execute.md` for board moves and the wave rules, to `debug.md` for bug reports and to `close.md` for closing; it carries no copy of their procedures. Its start paste names the wave.
+At step 12 write `references/templates.md` → Execution prompt, Ledger and Wave note as the sprint's papers. The execution prompt runs one wave per run without questions, merges passing cards into the local development branch, pushes `development` once at the end of the last code wave (never `main`, never a deploy), keeps the ledger after every milestone and writes the handover test report. A wave starts from its wave note; a new chat resumes from the ledger. The commands that run it are `execute`, `debug` and `close` (`references/execute.md`, `debug.md`, `close.md`). The prompt points to `execute.md` for board moves and the wave rules, to `debug.md` for bug reports and to `close.md` for closing; it carries no copy of their procedures. Its start paste names the wave.

@@ -27,7 +27,7 @@ live, `get_sprints { boardId }`). No command → offer the table and ask which.
 
 | Command | Input | Does | Reference |
 |---|---|---|---|
-| `plan` | Nothing (every open High card not in a sprint) or a list of card ids | The plan cycle below; no list means go straight: state the selection, list open Urgent cards as "not selected", start | `references/plan.md` |
+| `plan` | Nothing (every open High card not in a sprint) or a list of card ids | The plan cycle (`references/plan.md`); no list means go straight: state the selection, list open Urgent cards as "not selected", start | `references/plan.md` |
 | `execute` | Sprint and wave (`execute {sprint} wave 2`) | One wave, one chat; refuses a wave whose cards depend on an undelivered card; refuses a batch card; moves cards on the Execution board | `references/execute.md` |
 | `run` | One or more sprints; `--paced [minutes]` under `/loop` | Every open wave, each in its own subagent, one wave at a time, each once its dependencies are delivered; checks each wave on the board; stops on a blocker | `references/run.md` |
 | `debug` | Sprint | Turns the user's adjustments into verified fixes | `references/debug.md` |
@@ -41,6 +41,8 @@ live, `get_sprints { boardId }`). No command → offer the table and ask which.
 | `references/homes.md` | Before a step's first write: homes, write rules, owners |
 | `references/gotchas.md` | Once at the start of any command |
 | `references/bandit-yaml.md` | The project recipe: every key, section and refusal |
+
+**A wave reads less.** `execute` and a `run` wave agent read what `references/execute.md` → Start lists, and nothing beyond it.
 
 ## 🗺️ Gate 0: before step 1
 
@@ -56,24 +58,9 @@ live, `get_sprints { boardId }`). No command → offer the table and ask which.
 
 ## 🔄 The plan cycle
 
-The ledger's **Plan steps** table carries the steps in this order, and its **Waves** table one row
-per wave (added at step 12) (`references/templates.md` → Ledger). **Mark a step done only with its
-evidence in its row**; the checker (SP9, SP10) refuses a done row without it.
-
-| # | Step | Done when |
-|---|---|---|
-| 1 | Select and freeze the batch | The sprint created in Planning with the batch as its cards, in no other sprint; the previous open sprint blocks it |
-| 2 | Spec completeness check, per card | Every card read against its brief; gaps as fix rows |
-| 3 | Close the open questions | The open questions the cards list answered and recorded; none listed: "none", no stop |
-| 4 | Size and classify | Every card at most L (XL split), lane and boundaries checked |
-| 5 | Cross-card analysis | Migrations, shared files, hidden order, docs regeneration written down |
-| 6 | Sequence | Waves with reasons, split with the WBS (`/bandit:plan wbs`, sprint mode) |
-| 7 | Write the one technical plan | Plan note filed; every card's Technical plan filled |
-| 8 | Risk and rollback | Per card and for the sprint, in the plan |
-| 9 | Definition of ready, per card | Each card checked; stage moved on; fix rows for failures |
-| 10 | Approval gate | The user's explicit approval, quoted in the ledger |
-| 11 | Independent plan review | The `plan-reviewer` agent's record with the sprint's papers; majors applied; no blocker open (the only stop) |
-| 12 | Commit the sprint | Assignee, undated cards given the sprint date and checked against this week's Sunday, the sprint's expected date, Ready to execute, execution prompt, ledger with `Committed:` and its Waves table, the debug card, the sprint map |
+Twelve steps, one row each in the ledger's **Plan steps** table, and one row per wave in its **Waves**
+table from step 12: the table and every step are in `references/plan.md`. **Mark a step done only
+with its evidence in its row**; the checker (SP9, SP10) refuses a done row without it.
 
 ## 🔒 Hard rules
 

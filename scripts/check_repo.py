@@ -2370,6 +2370,52 @@ def check_testdata():
            "the project's command, its absence said, its failure stops the clean)")
 
 
+# ── WN1 · a wave starts from its wave note: planning writes one per wave, execute and run name it, the sprint checker takes it ─
+def wave_note_problems(files):
+    """`files` maps a sprint reference name to its text."""
+    flat = {n: " ".join(x.split()) for n, x in files.items()}
+    needles = (("templates.md", "## Wave note"), ("templates.md", "`{project}-sprint-{name}-wave-{n}`"),
+               ("templates.md", "copied word for word"), ("plan.md", "**Wave notes:** one note per wave"),
+               ("execute.md", "**What a wave reads, and nothing beyond it.**"), ("execute.md", "Not the plan, not another wave's note"),
+               ("execute.md", "right before the wave's first ledger write"),
+               ("run.md", "your wave note `{project}-sprint-{name}-wave-{n}`"), ("run.md", "never the whole plan or ledger to begin"))
+    bad = [f"{n} lost '{w}'" for n, w in needles if w not in (files if w.startswith("## ") else flat).get(n, "")]
+    if "Read the ledger, the plan and the execution prompt" in flat.get("execute.md", ""):
+        bad.append("execute.md Start still reads the whole plan and ledger")
+    return bad
+
+
+def check_wave_note():
+    import tempfile
+    s = PLUGINS / "bandit-dev" / "skills" / "sprint"
+    files = {n: (s / "references" / n).read_text(encoding="utf-8") for n in ("templates.md", "plan.md", "execute.md", "run.md")}
+    bad = wave_note_problems(files)
+    mutants = [{**files, "templates.md": files["templates.md"].replace("## Wave note", "## Other")},
+               {**files, "plan.md": files["plan.md"].replace("**Wave notes:** one note per wave", "")},
+               {**files, "run.md": files["run.md"].replace("your wave note", "the plan")},
+               {**files, "execute.md": files["execute.md"] + "\n3. Read the ledger, the plan and the execution prompt.\n"}]
+    missed = [i for i, m in enumerate(mutants) if not wave_note_problems(m)]
+    if missed:
+        bad.append(f"the rule does not fail on every broken copy (missed {missed})")
+    # A sprint that holds wave notes still passes the sprint checker.
+    src = Path(notes_fixture("Record"))
+    data = json.loads(src.read_text(encoding="utf-8"))
+    plan = next(n for n in data["notes"] if n["title"].endswith("-plan"))
+    for w in (1, 2):
+        data["notes"].append({"title": plan["title"][:-len("plan")] + f"wave-{w}", "kind": "reference", "status": plan["status"],
+                              "tags": plan["tags"], "cards": [], "text": f"# wave {w}\n\n## Cards\n\nx\n"})
+    with tempfile.TemporaryDirectory() as d:
+        for f in src.parent.iterdir():
+            (Path(d) / f.name).write_bytes(f.read_bytes())
+        (Path(d) / src.name).write_text(json.dumps(data), encoding="utf-8")
+        got = run_script(s / "scripts" / "check_sprint.py", "--notes", str(Path(d) / src.name))
+    if got[0] != 0:
+        bad.append(f"check_sprint.py refuses a sprint with wave notes: {got[1][-160:]!r}")
+    report("WN1", not bad, "; ".join(bad) + " (BM-4)" if bad else
+           "wave note: one home for its shape in templates.md; plan step 12 writes one per wave; execute's Start and run's "
+           "prompt name it in place of the whole plan and ledger; the sprint checker passes a sprint that holds them")
+
+
 # ── L5 · project instructions templates are one page, and the project skill ships them as-is ─
 TEMPLATE_MAX_LINES, TEMPLATE_MAX_WORDS = 60, 450
 
@@ -2464,6 +2510,7 @@ def main(argv):
     check_card_ids()
     check_code_changed()
     check_testdata()
+    check_wave_note()
     check_l5()
     for rule, ok, msg in results:
         print(f"{'✅' if ok else '❌'} {rule} {msg}")

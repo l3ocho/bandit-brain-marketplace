@@ -8,7 +8,7 @@ Contents: Command · Rules · Before the first wave · The loop · Paced mode ·
 
 `/bandit-dev:sprint run {sprint}` runs every wave not done in its ledger, in plan order, each once the cards it depends on are delivered (`execute.md` → Command, rule 3). `/bandit-dev:sprint run {sprint A} {sprint B}` runs the sprints in the order given, all of the first before any of the second.
 
-1. **Only sprints are accepted** (a real sprint, or an old-way sprint card: `references/old-way.md`). A batch card is refused, as in `execute`.
+1. **Only sprints are accepted.** A batch card is refused, as in `execute`.
 2. **Each sprint must be committed**: its ledger's 12 Plan steps done. A sprint still in planning is named and skipped; the others still run.
    - **Review gate.** Step 11 (Independent plan review) not done → that sprint is refused, naming the step.
    - **Order gate.** The sprint is blocked by an open sprint or card (`get_sprints { sprintId }` → `blockedBy`, `completed: false`) → refused, naming it. A blocking sprint named earlier in the same `run` command counts once its last wave is checked.
@@ -49,7 +49,7 @@ For each wave, in order:
    - the ledger's "At a glance" names the next wave, and the wave's migration-tail line (`execute.md` → The wave, step 3) shows the tail matched;
    - the ledger's Status line reads `Wave {n} of {total} delivered…` for this wave: a stale line fails the wave;
    - `git status --short` is clean and `git branch --show-current` is `development`;
-   - if the wave carries the final push (`execute.md` → Pushing `development`): the ledger records the pushed hash and `git status -sb` shows `development` level with `origin/development`. A recorded push failure is a "Needs the user" item, not a failed wave. After a recorded push, `get_task` on the ledger's `Staging handover:` card shows the ready form with the pushed hash; a card still not ready is a failed wave.
+   - if the wave carries the final push (`execute.md` → Pushing `development`): the ledger records the pushed hash and `git status -sb` shows `development` level with `origin/development`. A recorded push failure is a "Needs the user" item, not a failed wave.
    - `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py` prints OK on a notes file built for this check (`references/templates.md` → Notes file).
    Any mismatch: treat the wave as not done and stop (see below).
 4. **Add one line to the ledger's Milestone log**: `Run: Wave {n} done by agent, checked ({what was checked}). Next: Wave {n+1}` or the next sprint.

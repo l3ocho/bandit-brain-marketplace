@@ -50,19 +50,12 @@ Check all before anything runs. Each miss is refused by name, with what would sa
    `close` checks). Milestone log: one line with the deploy word quoted.
 4. **Status line.** Ledger: `Released {version} on {date}; ready to close`. Milestone log: version,
    commit, recipe steps run.
-5. **Production handover card.** The ledger's `Production handover:` line names it; none and the
-   recipe has a `handover` section → create it now, as `plan.md` step 12 says. `get_task`, then replace
-   its title and description with the ready form (`references/templates.md` → Handover cards), built
-   from this release's facts and the `handover.production.runbook` section read on `branches.deploy`;
-   the runbook's commands are copied, never written by the skill. Comment: version and commit. No
-   `handover` section → no card; one line under "Needs the user". The card stays open: the user
-   fires its hook and closes it. **No production part** (`recipe.py opt handover.production.column`
-   prints `none`): no card and no "Needs the user" line; the recipe's own steps (step 1) carry the
-   deploy, its watch and its version check, and the Milestone log holds each one's result.
+5. **The deploy is the recipe's.** Its own steps (step 1) carry the deploy, its watch and its version
+   check, and the Milestone log holds each one's result.
 6. **Staging.** `recipe.py opt staging.refresh`: give the user that instruction to put the release on
    staging; never run it. `none` → no staging step.
-7. Final message, ten lines at most, with the production handover card's id (or, with none, the
-   running version the recipe confirmed) and the paste for `close`.
+7. Final message, ten lines at most, with the running version the recipe confirmed and the paste for
+   `close`.
 
 ## Covering
 
@@ -72,10 +65,7 @@ project's last `Released:` line. Their code is on the trunk already, so the rele
 
 - **The `Released:` line names them all:** `Released: {version} · {date} · {commit} · covers {sprint},
   {sprint}`. The deferred sprints' notes stay as they are: they say deferred, and this line covers them.
-- **One handover card:** this sprint's production handover card carries the release; its Facts name
-  every sprint covered. A deferred sprint's own production card was left with one comment at its close
-  (`close.md`), and the user closes it. With no production card, the Milestone log's release line names
-  every sprint covered.
+- **One release line:** the Milestone log's release line names every sprint covered.
 - **Plugins alone.** A sprint with Marketplace cards whose app release the user defers still releases
   the plugins: on the user's word for the plugins alone, run only Marketplace cards (below); the
   `Released:` line names the plugin version and `app deferred`, and close writes `Release: deferred`
@@ -103,5 +93,4 @@ marketplace repo itself, its recipe already runs these steps: run them once.
 - Continue past a failing recipe step, retry it with force, or edit the recipe to get past it
 - Run `staging.refresh`, touch production data, or run credential scripts
 - Complete a card or close the sprint: that is `close`
-- Put a password, token or env value in a handover card, or let its prompt run while the card
-  is still in its not-ready form
+- Print or copy a password, token or env value

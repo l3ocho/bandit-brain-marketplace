@@ -2,6 +2,12 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
+## Unreleased
+
+### Changed
+- **Retired material leaves the sprint helper** (BM-5, sprint dev-efficiency-2). Every sprint command now loads about 12 to 14 KB less text. Gone: the old-way path (`old-way.md` and every branch on it: no sprint card and no `sprint/*` tag is left on any board); the deployment cards for the CTO agent (their template, the plan's Deployment handover section and its fix row, the fills at the final push and at release), so `release` deploys through the recipe's own steps and a deferred close writes one Milestone log line; and the incident stories in `gotchas.md`, which now holds one rule per line and leaves out the rules a script or hook already enforces. The recipe's `handover` keys keep their rows in the keys table, marked retired, because the reader still knows them.
+- **A debug fix runs only the tests that cover it, and debug pushes once** (BM-5). No code review and no browser check per fix; every fix is committed locally and they go out in one push at the end, after one full check when code changed.
+
 ## 1.0.2 · 2026-11-21
 
 ### Fixed

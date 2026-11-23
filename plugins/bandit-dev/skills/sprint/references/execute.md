@@ -6,10 +6,10 @@ Contents: Command · Rules · Start · The wave · Sprint status · Board moves 
 
 ## Command
 
-`/bandit-dev:sprint execute {sprint} wave N` (for example `execute 2026-w42 wave 2`). **The wave is the unit; the sprint's name says which sprint it belongs to.** A sprint card id instead: `references/old-way.md`. Rules, checked before anything moves:
+`/bandit-dev:sprint execute {sprint} wave N` (for example `execute 2026-w42 wave 2`). **The wave is the unit; the sprint's name says which sprint it belongs to.** Rules, checked before anything moves:
 
-1. **Only a sprint is accepted**: a real sprint on the home board, or an old-way sprint card. A batch card (any card of a sprint that sits in a wave; the sprint's debug card is in no wave) is refused with: "That is a card inside {sprint}. Point me at {sprint} and a wave number." Nothing is run for a single card.
-2. **Wave N is named or chosen, and said out loud.** `wave N` runs that wave. No number: run the first wave not done in the Waves table whose dependencies are delivered (old way: the first unticked wave sub-task), and state the choice in the opening line ("Running Wave 2: {ids}") before any move.
+1. **Only a sprint is accepted**: a real sprint on the home board. A batch card (any card of a sprint that sits in a wave; the sprint's debug card is in no wave) is refused with: "That is a card inside {sprint}. Point me at {sprint} and a wave number." Nothing is run for a single card.
+2. **Wave N is named or chosen, and said out loud.** `wave N` runs that wave. No number: run the first wave not done in the Waves table whose dependencies are delivered, and state the choice in the opening line ("Running Wave 2: {ids}") before any move.
 3. **A wave waits for what it depends on, not for the wave before it.** Wave N is refused only while a card it depends on is not delivered (in `standby` or done), naming that card and its wave, unless the user says to skip it in this chat. A card depends on another when the ledger's Batch table lists it under `Blocked by`, or the plan's `Lands after:` line pairs them. A paused or blocked card in another wave holds back only the cards that depend on it. Cards completed by hand count as delivered once the board and the ledger agree.
 4. **Only the cards in that wave's row are worked or commented on.** No card outside it is worked or commented on, and the only move outside it is a later card whose dependencies are now all delivered going to `next` (The wave, step 7). One more exception: the sprint's debug card (`Debug card:` in the ledger) gets an `Expected:` line for an issue the wave could not solve (Finishing a wave) and a `Process:` line for a step that stalled or failed (Rules). A wave never moves the debug card (`debug` moves it to `doing`, `release` to `standby`: `references/templates.md` → Debug card).
 
@@ -95,8 +95,7 @@ Allowed. The user lifted the old "never push" rule on 2026-10-10: it was written
 - **When.** The sprint plan carries a "Final push" section by default (`plan.md` step 7), and the handover prompt repeats it. The last wave that changes code pushes at its end, after its merge into local `development` and a green `verify` (the project's `bandit.yaml`); a `verify` that prints "already passed" is that green run, never repeated in full, and so is `code_changed.py --since {the commit of the last green full check}` printing "full check: not needed" (`templates.md` → Gate order). A wave that is the user's own steps (production, host work) is never where the push waits.
 - **How.** `git status` clean and branch `development`; `git fetch origin`; if `origin/development` has commits local lacks, merge it into local `development` and re-run `verify`; then `git push origin development`. Fast-forward only: no force, no tags, no other branch.
 - **Proof.** The ledger records the pushed hash and `git status -sb` showing `development` level with `origin/development`.
-- **Staging handover.** Right after the proof, fill the staging handover card the ledger's `Staging handover:` line names: `get_task`, then replace its title and description with the ready form (`references/templates.md` → Handover cards), built from the pushed hash and the `handover.staging.runbook` section read from the app repo; the runbook's commands are copied, never written by the agent. Comment: the pushed hash. No line in the ledger → one line under "Needs the user". The user fires the hook before testing.
-- **If it fails** (a refused or disconnected push): the staging card stays not ready; record the exact output under "Needs the user", leave `development` as it is, never retry with force. The wave is still delivered.
+- **If it fails** (a refused or disconnected push): record the exact output under "Needs the user", leave `development` as it is, never retry with force. The wave is still delivered.
 - **Still the user's:** merging into `main` and deploying. They need their explicit say-so in the message being answered (project branching rule 9). A push of `development` starts the repo's own checks and staging build by itself; that is expected and is not a deploy.
 
 ## Never
@@ -107,4 +106,4 @@ Allowed. The user lifted the old "never push" rule on 2026-10-10: it was written
 - Run two waves in one chat.
 - Move a card to Doing past a gate, or past the sprint's five-item cap.
 - Move the sprint's status but as Sprint status says.
-- Write to cards outside the sprint, or to the staging handover card but as Pushing `development` says.
+- Write to cards outside the sprint.

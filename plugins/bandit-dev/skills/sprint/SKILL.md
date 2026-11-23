@@ -23,8 +23,7 @@ Execution board shows it; a card with its own date keeps it.
 ## 🧭 Router
 
 `/bandit-dev:sprint <command> {sprint}`, `{sprint}` the sprint's name on the home board (resolved
-live, `get_sprints { boardId }`). A **sprint card** id instead (a card with `Wave n:` sub-tasks) is an
-old-way sprint: follow `references/old-way.md`. No command → offer the table and ask which.
+live, `get_sprints { boardId }`). No command → offer the table and ask which.
 
 | Command | Input | Does | Reference |
 |---|---|---|---|
@@ -32,8 +31,8 @@ old-way sprint: follow `references/old-way.md`. No command → offer the table a
 | `execute` | Sprint and wave (`execute {sprint} wave 2`) | One wave, one chat; refuses a wave whose cards depend on an undelivered card; refuses a batch card; moves cards on the Execution board | `references/execute.md` |
 | `run` | One or more sprints; `--paced [minutes]` under `/loop` | Every open wave, each in its own subagent, one wave at a time, each once its dependencies are delivered; checks each wave on the board; stops on a blocker | `references/run.md` |
 | `debug` | Sprint | Turns the user's adjustments into verified fixes | `references/debug.md` |
-| `release` | Sprint, with the user's deploy word | Preconditions (cards tested, debug done, deploy word, migration tail, backup), then the project's `bandit.yaml` recipe; plugin release for Marketplace cards; fills the production handover card when the recipe names one | `references/release.md` |
-| `close` | Sprint | Releasing is optional (no app release: `Release: deferred`, the next release covers it; helpers changed: their release first); completes the approved cards, closes the sprint, archives the sprint's papers; brings an old-way sprint into the app first | `references/close.md` |
+| `release` | Sprint, with the user's deploy word | Preconditions (cards tested, debug done, deploy word, migration tail, backup), then the project's `bandit.yaml` recipe; plugin release for Marketplace cards | `references/release.md` |
+| `close` | Sprint | Releasing is optional (no app release: `Release: deferred`, the next release covers it; helpers changed: their release first); completes the approved cards, closes the sprint, archives the sprint's papers | `references/close.md` |
 
 | Read | When |
 |---|---|
@@ -42,7 +41,6 @@ old-way sprint: follow `references/old-way.md`. No command → offer the table a
 | `references/homes.md` | Before a step's first write: homes, write rules, owners |
 | `references/gotchas.md` | Once at the start of any command |
 | `references/bandit-yaml.md` | The project recipe: every key, section and refusal |
-| `references/old-way.md` | A sprint card instead of a sprint: what changes in every command, and its close |
 
 ## 🗺️ Gate 0: before step 1
 
@@ -51,8 +49,7 @@ old-way sprint: follow `references/old-way.md`. No command → offer the table a
    project and `prefix`. Missing or not dev → say which and stop. Resolve the board, its columns
    and members **live**. The board must be Technical (sprints live only there)
 3. **Sprints on.** `get_sprints { boardId }` answers. `MODULE_DISABLED` → say Sprints is off and who
-   turns it on (bandit:tasks `references/errors.md`), and stop. An old-way sprint card skips this step,
-   except at its Close (`references/old-way.md`)
+   turns it on (bandit:tasks `references/errors.md`), and stop
 4. **Repo state.** `git branch --show-current`, `git status --short`. Work on the deploy branch → say
    so and keep every commit for the trunk
 5. **Tools.** Board server and a browser tool; BanditCloud server only for a vault project (no `notes: app`). A missing server stops the run
@@ -76,7 +73,7 @@ evidence in its row**; the checker (SP9, SP10) refuses a done row without it.
 | 9 | Definition of ready, per card | Each card checked; stage moved on; fix rows for failures |
 | 10 | Approval gate | The user's explicit approval, quoted in the ledger |
 | 11 | Independent plan review | The `plan-reviewer` agent's record with the sprint's papers; majors applied; no blocker open (the only stop) |
-| 12 | Commit the sprint | Assignee, undated cards given the sprint date and checked against this week's Sunday, the sprint's expected date, Ready to execute, execution prompt, ledger with `Committed:` and its Waves table, the handover cards the recipe names, the debug card, the sprint map |
+| 12 | Commit the sprint | Assignee, undated cards given the sprint date and checked against this week's Sunday, the sprint's expected date, Ready to execute, execution prompt, ledger with `Committed:` and its Waves table, the debug card, the sprint map |
 
 ## 🔒 Hard rules
 
@@ -103,7 +100,7 @@ The full list is `references/gotchas.md`: read it once at the start of any comma
 - Ask which cards when no list was given
 - Mark a card complete, tick its approval line or call anything approved, except `close` doing so for cards the user approved (approval line ticked by the user, or approved in that chat)
 - Rewrite a locked Spec without showing old and new and getting a yes
-- Write to a card outside the batch, its debug card and its handover cards (old way: and the sprint card), or to a sprint but this one; create columns or boards
+- Write to a card outside the batch and its debug card, or to a sprint but this one; create columns or boards
 - Merge into the deploy branch or deploy outside `release`; force-push, or push anything but the trunk (`references/execute.md` → Pushing)
 - Run two wave agents at once, two waves in one chat, a single card, or a wave before the cards it depends on are delivered without the user's say-so
 - Move a card to Done by anything but `close`, or treat an urgency remark as approval

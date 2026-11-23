@@ -70,7 +70,9 @@ These start outside, so no file here triggers them. Each has its own check.
 A place the done check lists as open, checked and found to need nothing for this release. One line
 each: the path as the map writes it, then why. `scripts/release.py --write` empties this list.
 
-- none yet
+- `README.md` — the sprint commands and the agent it names are unchanged; only the compatibility row for 1.1.0 was added
+- `plugins/bandit-dev/skills/sprint/scripts/recipe.py` — the scripts are outside the cards (BM-5); the reader keeps the `handover` keys, so the keys table keeps their rows
+- `bandit.yaml` — this repository's recipe has no `handover` section
 
 ## ✅ Before saying done
 

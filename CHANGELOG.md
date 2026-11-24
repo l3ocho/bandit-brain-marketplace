@@ -16,7 +16,10 @@ Version 2.0.0 when released: the Project Context format changes and commands are
 
 - **Audit rules S5, S7, S8, S10 and S11.** They compared the files of the settings folder and the second copy of a project's instructions, which no longer exist. Their numbers are not reused. Snapshots of schema 1 to 7 no longer load: `check_structure.py` refuses one by name, and its report is superseded.
 
+- **The sprint helper's vault branches** (BM-15). A sprint's papers are notes on the project's board only, its sprint data file sits in `.sprint/`, and closing archives the papers by status; the papers-folder link, the folder move to the archive and the vault's write rule are gone. Checker rule SP4, which checked a vault note's frontmatter, is retired.
+
 ### Added
+- **Checker rule VO1** (BM-15): no shipped file names the MyNotes vault, WebDAV, a vault settings path or the vault's archive folder, except a line saying what was retired.
 - **A project checks in with a stamp.** `/bandit:audit check`, run inside a project, writes one section of the note `{domain}-audit-stamps` on the domain's workflow board: the surface, the version, the Project Context and, in Claude Code, the state of the working-folder guard and its manifest. `/bandit:audit` scores a domain from those stamps and the boards (snapshot schema 8); a domain is a top-level board folder. A board no stamp names is unchecked and says so.
 - **One configuration per project.** `bandit:project` works on the surface the chat runs on: in Claude Code it reads the folder's `CLAUDE.md` and `.claude/`, says whether the project is a workflow agent or a technical one, checks it is ready for Bandit Brain, and proposes every change as a row; a file is written only for an approved row, with a way back first. On Claude.ai the instructions are handed over to paste. It never writes the user's own settings and never removes a permission rule or a hook.
 - **Two reference notes.** The reference doc is the note `{slug}-reference` on the project's board; a Claude.ai project's instructions also get a copy, `{slug}-instructions`. One note each, updated in place.

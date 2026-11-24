@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 """Checks a project's bandit-dev:sprint papers from its notes file. Exit 1 on any error.
 
-The notes file is built by the sprint helper through bandit:notes, in whichever storage the project uses
+The notes file is built by the sprint helper through bandit:notes from the app's Notes
 (references/templates.md → Notes file): `.sprint/{project}-sprint-notes.json` at the root of the repository, a JSON
 object `{"project", "built", "notes": [{"title", "kind", "status", "tags", "cards", "text"}], "titles": [...]}`: in
 `notes` every paper, WBS note and targets note of the project and every brief of the project whatever its tag (the
-Inbox, the project's root and the domain's inbox included), in `titles` the titles of the project's other notes; a note
-read from the vault whose frontmatter does not parse carries `frontmatter_error`. A sprint's papers are the notes
-tagged `sprint-{name}`; a paper is found by its title. No script reads a vault folder or the app.
+Inbox, the project's root and the domain's inbox included), in `titles` the titles of the project's other notes. A sprint's papers are the notes
+tagged `sprint-{name}`; a paper is found by its title. No script reads the app.
 
 Rules (each one a failure, not a warning):
   SP1  every sprint has its plan, handover prompt and ledger: notes titled {project}-sprint-{name}-{record} with its tag
@@ -16,8 +15,6 @@ Rules (each one a failure, not a warning):
        no paper of that sprint exists (and it is not named in `--closed`) is one line: the tag names no sprint
   SP2  a brief (kind brief) linked to a card of a sprint (a card row of the ledger's tables) carries that sprint's tag
   SP3  no two notes of the project share a title, `notes` and `titles` together (the scripts find a paper by its title)
-  SP4  a note read from the vault has frontmatter that parses as YAML: its `frontmatter_error` fails (never set for a
-       note on the app's Notes, nor for the user's own inbox notes: no frontmatter or status inbox)
   SP6  one brief per card: a card has at most one brief that is not archived (a card detached from a closing sprint
        carries everything into that one note, which waits in the inbox; its ledger row says "detached")
   SP7  a sprint whose ledger says it is committed (a `Committed:` line, written at plan step 12) has its independent
@@ -41,7 +38,7 @@ Rules (each one a failure, not a warning):
        a plan linked to a card with status done is settled too (the app keeps such a plan at its card's state and
        refuses to archive it)
 Retired with app 0.56.0, whose sprint page draws the map: SP12 (the sprint map page beside the notes file).
-Retired with the vault folder: SP5 (the project folder's root; bandit:audit's S16, retired with it) and the `--listing`
+Retired with the vault (2.0.0): SP4 (a vault note's frontmatter). Retired with the vault folder: SP5 (the project folder's root; bandit:audit's S16, retired with it) and the `--listing`
 mode; SP8 is the repo checker's rule on this script's Stop hook.
 
 Usage:
@@ -52,8 +49,7 @@ Usage:
   No notes file, or one that is not a notes file: says it could not read the notes file (exit 1).
   check_sprint.py --hook   (Stop hook: reads the hook JSON on stdin, checks only when the chat used the sprint helper:
                             a Skill call or a typed /bandit-dev:sprint command, or a tool call on a notes file, never
-                            the skill's name in the chat's lists; the project is the repository's own (its Project Context), so
-                            no vault is needed. A missing notes file, or one built before the session began, is said
+                            the skill's name in the chat's lists; the project is the repository's own (its Project Context). A missing notes file, or one built before the session began, is said
                             in a notice (exit 0); an error in a notes file built in this session blocks the stop once (exit 2))
 """
 import argparse
@@ -90,7 +86,7 @@ OWED = re.compile(r"trigger\s*:[^)\n]*\b(?:close|closing|release)\b|\b(?:at|on|d
 WAVE_ROW = re.compile(r"^\|\s*Wave\s+(\d+)\s*\|\s*([^|]+?)\s*\|\s*([^|]*?)\s*\|\s*((?:[^|\\]|\\.)*?)\s*\|\s*$", re.M)
 SPRINT_TAG = re.compile(r"^sprint-(.+)$")
 NOTES_NAME = "{project}-sprint-notes.json"
-RULES = "SP1-SP4, SP6, SP7, SP9-SP11, SP13-SP15"
+RULES = "SP1-SP3, SP6, SP7, SP9-SP11, SP13-SP15"
 FIELDS = ("title", "kind", "status", "tags", "cards", "text")
 
 
@@ -120,7 +116,7 @@ def load_notes(path) -> dict:
             raise NotesFileError(f"could not read the notes file {path}: note {i} has no title")
         notes.append({"title": note["title"], "kind": str(note.get("kind") or ""), "status": str(note.get("status") or ""),
                       "tags": [str(t) for t in note.get("tags") or []], "cards": [str(c) for c in note.get("cards") or []],
-                      "text": str(note.get("text") or ""), "frontmatter_error": str(note.get("frontmatter_error") or "")})
+                      "text": str(note.get("text") or "")})
     titles = data.get("titles") or []
     if not isinstance(titles, list):
         raise NotesFileError(f"could not read the notes file {path}: `titles` is not a list")
@@ -326,11 +322,6 @@ def check(data: dict, folder: Path, closed_in_app: set = frozenset()) -> list[st
         if count > 1:
             errors.append(f"SP3 {count} notes are titled {title}: the scripts find a paper by its title "
                           "(archive or rename one through bandit:notes)")
-
-    # SP4 a vault note's frontmatter that does not parse (the builder records it)
-    for note in notes:
-        if note["frontmatter_error"]:
-            errors.append(f"SP4 {note['title']}: {note['frontmatter_error']}")
 
     # SP6 one brief per card that is not archived; and the briefs by card for SP2
     briefs_by_card = defaultdict(list)

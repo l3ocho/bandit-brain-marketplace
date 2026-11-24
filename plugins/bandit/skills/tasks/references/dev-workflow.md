@@ -217,8 +217,8 @@ table says (**🗂️ Record homes**).
 Steps 1 and 5 are the **card-write rules** bandit-dev:sprint calls for a sprint's cards.
 
 1. **Drift check first.** Compare the repo `CLAUDE.md` Project Context with the **production**
-   Claude.ai block: the instructions version matching the project's self-check stamp, read the way
-   bandit:project reads its settings folder. Report any difference before anything else; don't fix it.
+   Claude.ai block: the instructions version matching the project's self-check stamp (bandit:project
+   `references/surfaces.md`). Report any difference before anything else; don't fix it.
 2. **List** the `stage/spec` cards (`list_tasks { boardId, tagId: {stage/spec tag id}, completed: false }`). Separately list the
    ones whose plan note is already linked and out of the inbox (bandit:notes' lookup of the card's
    notes) and offer the `planned` flip for them.

@@ -810,12 +810,12 @@ def check_sp7():
     papers = run_script(script, "--notes", notes_fixture("PapersBad"))   # one break each of SP2, SP3, SP6 (BB-601)
     papers_ok = (papers[0] == 1 and papers[1].count("\n- ") == 3 and all(f"- {r} " in papers[1] for r in ("SP2", "SP3", "SP6"))
                  and "garden-ga-2-brief-2026-10-01" not in papers[1] and "titled garden-sprint-spring-plan" in papers[1])
-    yaml_bad = run_script(script, "--notes", notes_fixture("SprintData"))   # five vault notes whose frontmatter fails (SP4)
-    sp4_ok = yaml_bad[1].count("\n- SP4 ") == 5 and "frontmatter is not valid YAML" in yaml_bad[1]
+    yaml_bad = run_script(script, "--notes", notes_fixture("SprintData"))   # SP4 retired with the vault (2.0.0): no SP4 line
+    sp4_ok = "SP4" not in yaml_bad[1]
     ok = good[0] == 0 and bad[0] == 1 and "SP7" in bad[1] and bad[1].count("\n- ") == 1 and papers_ok and sp4_ok
     report("SP7", ok, "check_sprint passes the reviewed sprint and refuses the unreviewed one with SP7 only; a root brief "
            "without its sprint's tag, a paper's title held by another note and an inbox draft brief fail SP2, SP3 and SP6 "
-           "(an archived brief counts not); a vault note whose frontmatter does not parse fails SP4"
+           "(an archived brief counts not); SP4 is retired with the vault"
            if ok else f"fixtures: good → {good[0]} {good[1][-120:]!r}; bad → {bad[0]} {bad[1][-160:]!r}; "
            f"PapersBad → {papers[0]} {papers[1][-240:]!r}; SprintData SP4 lines → {yaml_bad[1].count(chr(10) + '- SP4 ')}")
 
@@ -1105,7 +1105,7 @@ def check_sp15():
     still = run_script(script, "--notes", notes_fixture("ClosedPlanOpen"))      # linked to an open card, and a done prompt
     close = " ".join((s / "references" / "close.md").read_text(encoding="utf-8").split())
     plan = " ".join((s / "references" / "plan.md").read_text(encoding="utf-8").split())
-    words = [w for w in ("and the sprint's WBS (`Projects/{slug}/planning/{project}-sprint-{name}-wbs.md`)",
+    words = [w for w in ("and so is the sprint's WBS note (`{project}-sprint-{name}-wbs`",
                          "check_sprint.py --closed {name}", "on a notes file built after the archive",
                          "the sprint is not reported closed",
                          "A plan linked to a card stays at its card's state",
@@ -1507,6 +1507,35 @@ def check_approval_line():
            "without asking; the repo CLAUDE.md leaves cards in Stand By until Leo's yes")
 
 
+# ── VO1 · no shipped file reads or writes the MyNotes vault (BM-15, 2.0.0) ─
+VAULT_TOKENS = ("mynotes", "webdav", "nc_webdav", "conventions-vault", "storage-vault", "claude/ai-", "claude/code-",
+                "_archive/projects")
+
+
+def vault_hits(name, text):
+    """Lines of one shipped file that name the vault; a line saying what was retired or flagging a legacy line is history."""
+    hits = []
+    for i, line in enumerate(text.splitlines(), 1):
+        low = line.lower()
+        if any(tok in low for tok in VAULT_TOKENS) or ("vault" in low and not any(w in low for w in ("retired", "legacy"))):
+            hits.append(f"{name}:{i}")
+    return hits
+
+
+def check_vault_out():
+    hits = []
+    for f in sorted(PLUGINS.rglob("*")):
+        if f.is_file() and f.suffix in (".md", ".py", ".json", ".yaml", ".yml", ".sh", ".txt") and "__pycache__" not in f.parts:
+            hits += vault_hits(str(f.relative_to(ROOT)), f.read_text(encoding="utf-8", errors="replace"))
+    selftest = (vault_hits("x", "save it in MyNotes/BanditLabs") == ["x:1"] and vault_hits("x", "in the vault folder") == ["x:1"]
+                and vault_hits("x", "nc_webdav_write_file") == ["x:1"] and vault_hits("x", "Retired with the vault (2.0.0)") == []
+                and vault_hits("x", "the app's Notes") == [])
+    ok = not hits and selftest
+    report("VO1", ok, "no shipped file names the MyNotes vault, WebDAV or a settings folder outside a line saying it was "
+           "retired (5 self-test lines)" if ok else f"vault named in {hits[:8]}{' …' if len(hits) > 8 else ''}; "
+           f"self-test {'ok' if selftest else 'failed'} (BM-15)")
+
+
 # ── WV1 · the sprint helper runs on the app's waves, lands-after links, run state and cancel; the map is the app's (BM-22) ─
 def check_waves():
     import tempfile
@@ -1614,7 +1643,7 @@ def check_wave_flow():
 # ── SD1 · the sprint data file: one row per wave from one measures list, empty where a record lacks a measure ─
 SPRINT_DATA_TEXT = (("execute.md", "**Sprint data:** rebuild the project's data file"),
                     ("close.md", "The project's sprint data file"),
-                    ("templates.md", "`{project}-sprint-data.csv`"),
+                    ("templates.md", "`.sprint/{project}-sprint-data.csv`"),
                     ("templates.md", "`{project}-sprint-targets`"),
                     ("templates.md", "**The measures list is the one place a measure lives**"),
                     ("homes.md", "The project's sprint data file"))
@@ -2525,6 +2554,7 @@ def main(argv):
     check_design_handover()
     check_gate_order()
     check_waves()
+    check_vault_out()
     check_sp13()
     check_sp14()
     check_sp15()

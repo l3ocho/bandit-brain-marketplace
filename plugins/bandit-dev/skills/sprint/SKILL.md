@@ -54,7 +54,7 @@ live, `get_sprints { boardId }`). No command → offer the table and ask which.
    turns it on (bandit:tasks `references/errors.md`), and stop
 4. **Repo state.** `git branch --show-current`, `git status --short`. Work on the deploy branch → say
    so and keep every commit for the trunk
-5. **Tools.** Board server and a browser tool; BanditCloud server only for a vault project (no `notes: app`). A missing server stops the run
+5. **Tools.** Board server and a browser tool. A missing server stops the run
 
 ## 🔄 The plan cycle
 
@@ -65,7 +65,7 @@ with its evidence in its row**; the checker (SP9, SP10) refuses a done row witho
 ## 🔒 Hard rules
 
 1. **The checker is the proof.** `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py` enforces the
-   sprint rules (SP1–SP4, SP6, SP7, SP9–SP11, SP13–SP15) on the project's notes file, built fresh before each run
+   sprint rules (SP1–SP3, SP6, SP7, SP9–SP11, SP13–SP15) on the project's notes file, built fresh before each run
    (`references/templates.md` → Notes file). Step 12, every wave end, `run` and `close` run it and
    paste its output; a step with a failing check is not done. The plugin's Stop hook runs it too
 2. **Gates read the recipe, never guess it:** `scripts/recipe.py` reads the project's `bandit.yaml`; a

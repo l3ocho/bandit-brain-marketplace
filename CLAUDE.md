@@ -91,7 +91,7 @@ This project's notes are in the app's Notes; nothing of it lives in a file stora
 
 | What | Where |
 |---|---|
-| Process docs, hub | Notes on this project's board (hub `bandit-brain-marketplace`) |
+| Process docs, hub | Notes on this project's board. A note linked to a card stays on that card's board (the app's rule), so the hub `bandit-brain-marketplace` and the plans and briefs of cards completed before 2026-11-22 are still on BB: Development |
 | Sprint records | Notes on this project's board tagged `sprint-{name}`; the sprint data file in `.sprint/` |
 | Audit stamps | The note `banditlabs-audit-stamps` on the domain's workflow board: this project's section, written by `/bandit:audit check` |
 | Settings | This file and `.claude/`: the one configuration, in this repository |

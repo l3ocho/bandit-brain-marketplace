@@ -26,7 +26,7 @@ Contents: Command · Rules · Before the first wave · The loop · Paced mode ·
 ## Before the first wave
 
 1. Gate 0 from SKILL.md, once.
-2. For every sprint: `get_sprints { sprintId }`, read the ledger's "At a glance" and its Waves table. List the waves to run (not done, in order).
+2. For every sprint: `get_sprints { sprintId }` (each card's `wave`, the `runState`), read the ledger's "At a glance" and its Waves table, which must match the app's waves (a difference is named and stops that sprint). List the waves to run (not done, in order; the debug card's own last wave is not one). A paused sprint whose answer is not in this chat, or a replanning one, is named and skipped (`references/execute.md` → Run state).
 3. **Cross-sprint check (only with two or more sprints).** Read each plan's migration numbers and the files each sprint's cards edit. Each sprint was planned alone, so two can claim the same migration number or the same file. Record the clash in each later sprint's ledger under "Plan deviations". The later sprint's waves stop at their migration-tail check until the user approves a corrected Migration tail row in its ledger; nothing renumbers on its own.
 4. Opening line: the sprints and waves that will run, in order, and anything skipped with the reason. Then start; do not wait for an answer.
 
@@ -42,7 +42,7 @@ For each wave, in order:
 3. **Check the wave** against live state, not the report:
    - the ledger's Waves row for wave n is done, with its evidence, and every merged card of the wave has its ledger line with its merge commit (`execute.md` → The wave, step 5);
    - the sprint's status (`get_sprints { sprintId }`) is `executing` while waves remain (never move it yourself), and `debugging` after the last wave;
-   - a paused card (NEEDS DECISION) is not a failed check: put its question to the user; the run goes on with a wave that does not depend on the paused card, and stops when no wave is workable;
+   - a paused card (NEEDS DECISION) is not a failed check: put its question to the user; the run goes on with a wave that does not depend on the paused card, and stops when no wave is workable, pausing the sprint in the app with that question as the reason (`references/execute.md` → Run state);
    - the cards the wave worked are in `standby` now, and during the wave they were in `doing`: read the wave agent's report line "BOARD at start" (the columns it showed after setting the board). A card that was worked from `assigned` or `next` is a failed wave: stop;
    - the sprint's columns (`execute.md` → Reading the board) show exactly what `execute.md` → Board moves requires: this wave's cards in `standby` (or Blocked with the reason on the card), every later card whose dependencies are delivered in `next` where the sprint's five-card cap allows, every card that depends on an undelivered card in `assigned` (step 2 already corrected any card in the wrong column);
    - every card of the wave has its build steps ticked, and its approval line still open (the approval line is never ticked here);
@@ -91,7 +91,7 @@ Use `PushNotification` (it reaches the user's phone when Remote Control is conne
 
 ## Final report
 
-Ten lines at most per sprint: waves run, cards now in Stand By awaiting the user's test, any question waiting for them (a paused card), every open call of every wave's report in one list, the link to the sprint map, the debug card and how many lines it holds, anything else that needs them, and the paste for the next step: `/bandit-dev:sprint debug {sprint}` once they have tested. `run` never starts `debug` or `close`: both wait for the user's own test.
+Ten lines at most per sprint: waves run, cards now in Stand By awaiting the user's test, any question waiting for them (a paused card), every open call of every wave's report in one list, the debug card and how many lines it holds, anything else that needs them, and the paste for the next step: `/bandit-dev:sprint debug {sprint}` once they have tested. `run` never starts `debug` or `close`: both wait for the user's own test.
 
 ## Never
 

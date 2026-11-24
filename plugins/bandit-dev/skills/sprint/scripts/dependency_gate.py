@@ -13,6 +13,9 @@ A created blocker titled `Design: …` is a design card (bandit:tasks Design car
 handover and the build card's `stage/spec`.
 After `link_tasks` the answer holds no checklist, so the notice says to skip a card that already has its gate.
 
+A "lands after" link (`link_tasks` kind `lands_after`, or `landsAfter` / `landsBefore` on a created card) only
+orders two cards and never blocks either, so it owes no gate and gets no notice.
+
 A sprint can be either end (`blockerSprintId`, `blockedSprintId`; `blocksSprints`, `blockedBySprints` on a
 created card). A sprint has no sub-tasks, so a blocked sprint's gate is a line in its ledger's Gates section.
 """
@@ -70,6 +73,8 @@ def links_made(tool_name, tool_input, response):
     if refused(answer):
         return []
     if m.group(1) == "link_tasks":
+        if tool_input.get("kind") == "lands_after":
+            return []   # order only: the card that lands after never waits, so it owes no gate
         blocker = tool_input.get("blockerTaskId") or sprint(tool_input.get("blockerSprintId"))
         blocked = tool_input.get("blockedTaskId") or sprint(tool_input.get("blockedSprintId"))
         return [(blocker, blocked)] if isinstance(blocker, str) and isinstance(blocked, str) else []

@@ -1072,16 +1072,6 @@ def check_dev_mirror():
            "dev mirror: the reference prunes .claude/worktrees, this repo runs the same copy")
 
 
-# ── SP12 · a done wave is drawn done in the sprint map (temporary, decisions RS16) ─
-def check_sp12():
-    script = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts" / "check_sprint.py"
-    good = run_script(script, "--notes", notes_fixture("Record"))
-    bad = run_script(script, "--notes", notes_fixture("MapBad"))
-    ok = good[0] == 0 and bad[0] == 1 and bad[1].count("\n- ") == 1 and "SP12" in bad[1]
-    report("SP12", ok, "check_sprint passes a map that lists the done waves and refuses one not redrawn after a wave"
-           if ok else f"SP12: Record → {good[0]} {good[1][-120:]!r}; MapBad → {bad[0]} {bad[1][-160:]!r}")
-
-
 # ── SP13 · a sprint committed after 2026-11-08 gives every batch card its build-step count in step 9 (fixtures) ─
 def check_sp13():
     script = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts" / "check_sprint.py"
@@ -1548,48 +1538,46 @@ def check_approval_line():
            "without asking; the repo CLAUDE.md leaves cards in Stand By until Leo's yes")
 
 
-# ── SM1 · the sprint map draws every card and link, routes no arrow through a card, follows the recipe ─
-def crosses(seg, box):
-    (x1, y1), (x2, y2) = seg
-    bx, by, bw, bh = box
-    lo_x, hi_x, lo_y, hi_y = min(x1, x2), max(x1, x2), min(y1, y2), max(y1, y2)
-    return lo_x < bx + bw - 0.5 and hi_x > bx + 0.5 and lo_y < by + bh - 0.5 and hi_y > by + 0.5
+# ── WV1 · the sprint helper runs on the app's waves, lands-after links, run state and cancel; the map is the app's (BM-22) ─
+def check_waves():
+    import tempfile
+    s = PLUGINS / "bandit-dev" / "skills" / "sprint"
+    files = [s / "SKILL.md", *sorted((s / "references").glob("*.md"))]
+    text = {f.name: " ".join(f.read_text(encoding="utf-8").split()) for f in files}
+    words = [f"{n}: {w}" for n, w in (
+        ("plan.md", "**Waves in the app,**"), ("plan.md", "`set_wave { taskId, wave }`"),
+        ("plan.md", "kind: \"lands_after\" }`"), ("plan.md", "status `closed` or `cancelled`"),
+        ("plan.md", "into that new last wave, alone"), ("templates.md", "alone in its last wave"),
+        ("templates.md", "The app draws the sprint's map on its sprint page"),
+        ("execute.md", "## Run state"), ("execute.md", "`manage_sprints { action: \"pause\", sprintId, reason }`"),
+        ("execute.md", "**Run state gate:**"), ("run.md", "pausing the sprint in the app"),
+        ("close.md", "`manage_sprints { action: \"remove_card\", replanConfirmed: true }`"),
+        ("close.md", "`manage_sprints { action: \"approve_plan\", sprintId }`"),
+        ("close.md", "**The sprint is not cancelled.**")) if w not in text[n]]
+    left = [n for n, body in text.items() if "map.html" in body or "sprint_map" in body]
+    gone = not (s / "scripts" / "sprint_map.py").exists()
+    script = s / "scripts" / "check_sprint.py"
+    src = Path(notes_fixture("StepsGood")).read_text(encoding="utf-8")
+    cancelled = src.replace("Wave 1 of 2 delivered", "Cancelled 2026-11-24")
+    with tempfile.TemporaryDirectory() as d:
+        f = Path(d) / "garden-sprint-notes.json"
+        f.write_text(cancelled, encoding="utf-8")
+        got = run_script(script, "--notes", str(f))
+    ok = (not words and not left and gone and cancelled != src and got[0] == 1 and "SP15 sprint spring" in got[1]
+          and "SP12" not in Path(script).read_text(encoding="utf-8").split("Retired with app 0.56.0")[0])
+    report("WV1", ok, "sprint helper on the app's waves: plan sets each card's wave and the lands-after links, the debug card "
+           "alone in the last wave; execute and run read the waves and the run state, pause and resume the sprint; close "
+           "confirms the replan and approves it; cancelled sprints count as closed (a cancelled ledger with papers left fails "
+           "SP15); the map page and its script are gone"
+           if ok else f"WV1: missing {words}; map still named in {left}; sprint_map.py gone: {gone}; cancelled ledger → "
+           f"{got[0]} {got[1][-160:]!r} (BM-22)")
 
 
-def check_sprint_map():
-    script = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts" / "sprint_map.py"
-    data = ROOT / "tests" / "fixture-map" / "cosmetic-1.json"
-    app = ROOT / "tests" / "fixture-app"
-    spec = json.loads(data.read_text(encoding="utf-8"))
-    bad = []
-    got, out = run_script(script, str(data), "--geometry", cwd=ROOT)
-    geo = json.loads(out) if got == 0 else {"boxes": {}, "paths": []}
-    drawn = {c["id"] for c in spec["cards"] if c.get("wave")}
-    if set(geo["boxes"]) != drawn:
-        bad.append(f"cards drawn {sorted(geo['boxes'])} ≠ the cards with a wave")
-    if len(geo["paths"]) != len(spec["links"]) + len(spec["after"]):
-        bad.append(f"{len(geo['paths'])} arrows for {len(spec['links']) + len(spec['after'])} links")
-    for p in geo["paths"]:
-        pts = p["points"]
-        if any(a[0] != b[0] and a[1] != b[1] for a, b in zip(pts, pts[1:])):
-            bad.append(f"{p['from']}→{p['to']} has a slanted segment")
-        for cid, box in geo["boxes"].items():
-            if any(crosses(s, box) for s in zip(pts, pts[1:])):
-                bad.append(f"{p['from']}→{p['to']} crosses {cid}")
-    for recipe, want, not_want in (("bandit.yaml", "production card for you to fire", "release runs the deploy"),
-                                   ("bandit.no-production.yaml", "release runs the deploy", "production card")):
-        got, page = run_script(script, str(data), "--recipe", str(app / recipe), cwd=ROOT)
-        if got != 0 or want not in page or not_want in page or 'name="sprint-map-waves-done" content="1,2"' not in page:
-            bad.append(f"page with {recipe}: road or waves-done marker wrong")
-    report("SM1", not bad, "; ".join(bad[:4]) or f"sprint_map.py: {len(drawn)} cards, {len(geo['paths'])} arrows at right "
-           "angles, none through a card; the road follows the recipe; the waves-done marker is set")
-
-
-# ── ES1 · the pre-sprint report: the map's per-wave estimate comes from past waves, none from too few ─
+# ── ES1 · the pre-sprint estimate: each wave's estimate comes from past waves, none from too few; it lives in the plan ─
 def check_estimate():
     s = PLUGINS / "bandit-dev" / "skills" / "sprint"
-    data_script, map_script = s / "scripts" / "sprint_data.py", s / "scripts" / "sprint_map.py"
-    fixture = ROOT / "tests" / "fixture-map"
+    data_script = s / "scripts" / "sprint_data.py"
+    fixture = ROOT / "tests" / "fixture-estimate"
     bad = []
     got, out = run_script(data_script, "--estimate", str(fixture / "estimate.csv"), "--effort", "3,5", cwd=ROOT)
     est = json.loads(out) if got == 0 else {}
@@ -1600,33 +1588,16 @@ def check_estimate():
     got, out = run_script(data_script, "--estimate", str(ROOT / "tests" / "fixture-expected" / "sprint-data.csv"), cwd=ROOT)
     if got != 0 or json.loads(out).get("rate") is not None:
         bad.append("fewer than 5 timed waves still gave an estimate")
-    spec = json.loads((fixture / "cosmetic-1.json").read_text(encoding="utf-8"))
-    waves = sorted({c["wave"] for c in spec["cards"] if c.get("wave")})
-    spec["estimate"] = {"waves_used": 5, "waves": {str(w): {"min": 60, "low": 40, "high": 90,
-                                                           "measured": 55 if w == 1 else None} for w in waves}}
-    with tempfile.TemporaryDirectory() as tmp:
-        f = Path(tmp) / "map.json"
-        f.write_text(json.dumps(spec), encoding="utf-8")
-        got, page = run_script(map_script, str(f), cwd=ROOT)
-        geo_got, geo = run_script(map_script, str(f), "--geometry", cwd=ROOT)
-    if got != 0 or page.count("≈ 1 h 00 (40 min–1 h 30)") != len(waves) or "took 55 min" not in page \
-            or f"Estimated <b>{len(waves)} h 00</b>" not in page:
-        bad.append("the map with an estimate does not show each wave's estimate, the measured time and the total")
-    _, plain = run_script(map_script, str(fixture / "cosmetic-1.json"), cwd=ROOT)
-    if plain.count("no estimate yet") != len(waves) or "No time estimate yet" not in plain:
-        bad.append("a map without an estimate does not say no estimate yet")
-    if geo_got != 0 or not json.loads(geo)["paths"]:
-        bad.append("geometry broke with an estimate")
-    texts = {"plan.md": ("**Draw the sprint map, the pre-sprint report**", "**First line: the pre-sprint report**"),
-             "templates.md": ("**The pre-sprint report.**", "never goes into the ledger or the wave report's measured numbers"),
-             "execute.md": ("its measured time next to its estimate",)}
+    texts = {"plan.md": ("**The pre-sprint estimate**", "**First line: the pre-sprint report**"),
+             "templates.md": ("## Pre-sprint estimate", "never goes into the ledger or the wave report's measured numbers",
+                              "written into the plan's Summary wave table", "wave table with reasons and each wave's time estimate")}
     for name, words in texts.items():
         body = (s / "references" / name).read_text(encoding="utf-8")
         bad += [f"{name} lacks {w!r}" for w in words if w not in body]
     report("ES1", not bad, "; ".join(bad[:4]) + " (BB-402)" if bad else
            "pre-sprint report: the estimate matches the hand count (median minutes per effort point, middle half as the "
-           "range), none under 5 timed waves; the map shows each wave's estimate, a done wave's time and the total, "
-           "and says no estimate yet without one; plan names the map first")
+           "range), none under 5 timed waves; each wave's estimate goes into the plan's Summary wave table and the sprint's "
+           "total into the first line of the planning report, never into the ledger")
 
 
 # ── WF1 · the wave report's Flow and Tokens blocks match a hand count of the fixture logs ─
@@ -1677,7 +1648,7 @@ SPRINT_DATA_TEXT = (("execute.md", "**Sprint data:** rebuild the project's data 
                     ("templates.md", "`{project}-sprint-data.csv`"),
                     ("templates.md", "`{project}-sprint-targets`"),
                     ("templates.md", "**The measures list is the one place a measure lives**"),
-                    ("homes.md", "The sprint map and the project's sprint data file"))
+                    ("homes.md", "The project's sprint data file"))
 
 
 def sprint_data_text_problems(files):
@@ -2165,6 +2136,11 @@ def check_dependency_gate():
          ["AB-1 now blocks sprint sp-2", "ledger, section Gates"]),
         ("create blocked by a sprint", create({"title": "New", "dependencies": {"blockedBySprints": ["sp-1"]}}),
          ["sprint sp-1 now blocks XY-9: add to XY-9 a sub-task"]),
+        # A lands-after link only orders two cards (BM-22): no gate, no notice; a blocker link given the default kind still has one.
+        ("lands-after link", {**link, "tool_input": {"blockerTaskId": "AB-1", "blockedTaskId": "AB-2", "kind": "lands_after"}}, None),
+        ("blocks link named", {**link, "tool_input": {"blockerTaskId": "AB-1", "blockedTaskId": "AB-2", "kind": "blocks"}},
+         ["AB-1 now blocks AB-2"]),
+        ("create lands after", create({"title": "New", "dependencies": {"landsAfter": ["AB-1"], "landsBefore": ["AB-5"]}}), None),
     ]
     bad = []
     for label, payload, want in cases:
@@ -2186,7 +2162,7 @@ def check_dependency_gate():
             bad.append(f"{label} → missing {missing or out.get('hookEventName')}")
     report("DG1", not bad, "; ".join(bad) or f"dependency gate: {len(cases)} fixture payloads (notice in the "
            "session's context naming the blocked card or sprint and the skip line; silent on refusals, a created card "
-           "with its gate, sprint cards and other tools)")
+           "with its gate, sprint cards, a lands-after link and other tools)")
 
 
 # ── SB1 · a sprint card gets its build steps before its Technical plan and before the commit (BB-451) ─
@@ -2580,8 +2556,7 @@ def main(argv):
     check_design_handover()
     check_gate_order()
     check_dev_mirror()
-    check_sprint_map()
-    check_sp12()
+    check_waves()
     check_sp13()
     check_sp14()
     check_sp15()

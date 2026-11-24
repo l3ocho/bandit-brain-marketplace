@@ -30,19 +30,17 @@ Rules (each one a failure, not a warning):
        (an old-way ledger, with no `Sprint record:` line, is skipped by SP9 and SP10)
   SP11 a committed sprint kept in the app has, for every wave marked done in its ## Waves table, a section
        (sprints committed after 2026-11-04) `## 🌊 Wave {n}` in its wave report {project}-sprint-{name}-wave-report holding a `#### ⏱️ Flow` and a `#### 🪙 Tokens` block
-  SP12 a live sprint (its ledger not archived) kept in the app and committed after 2026-11-04 has its map
-       {project}-sprint-{name}-map.html beside the notes file, redrawn after every wave: its
-       `sprint-map-waves-done` marker lists every wave marked done in the ## Waves table (temporary, decisions RS16)
   SP13 a committed sprint kept in the app (committed after 2026-11-08) has, in its step 9 evidence, `{card}: {n} steps`
        (n at least 1, build steps only) for every card in its ## Batch table: every planned card carries its build steps as sub-tasks
   SP14 a live sprint's plan (not archived, its sprint not closed as SP15 reads it) leaves nothing for after debug: its `Items to register` section
        schedules no item for the close, the release or after the sprint (`trigger: sprint close`, `at close`,
        `after the release`, `after the sprint`); a repository change is done in a wave or in debug, before the release
   SP15 a closed sprint keeps no paper and no WBS unarchived: a sprint whose ledger records the close (`Status: Closed …`,
-       `Current wave: Sprint closed`), whose ledger is archived, or that is named in `--closed` (closed in the app)
+       `Current wave: Sprint closed`), whose ledger is archived, or that is named in `--closed` (closed or cancelled in the app)
        fails while a note with its tag, or its WBS note {project}-sprint-{name}-wbs, has a status other than archived;
        a plan linked to a card with status done is settled too (the app keeps such a plan at its card's state and
        refuses to archive it)
+Retired with app 0.56.0, whose sprint page draws the map: SP12 (the sprint map page beside the notes file).
 Retired with the vault folder: SP5 (the project folder's root; bandit:audit's S16, retired with it) and the `--listing`
 mode; SP8 is the repo checker's rule on this script's Stop hook.
 
@@ -50,7 +48,7 @@ Usage:
   check_sprint.py [--notes FILE] [--closed NAME[,NAME…]]
                            (--notes defaults to .sprint/{project}-sprint-notes.json at the root of the repository,
                             {project} from the `project:` line of the repo CLAUDE.md Project Context;
-                            --closed: sprints closed in the app, from get_sprints)
+                            --closed: sprints closed or cancelled in the app, from get_sprints)
   No notes file, or one that is not a notes file: says it could not read the notes file (exit 1).
   check_sprint.py --hook   (Stop hook: reads the hook JSON on stdin, checks only when the chat used the sprint helper:
                             a Skill call or a typed /bandit-dev:sprint command, or a tool call on a notes file, never
@@ -77,7 +75,7 @@ STEPS = ("Select and freeze the batch", "Spec completeness check, per card", "Cl
 SPRINT_RECORD = re.compile(r"^\W*Sprint record:", re.M)
 STEP_ROW = re.compile(r"^\|\s*(\d{1,2})\s*\|\s*([^|]+?)\s*\|\s*([^|]*?)\s*\|\s*((?:[^|\\]|\\.)*?)\s*\|\s*$", re.M)
 DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
-# SP11 and SP12 hold for sprints committed after the release that brought the wave report and the map;
+# SP11 holds for sprints committed after the release that brought the wave report;
 # an earlier sprint never had them.
 REPORTS_FROM = "2026-11-04"
 # SP13 holds for sprints committed after the release that brought the build-step count; an earlier sprint never had it.
@@ -86,13 +84,13 @@ BATCH_CARD = re.compile(r"^\|\s*([A-Z0-9]*[A-Z][A-Z0-9]*-T?\d+)\s*\|", re.M)
 COMMITTED_ON = re.compile(r"^\W*Committed:\W*(\d{4}-\d{2}-\d{2})", re.M)
 LANDS_AFTER = re.compile(r"^\W*Lands after:\s*(.+)$", re.M)
 LANDS_PAIR = re.compile(r"^\s*([A-Z0-9]*[A-Z][A-Z0-9]*-T?\d+)\s+after\s+(.+?)\s*\.?\s*$")
-CLOSED = re.compile(r"^\W*(?:Status:\W*Closed\b|Current wave:\W*Sprint closed\b)", re.M | re.I)
+CLOSED = re.compile(r"^\W*(?:Status:\W*(?:Closed|Cancelled)\b|Current wave:\W*Sprint closed\b)", re.M | re.I)
 OWED = re.compile(r"trigger\s*:[^)\n]*\b(?:close|closing|release)\b|\b(?:at|on|during|after)\s+(?:the\s+)?(?:sprint\s+)?"
                   r"(?:close|closing|release)\b|\bafter the sprint\b", re.I)
 WAVE_ROW = re.compile(r"^\|\s*Wave\s+(\d+)\s*\|\s*([^|]+?)\s*\|\s*([^|]*?)\s*\|\s*((?:[^|\\]|\\.)*?)\s*\|\s*$", re.M)
 SPRINT_TAG = re.compile(r"^sprint-(.+)$")
 NOTES_NAME = "{project}-sprint-notes.json"
-RULES = "SP1-SP4, SP6, SP7, SP9-SP15"
+RULES = "SP1-SP4, SP6, SP7, SP9-SP11, SP13-SP15"
 FIELDS = ("title", "kind", "status", "tags", "cards", "text")
 
 
@@ -258,21 +256,6 @@ def check_wave_report(where, ledger_text: str, title: str, report) -> list[str]:
     return errors
 
 
-def check_map(where, ledger_text: str, page: Path) -> list[str]:
-    """SP12: the sprint map beside the notes file was redrawn after every done wave (its marker lists them)."""
-    on = COMMITTED_ON.search(ledger_text)
-    if not on or on.group(1) <= REPORTS_FROM:
-        return []
-    done = [n for n, _, d, _ in WAVE_ROW.findall(section(ledger_text, "Waves")) if d]
-    if not page.exists():
-        return [f"SP12 {where}: committed but there is no {page.name} beside the notes file "
-                "(drawn at plan step 12, redrawn every wave)"]
-    m = re.search(r'name="sprint-map-waves-done"\s+content="([^"]*)"', page.read_text(encoding="utf-8", errors="replace"))
-    drawn = set((m.group(1) if m else "").replace(" ", "").split(",")) - {""}
-    missing = [n for n in done if n not in drawn]
-    return [f"SP12 {where}: Wave {', '.join(missing)} done but {page.name} was not redrawn after it"] if missing else []
-
-
 def check_owed(where, plan_text: str) -> list[str]:
     """SP14: the plan's Items to register leaves no item for the close, the release or after the sprint."""
     m = re.search(r"^#+[^\n]*Items to register[^\n]*$", plan_text, re.M)
@@ -330,7 +313,7 @@ def ordered_sprints(project: str, papers: dict) -> list[str]:
 
 
 def check(data: dict, folder: Path, closed_in_app: set = frozenset()) -> list[str]:
-    """Every rule on one notes file; `folder` is where the file sits (the sprint maps sit beside it)."""
+    """Every rule on one notes file; `folder` is where the file sits."""
     errors: list[str] = []
     project, notes = data["project"], data["notes"]
     papers = sprints_of(notes)
@@ -402,8 +385,6 @@ def check(data: dict, folder: Path, closed_in_app: set = frozenset()) -> list[st
             errors.extend(check_build_steps(where, ledger_text))
             report_title = f"{project}-sprint-{name}-wave-report"
             errors.extend(check_wave_report(where, ledger_text, report_title, mine.get(report_title)))
-            if not is_archived(ledger):
-                errors.extend(check_map(where, ledger_text, folder / f"{project}-sprint-{name}-map.html"))
         if not is_archived(plan) and not sprint_closed(project, name, mine, closed_in_app):
             errors.extend(check_owed(where, plan_text))
         cards, detached = set(), set()
@@ -516,7 +497,7 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--notes", default=None, help="the project's notes file (default: .sprint/{project}-sprint-notes.json)")
     ap.add_argument("--hook", action="store_true")
-    ap.add_argument("--closed", default="", help="comma-separated names of sprints closed in the app")
+    ap.add_argument("--closed", default="", help="comma-separated names of sprints closed or cancelled in the app")
     args = ap.parse_args()
     closed = {n.strip() for n in args.closed.split(",") if n.strip()}
 

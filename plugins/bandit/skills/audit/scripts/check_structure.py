@@ -214,6 +214,24 @@ def parse_board(value):
     return (value.strip(), None)
 
 
+def domain_path(value):
+    """`Acme` → ["Acme"]; `Acme / Clients / Beta` → the folder names from the top-level one down."""
+    return [s.strip() for s in str(value or "").split("/") if s.strip()]
+
+
+def parse_write(value):
+    """`board "X", board "Y" column "Z"` → [("X", None), ("Y", "Z")]; anything else in the line → None."""
+    items, rest = [], str(value or "").strip()
+    pat = re.compile(r'board\s+"([^"]+)"(?:\s+column\s+"([^"]+)")?\s*(?:,\s*|$)')
+    while rest:
+        m = pat.match(rest)
+        if not m:
+            return None
+        items.append((m.group(1), m.group(2)))
+        rest = rest[m.end():]
+    return items or None
+
+
 class Row:
     def __init__(self, action, target, owner, rule, pair=None):
         self.action, self.target, self.owner, self.rule, self.pair = action, target, owner, rule, pair
@@ -227,7 +245,8 @@ class Domain:
         self.levels = rules["levels"]
         folders = snap["board"]["folders"]
         self.top = next((f for f in folders if f["name"] == name and f["parent"] is None), None)
-        sub = {f["name"] for f in folders if f["parent"] == name}
+        self.folders = folders
+        sub = self.below(name)
         allp = snap["board"]["projects"]
         self.system = sorted(p["name"] for p in allp
                              if p["system_owner"] and (p["folder"] == name or p["folder"] in sub))
@@ -235,6 +254,7 @@ class Domain:
                               and (p["folder"] == name or p["folder"] in sub)], key=lambda p: p["name"])
         self.all_board_names = {p["name"]: p for p in allp}
         self.projects = []
+
         self.domain_results = []
         self.rows = []
         self.unchecked = []
@@ -245,6 +265,25 @@ class Domain:
             for key in (c["id"], (c.get("short_id") or "").upper()):
                 if key:
                     self.sprint_of[key] = sorted(c["sprints"])
+
+    def below(self, name):
+        """Every folder under `name`, at any depth (folders nest three levels deep)."""
+        out, todo = set(), [name]
+        while todo:
+            node = todo.pop()
+            kids = {f["name"] for f in self.folders if f["parent"] == node} - out
+            out |= kids
+            todo += kids
+        return out
+
+    def path_folder(self, segs):
+        """The last folder of a domain path when each one is the parent of the next, from this domain down; else None."""
+        if not segs or segs[0] != self.name:
+            return None
+        for parent, child in zip(segs, segs[1:]):
+            if not any(f["name"] == child and f["parent"] == parent for f in self.folders):
+                return None
+        return segs[-1]
 
     def res(self, rule, status, note, evidence):
         if status == "bad":
@@ -289,8 +328,23 @@ class Domain:
             rows.append(Row("Add the Project Context block", target, own["context_update"], "S4"))
         else:
             problems = [f"missing `{k}`" for k in pc["required_keys"] if not ctx.get(k)]
-            if ctx.get("domain") and ctx["domain"] != self.name:
+            segs = domain_path(ctx.get("domain"))
+            scope_folder = self.name
+            if ctx.get("domain") and segs[:1] != [self.name]:
                 problems.append(f"domain `{ctx['domain']}` ≠ `{self.name}`")
+            elif len(segs) > 1:
+                scope_folder = self.path_folder(segs)
+                if scope_folder is None:
+                    problems.append(f"domain `{ctx['domain']}` isn't a folder path under `{self.name}`")
+            scope_boards = ({p["name"] for p in self.boards
+                             if p["folder"] == scope_folder or p["folder"] in self.below(scope_folder)}
+                            if scope_folder else set())
+            if "write" in ctx:
+                targets = parse_write(ctx["write"])
+                if targets is None:
+                    problems.append(f"write `{ctx['write']}` isn't `board \"…\"` or `board \"…\" column \"…\"`, comma-separated")
+                else:
+                    problems += [f"write names board `{b}`, outside the domain" for b, _ in targets if b not in scope_boards]
             if ctx.get("project") and ctx["project"] != pslug:
                 problems.append(f"project `{ctx['project']}` ≠ the stamp's `{pslug}`")
             if ctx.get("type") and ctx["type"] not in pc["types"]:
@@ -305,9 +359,9 @@ class Domain:
                 problems.append(f"board form `{board_kind}` not allowed ({', '.join(pc['board_forms'])})")
             elif board_kind == "project" and board_name not in self.all_board_names:
                 problems.append(f"board `{board_name}` doesn't resolve")
-            elif board_kind == "project" and pc.get("board_in_domain") \
-                    and board_name not in {b["name"] for b in self.boards}:
-                problems.append(f"board `{board_name}` is outside the `{self.name}` folder")
+            elif board_kind == "project" and pc.get("board_in_domain") and scope_folder \
+                    and board_name not in scope_boards:
+                problems.append(f"board `{board_name}` is outside the `{scope_folder}` folder")
             R.append(self.res("S4", "bad" if problems else "ok",
                               "; ".join(problems) or f"5 required keys (+ optional `dev`, `notes`), board `{ctx['board']}` resolves",
                               ev + ".context"))

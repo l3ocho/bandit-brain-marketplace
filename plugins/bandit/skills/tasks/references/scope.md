@@ -2,12 +2,13 @@
 
 Read the `## 🧭 Project Context` section before every read or write: in the Claude.ai project
 instructions, or in the repo's `CLAUDE.md` on Claude Code. The block's format is owned by
-bandit:project. Two keys set the scope:
+bandit:project. Three keys set the scope:
 
 | Key | Gives | Example |
 |---|---|---|
 | `board:` | The **home board**: the project's own board, the default for new cards, shown first | `board: project "Home Reno"` |
-| `domain:` | The **domain**: the board's top-level folder with that name, **with every subfolder in it** (structure rule S1 makes the names match) | `domain: Acme` → folder `Acme` + its subfolder `Clients` |
+| `domain:` | The **domain**: the board folder it names, **with every subfolder in it**, at any depth: a top-level folder (structure rule S1 makes the names match), or a path of folder names from the top-level one down joined by ` / ` for a project that should see and change only that subfolder | `domain: Acme` → folder `Acme` + `Clients` + `Clients`'s own `Beta`; `domain: Acme / Clients` → `Clients` + `Beta` |
+| `write:` *(optional)* | The **writable part** of the domain: only these boards, and on a board named with a column only that column. Reads stay the whole domain | `write: board "Office" column "Legal"` |
 
 ```
 board: project "Home Reno"
@@ -27,6 +28,8 @@ board: pending
 | Outside the domain, not linked | ❌ Never shown, counted or summarised | ❌ Never |
 | Untriaged (no board) | Only from the domain's **workflow** project (`type: workflow`) | That project files them, into its own domain only |
 
+**The `write:` line narrows the writes.** With one, a write (a new card, a move, a field, a comment, a sub-task, a tag) goes only to a board it names, and on a board named with a column only to a card in that column: a new card lands in it, and no card is moved into or out of it from another column. Any other write in the domain is refused before the call and said in one line, naming the line; the reads above are unchanged.
+
 Board rules still hold on every board: a locked Spec changes only through `Spec change needed:` or
 `spec reconcile` (`references/dev.md`), deletes are confirmed (`references/board.md` → Safety).
 
@@ -34,11 +37,14 @@ Board rules still hold on every board: a locked Spec changes only through `Spec 
 
 1. `get_context` once. Its `boards` carry each board's folder, and its `folders` are the
    top-level folders with their child folders. **The domain's boards** = every board whose
-   folder is the top-level folder named exactly `domain:`, or a child of it. No folder of that name → stop and say so; never guess
+   folder is the domain's folder or any folder under it, at any depth. A path is followed from the top-level folder down, each
+   name a child of the one before. No folder of that name, or a path that leads nowhere → stop and say so; never guess
    the nearest match.
 2. **The home board** = the `board:` name. It must be one of the domain's boards; a home board
    outside its domain folder → stop and say so (bandit:audit S4).
-3. Keep both sets for the turn. 🔴 **No hardcoded IDs, ever**: a stored ID is a stale ID.
+3. **The writable part** = the `write:` line's boards and columns, each one of the domain's boards and that board's column; one
+   that isn't → stop and say so. No `write:` line → the whole domain.
+4. Keep these sets for the turn. 🔴 **No hardcoded IDs, ever**: a stored ID is a stale ID.
 
 ## 🧹 Filtering the household-wide views
 

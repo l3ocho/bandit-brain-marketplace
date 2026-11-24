@@ -46,6 +46,8 @@ Each phase may take 1–2 messages when mixing both question types — that's fi
 
    Call `get_context` first. **Domain** (single select): its top-level board folders, plus "A new
    folder" (its name is asked; bandit:tasks' board step creates it) and "None" (`domain: none`).
+   A project that should see and change only a subfolder (a client's folder inside a company's) gets that folder as a
+   path, `domain: {top} / {sub}` (`references/project-context.md`).
    Then present the `boards` in the domain's folder. Options:
    - "One existing board" — pick from the domain's live board list
    - "New board" — ask its name and, optionally, a subfolder of the domain's folder. Its profile

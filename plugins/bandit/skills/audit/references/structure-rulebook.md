@@ -1,7 +1,7 @@
 ---
 type: reference
 summary: House standard for the user's domains and projects across Claude.ai, each project's own folder and the Bandit Brain boards. bandit:audit scores against these 8 rules.
-updated: 2026-11-22
+updated: 2026-11-24
 ---
 
 # 🧱 Structure Rulebook
@@ -63,7 +63,8 @@ The `{L} - ` prefix exists only in Claude.ai, as a workaround until Claude.ai ca
 
 - The `## 🧭 Project Context` block (owned by `bandit:project`) has all 5 required keys: `domain`, `project`, `type`, `board`, `prefix`.
 - Two optional keys: `dev`, valid value `true`, and `notes`, valid values `none` (the helpers keep no notes for the project) and `app` (the older way to say the default). Each is such a value or its line is absent. Any other value is ❌. A project without the line is never flagged: its notes are in the app's Notes.
-- `domain` is the board folder the project is scored in. `board` is `project "{name}"` naming an existing board, or `none`. `folder "…"`, `global` and `pending` don't pass. `prefix` is 2–3 letters, or `none`.
+- `domain` is the board folder the project is scored in: its top-level folder, or a path from it down (`Acme / Clients / Beta`), each name a child of the one before; a path that leads to no folder is ❌. The home board must then sit in the folder the path leads to, or under it.
+- An optional `write` line names `board "…"` items, each with an optional `column "…"`, comma-separated: the boards the project may write on. A board outside the domain, or a line in another shape, is ❌. `board` is `project "{name}"` naming an existing board, or `none`. `folder "…"`, `global` and `pending` don't pass. `prefix` is 2–3 letters, or `none`.
 - The `board` line's board is filed in the domain's board folder or one of its subfolders: `domain` and `board` together are the project's board scope (bandit:tasks `references/scope.md`). A home board outside its domain folder is ❌.
 - **Check:** read from the project's stamp. Keys missing, a value invalid, `board` unresolved or outside the domain folder → ❌. The fix is made in the project itself (`/bandit:project audit` there).
 
@@ -155,4 +156,5 @@ is superseded (**📄 Report lifecycle**).
 - **2026-10-29 · Board profile**, with the user's approval: the app replaced Type with a profile on boards (Workflow or Technical). S3 checks the workflow board's profile, and no longer asks that no other board be Workflow; S9 adds that a dev project's board is Technical.
 - **2026-11-20 · Notes in the app**, with the user's approval: S13 scores a brief's sprint tag; S14, S15 and S16 are retired. The report is a note; the snapshot moves to `.audit/` in the folder Claude Code runs from.
 - **2026-11-22 · One storage, one configuration**, on the user's word (everything locked into the app; one configuration per project): the notes storage outside the app is gone, and so are the settings folder, the second copy of a project's instructions and the dev mirror. A project is known by its stamp, and a domain is a board folder. S5, S7, S8, S10 and S11 are retired; S1, S2, S4, S6, S12 and S13 are restated on the stamp. S4 accepts `notes: none`. Snapshot schema 8; earlier snapshots no longer load.
+- **2026-11-24 · Nested domains and the write line**, on the user's word: a domain can be a folder path from the top-level folder down, so a project inside a client's folder is scored on that folder; a domain's boards are those of its folder at any depth (folders nest three levels deep); S4 checks the optional `write` line's boards are inside the domain.
 - A rules or script change stops earlier reports from replaying (their footer hashes differ). Close live reports before installing one if their fixes are done; any left live become superseded (**📄 Report lifecycle**), and the next fresh audit archives them.

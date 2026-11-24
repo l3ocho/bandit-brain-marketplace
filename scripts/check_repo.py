@@ -767,6 +767,9 @@ def check_audit_fixtures():
         return report("A2", False, f"good.json not scored: {msg}")
     if any(s in good for s in ("| ❌ |", "| ⚠️ |", "| unchecked |")) or "\n| 1 | " in good:
         bad.append("good.json has a finding, an unchecked rule or a fix row")
+    nested, msg = score("nested-domain.json")   # BM-16: a domain three folders deep, a write line inside it
+    if nested is None or any(s in nested for s in ("| ❌ |", "| ⚠️ |")):
+        bad.append(f"nested-domain.json (a domain path and a write line inside it) has a finding or is not scored: {msg[-120:]}")
     for rule in sorted(rules["levels"], key=lambda r: int(r[1:])):
         cases = sorted(AUDIT_FIXTURES.glob(f"break-{rule}.json")) + sorted(AUDIT_FIXTURES.glob(f"break-{rule}-*.json"))
         if not cases:
@@ -786,7 +789,7 @@ def check_audit_fixtures():
         if needle in script.read_text(encoding="utf-8"):
             bad.append(f"check_structure.py still names `{needle}`")
     report("A2", not bad, "; ".join(bad) or f"audit fixtures: good clean, each of {len(rules['levels'])} kept rules "
-           "caught, an old snapshot refused by name, no retired rule listed")
+           "caught, a nested domain with a write line clean, an old snapshot refused by name, no retired rule listed")
 
 
 # ── SP7 · the sprint checker refuses a committed sprint without its plan review (fixtures) ─

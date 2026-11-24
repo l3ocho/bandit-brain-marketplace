@@ -65,6 +65,10 @@ slug names its hub note and tags its private notes.
 | Minutes and requests on the domain's workflow board | Only the ones that name this project (related to its hub note) | ✗ read-only. A helper may create its new minutes or request drafts in that board's Inbox; filing them is the workflow project's |
 | Every other board | ✗ | ✗ |
 
+A `write:` line in the Project Context limits note writes the same way it limits card writes (bandit:tasks
+`references/scope.md`): a note is created, filed or moved only on a board it names, and into that board's column when
+it names one.
+
 Anything outside the scope (another project's board, a note on the workflow board) that the user
 asks for: stop and say it's a domain-level action to run from the workflow project. Never widen
 scope on your own. One exception: a **`domain` fix row** runs when the user approves that row by

@@ -1,0 +1,264 @@
+{
+ "board": {
+  "folders": [
+   {
+    "name": "Acme",
+    "parent": null
+   },
+   {
+    "name": "Clients",
+    "parent": "Acme"
+   },
+   {
+    "name": "Beta",
+    "parent": "Clients"
+   }
+  ],
+  "projects": [
+   {
+    "folder": "Acme",
+    "lanes": [],
+    "name": "Acme - wkflw",
+    "profile": "workflow",
+    "system_owner": null,
+    "visibility": "household"
+   },
+   {
+    "folder": "Acme",
+    "lanes": [
+     {
+      "matcher": {
+       "field": "tag",
+       "values": [
+        "lane/incident"
+       ]
+      },
+      "name": "Incident",
+      "position": 0
+     },
+     {
+      "matcher": {
+       "field": "tag",
+       "values": [
+        "lane/issue"
+       ]
+      },
+      "name": "Issue",
+      "position": 1
+     },
+     {
+      "matcher": {
+       "field": "tag",
+       "values": [
+        "lane/feature"
+       ]
+      },
+      "name": "Feature",
+      "position": 2
+     },
+     {
+      "matcher": {
+       "field": "tag",
+       "values": [
+        "lane/maintenance"
+       ]
+      },
+      "name": "Maintenance",
+      "position": 3
+     },
+     {
+      "matcher": {
+       "field": "tag",
+       "values": [
+        "lane/content"
+       ]
+      },
+      "name": "Content",
+      "position": 4
+     },
+     {
+      "matcher": {
+       "field": "tag",
+       "values": [
+        "lane/tech-debt"
+       ]
+      },
+      "name": "Tech-Debt",
+      "position": 5
+     }
+    ],
+    "name": "Home Reno",
+    "profile": "technical",
+    "system_owner": null,
+    "visibility": "household"
+   },
+   {
+    "folder": "Beta",
+    "lanes": [],
+    "name": "Ops Desk",
+    "profile": "workflow",
+    "system_owner": null,
+    "visibility": "household"
+   }
+  ],
+  "sprint_cards": [
+   {
+    "id": "00000000-0000-4000-8000-000000000012",
+    "short_id": "HR-12",
+    "sprints": [
+     "Staging 1"
+    ]
+   }
+  ]
+ },
+ "notes": {
+  "Acme": {
+   "acme": {
+    "board": "Acme - wkflw",
+    "notes": []
+   },
+   "home-reno": {
+    "board": "Home Reno",
+    "notes": [
+     {
+      "cards": [],
+      "id": "n-1",
+      "kind": "plan",
+      "status": "active",
+      "tags": null,
+      "title": "home-reno-sprint-staging-1-plan"
+     },
+     {
+      "cards": [
+       "HR-12"
+      ],
+      "id": "n-2",
+      "kind": "brief",
+      "status": "active",
+      "tags": [
+       "sprint-staging-1"
+      ],
+      "title": "home-reno-tiles-brief"
+     }
+    ]
+   },
+   "ops-desk": {
+    "board": "Ops Desk",
+    "notes": []
+   }
+  }
+ },
+ "schema": 8,
+ "stamps": {
+  "Acme/acme": {
+   "checked": "2026-11-20",
+   "context": {
+    "board": "project \"Acme - wkflw\"",
+    "domain": "Acme",
+    "prefix": "ac",
+    "project": "acme",
+    "type": "workflow"
+   },
+   "guard": null,
+   "name": "A - Acme",
+   "surface": "claude-ai",
+   "version": "1.0.0",
+   "workdir": null
+  },
+  "Acme/home-reno": {
+   "checked": "2026-11-20",
+   "context": {
+    "board": "project \"Home Reno\"",
+    "dev": "true",
+    "domain": "Acme",
+    "prefix": "hr",
+    "project": "home-reno",
+    "type": "product_service"
+   },
+   "guard": null,
+   "name": null,
+   "surface": "claude-code",
+   "version": "2.0.0",
+   "workdir": null
+  },
+  "Acme/ops-desk": {
+   "checked": "2026-11-21",
+   "context": {
+    "board": "project \"Ops Desk\"",
+    "domain": "Acme / Clients / Gamma",
+    "prefix": "od",
+    "project": "ops-desk",
+    "type": "product_service"
+   },
+   "guard": {
+    "hooks": [
+     "PreToolUse",
+     "SessionStart"
+    ],
+    "script_sha12": "203b01d9ceab",
+    "settings_parses": true
+   },
+   "name": null,
+   "surface": "claude-code",
+   "version": "1.2.0",
+   "workdir": {
+    "backup": [],
+    "domain": "Acme",
+    "generated_at": "2026-11-21",
+    "hosted": [],
+    "loose": [],
+    "misplaced_data": [],
+    "prefix": "od",
+    "project": "ops-desk",
+    "root": [
+     {
+      "dir": false,
+      "name": "CLAUDE.md"
+     },
+     {
+      "dir": true,
+      "name": ".claude"
+     },
+     {
+      "dir": true,
+      "name": "work"
+     },
+     {
+      "dir": true,
+      "name": "data"
+     },
+     {
+      "dir": true,
+      "name": "scratch"
+     }
+    ],
+    "schema": 1,
+    "scratch": [],
+    "task_folders": {
+     "_closed": [],
+     "data": [],
+     "work": [
+      {
+       "modified": "2026-11-20",
+       "name": "od-weekly-report"
+      }
+     ]
+    },
+    "truncated": false
+   }
+  }
+ },
+ "tags": [
+  "lane/incident",
+  "lane/issue",
+  "lane/feature",
+  "lane/maintenance",
+  "lane/content",
+  "lane/tech-debt",
+  "stage/spec",
+  "stage/planned",
+  "stage/ready",
+  "deep-work"
+ ],
+ "taken_at": "2026-11-22T12:00:00Z"
+}

@@ -345,14 +345,55 @@ NOTES_TOOLS = (
 SEARCH_TOOL = "search"
 # The app clone on this host (read-only) and the branch the skills are built against.
 APP_REPO = Path(os.environ.get("BANDIT_APP_REPO") or ROOT.parent / "dev")
-# The app's 0.55.0, the release that ships the note tools (BB-590; sprint 2026-w47, BB-596).
-APP_REF = os.environ.get("BANDIT_APP_REF") or "1e0170c1"
+# The app's 0.56.0, the release that ships waves, lands-after links, pause, replan and cancel (BM-21);
+# 0.55.0 (1e0170c1) shipped the note tools (BB-590; sprint 2026-w47, BB-596).
+APP_REF = os.environ.get("BANDIT_APP_REF") or "abb08af6"
 
 
 def app_file(path):
     r = subprocess.run(["git", "-C", str(APP_REPO), "show", f"{APP_REF}:{path}"], capture_output=True, text=True)
     return r.stdout if r.returncode == 0 else None
 
+
+
+# ── ER1 · every refusal code the app's assistant tools name has a row in bandit:tasks errors.md (BM-21) ─
+def refusal_codes(source):
+    """The codes of the app's RefusalCode union (src/domains/tasks/server/refusals.ts), comments skipped."""
+    if "export type RefusalCode" not in (source or ""):
+        return []
+    codes = []
+    for line in source[source.index("export type RefusalCode"):].splitlines()[1:]:
+        s = line.strip()
+        if not s or s.startswith("//"):
+            continue
+        m = re.match(r"\|\s*'([A-Z_]+)'\s*(;)?", s)
+        if not m:
+            break
+        codes.append(m.group(1))
+        if m.group(2):
+            break
+    return codes
+
+
+def unlisted_codes(codes, descriptors, table):
+    """The codes the tools' text names that the error table has no row for."""
+    return [c for c in codes if re.search(rf"\b{c}\b", descriptors) and f"`{c}`" not in table]
+
+
+def check_error_rows():
+    refusals = app_file("src/domains/tasks/server/refusals.ts") if (APP_REPO / ".git").exists() else None
+    desc = app_file("src/domains/tasks/descriptors.ts") if refusals else None
+    if not refusals or not desc:
+        return report("ER1", True, f"skipped (no app clone at {APP_REPO} with {APP_REF})")
+    codes = refusal_codes(refusals)
+    table = (PLUGINS / "bandit" / "skills" / "tasks" / "references" / "errors.md").read_text(encoding="utf-8")
+    missing = unlisted_codes(codes, desc, table)
+    selftest = unlisted_codes(["MADE_UP_CODE", "NOT_FOUND"], "MADE_UP_CODE and NOT_FOUND", "| `NOT_FOUND` |") == ["MADE_UP_CODE"]
+    named = [c for c in codes if re.search(rf"\b{c}\b", desc)]
+    ok = len(codes) > 50 and not missing and selftest
+    report("ER1", ok, f"errors.md has a row for each of the {len(named)} refusal codes the app's task tools name at {APP_REF} "
+           f"({len(codes)} codes in the app's list; a made-up unlisted code is caught)"
+           if ok else f"errors.md lacks {missing}; {len(codes)} codes read; self-test {'ok' if selftest else 'failed'} (BM-21)")
 
 def check_app_tools():
     desc = app_file("src/domains/tasks/descriptors.ts") if (APP_REPO / ".git").exists() else None
@@ -2510,6 +2551,7 @@ def main(argv):
     check_bridge_names()
     check_board_type()
     check_app_tools()
+    check_error_rows()
     check_copies()
     check_changelog_entry()
     check_cheat_sheet()

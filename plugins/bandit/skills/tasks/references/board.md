@@ -120,6 +120,16 @@ keeps its `sprint/{name}` tag until its close (`list_tasks { tagName: "sprint/{n
 cards), so a card is in a sprint when a record holds it or it carries a `sprint/*` tag. **Sprints off**
 (`MODULE_DISABLED`, `references/errors.md`) is never read as "no sprints".
 
+**Waves, run state, cancel.** A sprint's cards sit in waves, Wave 1 to `waveCount`, run in order
+(wave, then the place inside it): `get_sprints { sprintId }` gives each card's `wave`; `manage_sprints`
+`set_wave`, `add_wave` and `remove_wave` change them, and a card never sits in an earlier wave than a
+card of its sprint that blocks it (`SPRINT_WAVE_ORDER`). `add_cards`, and `create_tasks` with `sprintId`,
+put a card at the end of the last wave. An Executing or Debugging sprint has a `runState`: running,
+paused (`pause` with a reason, `resume`) or replanning (ended by `approve_plan`). Changing a running
+sprint's cards asks the person first, then sends `replanConfirmed: true` (`SPRINT_REPLAN_UNCONFIRMED`).
+`cancel` (a reason and `confirmed: true`, after the person confirms) ends a sprint for good: status
+`cancelled`, its open cards leave it, and it no longer blocks anything.
+
 Tags are account-wide, so the vocabulary is the **union** of all six rows. On Technical boards Kind
 is expressed by the `lane/*` tag; `feature · issue · chore` stay valid everywhere else.
 

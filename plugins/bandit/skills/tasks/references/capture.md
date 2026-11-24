@@ -119,6 +119,8 @@ wrong → tell the user which card.
 
 Read links with `get_task`: in `blockedBy` and `blocks`, `id` is the **link** (pass to `delete_tasks { items: [{ kind: "link", dependencyId }] }`) and `taskId` is the other task. Confusing the two removes the wrong thing.
 
+**Lands after** is the other kind of link: `link_tasks { blockerTaskId, blockedTaskId, kind: "lands_after" }` puts the blocked card after the other in the order and **never blocks** it (completing either card is never refused because of it). Cards only, no sprint end, no date rule; refused on a cycle with links of either kind, on a repeating card, when it already exists that way round, and when someone who sees the card that lands after could not see the other. It counts toward the same 30 links. `create_tasks` takes it as `dependencies.landsAfter` and `landsBefore`. `get_task` lists these links in `landsAfter` and `landsBefore`, in the same shape (the `id` is the link, removed with `delete_tasks` kind `link`). Use it for "this goes after that" when nothing has to wait.
+
 ---
 
 ## 🔁 The recurrence vocabulary — complete

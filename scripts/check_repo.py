@@ -810,20 +810,40 @@ def check_sp8():
         env = {k: v for k, v in os.environ.items() if k not in ("MYNOTES_DIR", "CLAUDE_PROJECT_DIR")}
         env.update(HOME=str(home), CLAUDE_PROJECT_DIR=str(repo))   # no MYNOTES_DIR and no ~/Documents/MyNotes
         notes = repo / ".sprint" / "home-reno-sprint-notes.json"
-        cases = (("missing", None, "bandit-dev:sprint"),
-                 ("fresh", "2026-11-20T12:00:00Z", "bandit-dev:sprint"),
-                 ("named", "2026-11-20T12:00:00Z", ".sprint/home-reno-sprint-notes.json"),
-                 ("old", "2026-11-19T08:00:00Z", "bandit-dev:sprint"),
-                 ("offset", "2026-11-20T08:00:00-05:00", "bandit-dev:sprint"),   # 13:00 UTC, after the 10:00 start
-                 ("unbuilt", "", "bandit-dev:sprint"),
-                 ("silent", "2026-11-20T12:00:00Z", "a chat about something else"))
-        for name, built, words in cases:
+        # Chat records as Claude Code writes them (BM-19): the helper is used through a Skill call, a typed command or a
+        # tool call on the notes file; the skill and agent lists, a tool's result and the hook's own notice are not use.
+        def tool(name, **inp):
+            return {"type": "assistant", "message": {"role": "assistant", "content": [{"type": "tool_use", "name": name, "input": inp}]}}
+        skill = [tool("Skill", skill="bandit-dev:sprint", args="plan spring")]
+        typed = [{"type": "user", "message": {"role": "user", "content": "<command-message>bandit-dev:sprint</command-message>\n"
+                                                                          "<command-name>/bandit-dev:sprint</command-name>\n<command-args>run spring</command-args>"}}]
+        named = [tool("Bash", command="python3 check_sprint.py --notes .sprint/home-reno-sprint-notes.json")]
+        lists = [{"type": "attachment", "attachment": {"type": "skill_listing", "content": "- bandit-dev:sprint: Plans, runs, "
+                                                                                             "debugs and closes a sprint"}},
+                 {"type": "attachment", "attachment": {"type": "agent_listing", "content": "plan-reviewer: Launched by "
+                                                                                             "/bandit-dev:sprint plan"}},
+                 {"type": "user", "message": {"role": "user", "content": [{"type": "tool_result", "content":
+                     "Stop says: bandit-dev:sprint check: the notes file home-reno-sprint-notes.json was built before"}]}},
+                 {"type": "assistant", "message": {"role": "assistant", "content": [{"type": "text", "text":
+                     "No sprint here: bandit-dev:sprint is for planning."}]}},
+                 tool("Skill", skill="bandit:tasks", args="capture a card")]
+        cases = (("missing", None, skill),
+                 ("fresh", "2026-11-20T12:00:00Z", skill),
+                 ("named", "2026-11-20T12:00:00Z", named),
+                 ("old", "2026-11-19T08:00:00Z", typed),
+                 ("offset", "2026-11-20T08:00:00-05:00", skill),   # 13:00 UTC, after the 10:00 start
+                 ("unbuilt", "", skill),
+                 ("silent", "2026-11-20T12:00:00Z", [{"type": "user", "message": {"role": "user", "content": "something else"}}]),
+                 ("lists", "2026-11-20T12:00:00Z", lists),          # a fresh file with an error: still silent
+                 ("lists-old", "2026-11-19T08:00:00Z", lists))      # the notice every ordinary chat used to get
+        for name, built, records in cases:
             if notes.exists():
                 notes.unlink()
             if built is not None:
                 notes.write_text(bad.replace('"built": "2026-11-20T00:00:00Z"', f'"built": "{built}"'), encoding="utf-8")
             t = Path(d) / f"{name}.jsonl"
-            t.write_text(json.dumps({"timestamp": "2026-11-20T10:00:00Z", "message": words}) + "\n", encoding="utf-8")
+            first = {"type": "user", "timestamp": "2026-11-20T10:00:00Z", "message": {"role": "user", "content": "hello"}}
+            t.write_text("".join(json.dumps(r) + "\n" for r in [first, *records]), encoding="utf-8")
             r = subprocess.run([sys.executable, "-B", str(script), "--hook"], input=json.dumps({"transcript_path": str(t)}),
                                capture_output=True, text=True, env=env, cwd=str(repo))
             got[name] = (r.returncode, r.stdout + r.stderr)
@@ -833,11 +853,12 @@ def check_sp8():
           and got["fresh"][0] == 2 and "SP7" in got["fresh"][1] and got["named"][0] == 2
           and got["old"][0] == 0 and "before this session" in got["old"][1] and "SP7" in got["old"][1]
           and got["offset"][0] == 2 and got["unbuilt"][0] == 0 and "before this session" in got["unbuilt"][1]
-          and got["silent"] == (0, "") and 'check_sprint.py" --hook' in hooks and "--vault" not in hooks)
+          and got["silent"] == (0, "") and got["lists"] == (0, "") and got["lists-old"] == (0, "")
+          and 'check_sprint.py" --hook' in hooks and "--vault" not in hooks)
     report("SP8", ok, "the Stop hook runs with no vault: it reads the repository's notes file, blocks once on a real error, "
            "says so (exit 0) when the file is missing, has no built time or was built before the session (times read with their "
-           "offset), and stays silent in a chat that "
-           "names neither the sprint helper nor the notes file"
+           "offset), and stays silent in a chat that did not use the sprint helper (no Skill call, typed command or tool call "
+           "on the notes file), the skill's name in the chat's lists included"
            if ok else "hook: " + "; ".join(f"{k} → {v[0]} {v[1][-120:]!r}" for k, v in got.items()))
 
 
@@ -1061,12 +1082,14 @@ def check_sp14():
         ("close.md", "**Close makes no commit.**"),
         ("close.md", "`git rev-list --count origin/{branches.deploy}..origin/{branches.trunk}`"),
         ("close.md", "- Commit to the repository:")) if w not in text[n]]
+    closed = run_script(script, "--notes", notes_fixture("ClosedPlanLinked"))   # the same item, in a closed sprint's plan
     ok = (good[0] == 0 and bad[0] == 1 and bad[1].count("\n- ") == 1 and "SP14" in bad[1] and "trigger: sprint close" in bad[1]
-          and not words)
+          and closed[0] == 0 and not words)
     report("SP14", ok, "check_sprint refuses a plan that leaves a repository change for the close and passes one whose items "
-           "run in debug; release refuses while the sprint owes the repository; close makes no commit"
+           "run in debug, and leaves a closed sprint's plan alone; release refuses while the sprint owes the repository; "
+           "close makes no commit"
            if ok else f"SP14: StepsGood → {good[0]} {good[1][-120:]!r}; OwedBad → {bad[0]} {bad[1][-160:]!r}; "
-           f"missing {words} (BB-450)")
+           f"ClosedPlanLinked → {closed[0]} {closed[1][-160:]!r}; missing {words} (BB-450, BM-20)")
 
 
 # ── SP15 · a closed sprint keeps no paper and no WBS note unarchived (BB-437, BB-601) ─
@@ -1078,23 +1101,53 @@ def check_sp15():
     app = run_script(script, "--notes", notes_fixture("StepsGood"), "--closed", "spring")
     done = run_script(script, "--notes", notes_fixture("Record"), "--closed", "winter")   # closed, nothing of it left
     nofile = run_script(script, "--notes", notes_fixture("NoSuchCase"))
+    linked = run_script(script, "--notes", notes_fixture("ClosedPlanLinked"))   # a plan linked to its done card: settled
+    still = run_script(script, "--notes", notes_fixture("ClosedPlanOpen"))      # linked to an open card, and a done prompt
     close = " ".join((s / "references" / "close.md").read_text(encoding="utf-8").split())
     plan = " ".join((s / "references" / "plan.md").read_text(encoding="utf-8").split())
     words = [w for w in ("and the sprint's WBS (`Projects/{slug}/planning/{project}-sprint-{name}-wbs.md`)",
                          "check_sprint.py --closed {name}", "on a notes file built after the archive",
-                         "the sprint is not reported closed") if w not in close]
+                         "the sprint is not reported closed",
+                         "A plan linked to a card stays at its card's state",
+                         "other than a plan linked to a done card") if w not in close]
     words += [w for w in ("**Closed sprints left behind, first.**", "**Closed-sprint check**",
                           "\"Could not read the notes file\" is a failed check, never a pass") if w not in plan]
     ok = (left[0] == 1 and left[1].count("SP15") == 2 and "papers are not archived" in left[1]
           and wbs[0] == 1 and wbs[1].count("SP15") == 1 and "garden-sprint-spring-wbs" in wbs[1]
           and app[0] == 1 and app[1].count("SP15") == 1 and done[0] == 0
-          and nofile[0] == 1 and "could not read the notes file" in nofile[1] and not words)
+          and nofile[0] == 1 and "could not read the notes file" in nofile[1]
+          and linked[0] == 0 and still[0] == 1 and still[1].count("\n- ") == 1
+          and "garden-sprint-spring-handover-prompt, garden-sprint-spring-plan" in still[1] and not words)
     report("SP15", ok, "check_sprint refuses a closed sprint whose papers or WBS note are not archived (closed in the "
-           "ledger, its ledger archived, or named by --closed) and says when it could not read the notes file; close "
+           "ledger, its ledger archived, or named by --closed), counts a done plan linked to a card as settled and no other "
+           "paper, and says when it could not read the notes file; close "
            "checks the archive before saying closed, and planning archives closed sprints left behind before it starts"
            if ok else f"SP15: ClosedLeft → {left[0]} {left[1][-160:]!r}; ClosedArchived → {wbs[0]} {wbs[1][-120:]!r}; "
            f"--closed → {app[0]} {app[1][-120:]!r}; closed with nothing left → {done[0]} {done[1][-120:]!r}; "
-           f"no notes file → {nofile[0]} {nofile[1][-120:]!r}; missing {words} (BB-437, BB-494, BB-601)")
+           f"no notes file → {nofile[0]} {nofile[1][-120:]!r}; ClosedPlanLinked → {linked[0]} {linked[1][-120:]!r}; "
+           f"ClosedPlanOpen → {still[0]} {still[1][-200:]!r}; missing {words} (BB-437, BB-494, BB-601, BM-20)")
+
+
+# ── NF1 · the notes file is built the same way every time, and a sprint tag out of place is named (BM-20) ─
+def check_notes_file_build():
+    s = PLUGINS / "bandit-dev" / "skills" / "sprint"
+    script = s / "scripts" / "check_sprint.py"
+    untagged = run_script(script, "--notes", notes_fixture("PaperUntagged"))
+    nosprint = run_script(script, "--notes", notes_fixture("TagNoSprint"))
+    text = " ".join((s / "references" / "templates.md").read_text(encoding="utf-8").split())
+    words = [w for w in ("**Every sprint, never only the one at hand:**",
+                         "**Tags exactly as stored:**",
+                         "never adds a sprint tag a note lacks",
+                         "**In order:**",
+                         "two builds of the same notes differ only in `built`") if w not in text]
+    ok = (untagged[0] == 1 and untagged[1].count("\n- ") == 1 and "without the tag sprint-spring" in untagged[1]
+          and "missing" not in untagged[1]
+          and nosprint[0] == 1 and nosprint[1].count("\n- ") == 1 and "the tag sprint-none names no sprint" in nosprint[1]
+          and not words)
+    report("NF1", ok, "the notes file's build rule reads every sprint's papers whole, copies tags as stored and sorts what it "
+           "writes; check_sprint names a paper without its sprint's tag, and a sprint tag no sprint has, in one line each"
+           if ok else f"NF1: PaperUntagged → {untagged[0]} {untagged[1][-200:]!r}; TagNoSprint → {nosprint[0]} "
+           f"{nosprint[1][-200:]!r}; templates.md missing {words} (BM-20)")
 
 
 def check_wave_order():
@@ -2490,6 +2543,7 @@ def main(argv):
     check_sp13()
     check_sp14()
     check_sp15()
+    check_notes_file_build()
     check_app_compat()
     check_wave_order()
     check_debug_card()

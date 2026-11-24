@@ -45,7 +45,7 @@ The ledger's **Plan steps** table carries the steps in this order (`references/t
 5. **Sprint order.** The previous open sprint on the board (`get_sprints { boardId }`, status not `closed`). One exists → `link_tasks { blockerSprintId, blockedSprintId }` so the new sprint is **blocked by** it. `run` and `execute` refuse a sprint that an open sprint blocks, so sprints ship in order.
 6. Step 1's row: selection rule, count, ids, the sprint it waits for; open Urgent cards listed as not selected.
 
-**Closed-sprint check** (here and `close.md` step 4). Build the project's notes file (`references/templates.md` → Notes file), then run `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py --closed {names}`: SP15 fails while a paper or the WBS note of a closed sprint is not archived, in either storage. "Could not read the notes file" is a failed check, never a pass.
+**Closed-sprint check** (here and `close.md` step 4). Build the project's notes file (`references/templates.md` → Notes file), then run `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py --closed {names}`: SP15 fails while a paper or the WBS note of a closed sprint is not archived, in either storage (a plan linked to a done card stays Done and passes). "Could not read the notes file" is a failed check, never a pass.
 
 **Done when** `get_sprints { sprintId }` shows the batch as its cards and the previous open sprint in
 `blockedBy` when there is one, and the ledger holds the Plan steps table.

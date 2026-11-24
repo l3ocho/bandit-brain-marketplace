@@ -2,6 +2,12 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
+## Unreleased
+
+### Fixed
+- **The sprint check at the end of a reply runs only in a sprint chat** (BM-19). It used to treat every chat of a dev repository as a sprint chat, because the skill and agent lists name the sprint helper, so an ordinary chat ended each reply with a notice about an old notes file. It now runs only when the chat called the sprint helper, you typed `/bandit-dev:sprint`, or a tool built, read or checked the notes file. Checker rule SP8 tests a chat that holds only the lists.
+- **The sprint checker accepts a closed sprint whose plan stays Done with its card** (BM-20). The app keeps a plan linked to a card at that card's state and will not archive it, so a closed sprint with such a plan no longer fails SP15; any other paper left unarchived still does. A closed sprint's plan is no longer read for work owed (SP14). A paper without its sprint's tag, and a sprint tag on notes when that sprint has no papers, are each named in one plain line instead of a list of missing papers. The notes file's build rule now reads every sprint's papers in full, copies tags as they are stored and sorts what it writes, so two builds of the same notes give the same file. Checker rules SP14, SP15 and NF1 test it.
+
 ## 1.1.0 · 2026-11-23
 
 ### Changed

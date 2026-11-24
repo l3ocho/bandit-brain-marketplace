@@ -83,6 +83,7 @@ The full list is `references/gotchas.md`: read it once at the start of any comma
 
 ## 🚫 Never
 
+- Break a hard rule (bandit:tasks `references/hard-rules.md`): names, tool limits, field limits, where information goes
 - Run any command on a project without `dev: true`, or from Claude.ai
 - Ask which cards when no list was given
 - Mark a card complete, tick its approval line or call anything approved, except `close` doing so for cards the user approved (approval line ticked by the user, or approved in that chat)

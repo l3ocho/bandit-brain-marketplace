@@ -51,6 +51,7 @@ The full list is `references/gotchas.md`: read it once before onboarding or an a
 
 ## 🚫 Never
 
+- Break a hard rule (bandit:tasks `references/hard-rules.md`): names, tool limits, field limits, where information goes
 - Leave a finding without a fix row, or stop an audit at a question when the fix is known
 - Create, rename or restructure anything on a board beyond bandit:tasks' onboard rows (one empty
   board, and for `dev: true` its dev board shape)

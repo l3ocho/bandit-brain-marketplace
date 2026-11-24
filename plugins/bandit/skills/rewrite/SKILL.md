@@ -37,6 +37,7 @@ there: no questions, no new ideas.
 
 ## 🚫 Never
 
+- Break a hard rule (bandit:tasks `references/hard-rules.md`): names, tool limits, field limits, where information goes
 - Invent new points, facts or decisions
 - Rewrite code inside code blocks
 - Save a note directly: bandit:notes writes notes

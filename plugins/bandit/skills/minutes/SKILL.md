@@ -48,6 +48,7 @@ None logged yet.
 
 ## 🚫 Never
 
+- Break a hard rule (bandit:tasks `references/hard-rules.md`): names, tool limits, field limits, where information goes
 - Put customer data in the minutes (names, account numbers, addresses, call contents)
 - Attribute statements from speaker labels on a single-mic room recording
 - Invent attendees, owners or deadlines, or a meeting type beyond the three

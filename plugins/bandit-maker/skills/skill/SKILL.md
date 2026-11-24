@@ -53,6 +53,7 @@ Every skill built or edited here passes `references/rulebook.md`. In this market
 
 ## 🚫 Never
 
+- Break a hard rule (bandit:tasks `references/hard-rules.md`): names, tool limits, field limits, where information goes
 - Run scripts inside an installed skill folder
 - Name an updated skill `-v2`, or add version lines, version folders or changelogs inside a skill folder
 - Send a card whose `description` is anything but the full trigger text

@@ -75,6 +75,7 @@ The full list is `references/gotchas.md`: read it once at the start of a session
 
 ## 🚫 Never
 
+- Break a hard rule (bandit:tasks `references/hard-rules.md`): names, tool limits, field limits, where information goes
 - Convert, estimate or round between currencies itself (`references/money.md` → Currencies)
 - Guess a CSV's date format, separator or sign: read the first rows and ask when they don't say
 - Retry a variant of a refused call to get past the refusal (`OVER_ROOM` is the app's own confirm

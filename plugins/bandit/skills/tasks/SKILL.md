@@ -29,7 +29,8 @@ Natural language always works; a request that spans two surfaces reads both file
 
 | Also read | When |
 |---|---|
-| `references/scope.md` | Before every read or write: the home board, the domain, filtering the household-wide views |
+| `references/scope.md` | Before every read or write: the home board, the domain, the `write:` line, filtering the household-wide views |
+| `references/hard-rules.md` | Before any write, by this skill or any other: names, tool limits, field limits, where information goes |
 | `references/board.md` | Board profile, right-sizing, planning variables, tags and tag view, many-card writes, card descriptions, sub-tasks, safety, refusals, what lies outside this skill |
 | `references/errors.md` | A call, or an entry in its `results`, comes back `{ ok: false, code, … }` |
 | `references/gotchas.md` | Once, at the start of a session that writes to the board |
@@ -65,6 +66,7 @@ The full list is `references/gotchas.md`: read it once at the start of a session
 
 ## 🚫 Never
 
+- Break a hard rule (bandit:tasks `references/hard-rules.md`): names, tool limits, field limits, where information goes
 - Design a board freehand inside a procedure: board structure is a conversation (`references/board.md` → Outside this skill)
 - Retry a variant of a refused call, or round a rule outside the vocabulary to the nearest fit
 - Resize a task silently, in either direction: propose

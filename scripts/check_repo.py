@@ -1539,6 +1539,30 @@ def check_vault_out():
            f"self-test {'ok' if selftest else 'failed'} (BM-15)")
 
 
+# ── HR1 · one hard-rules page, every skill's Never section points to it, every home it names exists (BM-16) ─
+def check_hard_rules():
+    page = PLUGINS / "bandit" / "skills" / "tasks" / "references" / "hard-rules.md"
+    bad = [] if page.exists() else ["bandit:tasks references/hard-rules.md is missing"]
+    text = page.read_text(encoding="utf-8") if page.exists() else ""
+    skills = sorted(PLUGINS.glob("*/skills/*/SKILL.md"))
+    for f in skills:
+        body = f.read_text(encoding="utf-8")
+        never = body.split("## 🚫 Never", 1)[1] if "## 🚫 Never" in body else ""
+        if "bandit:tasks `references/hard-rules.md`" not in never:
+            bad.append(f"{f.relative_to(ROOT)}: its Never section does not point to the hard-rules page")
+    homes = {"bandit:notes": PLUGINS / "bandit" / "skills" / "notes", "bandit:project": PLUGINS / "bandit" / "skills" / "project",
+             "bandit-dev:sprint": PLUGINS / "bandit-dev" / "skills" / "sprint"}
+    for line in (l for l in text.splitlines() if l.startswith("- ")):
+        for skill, ref in re.findall(r"(?:(bandit(?:-dev)?:\w+)\s+)?`(references/[\w-]+\.md)`", line):
+            base = homes.get(skill, page.parent.parent)
+            if not (base / ref).exists():
+                bad.append(f"hard-rules.md names {skill or 'bandit:tasks'} {ref}, which does not exist")
+    rules = sum(1 for l in text.splitlines() if l.startswith("- "))
+    ok = not bad and rules >= 15
+    report("HR1", ok, f"hard rules: one page ({rules} rules, each naming its home, every home exists); all {len(skills)} skills "
+           "point to it from their Never section" if ok else "; ".join(bad[:6]) + f" ({rules} rules) (BM-16)")
+
+
 # ── WV1 · the sprint helper runs on the app's waves, lands-after links, run state and cancel; the map is the app's (BM-22) ─
 def check_waves():
     import tempfile
@@ -2586,6 +2610,7 @@ def main(argv):
     check_gate_order()
     check_waves()
     check_vault_out()
+    check_hard_rules()
     check_sp13()
     check_sp14()
     check_sp15()

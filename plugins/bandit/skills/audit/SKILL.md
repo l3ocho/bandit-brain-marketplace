@@ -64,6 +64,7 @@ The full list is `references/gotchas.md`: read it once before a `check` or an `a
 
 ## 🚫 Never
 
+- Break a hard rule (bandit:tasks `references/hard-rules.md`): names, tool limits, field limits, where information goes
 - Leave a finding without a fix row, or list a problem as a note and walk away
 - Fix anything with its own calls, run half of a linked pair, or a board rename before its settings row
 - Guess a Claude.ai name or version: not in a stamp → **unchecked**

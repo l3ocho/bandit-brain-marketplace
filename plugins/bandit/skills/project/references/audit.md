@@ -69,7 +69,7 @@ template section. Note:
   `finance:` line must read `accounts "…"` with each name an account `finance_get_context` returns;
   a name that doesn't resolve → propose the fix. No `finance:` line is never a finding. A
   `design:` line must read `column "…"` (optionally `on board "…"`) with a column that resolves on
-  that board via `get_context`; one that doesn't → propose the fix. No `design:` line is never a finding. A `notes:` line, when present, is `none` or the older `app`; any other value → propose removing the line. No `notes:` line is never a finding. Check them live: `domain` is a top-level board folder (or `none`); `board` resolves via `get_context → boards` (or is `none` / `pending`).
+  that board via `get_context`; one that doesn't → propose the fix. No `design:` line is never a finding. A `write:` line must read `board "…"` items, each with an optional `column "…"`, comma-separated, every board one of the domain's and every column one of that board's; one that doesn't resolve → propose the fix. No `write:` line is never a finding. A `notes:` line, when present, is `none` or the older `app`; any other value → propose removing the line. No `notes:` line is never a finding. Check them live: `domain` is a top-level board folder, or a path from one down whose every name is a child of the one before (or `none`); `board` resolves via `get_context → boards` (or is `none` / `pending`).
   Naming, board profile and footprint aren't judged here: run `/bandit:audit check` in this project
   and carry its rows into the proposal (skip it for `domain: none`: bandit:audit scores domain
   projects only).

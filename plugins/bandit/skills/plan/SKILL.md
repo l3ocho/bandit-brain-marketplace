@@ -26,6 +26,7 @@ The order is `project` → `wbs` → the board (`/bandit:tasks load`, or the dev
 
 ## 🚫 Never
 
+- Break a hard rule (bandit:tasks `references/hard-rules.md`): names, tool limits, field limits, where information goes
 - Put tasks on the board: that's `/bandit:tasks load` (and `/bandit:tasks spec` on dev projects)
 - Edit project instructions: that's bandit:project
 - Change the WBS output structure `/bandit:tasks load` parses

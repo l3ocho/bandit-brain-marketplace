@@ -86,6 +86,7 @@ data, and the data each card's acceptance lines need to be tested. The app build
 
 ## 🚫 Never
 
+- Break a hard rule (bandit:tasks `references/hard-rules.md`): names, tool limits, field limits, where information goes
 - Run on a database outside `development`, `test` and `staging`, or on staging without this run's yes
 - Copy, sample or derive a value from existing rows, or show an existing row in the chat
 - Print, store or echo a database address, password or env file; open `.env*` files

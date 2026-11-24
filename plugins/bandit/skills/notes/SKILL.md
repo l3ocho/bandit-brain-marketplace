@@ -63,6 +63,7 @@ The full list is `references/gotchas.md`: read it once before a session's first 
 
 ## 🚫 Never
 
+- Break a hard rule (bandit:tasks `references/hard-rules.md`): names, tool limits, field limits, where information goes
 - Invent a module, a kind, a status value or a field that isn't in the conventions: propose a change to this skill
 - Edit, rename, reformat or move an inbox note the user didn't put up for review, or leave one half-edited
   (sole exception: a skill's own draft from this conversation, on their explicit request)

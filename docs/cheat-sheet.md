@@ -54,7 +54,7 @@ updated: 2026-10-20
 ### 🗃️ bandit:notes
 
 > [!abstract] Owns the note conventions and their storage, the app's Notes: kinds, fields, status, names, places, archiving
-> `plugin` · [[bandit:notes/SKILL|open skill]] · every project's notes are on its board, unless its Project Context says `notes: none` (then no helper writes a note for it) · the domain comes from the Project Context `domain:` (a top-level board folder), from bandit:project during onboarding, or the command, or it asks
+> `plugin` · [[bandit:notes/SKILL|open skill]] · every project's notes are on its board, unless its Project Context says `notes: none` (then no helper writes a note for it) · the domain comes from the Project Context `domain:` (a top-level board folder, or a path down to a subfolder), and a `write:` line limits where it writes, from bandit:project during onboarding, or the command, or it asks
 
 | Command                  | ⚙️ Modifiers           | Does                                                                                                                                                                                                                       |        |
 |--------------------------|------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|

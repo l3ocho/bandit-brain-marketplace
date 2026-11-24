@@ -345,14 +345,55 @@ NOTES_TOOLS = (
 SEARCH_TOOL = "search"
 # The app clone on this host (read-only) and the branch the skills are built against.
 APP_REPO = Path(os.environ.get("BANDIT_APP_REPO") or ROOT.parent / "dev")
-# The app's 0.55.0, the release that ships the note tools (BB-590; sprint 2026-w47, BB-596).
-APP_REF = os.environ.get("BANDIT_APP_REF") or "1e0170c1"
+# The app's 0.56.0, the release that ships waves, lands-after links, pause, replan and cancel (BM-21);
+# 0.55.0 (1e0170c1) shipped the note tools (BB-590; sprint 2026-w47, BB-596).
+APP_REF = os.environ.get("BANDIT_APP_REF") or "abb08af6"
 
 
 def app_file(path):
     r = subprocess.run(["git", "-C", str(APP_REPO), "show", f"{APP_REF}:{path}"], capture_output=True, text=True)
     return r.stdout if r.returncode == 0 else None
 
+
+
+# ── ER1 · every refusal code the app's assistant tools name has a row in bandit:tasks errors.md (BM-21) ─
+def refusal_codes(source):
+    """The codes of the app's RefusalCode union (src/domains/tasks/server/refusals.ts), comments skipped."""
+    if "export type RefusalCode" not in (source or ""):
+        return []
+    codes = []
+    for line in source[source.index("export type RefusalCode"):].splitlines()[1:]:
+        s = line.strip()
+        if not s or s.startswith("//"):
+            continue
+        m = re.match(r"\|\s*'([A-Z_]+)'\s*(;)?", s)
+        if not m:
+            break
+        codes.append(m.group(1))
+        if m.group(2):
+            break
+    return codes
+
+
+def unlisted_codes(codes, descriptors, table):
+    """The codes the tools' text names that the error table has no row for."""
+    return [c for c in codes if re.search(rf"\b{c}\b", descriptors) and f"`{c}`" not in table]
+
+
+def check_error_rows():
+    refusals = app_file("src/domains/tasks/server/refusals.ts") if (APP_REPO / ".git").exists() else None
+    desc = app_file("src/domains/tasks/descriptors.ts") if refusals else None
+    if not refusals or not desc:
+        return report("ER1", True, f"skipped (no app clone at {APP_REPO} with {APP_REF})")
+    codes = refusal_codes(refusals)
+    table = (PLUGINS / "bandit" / "skills" / "tasks" / "references" / "errors.md").read_text(encoding="utf-8")
+    missing = unlisted_codes(codes, desc, table)
+    selftest = unlisted_codes(["MADE_UP_CODE", "NOT_FOUND"], "MADE_UP_CODE and NOT_FOUND", "| `NOT_FOUND` |") == ["MADE_UP_CODE"]
+    named = [c for c in codes if re.search(rf"\b{c}\b", desc)]
+    ok = len(codes) > 50 and not missing and selftest
+    report("ER1", ok, f"errors.md has a row for each of the {len(named)} refusal codes the app's task tools name at {APP_REF} "
+           f"({len(codes)} codes in the app's list; a made-up unlisted code is caught)"
+           if ok else f"errors.md lacks {missing}; {len(codes)} codes read; self-test {'ok' if selftest else 'failed'} (BM-21)")
 
 def check_app_tools():
     desc = app_file("src/domains/tasks/descriptors.ts") if (APP_REPO / ".git").exists() else None
@@ -794,20 +835,40 @@ def check_sp8():
         env = {k: v for k, v in os.environ.items() if k not in ("MYNOTES_DIR", "CLAUDE_PROJECT_DIR")}
         env.update(HOME=str(home), CLAUDE_PROJECT_DIR=str(repo))   # no MYNOTES_DIR and no ~/Documents/MyNotes
         notes = repo / ".sprint" / "home-reno-sprint-notes.json"
-        cases = (("missing", None, "bandit-dev:sprint"),
-                 ("fresh", "2026-11-20T12:00:00Z", "bandit-dev:sprint"),
-                 ("named", "2026-11-20T12:00:00Z", ".sprint/home-reno-sprint-notes.json"),
-                 ("old", "2026-11-19T08:00:00Z", "bandit-dev:sprint"),
-                 ("offset", "2026-11-20T08:00:00-05:00", "bandit-dev:sprint"),   # 13:00 UTC, after the 10:00 start
-                 ("unbuilt", "", "bandit-dev:sprint"),
-                 ("silent", "2026-11-20T12:00:00Z", "a chat about something else"))
-        for name, built, words in cases:
+        # Chat records as Claude Code writes them (BM-19): the helper is used through a Skill call, a typed command or a
+        # tool call on the notes file; the skill and agent lists, a tool's result and the hook's own notice are not use.
+        def tool(name, **inp):
+            return {"type": "assistant", "message": {"role": "assistant", "content": [{"type": "tool_use", "name": name, "input": inp}]}}
+        skill = [tool("Skill", skill="bandit-dev:sprint", args="plan spring")]
+        typed = [{"type": "user", "message": {"role": "user", "content": "<command-message>bandit-dev:sprint</command-message>\n"
+                                                                          "<command-name>/bandit-dev:sprint</command-name>\n<command-args>run spring</command-args>"}}]
+        named = [tool("Bash", command="python3 check_sprint.py --notes .sprint/home-reno-sprint-notes.json")]
+        lists = [{"type": "attachment", "attachment": {"type": "skill_listing", "content": "- bandit-dev:sprint: Plans, runs, "
+                                                                                             "debugs and closes a sprint"}},
+                 {"type": "attachment", "attachment": {"type": "agent_listing", "content": "plan-reviewer: Launched by "
+                                                                                             "/bandit-dev:sprint plan"}},
+                 {"type": "user", "message": {"role": "user", "content": [{"type": "tool_result", "content":
+                     "Stop says: bandit-dev:sprint check: the notes file home-reno-sprint-notes.json was built before"}]}},
+                 {"type": "assistant", "message": {"role": "assistant", "content": [{"type": "text", "text":
+                     "No sprint here: bandit-dev:sprint is for planning."}]}},
+                 tool("Skill", skill="bandit:tasks", args="capture a card")]
+        cases = (("missing", None, skill),
+                 ("fresh", "2026-11-20T12:00:00Z", skill),
+                 ("named", "2026-11-20T12:00:00Z", named),
+                 ("old", "2026-11-19T08:00:00Z", typed),
+                 ("offset", "2026-11-20T08:00:00-05:00", skill),   # 13:00 UTC, after the 10:00 start
+                 ("unbuilt", "", skill),
+                 ("silent", "2026-11-20T12:00:00Z", [{"type": "user", "message": {"role": "user", "content": "something else"}}]),
+                 ("lists", "2026-11-20T12:00:00Z", lists),          # a fresh file with an error: still silent
+                 ("lists-old", "2026-11-19T08:00:00Z", lists))      # the notice every ordinary chat used to get
+        for name, built, records in cases:
             if notes.exists():
                 notes.unlink()
             if built is not None:
                 notes.write_text(bad.replace('"built": "2026-11-20T00:00:00Z"', f'"built": "{built}"'), encoding="utf-8")
             t = Path(d) / f"{name}.jsonl"
-            t.write_text(json.dumps({"timestamp": "2026-11-20T10:00:00Z", "message": words}) + "\n", encoding="utf-8")
+            first = {"type": "user", "timestamp": "2026-11-20T10:00:00Z", "message": {"role": "user", "content": "hello"}}
+            t.write_text("".join(json.dumps(r) + "\n" for r in [first, *records]), encoding="utf-8")
             r = subprocess.run([sys.executable, "-B", str(script), "--hook"], input=json.dumps({"transcript_path": str(t)}),
                                capture_output=True, text=True, env=env, cwd=str(repo))
             got[name] = (r.returncode, r.stdout + r.stderr)
@@ -817,11 +878,12 @@ def check_sp8():
           and got["fresh"][0] == 2 and "SP7" in got["fresh"][1] and got["named"][0] == 2
           and got["old"][0] == 0 and "before this session" in got["old"][1] and "SP7" in got["old"][1]
           and got["offset"][0] == 2 and got["unbuilt"][0] == 0 and "before this session" in got["unbuilt"][1]
-          and got["silent"] == (0, "") and 'check_sprint.py" --hook' in hooks and "--vault" not in hooks)
+          and got["silent"] == (0, "") and got["lists"] == (0, "") and got["lists-old"] == (0, "")
+          and 'check_sprint.py" --hook' in hooks and "--vault" not in hooks)
     report("SP8", ok, "the Stop hook runs with no vault: it reads the repository's notes file, blocks once on a real error, "
            "says so (exit 0) when the file is missing, has no built time or was built before the session (times read with their "
-           "offset), and stays silent in a chat that "
-           "names neither the sprint helper nor the notes file"
+           "offset), and stays silent in a chat that did not use the sprint helper (no Skill call, typed command or tool call "
+           "on the notes file), the skill's name in the chat's lists included"
            if ok else "hook: " + "; ".join(f"{k} → {v[0]} {v[1][-120:]!r}" for k, v in got.items()))
 
 
@@ -977,14 +1039,6 @@ def check_code_changed():
            "implementation paths, a code line and an unknown base say needed)")
 
 
-# ── SP12 · a done wave is drawn done in the sprint map (temporary, decisions RS16) ─
-def check_sp12():
-    script = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts" / "check_sprint.py"
-    good = run_script(script, "--notes", notes_fixture("Record"))
-    bad = run_script(script, "--notes", notes_fixture("MapBad"))
-    ok = good[0] == 0 and bad[0] == 1 and bad[1].count("\n- ") == 1 and "SP12" in bad[1]
-    report("SP12", ok, "check_sprint passes a map that lists the done waves and refuses one not redrawn after a wave"
-           if ok else f"SP12: Record → {good[0]} {good[1][-120:]!r}; MapBad → {bad[0]} {bad[1][-160:]!r}")
 
 
 # ── SP13 · a sprint committed after 2026-11-08 gives every batch card its build-step count in step 9 (fixtures) ─
@@ -1028,12 +1082,14 @@ def check_sp14():
         ("close.md", "**Close makes no commit.**"),
         ("close.md", "`git rev-list --count origin/{branches.deploy}..origin/{branches.trunk}`"),
         ("close.md", "- Commit to the repository:")) if w not in text[n]]
+    closed = run_script(script, "--notes", notes_fixture("ClosedPlanLinked"))   # the same item, in a closed sprint's plan
     ok = (good[0] == 0 and bad[0] == 1 and bad[1].count("\n- ") == 1 and "SP14" in bad[1] and "trigger: sprint close" in bad[1]
-          and not words)
+          and closed[0] == 0 and not words)
     report("SP14", ok, "check_sprint refuses a plan that leaves a repository change for the close and passes one whose items "
-           "run in debug; release refuses while the sprint owes the repository; close makes no commit"
+           "run in debug, and leaves a closed sprint's plan alone; release refuses while the sprint owes the repository; "
+           "close makes no commit"
            if ok else f"SP14: StepsGood → {good[0]} {good[1][-120:]!r}; OwedBad → {bad[0]} {bad[1][-160:]!r}; "
-           f"missing {words} (BB-450)")
+           f"ClosedPlanLinked → {closed[0]} {closed[1][-160:]!r}; missing {words} (BB-450, BM-20)")
 
 
 # ── SP15 · a closed sprint keeps no paper and no WBS note unarchived (BB-437, BB-601) ─
@@ -1045,23 +1101,53 @@ def check_sp15():
     app = run_script(script, "--notes", notes_fixture("StepsGood"), "--closed", "spring")
     done = run_script(script, "--notes", notes_fixture("Record"), "--closed", "winter")   # closed, nothing of it left
     nofile = run_script(script, "--notes", notes_fixture("NoSuchCase"))
+    linked = run_script(script, "--notes", notes_fixture("ClosedPlanLinked"))   # a plan linked to its done card: settled
+    still = run_script(script, "--notes", notes_fixture("ClosedPlanOpen"))      # linked to an open card, and a done prompt
     close = " ".join((s / "references" / "close.md").read_text(encoding="utf-8").split())
     plan = " ".join((s / "references" / "plan.md").read_text(encoding="utf-8").split())
     words = [w for w in ("and the sprint's WBS (`Projects/{slug}/planning/{project}-sprint-{name}-wbs.md`)",
                          "check_sprint.py --closed {name}", "on a notes file built after the archive",
-                         "the sprint is not reported closed") if w not in close]
+                         "the sprint is not reported closed",
+                         "A plan linked to a card stays at its card's state",
+                         "other than a plan linked to a done card") if w not in close]
     words += [w for w in ("**Closed sprints left behind, first.**", "**Closed-sprint check**",
                           "\"Could not read the notes file\" is a failed check, never a pass") if w not in plan]
     ok = (left[0] == 1 and left[1].count("SP15") == 2 and "papers are not archived" in left[1]
           and wbs[0] == 1 and wbs[1].count("SP15") == 1 and "garden-sprint-spring-wbs" in wbs[1]
           and app[0] == 1 and app[1].count("SP15") == 1 and done[0] == 0
-          and nofile[0] == 1 and "could not read the notes file" in nofile[1] and not words)
+          and nofile[0] == 1 and "could not read the notes file" in nofile[1]
+          and linked[0] == 0 and still[0] == 1 and still[1].count("\n- ") == 1
+          and "garden-sprint-spring-handover-prompt, garden-sprint-spring-plan" in still[1] and not words)
     report("SP15", ok, "check_sprint refuses a closed sprint whose papers or WBS note are not archived (closed in the "
-           "ledger, its ledger archived, or named by --closed) and says when it could not read the notes file; close "
+           "ledger, its ledger archived, or named by --closed), counts a done plan linked to a card as settled and no other "
+           "paper, and says when it could not read the notes file; close "
            "checks the archive before saying closed, and planning archives closed sprints left behind before it starts"
            if ok else f"SP15: ClosedLeft → {left[0]} {left[1][-160:]!r}; ClosedArchived → {wbs[0]} {wbs[1][-120:]!r}; "
            f"--closed → {app[0]} {app[1][-120:]!r}; closed with nothing left → {done[0]} {done[1][-120:]!r}; "
-           f"no notes file → {nofile[0]} {nofile[1][-120:]!r}; missing {words} (BB-437, BB-494, BB-601)")
+           f"no notes file → {nofile[0]} {nofile[1][-120:]!r}; ClosedPlanLinked → {linked[0]} {linked[1][-120:]!r}; "
+           f"ClosedPlanOpen → {still[0]} {still[1][-200:]!r}; missing {words} (BB-437, BB-494, BB-601, BM-20)")
+
+
+# ── NF1 · the notes file is built the same way every time, and a sprint tag out of place is named (BM-20) ─
+def check_notes_file_build():
+    s = PLUGINS / "bandit-dev" / "skills" / "sprint"
+    script = s / "scripts" / "check_sprint.py"
+    untagged = run_script(script, "--notes", notes_fixture("PaperUntagged"))
+    nosprint = run_script(script, "--notes", notes_fixture("TagNoSprint"))
+    text = " ".join((s / "references" / "templates.md").read_text(encoding="utf-8").split())
+    words = [w for w in ("**Every sprint, never only the one at hand:**",
+                         "**Tags exactly as stored:**",
+                         "never adds a sprint tag a note lacks",
+                         "**In order:**",
+                         "two builds of the same notes differ only in `built`") if w not in text]
+    ok = (untagged[0] == 1 and untagged[1].count("\n- ") == 1 and "without the tag sprint-spring" in untagged[1]
+          and "missing" not in untagged[1]
+          and nosprint[0] == 1 and nosprint[1].count("\n- ") == 1 and "the tag sprint-none names no sprint" in nosprint[1]
+          and not words)
+    report("NF1", ok, "the notes file's build rule reads every sprint's papers whole, copies tags as stored and sorts what it "
+           "writes; check_sprint names a paper without its sprint's tag, and a sprint tag no sprint has, in one line each"
+           if ok else f"NF1: PaperUntagged → {untagged[0]} {untagged[1][-200:]!r}; TagNoSprint → {nosprint[0]} "
+           f"{nosprint[1][-200:]!r}; templates.md missing {words} (BM-20)")
 
 
 def check_wave_order():
@@ -1421,48 +1507,46 @@ def check_approval_line():
            "without asking; the repo CLAUDE.md leaves cards in Stand By until Leo's yes")
 
 
-# ── SM1 · the sprint map draws every card and link, routes no arrow through a card, follows the recipe ─
-def crosses(seg, box):
-    (x1, y1), (x2, y2) = seg
-    bx, by, bw, bh = box
-    lo_x, hi_x, lo_y, hi_y = min(x1, x2), max(x1, x2), min(y1, y2), max(y1, y2)
-    return lo_x < bx + bw - 0.5 and hi_x > bx + 0.5 and lo_y < by + bh - 0.5 and hi_y > by + 0.5
+# ── WV1 · the sprint helper runs on the app's waves, lands-after links, run state and cancel; the map is the app's (BM-22) ─
+def check_waves():
+    import tempfile
+    s = PLUGINS / "bandit-dev" / "skills" / "sprint"
+    files = [s / "SKILL.md", *sorted((s / "references").glob("*.md"))]
+    text = {f.name: " ".join(f.read_text(encoding="utf-8").split()) for f in files}
+    words = [f"{n}: {w}" for n, w in (
+        ("plan.md", "**Waves in the app,**"), ("plan.md", "`set_wave { taskId, wave }`"),
+        ("plan.md", "kind: \"lands_after\" }`"), ("plan.md", "status `closed` or `cancelled`"),
+        ("plan.md", "into that new last wave, alone"), ("templates.md", "alone in its last wave"),
+        ("templates.md", "The app draws the sprint's map on its sprint page"),
+        ("execute.md", "## Run state"), ("execute.md", "`manage_sprints { action: \"pause\", sprintId, reason }`"),
+        ("execute.md", "**Run state gate:**"), ("run.md", "pausing the sprint in the app"),
+        ("close.md", "`manage_sprints { action: \"remove_card\", replanConfirmed: true }`"),
+        ("close.md", "`manage_sprints { action: \"approve_plan\", sprintId }`"),
+        ("close.md", "**The sprint is not cancelled.**")) if w not in text[n]]
+    left = [n for n, body in text.items() if "map.html" in body or "sprint_map" in body]
+    gone = not (s / "scripts" / "sprint_map.py").exists()
+    script = s / "scripts" / "check_sprint.py"
+    src = Path(notes_fixture("StepsGood")).read_text(encoding="utf-8")
+    cancelled = src.replace("Wave 1 of 2 delivered", "Cancelled 2026-11-24")
+    with tempfile.TemporaryDirectory() as d:
+        f = Path(d) / "garden-sprint-notes.json"
+        f.write_text(cancelled, encoding="utf-8")
+        got = run_script(script, "--notes", str(f))
+    ok = (not words and not left and gone and cancelled != src and got[0] == 1 and "SP15 sprint spring" in got[1]
+          and "SP12" not in Path(script).read_text(encoding="utf-8").split("Retired with app 0.56.0")[0])
+    report("WV1", ok, "sprint helper on the app's waves: plan sets each card's wave and the lands-after links, the debug card "
+           "alone in the last wave; execute and run read the waves and the run state, pause and resume the sprint; close "
+           "confirms the replan and approves it; cancelled sprints count as closed (a cancelled ledger with papers left fails "
+           "SP15); the map page and its script are gone"
+           if ok else f"WV1: missing {words}; map still named in {left}; sprint_map.py gone: {gone}; cancelled ledger → "
+           f"{got[0]} {got[1][-160:]!r} (BM-22)")
 
 
-def check_sprint_map():
-    script = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts" / "sprint_map.py"
-    data = ROOT / "tests" / "fixture-map" / "cosmetic-1.json"
-    app = ROOT / "tests" / "fixture-app"
-    spec = json.loads(data.read_text(encoding="utf-8"))
-    bad = []
-    got, out = run_script(script, str(data), "--geometry", cwd=ROOT)
-    geo = json.loads(out) if got == 0 else {"boxes": {}, "paths": []}
-    drawn = {c["id"] for c in spec["cards"] if c.get("wave")}
-    if set(geo["boxes"]) != drawn:
-        bad.append(f"cards drawn {sorted(geo['boxes'])} ≠ the cards with a wave")
-    if len(geo["paths"]) != len(spec["links"]) + len(spec["after"]):
-        bad.append(f"{len(geo['paths'])} arrows for {len(spec['links']) + len(spec['after'])} links")
-    for p in geo["paths"]:
-        pts = p["points"]
-        if any(a[0] != b[0] and a[1] != b[1] for a, b in zip(pts, pts[1:])):
-            bad.append(f"{p['from']}→{p['to']} has a slanted segment")
-        for cid, box in geo["boxes"].items():
-            if any(crosses(s, box) for s in zip(pts, pts[1:])):
-                bad.append(f"{p['from']}→{p['to']} crosses {cid}")
-    for recipe, want, not_want in (("bandit.yaml", "production card for you to fire", "release runs the deploy"),
-                                   ("bandit.no-production.yaml", "release runs the deploy", "production card")):
-        got, page = run_script(script, str(data), "--recipe", str(app / recipe), cwd=ROOT)
-        if got != 0 or want not in page or not_want in page or 'name="sprint-map-waves-done" content="1,2"' not in page:
-            bad.append(f"page with {recipe}: road or waves-done marker wrong")
-    report("SM1", not bad, "; ".join(bad[:4]) or f"sprint_map.py: {len(drawn)} cards, {len(geo['paths'])} arrows at right "
-           "angles, none through a card; the road follows the recipe; the waves-done marker is set")
-
-
-# ── ES1 · the pre-sprint report: the map's per-wave estimate comes from past waves, none from too few ─
+# ── ES1 · the pre-sprint estimate: each wave's estimate comes from past waves, none from too few; it lives in the plan ─
 def check_estimate():
     s = PLUGINS / "bandit-dev" / "skills" / "sprint"
-    data_script, map_script = s / "scripts" / "sprint_data.py", s / "scripts" / "sprint_map.py"
-    fixture = ROOT / "tests" / "fixture-map"
+    data_script = s / "scripts" / "sprint_data.py"
+    fixture = ROOT / "tests" / "fixture-estimate"
     bad = []
     got, out = run_script(data_script, "--estimate", str(fixture / "estimate.csv"), "--effort", "3,5", cwd=ROOT)
     est = json.loads(out) if got == 0 else {}
@@ -1473,33 +1557,16 @@ def check_estimate():
     got, out = run_script(data_script, "--estimate", str(ROOT / "tests" / "fixture-expected" / "sprint-data.csv"), cwd=ROOT)
     if got != 0 or json.loads(out).get("rate") is not None:
         bad.append("fewer than 5 timed waves still gave an estimate")
-    spec = json.loads((fixture / "cosmetic-1.json").read_text(encoding="utf-8"))
-    waves = sorted({c["wave"] for c in spec["cards"] if c.get("wave")})
-    spec["estimate"] = {"waves_used": 5, "waves": {str(w): {"min": 60, "low": 40, "high": 90,
-                                                           "measured": 55 if w == 1 else None} for w in waves}}
-    with tempfile.TemporaryDirectory() as tmp:
-        f = Path(tmp) / "map.json"
-        f.write_text(json.dumps(spec), encoding="utf-8")
-        got, page = run_script(map_script, str(f), cwd=ROOT)
-        geo_got, geo = run_script(map_script, str(f), "--geometry", cwd=ROOT)
-    if got != 0 or page.count("≈ 1 h 00 (40 min–1 h 30)") != len(waves) or "took 55 min" not in page \
-            or f"Estimated <b>{len(waves)} h 00</b>" not in page:
-        bad.append("the map with an estimate does not show each wave's estimate, the measured time and the total")
-    _, plain = run_script(map_script, str(fixture / "cosmetic-1.json"), cwd=ROOT)
-    if plain.count("no estimate yet") != len(waves) or "No time estimate yet" not in plain:
-        bad.append("a map without an estimate does not say no estimate yet")
-    if geo_got != 0 or not json.loads(geo)["paths"]:
-        bad.append("geometry broke with an estimate")
-    texts = {"plan.md": ("**Draw the sprint map, the pre-sprint report**", "**First line: the pre-sprint report**"),
-             "templates.md": ("**The pre-sprint report.**", "never goes into the ledger or the wave report's measured numbers"),
-             "execute.md": ("its measured time next to its estimate",)}
+    texts = {"plan.md": ("**The pre-sprint estimate**", "**First line: the pre-sprint report**"),
+             "templates.md": ("## Pre-sprint estimate", "never goes into the ledger or the wave report's measured numbers",
+                              "written into the plan's Summary wave table", "wave table with reasons and each wave's time estimate")}
     for name, words in texts.items():
         body = (s / "references" / name).read_text(encoding="utf-8")
         bad += [f"{name} lacks {w!r}" for w in words if w not in body]
     report("ES1", not bad, "; ".join(bad[:4]) + " (BB-402)" if bad else
            "pre-sprint report: the estimate matches the hand count (median minutes per effort point, middle half as the "
-           "range), none under 5 timed waves; the map shows each wave's estimate, a done wave's time and the total, "
-           "and says no estimate yet without one; plan names the map first")
+           "range), none under 5 timed waves; each wave's estimate goes into the plan's Summary wave table and the sprint's "
+           "total into the first line of the planning report, never into the ledger")
 
 
 # ── WF1 · the wave report's Flow and Tokens blocks match a hand count of the fixture logs ─
@@ -1550,7 +1617,7 @@ SPRINT_DATA_TEXT = (("execute.md", "**Sprint data:** rebuild the project's data 
                     ("templates.md", "`{project}-sprint-data.csv`"),
                     ("templates.md", "`{project}-sprint-targets`"),
                     ("templates.md", "**The measures list is the one place a measure lives**"),
-                    ("homes.md", "The sprint map and the project's sprint data file"))
+                    ("homes.md", "The project's sprint data file"))
 
 
 def sprint_data_text_problems(files):
@@ -2038,6 +2105,11 @@ def check_dependency_gate():
          ["AB-1 now blocks sprint sp-2", "ledger, section Gates"]),
         ("create blocked by a sprint", create({"title": "New", "dependencies": {"blockedBySprints": ["sp-1"]}}),
          ["sprint sp-1 now blocks XY-9: add to XY-9 a sub-task"]),
+        # A lands-after link only orders two cards (BM-22): no gate, no notice; a blocker link given the default kind still has one.
+        ("lands-after link", {**link, "tool_input": {"blockerTaskId": "AB-1", "blockedTaskId": "AB-2", "kind": "lands_after"}}, None),
+        ("blocks link named", {**link, "tool_input": {"blockerTaskId": "AB-1", "blockedTaskId": "AB-2", "kind": "blocks"}},
+         ["AB-1 now blocks AB-2"]),
+        ("create lands after", create({"title": "New", "dependencies": {"landsAfter": ["AB-1"], "landsBefore": ["AB-5"]}}), None),
     ]
     bad = []
     for label, payload, want in cases:
@@ -2059,7 +2131,7 @@ def check_dependency_gate():
             bad.append(f"{label} → missing {missing or out.get('hookEventName')}")
     report("DG1", not bad, "; ".join(bad) or f"dependency gate: {len(cases)} fixture payloads (notice in the "
            "session's context naming the blocked card or sprint and the skip line; silent on refusals, a created card "
-           "with its gate, sprint cards and other tools)")
+           "with its gate, sprint cards, a lands-after link and other tools)")
 
 
 # ── SB1 · a sprint card gets its build steps before its Technical plan and before the commit (BB-451) ─
@@ -2337,6 +2409,52 @@ def check_testdata():
            "the project's command, its absence said, its failure stops the clean)")
 
 
+# ── WN1 · a wave starts from its wave note: planning writes one per wave, execute and run name it, the sprint checker takes it ─
+def wave_note_problems(files):
+    """`files` maps a sprint reference name to its text."""
+    flat = {n: " ".join(x.split()) for n, x in files.items()}
+    needles = (("templates.md", "## Wave note"), ("templates.md", "`{project}-sprint-{name}-wave-{n}`"),
+               ("templates.md", "copied word for word"), ("plan.md", "**Wave notes:** one note per wave"),
+               ("execute.md", "**What a wave reads, and nothing beyond it.**"), ("execute.md", "Not the plan, not another wave's note"),
+               ("execute.md", "right before the wave's first ledger write"),
+               ("run.md", "your wave note `{project}-sprint-{name}-wave-{n}`"), ("run.md", "never the whole plan or ledger to begin"))
+    bad = [f"{n} lost '{w}'" for n, w in needles if w not in (files if w.startswith("## ") else flat).get(n, "")]
+    if "Read the ledger, the plan and the execution prompt" in flat.get("execute.md", ""):
+        bad.append("execute.md Start still reads the whole plan and ledger")
+    return bad
+
+
+def check_wave_note():
+    import tempfile
+    s = PLUGINS / "bandit-dev" / "skills" / "sprint"
+    files = {n: (s / "references" / n).read_text(encoding="utf-8") for n in ("templates.md", "plan.md", "execute.md", "run.md")}
+    bad = wave_note_problems(files)
+    mutants = [{**files, "templates.md": files["templates.md"].replace("## Wave note", "## Other")},
+               {**files, "plan.md": files["plan.md"].replace("**Wave notes:** one note per wave", "")},
+               {**files, "run.md": files["run.md"].replace("your wave note", "the plan")},
+               {**files, "execute.md": files["execute.md"] + "\n3. Read the ledger, the plan and the execution prompt.\n"}]
+    missed = [i for i, m in enumerate(mutants) if not wave_note_problems(m)]
+    if missed:
+        bad.append(f"the rule does not fail on every broken copy (missed {missed})")
+    # A sprint that holds wave notes still passes the sprint checker.
+    src = Path(notes_fixture("Record"))
+    data = json.loads(src.read_text(encoding="utf-8"))
+    plan = next(n for n in data["notes"] if n["title"].endswith("-plan"))
+    for w in (1, 2):
+        data["notes"].append({"title": plan["title"][:-len("plan")] + f"wave-{w}", "kind": "reference", "status": plan["status"],
+                              "tags": plan["tags"], "cards": [], "text": f"# wave {w}\n\n## Cards\n\nx\n"})
+    with tempfile.TemporaryDirectory() as d:
+        for f in src.parent.iterdir():
+            (Path(d) / f.name).write_bytes(f.read_bytes())
+        (Path(d) / src.name).write_text(json.dumps(data), encoding="utf-8")
+        got = run_script(s / "scripts" / "check_sprint.py", "--notes", str(Path(d) / src.name))
+    if got[0] != 0:
+        bad.append(f"check_sprint.py refuses a sprint with wave notes: {got[1][-160:]!r}")
+    report("WN1", not bad, "; ".join(bad) + " (BM-4)" if bad else
+           "wave note: one home for its shape in templates.md; plan step 12 writes one per wave; execute's Start and run's "
+           "prompt name it in place of the whole plan and ledger; the sprint checker passes a sprint that holds them")
+
+
 # ── L5 · project instructions templates are one page, and the project skill ships them as-is ─
 TEMPLATE_MAX_LINES, TEMPLATE_MAX_WORDS = 60, 450
 
@@ -2378,6 +2496,7 @@ def main(argv):
     check_bridge_names()
     check_board_type()
     check_app_tools()
+    check_error_rows()
     check_copies()
     check_changelog_entry()
     check_cheat_sheet()
@@ -2405,11 +2524,11 @@ def main(argv):
     check_sp11()
     check_design_handover()
     check_gate_order()
-    check_sprint_map()
-    check_sp12()
+    check_waves()
     check_sp13()
     check_sp14()
     check_sp15()
+    check_notes_file_build()
     check_app_compat()
     check_wave_order()
     check_debug_card()
@@ -2430,6 +2549,7 @@ def main(argv):
     check_card_ids()
     check_code_changed()
     check_testdata()
+    check_wave_note()
     check_l5()
     for rule, ok, msg in results:
         print(f"{'✅' if ok else '❌'} {rule} {msg}")

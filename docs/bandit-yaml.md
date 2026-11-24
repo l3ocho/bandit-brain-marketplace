@@ -32,10 +32,6 @@ testdata:
     table: identity_households
     dry_run: { development: 'node scripts/remove-household.mjs {id}' }
     remove: { development: 'sh scripts/dev-remove-household.sh {id}' }   # the app's: backup, then --confirm
-handover:
-  board: Bandit CTO
-  production: { column: Bandit Labs VPS, runbook: 'docs/deployment.md#Deploy now' }
-  staging: { column: Bandit Port, runbook: 'docs/staging-runbook.md#SECTION' }  # SECTION: the app names it
 guard:
   credentials:
     block: ['\bscripts/set-password\.mjs\b', '\bscripts/bootstrap-household\.mjs\b', '(?i)\bpassword_hash\b\s*=']
@@ -56,7 +52,7 @@ The `testdata.owner` lines are a proposal for the app (BB-492, 2026-11-13: in sp
 
 The `release_checks` lines are a proposal for the app (BB-465, 2026-11-13: its release gate `scripts/check-release-docs.mjs` and the CI Deploy run on `main` its recipe already waits for; the workflow name is the app's to confirm). `version` and `whats_new` are left out until the app has a command that prints them.
 
-`handover.production` is optional: without it no production handover card is made and `release` runs the deploy itself through the `release` steps (BB-304, 2026-11-04). The `handover` lines are a proposal for the app (2026-10-24, from the BC-24 deployment card: board and production column as used, deploy steps in the app's `docs/deployment.md` section "Deploy now"; staging runs on Bandit Port from `docs/staging-runbook.md`, whose section the app names).
+The recipe has no `handover` section: no helper creates or fills a deployment card, and `release` runs the deploy itself through the `release` steps (BM-5, 2026-11-23; the app dropped the section on 2026-11-08). The reader still knows the `handover` keys until the scripts drop them.
 
 The `testdata` lines are a proposal for the app (checked 2026-10-15: tables in `src/domains/*/schema.ts`, rules in the server actions, staging's database publishes no port, the test suite reads `DATABASE_URL` from the git-ignored `.env.test`). Development reads `DATABASE_URL` from the shell the skill runs in. The app commits its own `bandit.yaml` and adds `.testdata/` to its `.gitignore`.
 

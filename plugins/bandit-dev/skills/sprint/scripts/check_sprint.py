@@ -11,7 +11,9 @@ tagged `sprint-{name}`; a paper is found by its title. No script reads a vault f
 
 Rules (each one a failure, not a warning):
   SP1  every sprint has its plan, handover prompt and ledger: notes titled {project}-sprint-{name}-{record} with its tag
-       (a sprint kept in the app: the ledger from plan step 1, the plan once step 7 is done, the prompt once committed)
+       (a sprint kept in the app: the ledger from plan step 1, the plan once step 7 is done, the prompt once committed);
+       a note with such a title but not the tag is named as an untagged paper, and a `sprint-{name}` tag on notes when
+       no paper of that sprint exists (and it is not named in `--closed`) is one line: the tag names no sprint
   SP2  a brief (kind brief) linked to a card of a sprint (a card row of the ledger's tables) carries that sprint's tag
   SP3  no two notes of the project share a title, `notes` and `titles` together (the scripts find a paper by its title)
   SP4  a note read from the vault has frontmatter that parses as YAML: its `frontmatter_error` fails (never set for a
@@ -28,17 +30,17 @@ Rules (each one a failure, not a warning):
        (an old-way ledger, with no `Sprint record:` line, is skipped by SP9 and SP10)
   SP11 a committed sprint kept in the app has, for every wave marked done in its ## Waves table, a section
        (sprints committed after 2026-11-04) `## 🌊 Wave {n}` in its wave report {project}-sprint-{name}-wave-report holding a `#### ⏱️ Flow` and a `#### 🪙 Tokens` block
-  SP12 a live sprint (its ledger not archived) kept in the app and committed after 2026-11-04 has its map
-       {project}-sprint-{name}-map.html beside the notes file, redrawn after every wave: its
-       `sprint-map-waves-done` marker lists every wave marked done in the ## Waves table (temporary, decisions RS16)
   SP13 a committed sprint kept in the app (committed after 2026-11-08) has, in its step 9 evidence, `{card}: {n} steps`
        (n at least 1, build steps only) for every card in its ## Batch table: every planned card carries its build steps as sub-tasks
-  SP14 a live sprint's plan (not archived) leaves nothing for after debug: its `Items to register` section
+  SP14 a live sprint's plan (not archived, its sprint not closed as SP15 reads it) leaves nothing for after debug: its `Items to register` section
        schedules no item for the close, the release or after the sprint (`trigger: sprint close`, `at close`,
        `after the release`, `after the sprint`); a repository change is done in a wave or in debug, before the release
   SP15 a closed sprint keeps no paper and no WBS unarchived: a sprint whose ledger records the close (`Status: Closed …`,
-       `Current wave: Sprint closed`), whose ledger is archived, or that is named in `--closed` (closed in the app)
-       fails while a note with its tag, or its WBS note {project}-sprint-{name}-wbs, has a status other than archived
+       `Current wave: Sprint closed`), whose ledger is archived, or that is named in `--closed` (closed or cancelled in the app)
+       fails while a note with its tag, or its WBS note {project}-sprint-{name}-wbs, has a status other than archived;
+       a plan linked to a card with status done is settled too (the app keeps such a plan at its card's state and
+       refuses to archive it)
+Retired with app 0.56.0, whose sprint page draws the map: SP12 (the sprint map page beside the notes file).
 Retired with the vault folder: SP5 (the project folder's root; bandit:audit's S16, retired with it) and the `--listing`
 mode; SP8 is the repo checker's rule on this script's Stop hook.
 
@@ -46,10 +48,11 @@ Usage:
   check_sprint.py [--notes FILE] [--closed NAME[,NAME…]]
                            (--notes defaults to .sprint/{project}-sprint-notes.json at the root of the repository,
                             {project} from the `project:` line of the repo CLAUDE.md Project Context;
-                            --closed: sprints closed in the app, from get_sprints)
+                            --closed: sprints closed or cancelled in the app, from get_sprints)
   No notes file, or one that is not a notes file: says it could not read the notes file (exit 1).
-  check_sprint.py --hook   (Stop hook: reads the hook JSON on stdin, checks only when the session named the sprint
-                            helper or the notes file; the project is the repository's own (its Project Context), so
+  check_sprint.py --hook   (Stop hook: reads the hook JSON on stdin, checks only when the chat used the sprint helper:
+                            a Skill call or a typed /bandit-dev:sprint command, or a tool call on a notes file, never
+                            the skill's name in the chat's lists; the project is the repository's own (its Project Context), so
                             no vault is needed. A missing notes file, or one built before the session began, is said
                             in a notice (exit 0); an error in a notes file built in this session blocks the stop once (exit 2))
 """
@@ -72,7 +75,7 @@ STEPS = ("Select and freeze the batch", "Spec completeness check, per card", "Cl
 SPRINT_RECORD = re.compile(r"^\W*Sprint record:", re.M)
 STEP_ROW = re.compile(r"^\|\s*(\d{1,2})\s*\|\s*([^|]+?)\s*\|\s*([^|]*?)\s*\|\s*((?:[^|\\]|\\.)*?)\s*\|\s*$", re.M)
 DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
-# SP11 and SP12 hold for sprints committed after the release that brought the wave report and the map;
+# SP11 holds for sprints committed after the release that brought the wave report;
 # an earlier sprint never had them.
 REPORTS_FROM = "2026-11-04"
 # SP13 holds for sprints committed after the release that brought the build-step count; an earlier sprint never had it.
@@ -81,13 +84,13 @@ BATCH_CARD = re.compile(r"^\|\s*([A-Z0-9]*[A-Z][A-Z0-9]*-T?\d+)\s*\|", re.M)
 COMMITTED_ON = re.compile(r"^\W*Committed:\W*(\d{4}-\d{2}-\d{2})", re.M)
 LANDS_AFTER = re.compile(r"^\W*Lands after:\s*(.+)$", re.M)
 LANDS_PAIR = re.compile(r"^\s*([A-Z0-9]*[A-Z][A-Z0-9]*-T?\d+)\s+after\s+(.+?)\s*\.?\s*$")
-CLOSED = re.compile(r"^\W*(?:Status:\W*Closed\b|Current wave:\W*Sprint closed\b)", re.M | re.I)
+CLOSED = re.compile(r"^\W*(?:Status:\W*(?:Closed|Cancelled)\b|Current wave:\W*Sprint closed\b)", re.M | re.I)
 OWED = re.compile(r"trigger\s*:[^)\n]*\b(?:close|closing|release)\b|\b(?:at|on|during|after)\s+(?:the\s+)?(?:sprint\s+)?"
                   r"(?:close|closing|release)\b|\bafter the sprint\b", re.I)
 WAVE_ROW = re.compile(r"^\|\s*Wave\s+(\d+)\s*\|\s*([^|]+?)\s*\|\s*([^|]*?)\s*\|\s*((?:[^|\\]|\\.)*?)\s*\|\s*$", re.M)
 SPRINT_TAG = re.compile(r"^sprint-(.+)$")
 NOTES_NAME = "{project}-sprint-notes.json"
-RULES = "SP1-SP4, SP6, SP7, SP9-SP15"
+RULES = "SP1-SP4, SP6, SP7, SP9-SP11, SP13-SP15"
 FIELDS = ("title", "kind", "status", "tags", "cards", "text")
 
 
@@ -138,6 +141,18 @@ def sprints_of(notes: list) -> dict:
 
 def is_archived(note) -> bool:
     return bool(note) and note["status"] == "archived"
+
+
+def is_settled(note) -> bool:
+    """A closed sprint's paper is settled when archived, or when it is a plan linked to a card and done: the app keeps a
+    plan linked to a card at its card's state (Done once the card is done) and refuses to archive it."""
+    return is_archived(note) or (note["kind"] == "plan" and note["status"] == "done" and bool(note["cards"]))
+
+
+def sprint_closed(project: str, name: str, mine: dict, closed_in_app: set) -> bool:
+    """Closed in the app (`--closed`), its ledger archived, or its ledger records the close."""
+    ledger = mine.get(f"{project}-sprint-{name}-progress")
+    return name in closed_in_app or is_archived(ledger) or bool(ledger and CLOSED.search(ledger["text"]))
 
 
 def card_dependencies(text: str, plan_text: str) -> dict:
@@ -241,21 +256,6 @@ def check_wave_report(where, ledger_text: str, title: str, report) -> list[str]:
     return errors
 
 
-def check_map(where, ledger_text: str, page: Path) -> list[str]:
-    """SP12: the sprint map beside the notes file was redrawn after every done wave (its marker lists them)."""
-    on = COMMITTED_ON.search(ledger_text)
-    if not on or on.group(1) <= REPORTS_FROM:
-        return []
-    done = [n for n, _, d, _ in WAVE_ROW.findall(section(ledger_text, "Waves")) if d]
-    if not page.exists():
-        return [f"SP12 {where}: committed but there is no {page.name} beside the notes file "
-                "(drawn at plan step 12, redrawn every wave)"]
-    m = re.search(r'name="sprint-map-waves-done"\s+content="([^"]*)"', page.read_text(encoding="utf-8", errors="replace"))
-    drawn = set((m.group(1) if m else "").replace(" ", "").split(",")) - {""}
-    missing = [n for n in done if n not in drawn]
-    return [f"SP12 {where}: Wave {', '.join(missing)} done but {page.name} was not redrawn after it"] if missing else []
-
-
 def check_owed(where, plan_text: str) -> list[str]:
     """SP14: the plan's Items to register leaves no item for the close, the release or after the sprint."""
     m = re.search(r"^#+[^\n]*Items to register[^\n]*$", plan_text, re.M)
@@ -274,14 +274,13 @@ def check_closed(project: str, notes: list, papers: dict, closed_in_app: set) ->
     by_title = {n["title"]: n for n in notes}
     for name in sorted(set(papers) | set(closed_in_app)):
         mine = papers.get(name, {})
-        ledger = mine.get(f"{project}-sprint-{name}-progress")
-        closed = name in closed_in_app or is_archived(ledger) or bool(ledger and CLOSED.search(ledger["text"]))
-        if not closed:
+        if not sprint_closed(project, name, mine, closed_in_app):
             continue
-        left = sorted(t for t, n in mine.items() if not is_archived(n))
+        left = sorted(t for t, n in mine.items() if not is_settled(n))
         if left:
             errors.append(f"SP15 sprint {name}: closed, but {len(left)} of its papers are not archived: {', '.join(left)} "
-                          "(close step 3 sets every note with the sprint's tag to archived)")
+                          "(close step 3 sets every note with the sprint's tag to archived; a plan linked to a done card "
+                          "stays Done)")
         wbs = by_title.get(f"{project}-sprint-{name}-wbs")
         if wbs and not is_archived(wbs):
             errors.append(f"SP15 {wbs['title']}: the WBS of closed sprint {name} is not archived "
@@ -314,7 +313,7 @@ def ordered_sprints(project: str, papers: dict) -> list[str]:
 
 
 def check(data: dict, folder: Path, closed_in_app: set = frozenset()) -> list[str]:
-    """Every rule on one notes file; `folder` is where the file sits (the sprint maps sit beside it)."""
+    """Every rule on one notes file; `folder` is where the file sits."""
     errors: list[str] = []
     project, notes = data["project"], data["notes"]
     papers = sprints_of(notes)
@@ -344,13 +343,32 @@ def check(data: dict, folder: Path, closed_in_app: set = frozenset()) -> list[st
         if len(live) > 1:
             errors.append(f"SP6 more than one brief for {card}: " + ", ".join(live) + " (merge them into one note per card)")
 
+    # SP1 a paper found by its title without its sprint's tag: named as such, never counted as the sprint's paper
+    untagged = set()
+    paper_title = re.compile(rf"^{re.escape(project)}-sprint-(.+)-({'|'.join(RECORDS)})$")
+    for note in notes:
+        m = paper_title.match(note["title"])
+        if m and f"sprint-{m.group(1)}" not in note["tags"]:
+            untagged.add(note["title"])
+            errors.append(f"SP1 {note['title']}: a paper of sprint {m.group(1)} without the tag sprint-{m.group(1)}, "
+                          "so the checks do not count it (add the tag through bandit:notes)")
+    all_titles = {n["title"] for n in notes} | set(data.get("titles", []))
+
     for name in ordered_sprints(project, papers):
         mine = papers[name]
         where = f"sprint {name}"
+        own = {f"{project}-sprint-{name}-{r}" for r in (*RECORDS, "wbs")}
+        if name not in closed_in_app and not own & all_titles and not any(
+                re.fullmatch(rf"{re.escape(project)}-review-sprint-{re.escape(name)}-\d{{4}}-\d{{2}}-\d{{2}}", t)
+                for t in all_titles):
+            errors.append(f"SP1 the tag sprint-{name} names no sprint: no paper of sprint {name} exists, yet "
+                          f"{', '.join(sorted(mine))} carry it (remove the tag through bandit:notes, or write the sprint's papers)")
+            continue
         ledger = mine.get(f"{project}-sprint-{name}-progress")
         for record in records_due(ledger):
-            if f"{project}-sprint-{name}-{record}" not in mine:
-                errors.append(f"SP1 {where}: missing {project}-sprint-{name}-{record} (a note tagged sprint-{name})")
+            title = f"{project}-sprint-{name}-{record}"
+            if title not in mine and title not in untagged:
+                errors.append(f"SP1 {where}: missing {title} (a note tagged sprint-{name})")
         if ledger is None:
             continue
         ledger_text = ledger["text"]
@@ -367,9 +385,7 @@ def check(data: dict, folder: Path, closed_in_app: set = frozenset()) -> list[st
             errors.extend(check_build_steps(where, ledger_text))
             report_title = f"{project}-sprint-{name}-wave-report"
             errors.extend(check_wave_report(where, ledger_text, report_title, mine.get(report_title)))
-            if not is_archived(ledger):
-                errors.extend(check_map(where, ledger_text, folder / f"{project}-sprint-{name}-map.html"))
-        if not is_archived(plan):
+        if not is_archived(plan) and not sprint_closed(project, name, mine, closed_in_app):
             errors.extend(check_owed(where, plan_text))
         cards, detached = set(), set()
         for match in CARD_ROW.finditer(ledger_text):
@@ -396,9 +412,42 @@ def transcript_text(payload: dict) -> str:
         return fh.read()
 
 
+SPRINT_SKILL = "bandit-dev:sprint"
+TYPED_COMMAND = "<command-name>/bandit-dev:sprint</command-name>"
+NOTES_SUFFIX = "-sprint-notes.json"
+
+
+def message_parts(record: dict) -> list:
+    """The content parts of one transcript record's message (a plain string becomes one text part)."""
+    message = record.get("message")
+    content = message.get("content") if isinstance(message, dict) else None
+    if isinstance(content, str):
+        return [{"type": "text", "text": content}]
+    return [p for p in content if isinstance(p, dict)] if isinstance(content, list) else []
+
+
 def session_names_sprint(text: str) -> bool:
-    """The session used the sprint helper or named a notes file."""
-    return "bandit-dev:sprint" in text or "-sprint-notes.json" in text
+    """The chat used the sprint helper: Claude called the Skill tool with it, the user typed its command, or a tool call
+    built, read or checked a notes file. The skill's name in the chat's skill and agent lists, in a loaded skill's text,
+    in a tool's result or in this hook's own notice is not use: those records are never read."""
+    for line in text.splitlines():
+        try:
+            record = json.loads(line)
+        except ValueError:
+            continue
+        if not isinstance(record, dict):
+            continue
+        kind = record.get("type")
+        for part in message_parts(record):
+            if kind == "assistant" and part.get("type") == "tool_use":
+                tool_input = part.get("input") if isinstance(part.get("input"), dict) else {}
+                if part.get("name") == "Skill" and tool_input.get("skill") == SPRINT_SKILL:
+                    return True
+                if NOTES_SUFFIX in json.dumps(tool_input, ensure_ascii=False):
+                    return True
+            elif kind == "user" and part.get("type") == "text" and TYPED_COMMAND in str(part.get("text") or ""):
+                return True
+    return False
 
 
 def session_start(text: str) -> str:
@@ -448,7 +497,7 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--notes", default=None, help="the project's notes file (default: .sprint/{project}-sprint-notes.json)")
     ap.add_argument("--hook", action="store_true")
-    ap.add_argument("--closed", default="", help="comma-separated names of sprints closed in the app")
+    ap.add_argument("--closed", default="", help="comma-separated names of sprints closed or cancelled in the app")
     args = ap.parse_args()
     closed = {n.strip() for n in args.closed.split(",") if n.strip()}
 

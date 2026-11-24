@@ -1,0 +1,69 @@
+{
+ "project": "garden",
+ "built": "2026-11-20T00:00:00Z",
+ "notes": [
+  {
+   "title": "garden-sprint-spring-wbs",
+   "kind": "reference",
+   "status": "archived",
+   "tags": [],
+   "cards": [],
+   "text": "# Sprint spring — WBS\n"
+  },
+  {
+   "title": "garden-review-sprint-spring-2026-10-31",
+   "kind": "log",
+   "status": "archived",
+   "tags": [
+    "sprint-spring"
+   ],
+   "cards": [],
+   "text": "# Fixture\n"
+  },
+  {
+   "title": "garden-sprint-spring-handover-prompt",
+   "kind": "reference",
+   "status": "archived",
+   "tags": [
+    "sprint-spring"
+   ],
+   "cards": [],
+   "text": "# Fixture\n"
+  },
+  {
+   "title": "garden-sprint-spring-plan",
+   "kind": "plan",
+   "status": "done",
+   "tags": [
+    "sprint-spring"
+   ],
+   "cards": [
+    "GA-1"
+   ],
+   "text": "# Fixture\n\n## 📝 Items to register\n\n- Open item: drop the old seed helper once GA-2 lands (trigger: sprint close).\n"
+  },
+  {
+   "title": "garden-sprint-spring-progress",
+   "kind": "reference",
+   "status": "archived",
+   "tags": [
+    "sprint-spring"
+   ],
+   "cards": [],
+   "text": "# Fixture\n\n## At a glance\n\n- **Sprint record:** spring on Garden\n- **Debug card:** GA-9\n- **Status:** Wave 1 of 2 delivered\n- **Committed:** 2026-11-09\n\n## Plan steps\n\n| # | Step | Done | Evidence |\n|---|---|---|---|\n| 1 | Select and freeze the batch | 2026-10-31 | Step 1 evidence. |\n| 2 | Spec completeness check, per card | 2026-10-31 | Step 2 evidence. |\n| 3 | Close the open questions | 2026-10-31 | Step 3 evidence. |\n| 4 | Size and classify | 2026-10-31 | Step 4 evidence. |\n| 5 | Cross-card analysis | 2026-10-31 | Step 5 evidence. |\n| 6 | Sequence | 2026-10-31 | Step 6 evidence. |\n| 7 | Write the one technical plan | 2026-10-31 | Plan filed, [[garden-sprint-spring-plan\\|the plan]]. |\n| 8 | Risk and rollback | 2026-10-31 | Step 8 evidence. |\n| 9 | Definition of ready, per card | 2026-10-31 | GA-1: 3 steps, GA-2: 2 steps. |\n| 10 | Approval gate | 2026-10-31 | Step 10 evidence. |\n| 11 | Independent plan review | 2026-10-31 | Step 11 evidence. |\n| 12 | Commit the sprint | | |\n\n## Batch\n\n| Card | Title |\n|---|---|\n| GA-1 | Dig |\n| GA-2 | Plant |\n\n## Waves\n\n| Wave | Cards | Done | Evidence |\n|---|---|---|---|\n| Wave 1 | GA-1 | 2026-10-31 | GA-1 delivered, verify green. |\n| Wave 2 | GA-2 | | |\n\n## Waves and cards\n\n| Wave | Card | Status |\n|---|---|---|\n| 1 | GA-1 | Delivered |\n| 2 | GA-2 | Not started |\n"
+  },
+  {
+   "title": "garden-sprint-spring-wave-report",
+   "kind": "reference",
+   "status": "archived",
+   "tags": [
+    "sprint-spring"
+   ],
+   "cards": [],
+   "text": "# Sprint spring — wave report (after wave 1)\n\n## 🙋 Open calls\nNone.\n\n## 🌊 Wave 1 — 2026-10-31\n### GA-1 — ✅ As specified\n\n#### ⏱️ Flow\n- Time: 0:40 · per card: GA-1 0:40\n\n#### 🪙 Tokens\n- Total: 1.0 M re-read from cache · 20 K new · 5 K written\n"
+  }
+ ],
+ "titles": [
+  "garden"
+ ]
+}

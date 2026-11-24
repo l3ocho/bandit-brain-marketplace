@@ -70,6 +70,7 @@ Then `/plugin` → Marketplaces → `bandit-brain` → **Enable auto-update** (o
 |---|---|---|
 | **Bandit Brain** MCP server (the task board), on app v0.41.0 or later: the one with inbox groups (`manage_inbox_groups`) besides sprints as records (`get_sprints`, `manage_sprints`), board profiles and tag view, serving the 21 assistant tools under their Board names (`get_context`, `list_tasks`, `create_tasks`, `update_tasks`, `manage_boards` …). For `finance`, app v0.31.0 or later (its 18 `finance_*` tools). After an app upgrade, reconnect the connector | `tasks`, `finance`, `audit`, `project`, `sprint`, `testdata`; card reads in `notes` and `plan`; saving a spec as a card in `clarify` | ✅ |
 | **Bandit Brain** app v0.55.0 or later for notes: the note tools (`notes_create`, `notes_get`, `notes_list`, `notes_update`, `notes_update_section`, `notes_set_status`, `notes_set_fields`, `notes_file`, `notes_move`, `notes_link_card`, `notes_unlink_card`, `notes_relate`, `notes_unrelate`, `notes_list_related`, `notes_delete`, `notes_restore`, `notes_list_trash`) and `search` | Every note a helper writes: `notes`, `minutes`, `plan`, `clarify`, `rewrite`, `finance` reviews, `tasks` briefs and plans, `sprint` papers, `audit` reports | ✅ |
+| **Bandit Brain** app v0.56.0 or later for sprints: waves (`set_wave`, `add_wave`, `remove_wave`), lands-after links (`link_tasks` kind `lands_after`), pause, replan and cancel (`manage_sprints`) | `bandit-dev:sprint`; the sprint and link rules of `bandit:tasks` | ✅ for sprints |
 | A file storage (Nextcloud, a drive) | Nothing. Since 2.0.0 no skill reads or writes one: notes are in the app, a project's instructions and working files in its own folder | Not needed |
 | Gmail | `/bandit:tasks email` | Optional |
 | Code execution (Claude.ai: Settings → Capabilities) | Every skill on Claude.ai | ✅ |
@@ -84,6 +85,7 @@ Then `/plugin` → Marketplaces → `bandit-brain` → **Enable auto-update** (o
 | 0.18.0 | v0.41.0 | same |
 | 0.19.0 | v0.41.0 | same |
 | 0.20.0 | v0.41.0 | same |
+| 1.1.0 | v0.55.0 | same |
 | 1.0.2 | v0.55.0 | same |
 | 1.0.1 | v0.55.0 | same |
 | 1.0.0 | v0.55.0 | same |

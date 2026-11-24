@@ -10,7 +10,7 @@ Contents: Rules · Read first · Intake · Combined test · Fix loop · Pushing 
 - **The user's words are the baseline.** Each adjustment is judged against what they asked for, never against the plan's summary of it.
 - **Every adjustment is a row in the one decision table** (`references/plan.md` → Conventions), plain words, no numbers or codes: what the user saw, the card, the cause, the fix, the recommendation. A fix is applied only on the user's say-so, or under their standing "go with the recommendations".
 - **The debug list holds defects only:** what does not match its card's Spec or the project's approved design. A visual point is checked against the card's design handover (its files are found through the `Handover:` line: the design card's, or the build card's own Source without a design card; the `Design:` line is the page to look at) before it is called a defect. Anything new (more than the card asked for, a better layout, an idea) goes to the board as a card for a later sprint, through bandit:tasks capture, with no question about joining this one.
-- **Same authority as `execute`:** work on the trunk; pushes follow `execute.md` → Pushing `development`, staging handover included: each debug push refills the staging handover card with the new hash, so every build the user tests on staging comes with its card (a card the user already closed is reopened with `reopen_tasks`, then refilled). Never deploy or touch production: release is its own command.
+- **Same authority as `execute`:** work on the trunk; the push follows `execute.md` → Pushing `development`. Never deploy or touch production: release is its own command.
 
 ## Read first
 
@@ -45,14 +45,14 @@ For a sprint whose Marketplace cards change the helpers along with the app: the 
 Per approved row, in card order and wave order where they interact:
 
 1. Reproduce or confirm from the code. If it does not reproduce, say so and ask.
-2. Fix with a test that fails against the old behaviour. Then the fix's own gates, lighter than a wave's: the targeted tests of the files it touched, code review, and the UI check only on the screens the fix changed. No full check per fix: it runs once before each push (Pushing).
+2. Fix with a test that fails against the old behaviour. Then, per fix, only the tests that cover the change, run by name: no code review and no browser check per fix. No full check per fix: it runs once, before the one push (Pushing).
 3. Commit on the local development branch (or the card's branch if it is still open).
 4. Record in the ledger Bug log: row, card, the debug card line it fixes, cause, fix, commit, how verified (the targeted tests it ran, by name or pattern). Tick that line, or end it with its outcome (`templates.md` → Debug card). Update the handover report's card section.
 5. Comment on the card: what was adjusted and why. Reopen nothing; the card stays in Stand By.
 
 ## Pushing
 
-Several fixes may share one push. Right before each push of `development` (the push that refills the staging handover card, Rules): one full check, the recipe's `verify`, on the code being pushed, only when `python3 ${CLAUDE_SKILL_DIR}/scripts/code_changed.py` says "full check: needed" (on `development` it compares with `origin/development`, what the push sends). "Not needed" (only docs, notes or comments) → no full check, and the Milestone log carries its line next to the push. Red stops the push: fix it first, as a row of its own if it is a new defect. The Milestone log names that full check (green, and the commit it ran on) next to the push.
+One push, at the end: every fix is committed locally and they all go out together once the last approved row is fixed. Right before that push of `development`: one full check, the recipe's `verify`, on the code being pushed, only when `python3 ${CLAUDE_SKILL_DIR}/scripts/code_changed.py` says "full check: needed" (on `development` it compares with `origin/development`, what the push sends). "Not needed" (only docs, notes or comments) → no full check, and the Milestone log carries its line next to the push. Red stops the push: fix it first, as a row of its own if it is a new defect. The Milestone log names that full check (green, and the commit it ran on) next to the push.
 
 ## Board
 

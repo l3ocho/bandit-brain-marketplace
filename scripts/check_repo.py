@@ -1631,11 +1631,39 @@ def check_wave_flow():
     moved, regrouped = run_script(script, "--logs", str(logs), "--since", "2026-11-04T09:00:00Z", "--verify", "x",
                                   "--connectors", "claude.ai BanditBrain", "--marketplace-plugins", "other-plugin", cwd=ROOT)
     regroup = "- By source: marketplace 130 K (11%) · Bandit Brain connectors 240 K (20%) · everything else 602 K (49%)"
-    ok = got == 0 and not missing and gone == 3 and moved == 0 and regroup in regrouped
+    want += ["- Search agent (Explore): 0 launches", "- Shell output taken in: wave chat 0 K chars (main chat) · all chats 0 K chars"]
+    missing = [w for w in want if w not in out]
+    # BM-T7: a made-up wave whose chat ran one search agent and took in 5,000 shell characters, its agent 3,000 more
+    import tempfile
+    with tempfile.TemporaryDirectory() as d:
+        root = Path(d)
+        (root / "w" / "subagents").mkdir(parents=True)
+        def row(ts, mid, content, role="assistant"):
+            r = {"type": role, "timestamp": ts, "message": {"role": role, "content": content}}
+            if role == "assistant":
+                r["message"].update(id=mid, model="claude-opus-5-5", usage={"input_tokens": 10, "output_tokens": 1})
+            return json.dumps(r) + "\n"
+        use = lambda i, name, inp: [{"type": "tool_use", "id": i, "name": name, "input": inp}]  # noqa: E731
+        res = lambda i, text: [{"type": "tool_result", "tool_use_id": i, "content": text}]  # noqa: E731
+        (root / "w.jsonl").write_text(
+            row("2026-11-24T10:00:00Z", "m1", use("b0", "Bash", {"command": "echo CARD-START AB-1"}))
+            + row("2026-11-24T10:00:01Z", None, res("b0", "CARD-START AB-1"), "user")
+            + row("2026-11-24T10:01:00Z", "m2", use("a1", "Agent", {"subagent_type": "Explore", "prompt": "find it"}))
+            + row("2026-11-24T10:02:00Z", "m3", use("b1", "Bash", {"command": "cat big"}))
+            + row("2026-11-24T10:02:01Z", None, res("b1", "x" * (5000 - len("CARD-START AB-1"))), "user"), encoding="utf-8")
+        (root / "w" / "subagents" / "agent-1.jsonl").write_text(
+            row("2026-11-24T10:03:00Z", "s1", use("b2", "Bash", {"command": "grep -r x"}))
+            + row("2026-11-24T10:03:01Z", None, res("b2", "y" * 3000), "user"), encoding="utf-8")
+        (root / "w" / "subagents" / "agent-1.meta.json").write_text(json.dumps({"agentType": "Explore"}), encoding="utf-8")
+        wave_got, wave_out = run_script(script, "--logs", str(root), "--since", "2026-11-24T09:00:00Z", "--verify", "x", cwd=ROOT)
+    wave_want = ["- Search agent (Explore): 1 launch", "- Shell output taken in: wave chat 5 K chars (main chat) · all chats 8 K chars"]
+    missing += [f"made-up wave: {w}" for w in wave_want if w not in wave_out]
+    ok = got == 0 and not missing and gone == 3 and moved == 0 and regroup in regrouped and wave_got == 0
     report("WF1", ok, f"wave_flow.py: {len(want)} Flow and Tokens lines match the hand count (steps deduped by "
            "message id, background run not measured, repeats after no edit, per card from CARD-START; tokens by source "
            "in three groups with the unlabelled line, helper agents, hooks by time and size, the estimated cost with its "
-           "price date; the group names follow the arguments)"
+           "price date; the group names follow the arguments; the search agent's launches and the wave chat's shell output, "
+           "checked on a made-up wave)"
            if ok else f"wave_flow.py → {got}, missing {missing}; empty window → {gone} (want 3); regrouped run → {moved}"
                       f"{'' if regroup in regrouped else ', group names not taken from the arguments'}")
 

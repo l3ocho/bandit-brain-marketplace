@@ -14,7 +14,9 @@ Counting:
   card         from its `echo CARD-START {card}` mark to the next mark or the end of the window
   full check   a Bash call whose command contains the recipe's `verify` command; failed = its result is an error
   test run     a Bash call matching --test; targeted when the command carries more after the match
-  gate round   one Agent launch, counted by its type
+  gate round   one Agent launch, counted by its type; the search agent is the launches of type Explore
+  shell output characters of the shell (Bash) results a chat took in; the wave chat is the log holding the first
+               CARD-START mark (the main chat for `execute`, the wave agent for `run`), compared with the baseline
   repeat run   a full check or test run whose exact command ran before with no file edit in between
   duration     from the call to its result; a call started in the background is "not measured"
   source       one step is counted once, by the first label Claude Code recorded on it, in this order:
@@ -149,7 +151,10 @@ def measure(logs, since, until):
     results = {}          # tool_use id → (time, text, is_error)
     marks = []            # (time, card)
     edits = []            # times of file edits (main chat and agents)
-    for part, rows in parts(logs):
+    shell = defaultdict(int)  # log file index → characters of shell (Bash) results that chat took in
+    names, wave_logs = {}, []  # log file index → its part name; (time, index) of each CARD-START mark
+    for idx, (part, rows) in enumerate(parts(logs)):
+        names[idx] = part
         for row in rows:
             t = when(row.get("timestamp"))
             if t is None or t < since or (until and t > until):
@@ -169,11 +174,16 @@ def measure(logs, since, until):
                     m = re.search(r"echo\s+['\"]?CARD-START\s+([^\s'\";&|]+)", cmd)
                     if m:
                         marks.append((t, m.group(1)))
+                        wave_logs.append((t, idx))
                     if b.get("name") in EDITS:
                         edits.append(t)
                 elif b.get("type") == "tool_result":
                     results[b.get("tool_use_id")] = (t, result_text(b), bool(b.get("is_error")))
-    return steps, calls, results, sorted(marks), sorted(edits), {"info": info, "hooks": hooks}
+                    if (calls.get(b.get("tool_use_id")) or {}).get("name") == "Bash":
+                        shell[idx] += len(result_text(b))
+    wave = min(wave_logs)[1] if wave_logs else None
+    return steps, calls, results, sorted(marks), sorted(edits), {"info": info, "hooks": hooks, "shell": shell,
+                                                                 "names": names, "wave_log": wave}
 
 
 def report(steps, calls, results, marks, edits, extra, verify, test, since, until, cfg):
@@ -217,6 +227,7 @@ def report(steps, calls, results, marks, edits, extra, verify, test, since, unti
     ui = sum(n for k, n in agents.items() if "ui" in k.lower())
     others = ", ".join(f"{k} {n}" for k, n in sorted(agents.items()) if "review" not in k and "ui" not in k.lower())
     lines.append(f"- Gates: code review {review} rounds, UI check {ui} rounds" + (f" · other agents: {others}" if others else ""))
+    lines.append(f"- Search agent (Explore): {agents.get('Explore', 0)} launch{'' if agents.get('Explore', 0) == 1 else 'es'}")
     seen, repeats = {}, []
     for t, cid in bash:
         if cid not in checks and cid not in tests:
@@ -269,6 +280,11 @@ def report(steps, calls, results, marks, edits, extra, verify, test, since, unti
             sizes[calls[cid]["name"]] += len(text)
     top = " · ".join(f"{i + 1}. {k} {round(v / 1e3)} K chars" for i, (k, v) in enumerate(sizes.most_common(3)))
     lines.append(f"- Biggest tool outputs: {top or NM}")
+    kchars = lambda n: f"{round(n / 1e3)} K chars"  # noqa: E731
+    wave = extra.get("wave_log")
+    lines.append(f"- Shell output taken in: " + (f"wave chat {kchars(extra['shell'][wave])} ({extra['names'][wave]})"
+                 if wave is not None else f"wave chat {NM} (no CARD-START mark)")
+                 + f" · all chats {kchars(sum(extra['shell'].values()))}")
     lines += by_source(steps, extra, allt, cfg)
     return "\n".join(lines)
 

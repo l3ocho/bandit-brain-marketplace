@@ -27,6 +27,7 @@ Version 2.0.0 when released: the Project Context format changes and commands are
 - **`/bandit:notes lint` checks names and the hub note:** a title that breaks conventions §4, two notes with one title in one place, a project board with no hub note or with two, customer data in a note's text.
 
 ### Changed
+- **A marketplace card is saved on the marketplace project's own board** (BM-T5). `bandit:clarify` and the sprint release no longer name a Marketplace column: the card goes to the board the marketplace project's `board:` line names, which is now BB: Marketplace.
 - **The audit runs the rows it can reach.** A row that changes another project's instructions or folder is handed over as one line saying where to run what; a project changes only itself. Rules S1, S2, S4, S6, S12 and S13 are restated on the stamp; S4 accepts `notes: none`. Checker rules A1 and A2 follow (a fixture per kept rule, an old snapshot refused by name).
 - **The working-folder layout allows `REFERENCE.md`** at the root, for a project with `notes: none`, and its rollback copy in `_backup/`.
 - **A finished card's conclusions are written on every project**, except one whose Project Context says `notes: none`.

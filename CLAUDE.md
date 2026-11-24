@@ -7,7 +7,7 @@ The Claude plugin marketplace of Bandit Brain.
 domain: BanditLabs
 project: bandit-brain-marketplace
 type: claude_marketplace
-board: project "BB: Development"
+board: project "BB: Marketplace"
 prefix: bbm
 dev: true
 notes: app
@@ -34,7 +34,7 @@ Read first. This wins over every other habit in this repo.
 
 ## 🗺️ What this repo is
 
-The single source of the skills, agents and hooks Claude uses with Bandit Brain: marketplace `bandit-brain`, three plugins. `bandit` (core skills, Claude.ai + Claude Code), `bandit-dev` (the sprint pipeline, Claude Code) and `bandit-maker` (building these skills, Bandit Port only). Marketplace cards live on the board **BB: Marketplace** (columns Bandit and Bandit Dev) since 2026-11-22; sprints and this project's notes are still on BB: Development until the skills and this Project Context are repointed (card BM-T5). Decisions: `docs/decisions.md`. The pipeline: `docs/pipeline.md`.
+The single source of the skills, agents and hooks Claude uses with Bandit Brain: marketplace `bandit-brain`, three plugins. `bandit` (core skills, Claude.ai + Claude Code), `bandit-dev` (the sprint pipeline, Claude Code) and `bandit-maker` (building these skills, Bandit Port only). This project's home board is **BB: Marketplace** (columns Bandit and Bandit Dev): its cards since 2026-11-22, its notes and its marketplace-only sprints since 2026-11-24 (BM-T5). A mixed sprint that also carries app cards stays on BB: Development and runs from the app project. Decisions: `docs/decisions.md`. The pipeline: `docs/pipeline.md`.
 
 ## 📁 Layout
 
@@ -92,7 +92,7 @@ This project's notes are in the app's Notes; nothing of it lives in a file stora
 | What | Where |
 |---|---|
 | Process docs, hub | Notes on this project's board (hub `bandit-brain-marketplace`) |
-| Sprint records | Notes on this project's board tagged `sprint-{name}`; map and data files in `.sprint/` |
+| Sprint records | Notes on this project's board tagged `sprint-{name}`; the sprint data file in `.sprint/` |
 | Audit stamps | The note `banditlabs-audit-stamps` on the domain's workflow board: this project's section, written by `/bandit:audit check` |
 | Settings | This file and `.claude/`: the one configuration, in this repository |
 

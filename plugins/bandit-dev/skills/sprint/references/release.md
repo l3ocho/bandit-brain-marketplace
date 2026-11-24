@@ -75,7 +75,7 @@ project's last `Released:` line. Their code is on the trunk already, so the rele
 
 ## Marketplace cards
 
-A sprint that carries cards from the **Marketplace** column (skill changes) also releases the
+A sprint that carries cards of the marketplace project (skill changes, on its own home board) also releases the
 marketplace repo, as its own version (decision D12), right after the app's recipe, in the same run: the two were tested together in debug (`debug.md` → Combined test). When the project is the
 marketplace repo itself, its recipe already runs these steps: run them once.
 

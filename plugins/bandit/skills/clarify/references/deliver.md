@@ -36,7 +36,7 @@ After the spec, offer one line. **The destination follows the subject:**
 
 | The spec is about | Offer |
 |---|---|
-| Changing one or more **skills** | **"Save as a Marketplace card plus brief?"** — one card in the **Marketplace** column of the bandit-brain-marketplace project's board, with one brief naming every skill touched. See *Marketplace card plus brief* below |
+| Changing one or more **skills** | **"Save as a Marketplace card plus brief?"** — one card on the bandit-brain-marketplace project's home board (its `board:` line), with one brief naming every skill touched. See *Marketplace card plus brief* below |
 | Work for a **dev project** (its home board is Technical: `get_context → boards → profile`) | **"Turn this into a card with `/bandit:tasks spec`?"** — `spec` takes this Clarified Specification as its input (`Source: clarify`), places the card in its area column and writes its brief. No separate note: the brief is the note |
 | Anything else | **Both, by default:** "Save this as a note for {Domain} **and** a card on the board, linked? Say *note only* or *card only* to drop one." See *Note + card* below |
 
@@ -59,7 +59,7 @@ After the spec, offer one line. **The destination follows the subject:**
 
 **Marketplace card plus brief** (only after the user says yes): the **Note + card** steps above, aimed at
 the bandit-brain-marketplace project instead of the current one. The card goes through bandit:tasks
-`capture` into that project's **Marketplace** column; the brief goes through bandit:notes as a draft
+`capture` onto that project's home board; the brief goes through bandit:notes as a draft
 for that project, linked to the card (bandit:notes names its place). The spec's
 Requirements name each skill touched and the change for it.
 

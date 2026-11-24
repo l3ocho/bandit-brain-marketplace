@@ -68,11 +68,7 @@ These start outside, so no file here triggers them. Each has its own check.
 A place the done check lists as open, checked and found to need nothing for this release. One line
 each: the path as the map writes it, then why. `scripts/release.py --write` empties this list.
 
-- `plugins/bandit-dev/skills/sprint/scripts/subtask_gate.py` — the card id patterns and the sprint membership it tracks (add_cards, remove_card) are unchanged; set_wave and the wave actions do not change which cards a sprint holds.
-- `plugins/bandit-dev/skills/sprint/scripts/sprint_data.py` — the ledger's Waves table keeps its four cells and the notes file its shape; SP4's retirement leaves its readers as they were.
-- `plugins/bandit/skills/finance/references/scope.md` — it says the Project Context is in the Claude.ai instructions or the repo's CLAUDE.md, still true; the `finance:` key is unchanged and `write:` limits board writes, not Finance.
-- `tests/fixture-logs/**` — the flow script's new lines are checked on a made-up wave built in the test; the fixture's own expected lines are unchanged.
-- `plugins/bandit-dev/hooks/hooks.json` — every hook's command and matcher is unchanged; only the scripts behind them changed.
+- none yet
 
 ## ✅ Before saying done
 

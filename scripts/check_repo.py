@@ -2692,6 +2692,61 @@ def check_retired_text():
            else f"retired text in {hits[:10]}{' …' if len(hits) > 10 else ''}; self-test wrong on {wrong}")
 
 
+# ── WR1 · a small fresh agent writes the wave's records after its last merge; its note writes answer short (BM-10) ─
+def check_wave_records():
+    dev = PLUGINS / "bandit-dev"
+    bad = []
+    agent = dev / "agents" / "wave-records.md"
+    text = agent.read_text(encoding="utf-8") if agent.exists() else ""
+    front = text.split("---", 2)[1] if text.count("---") >= 2 else ""
+    for need in ("name: wave-records", "model: sonnet", "effort: ", "disallowedTools: Edit, NotebookEdit, Agent"):
+        if need not in front:
+            bad.append(f"agents/wave-records.md frontmatter lacks `{need}`")
+    for need in ("wave_flow.py", "--row", "check_sprint.py", "sectionMatches", "never the approval line"):
+        if need not in text:
+            bad.append(f"agents/wave-records.md lacks `{need}`")
+    refs = dev / "skills" / "sprint" / "references"
+    ex, rn = (refs / "execute.md").read_text(encoding="utf-8"), (refs / "run.md").read_text(encoding="utf-8")
+    fin = ex.split("## Finishing a wave", 1)[-1].split("\n## ", 1)[0]
+    for need in ("at most five steps", "WAVE SUMMARY", "agent `wave-records`", "The wave is not finished until its report shows the checker's OK"):
+        if need not in fin:
+            bad.append(f"execute.md → Finishing a wave lacks `{need}`")
+    if "launch the records agent" not in rn or "WAVE SUMMARY" not in rn:
+        bad.append("run.md: the orchestrator does not launch the records agent with the wave agent's summary")
+    hooks = json.loads((dev / "hooks" / "hooks.json").read_text(encoding="utf-8"))["hooks"]
+    if not any("note_reply.py" in h["command"] and "notes_update_section" in e["matcher"]
+               for e in hooks.get("PostToolUse", []) for h in e["hooks"]):
+        bad.append("hooks.json does not register note_reply.py on the note writes")
+    script = dev / "skills" / "sprint" / "scripts" / "note_reply.py"
+    big = "# L\n\n## Status\n\nhello\n\n## Log\n\n" + "x\n" * 5000
+    answer = lambda body, ok=True: [{"type": "text", "text": json.dumps({"ok": ok, "note": {"id": "n1", "title": "t", "body": body}})}]  # noqa: E731
+    base = {"hook_event_name": "PostToolUse", "agent_type": "bandit-dev:wave-records", "tool_name": "mcp__x__notes_update_section",
+            "tool_input": {"noteId": "n1", "heading": "Status", "text": "hello"}, "tool_response": answer(big)}
+
+    def run(payload):
+        r = subprocess.run([sys.executable, "-B", str(script)], input=json.dumps(payload), capture_output=True, text=True)
+        return r.returncode, r.stdout.strip()
+    code, out = run(base)
+    try:
+        new = json.loads(out)["hookSpecificOutput"]
+        small = json.loads(new["updatedMCPToolOutput"][0]["text"])["note"]
+        if new["hookEventName"] != "PostToolUse" or "body" in small or small.get("sectionMatches") is not True or len(out) > 1000:
+            bad.append(f"note_reply: a records agent's section write is not shortened with sectionMatches true: {out[:160]!r}")
+    except (ValueError, KeyError, TypeError, IndexError):
+        bad.append(f"note_reply: no shortened answer for a records agent's section write: {code} {out[:120]!r}")
+    _, out = run({**base, "tool_input": {**base["tool_input"], "text": "other"}})
+    if '\\"sectionMatches\\": false' not in out:
+        bad.append("note_reply: a section that does not hold the text written is not reported as sectionMatches false")
+    for label, payload in (("another chat", {**base, "agent_type": ""}), ("a wave agent", {**base, "agent_type": "general-purpose"}),
+                           ("a read", {**base, "tool_name": "mcp__x__notes_get"}), ("a refused write", {**base, "tool_response": answer(big, False)}),
+                           ("an unreadable answer", {**base, "tool_response": "not json"})):
+        if run(payload)[1]:
+            bad.append(f"note_reply shortens {label}")
+    report("WR1", not bad, "; ".join(bad) or "the wave-records agent (Sonnet, its effort named) writes the wave's records from the "
+           "wave summary after at most five steps of the wave's own; execute and run launch it; the note reply hook shortens its "
+           "note writes (section checked) and leaves every other chat, reads, refusals and unreadable answers alone")
+
+
 def main(argv):
     use_cli = "--no-cli" not in argv
     check_manifests()
@@ -2764,6 +2819,7 @@ def main(argv):
     check_delivered_once()
     check_one_card_wave()
     check_retired_text()
+    check_wave_records()
     check_l5()
     for rule, ok, msg in results:
         print(f"{'✅' if ok else '❌'} {rule} {msg}")

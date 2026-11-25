@@ -107,7 +107,7 @@ The ledger is created at step 1 with every section heading above, `_Pending_` un
 
 ## Wave report
 
-One note per sprint, written for the user, rebuilt by the wave agent at the end of every wave (`execute.md` → Finishing a wave): each card by its id with at most one line (what it delivered is its Delivered comment), the calls waiting for the user, how the work flowed and where the tokens went, all measured from the chat logs, and the lessons later plans read. Read through bandit:notes right before the rebuild, never from a local copy; each rebuilt section is written back on its own (bandit:notes edit by section), and this wave's new section, which the note does not hold yet, by one whole-text save made right after that read. Kind `reference`, the sprint's tag, related to the ledger and the handover report.
+One note per sprint, written for the user, rebuilt by the records agent (`agents/wave-records.md`) at the end of every wave, from the wave summary (`execute.md` → Finishing a wave): each card by its id with at most one line (what it delivered is its Delivered comment), the calls waiting for the user, how the work flowed and where the tokens went, all measured from the chat logs, and the lessons later plans read. Read through bandit:notes right before the rebuild, never from a local copy; each rebuilt section is written back on its own (bandit:notes edit by section), and this wave's new section, which the note does not hold yet, by one whole-text save made right after that read. Kind `reference`, the sprint's tag, related to the ledger and the handover report.
 
 Shape, in this order (an empty section is left out, Open calls says "None."):
 

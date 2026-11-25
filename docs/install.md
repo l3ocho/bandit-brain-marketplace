@@ -72,7 +72,7 @@ Plugins on your claude.ai account already reach Claude Code: they appear as `ban
 /plugin install bandit-maker@bandit-brain        # maintainers
 ```
 
-- `bandit-dev` declares `bandit` as a dependency: Claude Code disables it (its hook and agent included) unless `bandit` is installed too.
+- `bandit-dev` declares `bandit` as a dependency: Claude Code disables it (its hooks and agents included) unless `bandit` is installed too.
 - Turn **auto-update** on: `/plugin` → Marketplaces → `bandit-brain` → **Enable auto-update** (off by default for marketplaces outside Anthropic's).
 
 ## 4. Update

@@ -46,7 +46,7 @@ The single source of the skills, agents and hooks Claude uses with Bandit Brain:
 assets/                             the Bandit Brain logo
 .work/                              git-ignored working files: import/ (frozen skill snapshot), test/ (test folder)
 plugins/bandit/                     skills/{tasks,notes,project,audit,clarify,rewrite,plan,minutes}/
-plugins/bandit-dev/                 skills/sprint/ · agents/plan-reviewer.md · hooks/hooks.json
+plugins/bandit-dev/                 skills/sprint/ · agents/plan-reviewer.md, wave-records.md · hooks/hooks.json
 plugins/bandit-maker/               skills/skill/
 templates/instructions/             one-page project instructions per project type
 tests/                              cases.md · fixture-app/

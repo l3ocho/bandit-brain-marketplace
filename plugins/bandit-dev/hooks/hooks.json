@@ -42,6 +42,16 @@
             "command": "if command -v python3 >/dev/null 2>&1; then exec python3 \"${CLAUDE_PLUGIN_ROOT}/skills/sprint/scripts/dependency_gate.py\"; else exec python \"${CLAUDE_PLUGIN_ROOT}/skills/sprint/scripts/dependency_gate.py\"; fi"
           }
         ]
+      },
+      {
+        "matcher": "mcp__.*__(notes_create|notes_update|notes_update_section|notes_set_fields|notes_set_status|notes_file|notes_move|notes_link_card|notes_unlink_card)",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 10,
+            "command": "if command -v python3 >/dev/null 2>&1; then exec python3 \"${CLAUDE_PLUGIN_ROOT}/skills/sprint/scripts/note_reply.py\"; else exec python \"${CLAUDE_PLUGIN_ROOT}/skills/sprint/scripts/note_reply.py\"; fi"
+          }
+        ]
       }
     ],
     "Stop": [

@@ -82,6 +82,7 @@ each: the path as the map writes it, then why. `scripts/release.py --write` empt
 - `tests/fixture-expected/sprint-data.csv` — same: no row of the existing fixture changes.
 - `plugins/bandit-dev/skills/sprint/references/close.md` — close reads the ledger's Status per card and the handover report's Targets section, both kept; nothing it does depends on a wave section or the card rows' Wave cell.
 - `tests/fixture-estimate/estimate.csv` — the estimate reads the data file's time and effort, unchanged.
+- `.claude-plugin/marketplace.json` — its bandit-dev description names the pipeline, not each agent; the plugin's own description names the new `wave-records` agent (BM-10).
 - `docs/dependencies.md` — the map's rows already cover the files these rules read; DW1, OC1 and RT1 are new checker rules, not new places.
 
 ## ✅ Before saying done

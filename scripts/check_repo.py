@@ -2736,6 +2736,9 @@ def check_wave_records():
             bad.append(f"note_reply: a records agent's section write is not shortened with sectionMatches true: {out[:160]!r}")
     except (ValueError, KeyError, TypeError, IndexError):
         bad.append(f"note_reply: no shortened answer for a records agent's section write: {code} {out[:120]!r}")
+    _, out = run({**base, "tool_name": "mcp__x__notes_relate", "tool_input": {"noteId": "n1", "otherNoteId": "n2"}})
+    if 'bodyChars' not in out:
+        bad.append("note_reply does not shorten a records agent's notes_relate, which answers the whole note on every app")
     _, out = run({**base, "tool_input": {**base["tool_input"], "text": "other"}})
     if '\\"sectionMatches\\": false' not in out:
         bad.append("note_reply: a section that does not hold the text written is not reported as sectionMatches false")

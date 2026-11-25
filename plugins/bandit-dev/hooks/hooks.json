@@ -44,7 +44,7 @@
         ]
       },
       {
-        "matcher": "mcp__.*__(notes_create|notes_update|notes_update_section|notes_set_fields|notes_set_status|notes_file|notes_move|notes_link_card|notes_unlink_card)",
+        "matcher": "mcp__.*__(notes_create|notes_update|notes_update_section|notes_set_fields|notes_set_status|notes_file|notes_move|notes_link_card|notes_unlink_card|notes_relate|notes_unrelate)",
         "hooks": [
           {
             "type": "command",

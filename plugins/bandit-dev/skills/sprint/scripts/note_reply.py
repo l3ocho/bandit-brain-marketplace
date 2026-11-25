@@ -3,7 +3,7 @@
 
 The app now answers a note write without the note's text: `{ ok, note: { id, title, kind, status, summary, tags,
 boardId, boardColumnId, lane, cards, updatedAt, bodyChars, headings }, sectionMatches | textMatches }`. An app from
-before that change answers with the whole note, text included: a ledger section write brought the whole ledger back
+before that change answers with the whole note, text included, and so do `notes_relate` and `notes_unrelate` on every app: a ledger section write brought the whole ledger back
 into the chat each time (about 15,000 tokens a write). For such an app this hook gives the records agent the same
 short answer (`updatedMCPToolOutput`, Claude Code hooks → PostToolUse), the match flags worked out on the saved text.
 The note itself is unchanged: only what the chat sees is shorter. A read (`notes_get`) is never shortened.
@@ -17,7 +17,7 @@ import re
 import sys
 
 TOOL = re.compile(r"^mcp__.+__(notes_create|notes_update|notes_update_section|notes_set_fields|notes_set_status|"
-                  r"notes_file|notes_move|notes_link_card|notes_unlink_card)$")
+                  r"notes_file|notes_move|notes_link_card|notes_unlink_card|notes_relate|notes_unrelate)$")
 AGENT = "wave-records"
 KEEP = ("id", "title", "kind", "status", "summary", "tags", "boardId", "boardColumnId", "lane", "cards", "updatedAt")
 HEADING = re.compile(r"^(#{1,3})\s+(.+?)\s*$", re.M)

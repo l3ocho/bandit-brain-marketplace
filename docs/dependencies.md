@@ -68,22 +68,7 @@ These start outside, so no file here triggers them. Each has its own check.
 A place the done check lists as open, checked and found to need nothing for this release. One line
 each: the path as the map writes it, then why. `scripts/release.py --write` empties this list.
 
-- `CLAUDE.md` — no rule in it names a sprint paper's shape, the old sprint card or the handover keys (BM-7, BM-8, BM-17).
-- `plugins/bandit/skills/notes/references/storage-app.md` — names no sprint card or sprint tag; the conventions' change (BM-17) is a wording of the plan's card field only.
-- `plugins/bandit/skills/notes/references/model.md` — same: nothing about the old sprint card or its tag.
-- `plugins/bandit/skills/notes/references/commands.md` — same: no command reads a sprint tag.
-- `tests/fixture-audit/**` — every snapshot already lists real sprint names only; S13's result is unchanged (A2 green).
-- `plugins/bandit/skills/audit/references/self-check.md` — the stamp reads no sprint tag; S13 is scored from the snapshot.
-- `bandit.yaml` — this repository's recipe has no `handover` section.
-- `README.md` — names neither the gates' old skip of a card titled `Sprint …` nor a sprint paper's shape.
-- `plugins/bandit-dev/hooks/hooks.json` — the sub-task, dependency and sprint-check hooks keep their events and commands; only what they skip changed.
-- `tests/fixture-logs/**` — wave_flow's counting is unchanged; `--row` reformats the same lines and OC1 tests it on its own sample.
-- `tests/fixture-notes/SprintData/**` — older records read exactly as before (SD1 green); the one-card cell has its own fixture, `OneCardWave`.
-- `tests/fixture-expected/sprint-data.csv` — same: no row of the existing fixture changes.
-- `plugins/bandit-dev/skills/sprint/references/close.md` — close reads the ledger's Status per card and the handover report's Targets section, both kept; nothing it does depends on a wave section or the card rows' Wave cell.
-- `tests/fixture-estimate/estimate.csv` — the estimate reads the data file's time and effort, unchanged.
-- `.claude-plugin/marketplace.json` — its bandit-dev description names the pipeline, not each agent; the plugin's own description names the new `wave-records` agent (BM-10).
-- `docs/dependencies.md` — the map's rows already cover the files these rules read; DW1, OC1 and RT1 are new checker rules, not new places.
+- none yet
 
 ## ✅ Before saying done
 

@@ -114,6 +114,10 @@ Read the note back (`notes_get`) and report its kind, summary, status and place.
   section: a heading that is not in the note is refused.
 - **The whole text or the title:** `notes_update` replaces, never appends. Read the note with
   `notes_get` right before, and send the full new text.
+- **The answer of a write** is the note without its text: `bodyChars` (the saved text's length), `headings`, and
+  `sectionMatches` for a section write or `textMatches` for a whole save (or a create with text). A `false` is a failed
+  write: read the note and redo it. An app from before this answer sends the whole note back instead. Either way the
+  text is read with `notes_get` (`references/commands.md` → Read back).
 - Every save keeps the text before it as a version the user can restore. Versions count against
   the account's notes space.
 - A note holds up to 200 KB of title and text.

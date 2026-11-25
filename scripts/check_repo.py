@@ -347,7 +347,7 @@ SEARCH_TOOL = "search"
 APP_REPO = Path(os.environ.get("BANDIT_APP_REPO") or ROOT.parent / "dev")
 # The app's 0.56.0, the release that ships waves, lands-after links, pause, replan and cancel (BM-21);
 # 0.55.0 (1e0170c1) shipped the note tools (BB-590; sprint 2026-w47, BB-596).
-APP_REF = os.environ.get("BANDIT_APP_REF") or "abb08af6"
+APP_REF = os.environ.get("BANDIT_APP_REF") or "cf14b641"   # the app's development: note writes answer short (BB-622)
 
 
 def app_file(path):
@@ -2729,15 +2729,20 @@ def check_wave_records():
     code, out = run(base)
     try:
         new = json.loads(out)["hookSpecificOutput"]
-        small = json.loads(new["updatedMCPToolOutput"][0]["text"])["note"]
-        if new["hookEventName"] != "PostToolUse" or "body" in small or small.get("sectionMatches") is not True or len(out) > 1000:
+        whole = json.loads(new["updatedMCPToolOutput"][0]["text"])
+        small = whole["note"]
+        if (new["hookEventName"] != "PostToolUse" or "body" in small or whole.get("sectionMatches") is not True
+                or small.get("bodyChars") != len(big) or "## Status" not in small.get("headings", []) or len(out) > 1000):
             bad.append(f"note_reply: a records agent's section write is not shortened with sectionMatches true: {out[:160]!r}")
     except (ValueError, KeyError, TypeError, IndexError):
         bad.append(f"note_reply: no shortened answer for a records agent's section write: {code} {out[:120]!r}")
     _, out = run({**base, "tool_input": {**base["tool_input"], "text": "other"}})
     if '\\"sectionMatches\\": false' not in out:
         bad.append("note_reply: a section that does not hold the text written is not reported as sectionMatches false")
-    for label, payload in (("another chat", {**base, "agent_type": ""}), ("a wave agent", {**base, "agent_type": "general-purpose"}),
+    short_answer = [{"type": "text", "text": json.dumps({"ok": True, "note": {"id": "n1", "title": "t", "bodyChars": 9, "headings": []},
+                                                         "sectionMatches": True})}]
+    for label, payload in (("an answer the app already sent short", {**base, "tool_response": short_answer}),
+                           ("another chat", {**base, "agent_type": ""}), ("a wave agent", {**base, "agent_type": "general-purpose"}),
                            ("a read", {**base, "tool_name": "mcp__x__notes_get"}), ("a refused write", {**base, "tool_response": answer(big, False)}),
                            ("an unreadable answer", {**base, "tool_response": "not json"})):
         if run(payload)[1]:

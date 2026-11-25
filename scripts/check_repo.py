@@ -1156,7 +1156,7 @@ def check_notes_file_build():
 def check_wave_order():
     s = PLUGINS / "bandit-dev" / "skills" / "sprint"
     files = [s / "SKILL.md", *sorted((s / "references").glob("*.md"))]
-    files = [f for f in files if f.name not in ("gotchas.md", "old-way.md")]   # history lines quote the old wording
+    files = [f for f in files if f.name not in ("gotchas.md",)]   # history lines quote the old wording
     hits = [f"{f.relative_to(ROOT)}: {h!r}" for f in files for h in old_order_hits(f.read_text(encoding="utf-8"))]
     cases = [("Wave N is refused while wave N-1 is not done", 1), ("Strictly\nin sequence.", 1), ("Waves run in order.", 1),
              ("**Last wave only:** when", 1), ("move the next wave's cards to `next`", 1),
@@ -1985,15 +1985,14 @@ def check_recipe():
         (("--file", "bandit.no-migrations.yaml", "check-tail", "none"), 0, "matches"),
         (("--file", "bandit.no-migrations.yaml", "opt", "staging.refresh"), 0, "none"),
         (("opt", "staging.refresh"), 0, "echo staging refresh"),
-        (("opt", "handover.board"), 0, "Fixture Ops"),
-        (("--file", "bandit.no-migrations.yaml", "opt", "handover.board"), 0, "none"),
-        (("get", "handover.staging.runbook"), 0, "docs/staging-runbook.md#Deploy to staging"),
-        (("--file", "bandit.missing-key.yaml", "require", "handover.production.runbook"), 3, "missing key `handover.production.runbook`"),
-        (("--file", "bandit.no-production.yaml", "require", "release", "branches.trunk", "branches.deploy"), 0, "present"),
-        (("--file", "bandit.no-production.yaml", "get", "handover.staging.column"), 0, "Fixture Lab"),
-        (("--file", "bandit.no-production.yaml", "get", "handover.production.column"), 3, "missing key `handover.production.column`"),
-        (("--file", "bandit.no-production.yaml", "opt", "handover.production.column"), 0, "none"),
-        (("opt", "handover.production.column"), 0, "Fixture Host"),
+        (("get", "testdata.schema"), 0, "schema.sql"),
+        (("--file", "bandit.no-migrations.yaml", "opt", "testdata.schema"), 0, "none"),
+        (("--file", "bandit.missing-key.yaml", "require", "release", "branches.trunk", "branches.deploy"), 0, "present"),
+        (("get", "testdata.owner.table"), 3, "missing key `testdata.owner.table`"),
+        (("opt", "testdata.owner.table"), 0, "none"),
+        (("--file", "bandit.testdata-owner.yaml", "opt", "testdata.owner.table"), 0, "teams"),
+        (("opt", "release_checks.ci"), 0, "none"),
+        (("opt", "handover.board"), 2, "is not optional"),
         (("opt", "guard.credentials.block"), 0, "set-password"),
         (("--file", "bandit.no-migrations.yaml", "opt", "guard.credentials.block"), 0, "none"),
         (("opt", "stop.close"), 0, "the fixture's close step"),
@@ -2172,7 +2171,7 @@ def check_dependency_gate():
     create = lambda item, resp=ok_text: {"tool_name": "mcp__other_board__create_tasks",  # noqa: E731
                                          "tool_input": {"items": [item]}, "tool_response": resp}
     cases = [
-        ("link", link, ["AB-1 now blocks AB-2", "Skip if a gate for this blocker already exists", "sprint card blocked by its"]),
+        ("link", link, ["AB-1 now blocks AB-2", "Skip if a gate for this blocker already exists"]),
         ("refused link", {**link, "tool_response": {"ok": False, "code": "CYCLE"}}, None),
         ("create blockedBy", create({"title": "New", "dependencies": {"blockedBy": ["AB-1"]}}), ["AB-1 now blocks XY-9"]),
         ("create blocks", create({"title": "New", "dependencies": {"blocks": ["AB-3"]}}), ["XY-9 now blocks AB-3"]),
@@ -2180,7 +2179,9 @@ def check_dependency_gate():
          ["XY-9 (a design card) now blocks AB-4", "the design handover is linked and approved", "before AB-4 gets stage/spec"]),
         ("create with its gate", create({"title": "New", "dependencies": {"blockedBy": ["AB-1"]},
                                          "subtasks": ["Build it", "Gate: AB-1 delivered (the API) before deploy"]}), None),
-        ("sprint card", create({"title": "Sprint 2026-w01", "dependencies": {"blockedBy": ["AB-1", "AB-2"]}}), None),
+        # A card titled `Sprint …` is a card like any other (BM-17).
+        ("card titled Sprint", create({"title": "Sprint 2026-w01", "dependencies": {"blockedBy": ["AB-1", "AB-2"]}}),
+         ["AB-1 now blocks XY-9", "AB-2 now blocks XY-9"]),
         ("refused create", create({"title": "New", "dependencies": {"blockedBy": ["AB-1"]}},
                                   {"ok": True, "results": [{"ok": False, "code": "CYCLE"}]}), None),
         ("no link", create({"title": "New"}), None),
@@ -2215,7 +2216,7 @@ def check_dependency_gate():
             bad.append(f"{label} → missing {missing or out.get('hookEventName')}")
     report("DG1", not bad, "; ".join(bad) or f"dependency gate: {len(cases)} fixture payloads (notice in the "
            "session's context naming the blocked card or sprint and the skip line; silent on refusals, a created card "
-           "with its gate, sprint cards, a lands-after link and other tools)")
+           "with its gate, a lands-after link and other tools; a card titled Sprint … gets its notice like any card)")
 
 
 # ── SB1 · a sprint card gets its build steps before its Technical plan and before the commit (BB-451) ─
@@ -2387,7 +2388,7 @@ def check_description_gate():
     handover = " ".join((PLUGINS / "bandit-dev" / "skills" / "sprint" / "references" / "templates.md")
                         .read_text(encoding="utf-8").split())
     if "never the last block" not in handover:
-        bad.append("sprint templates.md → Handover cards: the `<pre>` is not said to be never the last block")
+        bad.append("sprint templates.md → Debug card: the `<pre>` is not said to be never the last block")
     pre_last = "<h2>Why</h2><p>x</p><h2>Prompt for the CTO agent</h2><pre>Card: a\n\n- step\n**b**</pre>"
     cases = [  # (label, tool, description, refused, text in the refusal)
         ("a prompt block last (sprint doors' CTO cards)", "update_tasks", pre_last, True, "raw text"),
@@ -2667,6 +2668,30 @@ def check_one_card_wave():
            "a missing one fails naming the card, the sprint data reads every measure from the cell as from a section")
 
 
+# ── RT1 · no text of the retired sprint card, sprint tags or deployment handover cards in the helpers or the docs (BM-17) ─
+RETIRED_TEXT = re.compile(r"old[- ]way|(?<![.\w])sprint/(?:\*|\{)|\bhandover cards?\b|deployment handover|"
+                          r"\bhandover\.(?:board|staging|production)\b|sprint card'?s? board shape|\bSprint card\b —|"
+                          r"\bold sprint tags?\b|tagPrefix: \"sprint/\"", re.I)
+
+
+def check_retired_text():
+    files = [p for base in (PLUGINS, ROOT / "docs") for p in base.rglob("*")
+             if p.is_file() and p.suffix in (".md", ".py", ".json", ".yaml", ".yml") and "__pycache__" not in p.parts]
+    files = [p for p in files + [ROOT / "README.md"] if p.name != "decisions.md"]   # the decision history keeps them
+    hits = [f"{p.relative_to(ROOT)}:{i}" for p in sorted(files)
+            for i, line in enumerate(p.read_text(encoding="utf-8").splitlines(), 1) if RETIRED_TEXT.search(line)]
+    probes = {"an old-way sprint card": 1, "a `sprint/*` tag": 1, "the deployment handover cards": 1, "`handover.board`": 1,
+              "`.sprint/{project}-sprint-notes.json`": 0, "the handover report": 0, "the design handover": 0, "sprint-{name}": 0}
+    wrong = [t for t, n in probes.items() if bool(RETIRED_TEXT.search(t)) != bool(n)]
+    keys = sprint_module("recipe").KEYS
+    if any(k.startswith("handover.") for k in keys):
+        hits.append("recipe.py still knows the handover keys")
+    ok = not hits and not wrong
+    report("RT1", ok, f"no old sprint card, sprint tag or deployment handover card in {len(files)} plugin and doc files "
+           f"(decisions.md keeps the history); recipe.py knows no handover key ({len(probes)} self-test lines)" if ok
+           else f"retired text in {hits[:10]}{' …' if len(hits) > 10 else ''}; self-test wrong on {wrong}")
+
+
 def main(argv):
     use_cli = "--no-cli" not in argv
     check_manifests()
@@ -2738,6 +2763,7 @@ def main(argv):
     check_wave_note()
     check_delivered_once()
     check_one_card_wave()
+    check_retired_text()
     check_l5()
     for rule, ok, msg in results:
         print(f"{'✅' if ok else '❌'} {rule} {msg}")

@@ -73,7 +73,7 @@ def load_rules(path, rulebook_path):
                                "manifest", "manifest_max_age_days", "root_allowed", "task_dirs",
                                "task_folder_pattern", "data_extensions", "retention_days",
                                "backup_dir", "backup_name_pattern")),
-                      ("sprint_briefs", ("sprint_tag_prefix", "brief_kind"))):
+                      ("sprint_briefs", ("brief_kind",))):
         for k in keys:
             if k not in rules[blk]:
                 raise ContractError(f"rules.{blk}: missing `{k}`")
@@ -561,13 +561,12 @@ class Domain:
         return self.res("S12", "bad" if probs else "ok", note, ev + ".workdir")
 
 
-    # ---------- S13 · a sprint card's brief carries its sprint's tag ----------
+    # ---------- S13 · the brief of a card in a sprint carries its sprint's tag ----------
     def want_tags(self, card):
-        """The sprint-{name} words of the sprints holding a card (a real sprint's name, or its old tag), or []."""
-        prefix = self.rules["sprint_briefs"]["sprint_tag_prefix"]
+        """The sprint-{name} tags of the sprints holding a card, or []."""
         sprints = self.sprint_of.get(card) or self.sprint_of.get(card.upper()) or []
-        # A real sprint's name is free text; its folder and its tag are the name in kebab-case (bandit:notes).
-        return [f"sprint-{kebab(s[len(prefix):] if s.startswith(prefix) else s)}" for s in sprints]
+        # A sprint's name is free text; its tag is the name in kebab-case (bandit:notes).
+        return [f"sprint-{kebab(s)}" for s in sprints]
 
     def sprint_briefs(self, key, fslug, ctx, rows):
         rules, own = self.rules["sprint_briefs"], self.rules["owners"]
@@ -593,9 +592,9 @@ class Domain:
                 r.proj = key
                 rows.append(r)
         if not seen:
-            return self.res("S13", "na", "No brief of a sprint card", ev)
+            return self.res("S13", "na", "No brief of a card in a sprint", ev)
         return self.res("S13", "bad" if missing else "ok",
-                        "; ".join(missing) or "Every sprint card's brief carries its sprint's tag", ev)
+                        "; ".join(missing) or "Every brief of a card in a sprint carries its sprint's tag", ev)
 
     def s9_problems(self, board, is_dev):
         s9 = self.rules["s9"]

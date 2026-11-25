@@ -25,7 +25,7 @@ Rules (each one a failure, not a warning):
        order); a wave marked done carries its evidence and needs only the waves it depends on to be done (a card under
        `Blocked by` in the ## Batch table, or a pair on the plan's `Lands after:` line); every card it names has a row in
        the Waves and cards table (the card in its first cell, or in its second after a Wave cell)
-       (a ledger written before sprints were records in the app, with no `Sprint record:` line, is skipped by SP9 and SP10)
+       (a ledger with no `Sprint record:` line, written before sprints were records in the app, is skipped by SP9 and SP10)
   SP11 a committed sprint kept in the app has, for every wave marked done in its ## Waves table (sprints committed after
        2026-11-04), a section `## 🌊 Wave {n}` in its wave report {project}-sprint-{name}-wave-report holding a
        `#### ⏱️ Flow` and a `#### 🪙 Tokens` block; a wave of one card may instead carry its numbers on its card's row

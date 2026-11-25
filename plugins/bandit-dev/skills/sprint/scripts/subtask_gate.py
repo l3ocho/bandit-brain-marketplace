@@ -17,7 +17,7 @@ and an id `get_task` was asked for that the card no longer carries (a former or 
 A card the record has not read is refused too, with the read that settles it (`get_task`), so a card that
 already has its build steps passes on the next try.
 
-Skipped: the debug card (title `Debug: …`), an old-way sprint card (title `Sprint …`) and a completed card.
+Skipped: the debug card (title `Debug: …`) and a completed card.
 Silent on every other call, and when the payload cannot be read.
 """
 import json
@@ -34,7 +34,7 @@ APPROVAL = "tested and approved by you"
 PLAN = re.compile(r"<h2[^>]*>\s*Technical plan\s*</h2>(.*?)(?=<h2|\Z)", re.S | re.I)
 PLACEHOLDER = "how it will be built"
 HTML = re.compile(r"<[^>]+>|&nbsp;")
-SKIP = ("Debug:", "Sprint ")
+SKIP = ("Debug:",)
 SHORT = re.compile(r"^[A-Za-z0-9]*[A-Za-z][A-Za-z0-9]*-[Tt]?\d+$")  # a proper id ({prefix}-{n}) or a temporary one ({prefix}-T{n}); a prefix may hold digits
 
 
@@ -148,7 +148,7 @@ def read_record(transcript):
 
 
 def owed(record, refs):
-    """(cards with no build step, cards the chat has not read), skipping the debug, old-way and completed cards."""
+    """(cards with no build step, cards the chat has not read), skipping the debug card and completed cards."""
     missing, unread = [], []
     for key in dict.fromkeys(record.key(r) for r in refs):
         if not key or key in record.done or record.titles.get(key, "").startswith(SKIP):

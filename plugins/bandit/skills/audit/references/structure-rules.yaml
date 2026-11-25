@@ -13,7 +13,7 @@ levels:            # must → ❌ on a break · should → ⚠️
   S6: should
   S9: must         # added 2026-09-28 as a preventive must (rulebook: Changing this rulebook)
   S12: must        # working folder of a project in Claude Code without dev: true; added 2026-09-29
-  S13: should      # a sprint card's brief carries its sprint's tag; added 2026-10-09
+  S13: should      # the brief of a card in a sprint carries its sprint's tag; added 2026-10-09
   # Retired, numbers not reused: S5, S7, S8, S10, S11 (2026-11-22, with the settings folder and the
   # second copy for another surface) · S14, S15, S16 (2026-11-20)
 
@@ -81,8 +81,7 @@ s12:
 
 sprint_briefs:
   # S13. The conventions are bandit:notes'; bandit-dev:sprint's local checker reads a notes file
-  # (its SP2 is the same rule at write time). The brief carries the tag sprint-{name}.
-  sprint_tag_prefix: "sprint/"      # sprint {name} (a real sprint, or its old card tag sprint/{name}) ↔ sprint-{name}
+  # (its SP2 is the same rule at write time). A brief whose card is in sprint {name} carries the tag sprint-{name}.
   brief_kind: brief                 # a note of this kind, with a card in a sprint
 
 s9:

@@ -110,12 +110,12 @@ scores them. bandit-dev:sprint's local checker (`check_sprint.py`, a `Stop` hook
 notes file, and its SP2 is this rule at write time. The audit scores it from the snapshot and never
 replaces that checker.
 
-- A brief (a note of kind `brief`) whose card is in sprint `{name}` (a real sprint, or its old
-  `sprint/{name}` tag) carries the tag `sprint-{name}`, `{name}` in kebab-case.
-- No brief of a sprint card, no board of its own, or `notes: none` → **—**.
+- A brief (a note of kind `brief`) whose card is in sprint `{name}` carries the tag `sprint-{name}`,
+  `{name}` in kebab-case.
+- No brief of a card in a sprint, no board of its own, or `notes: none` → **—**.
 - Fix row: bandit:notes tags it (`notes_set_fields`, the other tags kept).
 - **Check:** the project's notes with their kind, cards and a brief's tags, and the cards in a
-  sprint (real sprints, and `sprint/*` tags until they retire), from the snapshot.
+  sprint, from the snapshot.
 
 ### Retired
 
@@ -157,4 +157,5 @@ is superseded (**📄 Report lifecycle**).
 - **2026-11-20 · Notes in the app**, with the user's approval: S13 scores a brief's sprint tag; S14, S15 and S16 are retired. The report is a note; the snapshot moves to `.audit/` in the folder Claude Code runs from.
 - **2026-11-22 · One storage, one configuration**, on the user's word (everything locked into the app; one configuration per project): the notes storage outside the app is gone, and so are the settings folder, the second copy of a project's instructions and the dev mirror. A project is known by its stamp, and a domain is a board folder. S5, S7, S8, S10 and S11 are retired; S1, S2, S4, S6, S12 and S13 are restated on the stamp. S4 accepts `notes: none`. Snapshot schema 8; earlier snapshots no longer load.
 - **2026-11-24 · Nested domains and the write line**, on the user's word: a domain can be a folder path from the top-level folder down, so a project inside a client's folder is scored on that folder; a domain's boards are those of its folder at any depth (folders nest three levels deep); S4 checks the optional `write` line's boards are inside the domain.
+- **2026-11-24 · Sprint tags no longer read**, on the user's word: S13 reads only the sprints in the app; the card tags that once named a sprint, gone from every board since 2026-11-23, are no longer read, and the rules file drops their prefix. The rule's result is unchanged.
 - A rules or script change stops earlier reports from replaying (their footer hashes differ). Close live reports before installing one if their fixes are done; any left live become superseded (**📄 Report lifecycle**), and the next fresh audit archives them.

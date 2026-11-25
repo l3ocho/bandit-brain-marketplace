@@ -1,0 +1,59 @@
+{
+ "project": "garden",
+ "built": "2026-11-20T00:00:00Z",
+ "notes": [
+  {
+   "title": "garden-review-sprint-spring-2026-10-31",
+   "kind": "log",
+   "status": "active",
+   "tags": [
+    "sprint-spring"
+   ],
+   "cards": [],
+   "text": "# Fixture\n"
+  },
+  {
+   "title": "garden-sprint-spring-handover-prompt",
+   "kind": "reference",
+   "status": "active",
+   "tags": [
+    "sprint-spring"
+   ],
+   "cards": [],
+   "text": "# Fixture\n"
+  },
+  {
+   "title": "garden-sprint-spring-plan",
+   "kind": "plan",
+   "status": "active",
+   "tags": [
+    "sprint-spring"
+   ],
+   "cards": [],
+   "text": "# Fixture\n"
+  },
+  {
+   "title": "garden-sprint-spring-progress",
+   "kind": "reference",
+   "status": "active",
+   "tags": [
+    "sprint-spring"
+   ],
+   "cards": [],
+   "text": "# Fixture\n\n## At a glance\n\n- Sprint record: spring on Garden\n- Debug card: GA-9\n- Status: Wave 2 of 2 delivered, awaiting the user's test\n- Committed: 2026-11-05\n\n## Plan steps\n\n| # | Step | Done | Evidence |\n|---|---|---|---|\n| 1 | Select and freeze the batch | 2026-10-31 | Step 1 evidence. |\n| 2 | Spec completeness check, per card | 2026-10-31 | Step 2 evidence. |\n| 3 | Close the open questions | 2026-10-31 | Step 3 evidence. |\n| 4 | Size and classify | 2026-10-31 | Step 4 evidence. |\n| 5 | Cross-card analysis | 2026-10-31 | Step 5 evidence. |\n| 6 | Sequence | 2026-10-31 | Step 6 evidence. |\n| 7 | Write the one technical plan | 2026-10-31 | Step 7 evidence. |\n| 8 | Risk and rollback | 2026-10-31 | Step 8 evidence. |\n| 9 | Definition of ready, per card | 2026-10-31 | Step 9 evidence. |\n| 10 | Approval gate | 2026-10-31 | Step 10 evidence. |\n| 11 | Independent plan review | 2026-10-31 | Step 11 evidence. |\n| 12 | Commit the sprint | 2026-11-05 | Committed, checker OK. |\n\n## Waves\n\n| Wave | Cards | Done | Evidence |\n|---|---|---|---|\n| Wave 1 | GA-1, GA-2 | 2026-11-06 | Both merged, review ship, verify green. |\n| Wave 2 | GA-3 | 2026-11-07 | Merged, review ship, verify green. |\n\n## Batch\n\n| Card | Title | Lane | Effort | Complexity | Blocked by |\n|---|---|---|---|---|---|\n| GA-1 | Seed tray | feature | M | Medium | |\n| GA-2 | Watering log | feature | S | Simple | |\n| GA-3 | Harvest list | feature | S | Simple | GA-1 |\n\n## Waves and cards\n\n| Card | Branch | Status | Commit | Review | Verify | UI | Merged | Numbers |\n|---|---|---|---|---|---|---|---|---|\n| GA-1 | feature/seed-tray | Delivered, awaiting the user's test | a1 | ship | passed 300 s | n/a | m1 | wave report |\n| GA-2 | feature/watering-log | Delivered, awaiting the user's test | a2 | ship | passed 290 s | n/a | m2 | wave report |\n| GA-3 | feature/harvest-list | Delivered, awaiting the user's test | a3 | ship | passed 280 s | n/a | m3 | wave report |\n\n## Milestone log\n\n- 2026-11-06: GA-1 merged (m1), Stand By: its Delivered comment.\n- 2026-11-06: GA-2 merged (m2), Stand By: its Delivered comment.\n- 2026-11-07: GA-3 merged (m3), Stand By: its Delivered comment.\n"
+  },
+  {
+   "title": "garden-sprint-spring-wave-report",
+   "kind": "reference",
+   "status": "active",
+   "tags": [
+    "sprint-spring"
+   ],
+   "cards": [],
+   "text": "# Sprint spring — wave report (after wave 2)\n\n## 🙋 Open calls\nNone.\n\n## ⏱️ Flow trend\n\n| Wave | Cards | Time | Full checks | Test runs | Gate rounds | Repeat runs | Tokens | Peak context |\n|---|---|---|---|---|---|---|---|---|\n| 1 | 2 | 1:10 | 2 | 0 whole suite, 3 targeted | code review 2 | 0 | 6.0 M re-read | 300 K |\n\n## 🌊 Wave 1 — 2026-11-06\n### GA-1 Seed tray — ✅ As specified\n### GA-2 Watering log — ✅ As specified\n\n#### ⏱️ Flow\n- Time: 1:10 · per card: GA-1 0:40, GA-2 0:30\n- Full checks: 2 runs, 10 min total, 0 failed\n\n#### 🪙 Tokens\n- Total: 6.0 M re-read from cache · 90 K new · 20 K written\n- Main chat: 120 steps · start context 95 K · peak context 300 K\n"
+  }
+ ],
+ "titles": [
+  "garden"
+ ]
+}

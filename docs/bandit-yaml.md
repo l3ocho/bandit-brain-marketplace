@@ -52,7 +52,7 @@ The `testdata.owner` lines are a proposal for the app (BB-492, 2026-11-13: in sp
 
 The `release_checks` lines are a proposal for the app (BB-465, 2026-11-13: its release gate `scripts/check-release-docs.mjs` and the CI Deploy run on `main` its recipe already waits for; the workflow name is the app's to confirm). `version` and `whats_new` are left out until the app has a command that prints them.
 
-The recipe has no `handover` section: no helper creates or fills a deployment card, and `release` runs the deploy itself through the `release` steps (BM-5, 2026-11-23; the app dropped the section on 2026-11-08). The reader still knows the `handover` keys until the scripts drop them.
+The recipe has no `handover` section: no helper creates or fills a deployment card, and `release` runs the deploy itself through the `release` steps (BM-5, 2026-11-23; the app dropped the section on 2026-11-08). Since BM-17 the reader knows no `handover` key either: a `handover` section left in a recipe is read by no command.
 
 The `testdata` lines are a proposal for the app (checked 2026-10-15: tables in `src/domains/*/schema.ts`, rules in the server actions, staging's database publishes no port, the test suite reads `DATABASE_URL` from the git-ignored `.env.test`). Development reads `DATABASE_URL` from the shell the skill runs in. The app commits its own `bandit.yaml` and adds `.testdata/` to its `.gitignore`.
 

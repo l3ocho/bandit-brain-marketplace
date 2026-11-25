@@ -3,7 +3,7 @@
 **Read with:** `references/dev-workflow.md` (the commands `spec`, `spec reconcile`, `plan-tech`,
 `stage`, `pick-ready`, surface roles, card boundaries, record homes)
 **Owns:** the generic app-dev lanes and stage tags · the lane template headings · the Spec lock ·
-tag merging · card fields · the old-way sprint card's board shape · the **dev board shape** procedure
+tag merging · card fields · the **dev board shape** procedure
 
 This file holds what the board itself enforces or expects. How work moves through it is
 `references/dev-workflow.md`. Planning a sprint is `bandit-dev:sprint`'s (Claude Code): it calls the
@@ -112,7 +112,7 @@ adding a Spec to a card with none are never refused.
 merge → write the full set.
 
 - **Stage change:** replace any `stage/*` tag with the new one, or **add** it when the card has
-  none. Keep every other tag, the `lane/*` and `sprint/*` tags above all.
+  none. Keep every other tag, the `lane/*` tag above all.
 - **Lane and stage on an untagged card:** merge the `lane/*` tag + `stage/spec` into its current
   tags. A card that already has them keeps its tags.
 - Refuse before writing if the result wouldn't carry exactly one `stage/*` tag (none on Incident);
@@ -126,7 +126,7 @@ Every dev card is written **complete**, in one `create_tasks` entry, then read b
 
 | Field | Value |
 |---|---|
-| `boardColumnId` | The **area column**: the module or page the change touches. `App` only when the change is shell-wide. Spans two, or no column fits → ask the user. Never create a column for it (columns come from `load`, the design conversation, or the PM step of **🏗️ Dev board shape**). **Project-management cards** (sprint planning, an old-way sprint card, planning checklists, process work) go in the `PM` column instead |
+| `boardColumnId` | The **area column**: the module or page the change touches. `App` only when the change is shell-wide. Spans two, or no column fits → ask the user. Never create a column for it (columns come from `load`, the design conversation, or the PM step of **🏗️ Dev board shape**). **Project-management cards** (sprint planning, planning checklists, process work) go in the `PM` column instead |
 | `tagIds` | `lane/*` + `stage/spec` (none on Incident; on a screen-changing card only once its design is linked and approved) + one Handler tag + one Energy tag (`references/board.md` → Tags), ids resolved live |
 | `priority` | Always set: urgency only |
 | `complexity` | Always set |
@@ -141,29 +141,9 @@ Every dev card is written **complete**, in one `create_tasks` entry, then read b
 
 ---
 
-## 🏁 Sprint card — board shape
-
-**The old way** (sprints planned before sprints were records, `references/board.md` → Tags): a sprint
-runs on one **sprint card**, the umbrella for a batch of cards. A real sprint has no sprint card. Its sections and sub-tasks
-(the planning steps, one per wave) are bandit-dev:sprint's (`templates.md` there); this file holds only
-what the board sees.
-
-| Part | Value |
-|---|---|
-| Column | `PM` (**🧾 Card fields** column rule) |
-| Tags | No `lane/*`, no `stage/*`: it isn't a lane card. Exempt from audit V1, V3 and V6 |
-| Description | No Spec. Written per `references/board.md` → Card descriptions |
-| Batch | Every card in the sprint is a **blocker** of the sprint card (`link_tasks { blockerTaskId: card, blockedTaskId: sprint card }`). The live blockers are the source of truth |
-| Sprint tag | `sprint/{name}` on each batch card, never on the sprint card. Read it as `references/board.md` → Tags says (records and tags both, until the tags retire) |
-| Effort | Its own size as the umbrella; B7 applies to the batch cards, not to it |
-| Records | Plan, execution prompt, ledger, report and the batch's briefs, with the sprint's records (bandit-dev:sprint and bandit:notes own where they go and their names) |
-
----
-
 ## 🏗️ Dev board shape — procedure
 
-Run from `onboard` (approved rows) or as a fix row for bandit:audit S9; the PM step also from a
-sprint plan. The one lane and column procedure in this skill; any other lane or column design is
+Run from `onboard` (approved rows) or as a fix row for bandit:audit S9. The one lane and column procedure in this skill; any other lane or column design is
 still a design conversation. **Never silently:** every step is an approved row.
 
 Read `get_context` once (tags, boards), then work by id.
@@ -181,7 +161,7 @@ Read `get_context` once (tags, boards), then work by id.
    list, in the lane table's order, each matcher `{field: "tag", values: [that lane tag's id]}`,
    ids resolved live after step 1 runs. The call replaces every lane, so existing lanes not in the
    list are named in the row.
-4. **PM column** (from `onboard` with `dev: true`, or from a sprint plan when the board has none).
+4. **PM column** (from `onboard` with `dev: true`, when the board has none).
    `get_context → boards` → no `PM` column → one row with two calls: `manage_columns_lanes { action: "add", boardId, name: "PM" }`
    (it lands last), then `manage_columns_lanes { action: "reorder", columns }` with **every** column, Backlog at 0 and `PM` at
    1, the rest in their current order. A board that already has `PM` gets no row.

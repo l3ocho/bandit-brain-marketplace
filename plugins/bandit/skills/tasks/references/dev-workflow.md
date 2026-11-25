@@ -4,7 +4,7 @@
 `/bandit:tasks stage` `/bandit:tasks pick-ready`
 **Owns:** surface roles · card boundaries · record homes · the dev card procedures
 **Board rules** (lanes, stages, lane template headings, Spec lock, tag merging, card fields, the
-sprint card, the dev board shape): `references/dev.md`. Read it first; its gate applies here too.
+dev board shape): `references/dev.md`. Read it first; its gate applies here too.
 
 One card workflow shared by Claude.ai and Claude Code. The card is the record (Gitea issues are
 retired; Gitea keeps PRs, the wiki, releases and CI). Project specifics (branch prefixes, gates,
@@ -59,7 +59,7 @@ can do it (*"`plan-tech` runs in Claude Code, from the repo"*).
 | B4 | Lazy: the next L3 work package becomes a card only through `spec`, which cites its `WBS-X.Y.Z` |
 | B5 | Thin card: `Spec` + `Technical plan`, each short. Everything else goes in the doc |
 | B6 | Before creating: merge check (below). Skipped for Incident |
-| B7 | Up to **L**. An L card's plan note lays out the landing/commit sequence. **XL splits** into 2+ cards, wherever the size is set: at `spec`, at `plan-tech` and at a sprint's sizing step. **Avoid** a card that is both high effort and high complexity (L and Complex): split it too. The app bands both `split` (`references/board.md` → Size, band and Rank). **No umbrella cards** that only group smaller ones: the smaller cards are the work, and a sprint takes them in its place. Each new card keeps the original's lane and stage and stays in the same sprint: added to its record (`manage_sprints { action: "add_cards" }`), or on an old-way sprint its `sprint/{name}` tag and a blocker of the sprint card |
+| B7 | Up to **L**. An L card's plan note lays out the landing/commit sequence. **XL splits** into 2+ cards, wherever the size is set: at `spec`, at `plan-tech` and at a sprint's sizing step. **Avoid** a card that is both high effort and high complexity (L and Complex): split it too. The app bands both `split` (`references/board.md` → Size, band and Rank). **No umbrella cards** that only group smaller ones: the smaller cards are the work, and a sprint takes them in its place. Each new card keeps the original's lane and stage and stays in the same sprint: added to its record (`manage_sprints { action: "add_cards" }`) |
 
 **WBS on dev projects.** Level names are bandit:plan's. Here: **L3 work package = one card**,
 created lazily through `spec` (B4). **A Technical home board is never loaded** (`/bandit:tasks load` refuses
@@ -180,7 +180,7 @@ files are found through that `Handover:` line.
 ### `/bandit:tasks spec reconcile {card…}` — bring locked Specs in line with decisions
 
 For cards whose Spec is locked and has fallen behind decisions taken since (in comments, the brief,
-the sprint's ledger or an old-way sprint card). Run only when the user asks; sprint planning never calls it.
+the sprint's ledger). Run only when the user asks; sprint planning never calls it.
 
 1. **Gate and role** (above). Per card: `get_task` → current `Spec`, comments, linked brief.
 2. Build the new `Spec` from the same template headings: answered questions move into Decisions,
@@ -259,6 +259,6 @@ Steps 1 and 5 are the **card-write rules** bandit-dev:sprint calls for a sprint'
 Runs **Dating the week** (`/bandit:tasks week`, `references/week.md`) with its `stage/ready` filter, and adds nothing: a
 weekly pick of approved cards, not sprint planning. Picked cards get due dates only; the midnight
 job moves them into To Do when due. A card picked for today → its `update_tasks` entry also carries
-`executionState: "assigned"`, since the midnight run has already passed. Cards already in a sprint (a record or a `sprint/*` tag, `references/board.md` → Tags)
+`executionState: "assigned"`, since the midnight run has already passed. Cards already in a sprint (`references/board.md` → Tags)
 are the sprint's work: they are not candidates.
 

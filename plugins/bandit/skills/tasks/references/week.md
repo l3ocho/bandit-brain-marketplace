@@ -69,8 +69,8 @@ as the app wrote it, never a total of Sizes (`references/board.md` → Size, ban
 2. `list_tasks { completed: false, boardId }` for candidates — undated tasks in the domain's
    boards, the home board first (`[board]` narrows it to one of them).
    **`stage/ready` filter** (called by `/bandit:tasks pick-ready` on a dev project): add `tagId` = the
-   `stage/ready` tag, `noSprint: true` and `noTagWithPrefix: "sprint/"`. Only approved cards in no
-   sprint and with no old sprint tag are candidates. Sprints are read as `references/board.md` → Tags says: a card in a sprint is the sprint's work, not a weekly pick. Nothing else changes
+   `stage/ready` tag and `noSprint: true`. Only approved cards in no
+   sprint are candidates. Sprints are read as `references/board.md` → Tags says: a card in a sprint is the sprint's work, not a weekly pick. Nothing else changes
 3. Propose dates as a list, candidates in the app's rank order (`references/board.md` → Size, band
    and Rank). One line per task
 4. On confirmation: `update_tasks { items: [{ taskId, dueDate }, …] }`, ≤100 per call

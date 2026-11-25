@@ -7,8 +7,8 @@ its checklist, saying what has to come back from the blocker. The hook cannot wr
 it puts a notice into the session's context (`additionalContext`) naming the cards and the steps owed.
 
 Any MCP server's `create_tasks` and `link_tasks`, recognised by the call's own shape. Silent when the
-write was refused, when no link was made, for a created card that already lists its own gate for that
-blocker, and for an old-way sprint card (title `Sprint …`), whose checklist is the plan's fixed steps.
+write was refused, when no link was made, and for a created card that already lists its own gate for that
+blocker.
 A created blocker titled `Design: …` is a design card (bandit:tasks Design card): its gate line names the design
 handover and the build card's `stage/spec`.
 After `link_tasks` the answer holds no checklist, so the notice says to skip a card that already has its gate.
@@ -24,7 +24,6 @@ import re
 import sys
 
 TOOL = re.compile(r"^mcp__.+__(create_tasks|link_tasks)$")
-SPRINT = "Sprint "
 SPRINT_END = "sprint "
 DESIGN = "Design:"
 DESIGNS = set()  # blockers created in this write whose title marks a design card (bandit:tasks Design card)
@@ -85,8 +84,6 @@ def links_made(tool_name, tool_input, response):
         if not isinstance(item, dict) or refused(result):
             continue
         title = item.get("title") if isinstance(item.get("title"), str) else "untitled"
-        if title.startswith(SPRINT):
-            continue
         result = result if isinstance(result, dict) else {}
         me = result.get("shortId") or result.get("taskId") or result.get("id") or f'the new card "{title}"'
         deps = item.get("dependencies") if isinstance(item.get("dependencies"), dict) else {}
@@ -120,8 +117,7 @@ def notice(payload):
         'For each card: manage_subtasks { action: "add" } on the blocked card → manage_subtasks { action: "reorder" } '
         "with the FULL order so the gate is last → get_task to read it back → add_comment on the blocked card "
         "naming the link and the gate. Say in your reply which gates you added.",
-        "Skip if a gate for this blocker already exists on the blocked card. An old-way sprint card blocked by its "
-        "batch or the previous sprint needs no gate: its checklist is the plan's fixed steps.",
+        "Skip if a gate for this blocker already exists on the blocked card.",
     ])
 
 

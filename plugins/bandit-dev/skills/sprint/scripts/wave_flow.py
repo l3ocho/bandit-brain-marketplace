@@ -32,8 +32,12 @@ Counting:
   cost         an estimate: each step's usage at the per-million price of its `message.model` (PRICES, checked on
                PRICES_CHECKED); cache writes at the 5-minute rate; a model with no price is listed, never guessed
 
+One-card wave (--row): one line for its card's Numbers cell in the ledger's Waves and cards table, in place of a wave
+report section: the lines the sprint data reads (ROW_LINES), each without its `- `, joined by `; `; the per-card
+split and the repeat runs' commands are left out (one card), and a `|` or `;` inside a line becomes `/` or `,`.
+
 Usage:
-  wave_flow.py --since ISO [--until ISO] [--logs DIR | --repo PATH] [--verify CMD] [--test REGEX]
+  wave_flow.py --since ISO [--until ISO] [--logs DIR | --repo PATH] [--verify CMD] [--test REGEX] [--row]
                [--marketplace-plugins a,b,c] [--connectors "server one,server two"]
   (--verify defaults to `recipe.py get verify` in the current project; without it full checks are "not measured")
 Exit codes: 0 ok · 2 usage · 3 no logs in the window.
@@ -60,6 +64,27 @@ PRICES = {
     "claude-sonnet-5-5": (2.00, 10.00, 0.20, 2.50),
     "claude-haiku-4-5": (1.00, 5.00, 0.10, 1.25),
 }
+
+
+# The lines a one-card wave's Numbers cell keeps (--row), in this order: what sprint_data.py reads, and the two counts
+# the wave report's Lessons name (the search agent, the shell output).
+ROW_LINES = ("Time", "Full checks", "Test runs", "Gates", "Search agent (Explore)", "Repeat runs", "Total", "Main chat",
+             "Shell output taken in", "Hooks", "Estimated cost")
+
+
+def row(text):
+    """The Flow and Tokens blocks as one Numbers cell: ROW_LINES, `- ` dropped, joined by `; `."""
+    keep = {}
+    for line in text.splitlines():
+        for name in ROW_LINES:
+            if line.startswith(f"- {name}:") and name not in keep:
+                part = line[2:]
+                if name == "Time":
+                    part = part.split(" · per card", 1)[0]
+                if name == "Repeat runs":
+                    part = part.split(" (", 1)[0]
+                keep[name] = part.replace("|", "/").replace(";", ",").strip()
+    return "; ".join(keep[n] for n in ROW_LINES if n in keep)
 
 
 def when(text):
@@ -376,6 +401,7 @@ def main(argv):
     ap.add_argument("--test")
     ap.add_argument("--marketplace-plugins", default=",".join(MARKETPLACE_PLUGINS))
     ap.add_argument("--connectors", default=",".join(CONNECTORS))
+    ap.add_argument("--row", action="store_true", help="one line for a one-card wave's Numbers cell")
     a = ap.parse_args(argv)
     since, until = when(a.since), when(a.until) if a.until else None
     if since is None or (a.until and until is None):
@@ -391,7 +417,7 @@ def main(argv):
     if text is None:
         print(f"wave_flow: no logged steps in {logs} for that window", file=sys.stderr)
         return 3
-    print(text)
+    print(row(text) if a.row else text)
     return 0
 
 

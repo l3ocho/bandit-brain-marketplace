@@ -35,11 +35,6 @@ KEYS = {
     "testdata.owner.table": "testdata: the table whose row is a made-up Account the clean removes whole (optional part)",
     "testdata.owner.dry_run": "testdata: per database, the project's dry run of removing that Account, taking {id}",
     "testdata.owner.remove": "testdata: per database, the project's command that removes that Account whole, taking {id}",
-    "handover.board": "plan, execute, release: the board the deployment handover cards go on",
-    "handover.production.column": "plan, release: the column of the production handover card (optional part)",
-    "handover.production.runbook": "release: the production deploy steps (path#section) (optional part)",
-    "handover.staging.column": "plan, execute: the column of the staging handover card",
-    "handover.staging.runbook": "execute: the staging deploy steps (path#section)",
     "guard.credentials.block": "credential guard hook: regexes of commands no agent runs",
     "guard.credentials.allow": "credential guard hook: regexes of the project's allowed dev-login commands",
     "stop.paths": "stop gate hook: the paths that count as implementation (git pathspecs)",
@@ -50,10 +45,9 @@ KEYS = {
     "release_checks.whats_new": "release: prints the version the app's What's new shows",
 }
 # A repo without an optional section leaves it out; a section present is complete, except its
-# optional parts: a `handover` section without `production` has no production handover card, and
-# each `release_checks` command may be left out on its own.
-OPTIONAL = ("migrations", "staging", "testdata", "handover", "guard", "stop", "release_checks")
-OPTIONAL_PARTS = ("handover.production", "testdata.owner", "release_checks.gate", "release_checks.ci", "release_checks.version",
+# optional parts: `testdata.owner` may be left out, and each `release_checks` command may be left out on its own.
+OPTIONAL = ("migrations", "staging", "testdata", "guard", "stop", "release_checks")
+OPTIONAL_PARTS = ("testdata.owner", "release_checks.gate", "release_checks.ci", "release_checks.version",
                   "release_checks.whats_new")
 
 

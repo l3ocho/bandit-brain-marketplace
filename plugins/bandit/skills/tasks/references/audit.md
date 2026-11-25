@@ -26,10 +26,10 @@ first (boards, tags, members, sprints, lane templates), then work by id. Sprints
 | 1 | **Untriaged pile** | `list_tasks { view: "inbox" }` → Untriaged count, cards in its groups included. Over ~15 is a triage backlog, not a hygiene problem |
 | 2 | **Untriaged parked cards** | `list_tasks { boardId, boardColumnId: null }` — on a board, in no column. Age via `list_events { taskId }`. Fires on the domain's ` - wkflw` board for any card older than a day (the daily sweep missed it), and on any board for a card older than ~30 days with no field answered. Fix row per board: run triage's **Leaving the inbox** for them (`references/triage.md`), or, on any other board, keep them parked as ideas with the user's yes |
 | 3 | **Stale overdue** | `list_tasks { view: "week" }` → Due column. Anything overdue by more than a month is a decision, not a date |
-| 4 | **Stand By rot** | `list_tasks { executionState: "standby", boardId }` per board. Nothing should sit there indefinitely. **Exempt:** cards in a sprint (a record or a `sprint/*` tag) and old-way sprint cards (`references/dev.md` → Sprint card): they wait there for the user's test |
+| 4 | **Stand By rot** | `list_tasks { executionState: "standby", boardId }` per board. Nothing should sit there indefinitely. **Exempt:** cards in a sprint (`references/board.md` → Tags): they wait there for the user's test |
 | 5 | **Dead dependencies** | `get_task` on anything with `blockedBy` — links pointing at completed tasks |
-| 6 | **Orphan tags** | `get_context → tags` → `taskCount: 0`. **Exempt:** `sprint/*` (the tag of an old-way sprint still running; its close retires it), and an App tag whose `view` isn't `both`: the count leaves out the cards where it is hidden, so zero proves nothing (the app's delete dialog shows the true count) |
-| 7 | **Off-vocabulary tags** | `get_context → tags` → anything outside the vocabulary (`references/board.md` → Tags: three axes, dev tags, sprint tags). **Exempt:** `sprint/*` |
+| 6 | **Orphan tags** | `get_context → tags` → `taskCount: 0`. **Exempt:** an App tag whose `view` isn't `both`: the count leaves out the cards where it is hidden, so zero proves nothing (the app's delete dialog shows the true count) |
+| 7 | **Off-vocabulary tags** | `get_context → tags` → anything outside the vocabulary (`references/board.md` → Tags: three axes, dev tags) |
 | 8 | **Untouched boards** | `get_context → boards`, then `list_events` per board. No activity in ~60 days → archive candidate |
 | 9 | **Unreadable rules** | `manage_recurrence { action: "get", taskId }` → `rule: null` on a recurring task. Fix row: `manage_recurrence { action: "update", taskId, rule }` with the rule read from its occurrence history (`manage_recurrence { action: "list_occurrences", taskId, from, to }`), shown in full and marked **unchecked**. History too thin to read → the row asks for the schedule instead. Never rewritten without that row's yes |
 | 10 | **Effort/complexity blanks** | Only worth flagging on tasks in Next or Doing |
@@ -57,12 +57,12 @@ Rules in `references/dev.md` and `references/dev-workflow.md`. Every finding is 
 
 | # | Check | How |
 |---|---|---|
-| V1 | **Lane and stage tags** | Every open card has exactly one `lane/*` tag and, except `lane/incident`, exactly one `stage/*` tag. Sprint cards are exempt (`references/dev.md` → Sprint card) |
+| V1 | **Lane and stage tags** | Every open card has exactly one `lane/*` tag and, except `lane/incident`, exactly one `stage/*` tag |
 | V2 | **Plan note present** | `stage/planned` and `stage/ready` cards have a plan note linked to them and out of the inbox (bandit:notes' lookup of the card's notes; this skill names no storage). A recurring card may carry a `Runbook:` line instead (`references/dev-workflow.md` → Record homes). A card whose `Technical plan` names its sprint's shared plan passes without the lookup: that plan is bandit-dev:sprint's to check |
-| V3 | **Split-band cards** | The app's `band` is `split` → split candidate (B7, `references/dev-workflow.md`; `references/board.md` → Size, band and Rank); the new cards stay in the same sprint. Sprint cards are exempt |
+| V3 | **Split-band cards** | The app's `band` is `split` → split candidate (B7, `references/dev-workflow.md`; `references/board.md` → Size, band and Rank); the new cards stay in the same sprint |
 | V4 | **Possible duplicates** | Two open cards in the same area column and lane with the same outcome (B6, `references/dev-workflow.md`). Judgment call: show both |
 | V5 | **Open spec changes** | Cards with a comment starting `Spec change needed:` (`get_task` → `comments`), or a legacy line of it under `Technical plan` |
-| V6 | **Card complete** | Every open card holds every **🧾 Card fields** value and every heading of its lane template (`references/dev.md`). One fix row per card: the missing values and headings, the exact `update_tasks { items: [{ taskId, description, tagIds }] }` entry (one entry per card; `tagIds` per `references/board.md` → Tags). Sprint cards are exempt |
+| V6 | **Card complete** | Every open card holds every **🧾 Card fields** value and every heading of its lane template (`references/dev.md`). One fix row per card: the missing values and headings, the exact `update_tasks { items: [{ taskId, description, tagIds }] }` entry (one entry per card; `tagIds` per `references/board.md` → Tags) |
 
 **No age check.** Time spent in a stage is never a finding.
 

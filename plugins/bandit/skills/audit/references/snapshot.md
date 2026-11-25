@@ -32,7 +32,7 @@ is gone, so its report is superseded (`references/domain-audit.md` → Replay).
                   "visibility": "household", "system_owner": null,
                   "lanes": [{"name": "Feature", "position": 0,
                              "matcher": {"field": "tag", "values": ["lane/feature"]}}]}],
-    "sprint_cards": [{"id": "<uuid>", "short_id": "{PFX}-26", "sprints": ["sprint/staging"]}]
+    "sprint_cards": [{"id": "<uuid>", "short_id": "{PFX}-26", "sprints": ["Staging 1"]}]
   },
   "stamps": {
     "Acme/home-reno": {
@@ -67,7 +67,7 @@ is gone, so its report is superseded (`references/domain-audit.md` → Replay).
 | `board.projects` | `get_context → boards` (not archived: no `includeArchived`) | `name`, `profile` (`workflow` or `technical`, as-is), `folder` = `folder.name` (or `null`), `visibility`, `system_owner` = `systemOwner`. Every board, system ones included: the script exempts them |
 | `….lanes` | `get_context → boards` (lanes come with the columns) | Every lane: `name`, `position`, `matcher.field` as-is, and `matcher.values` with **tag ids replaced by tag names** from `get_context → tags` (priority and state values as-is). No lanes → `[]` (a Workflow board always: the app hides its lanes) |
 | `tags` | `get_context → tags` | Every tag **name**, as-is |
-| `board.sprint_cards` | Real sprints: `get_sprints { boardId }` on each Technical board of the domain, then `get_sprints { sprintId }` for each one's cards. Old sprints, until the tags retire: `list_tasks(tagPrefix: "sprint/")`, open and completed (not archived). `MODULE_DISABLED` → stop and say Sprints is off; never write an empty list for it | One entry per card: `id`, `short_id` (`shortId`, or `null`), `sprints` = the **names** of the real sprints holding it, as-is, and its tag names starting `sprint/`, as-is |
+| `board.sprint_cards` | Real sprints: `get_sprints { boardId }` on each Technical board of the domain, then `get_sprints { sprintId }` for each one's cards. `MODULE_DISABLED` → stop and say Sprints is off; never write an empty list for it | One entry per card: `id`, `short_id` (`shortId`, or `null`), `sprints` = the **names** of the sprints holding it, as-is |
 | `stamps` | The stamps note of each domain scored (`stamps.note_title`; found as `references/self-check.md` step 4 says), read with `notes_get` | One key per `## {project}` section, `{domain}/{project}`: the section's `json` block parsed, as-is. No note for a domain → no keys for it. A block that doesn't parse → stop and say which section: never skip it |
 | `notes.{D}.{project}` | `notes_list` of the board the stamp's `board:` line names (its Inbox included, archived notes left out) | One key per stamped project of a scored domain. `board` = the board's name. `notes`: one row per note, `id`, `title`, `kind`, `status` as-is, `cards` = each linked card's `shortId` (its `id` when it has none). `board: none`, a board that doesn't resolve, or `notes: none` → `notes: []` |
 | `….notes[].tags` | `notes_get` of **every** note of kind `brief` linked to a card | Its `tags`, as-is. Every other note: `null` (not read). The script refuses a brief linked to a card whose tags are `null` |

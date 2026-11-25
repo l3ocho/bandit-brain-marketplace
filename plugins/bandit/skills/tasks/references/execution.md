@@ -70,8 +70,7 @@ Report the breach. Propose what moves back to To Do or Stand By, starting from t
    the rest of the domain by board; inside each board, the app's rank order, each card with its
    Size, band and Rank as the app wrote them (`references/board.md` → Size, band and Rank)
 3. Flag: cap breach · anything overdue · anything in Stand By older than a week, **except** a
-   card in a sprint (a record or a `sprint/*` tag, `references/board.md` → Tags) or an old-way sprint card
-   (`references/dev.md` → Sprint card): those wait
+   card in a sprint (`references/board.md` → Tags): it waits
    in Stand By for the user's test on purpose
 4. Stop. `/bandit:tasks today` is a read.
 

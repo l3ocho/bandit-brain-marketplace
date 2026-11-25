@@ -27,10 +27,6 @@ testdata:
       development: python3 fake_remove.py {id}
     remove:
       development: python3 fake_remove.py {id} --confirm
-handover:
-  board: Fixture Ops
-  production: { column: Fixture Host, runbook: docs/deployment.md#Deploy now }
-  staging: { column: Fixture Lab, runbook: docs/staging-runbook.md#Deploy to staging }
 guard:
   credentials:
     block: ['\bscripts/set-password\.py\b', '(?i)\bpassword_hash\b\s*=']

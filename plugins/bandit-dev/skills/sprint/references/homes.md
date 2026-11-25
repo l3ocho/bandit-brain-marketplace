@@ -8,6 +8,7 @@
 |---|---|
 | The sprint | A real sprint on the home board: status and the batch in run order (`references/templates.md` → The sprint in the app) |
 | Plan, briefs, execution prompt, wave notes, ledger (planning steps and wave progress), review record, wave report, handover report | The sprint's papers: notes on the project's board with the tag `sprint-{name}`, through bandit:notes. Titles and kinds in `references/templates.md` → Papers |
+| What a card delivered | Its Delivered comment, one comment on the card written when it reaches Stand By (`references/templates.md` → Delivered comment); every paper names the card instead of retelling it |
 | The project's targets note | A note in the project's place for planning documents (`references/templates.md` → Papers, Sprint targets) |
 | The project's sprint data file (not text, so not a note) | A data file in `.sprint/` at the root of the repository the helper runs from (`references/templates.md` → Papers, Sprint data) |
 | The project's notes file (what the sprint scripts read) | `.sprint/{project}-sprint-notes.json` at the root of the repository the helper runs from, rebuilt whole before each run of the scripts (`references/templates.md` → Notes file) |

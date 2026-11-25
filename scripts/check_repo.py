@@ -1156,7 +1156,7 @@ def check_notes_file_build():
 def check_wave_order():
     s = PLUGINS / "bandit-dev" / "skills" / "sprint"
     files = [s / "SKILL.md", *sorted((s / "references").glob("*.md"))]
-    files = [f for f in files if f.name not in ("gotchas.md", "old-way.md")]   # history lines quote the old wording
+    files = [f for f in files if f.name not in ("gotchas.md",)]   # history lines quote the old wording
     hits = [f"{f.relative_to(ROOT)}: {h!r}" for f in files for h in old_order_hits(f.read_text(encoding="utf-8"))]
     cases = [("Wave N is refused while wave N-1 is not done", 1), ("Strictly\nin sequence.", 1), ("Waves run in order.", 1),
              ("**Last wave only:** when", 1), ("move the next wave's cards to `next`", 1),
@@ -1985,15 +1985,14 @@ def check_recipe():
         (("--file", "bandit.no-migrations.yaml", "check-tail", "none"), 0, "matches"),
         (("--file", "bandit.no-migrations.yaml", "opt", "staging.refresh"), 0, "none"),
         (("opt", "staging.refresh"), 0, "echo staging refresh"),
-        (("opt", "handover.board"), 0, "Fixture Ops"),
-        (("--file", "bandit.no-migrations.yaml", "opt", "handover.board"), 0, "none"),
-        (("get", "handover.staging.runbook"), 0, "docs/staging-runbook.md#Deploy to staging"),
-        (("--file", "bandit.missing-key.yaml", "require", "handover.production.runbook"), 3, "missing key `handover.production.runbook`"),
-        (("--file", "bandit.no-production.yaml", "require", "release", "branches.trunk", "branches.deploy"), 0, "present"),
-        (("--file", "bandit.no-production.yaml", "get", "handover.staging.column"), 0, "Fixture Lab"),
-        (("--file", "bandit.no-production.yaml", "get", "handover.production.column"), 3, "missing key `handover.production.column`"),
-        (("--file", "bandit.no-production.yaml", "opt", "handover.production.column"), 0, "none"),
-        (("opt", "handover.production.column"), 0, "Fixture Host"),
+        (("get", "testdata.schema"), 0, "schema.sql"),
+        (("--file", "bandit.no-migrations.yaml", "opt", "testdata.schema"), 0, "none"),
+        (("--file", "bandit.missing-key.yaml", "require", "release", "branches.trunk", "branches.deploy"), 0, "present"),
+        (("get", "testdata.owner.table"), 3, "missing key `testdata.owner.table`"),
+        (("opt", "testdata.owner.table"), 0, "none"),
+        (("--file", "bandit.testdata-owner.yaml", "opt", "testdata.owner.table"), 0, "teams"),
+        (("opt", "release_checks.ci"), 0, "none"),
+        (("opt", "handover.board"), 2, "is not optional"),
         (("opt", "guard.credentials.block"), 0, "set-password"),
         (("--file", "bandit.no-migrations.yaml", "opt", "guard.credentials.block"), 0, "none"),
         (("opt", "stop.close"), 0, "the fixture's close step"),
@@ -2172,7 +2171,7 @@ def check_dependency_gate():
     create = lambda item, resp=ok_text: {"tool_name": "mcp__other_board__create_tasks",  # noqa: E731
                                          "tool_input": {"items": [item]}, "tool_response": resp}
     cases = [
-        ("link", link, ["AB-1 now blocks AB-2", "Skip if a gate for this blocker already exists", "sprint card blocked by its"]),
+        ("link", link, ["AB-1 now blocks AB-2", "Skip if a gate for this blocker already exists"]),
         ("refused link", {**link, "tool_response": {"ok": False, "code": "CYCLE"}}, None),
         ("create blockedBy", create({"title": "New", "dependencies": {"blockedBy": ["AB-1"]}}), ["AB-1 now blocks XY-9"]),
         ("create blocks", create({"title": "New", "dependencies": {"blocks": ["AB-3"]}}), ["XY-9 now blocks AB-3"]),
@@ -2180,7 +2179,9 @@ def check_dependency_gate():
          ["XY-9 (a design card) now blocks AB-4", "the design handover is linked and approved", "before AB-4 gets stage/spec"]),
         ("create with its gate", create({"title": "New", "dependencies": {"blockedBy": ["AB-1"]},
                                          "subtasks": ["Build it", "Gate: AB-1 delivered (the API) before deploy"]}), None),
-        ("sprint card", create({"title": "Sprint 2026-w01", "dependencies": {"blockedBy": ["AB-1", "AB-2"]}}), None),
+        # A card titled `Sprint …` is a card like any other (BM-17).
+        ("card titled Sprint", create({"title": "Sprint 2026-w01", "dependencies": {"blockedBy": ["AB-1", "AB-2"]}}),
+         ["AB-1 now blocks XY-9", "AB-2 now blocks XY-9"]),
         ("refused create", create({"title": "New", "dependencies": {"blockedBy": ["AB-1"]}},
                                   {"ok": True, "results": [{"ok": False, "code": "CYCLE"}]}), None),
         ("no link", create({"title": "New"}), None),
@@ -2215,7 +2216,7 @@ def check_dependency_gate():
             bad.append(f"{label} → missing {missing or out.get('hookEventName')}")
     report("DG1", not bad, "; ".join(bad) or f"dependency gate: {len(cases)} fixture payloads (notice in the "
            "session's context naming the blocked card or sprint and the skip line; silent on refusals, a created card "
-           "with its gate, sprint cards, a lands-after link and other tools)")
+           "with its gate, a lands-after link and other tools; a card titled Sprint … gets its notice like any card)")
 
 
 # ── SB1 · a sprint card gets its build steps before its Technical plan and before the commit (BB-451) ─
@@ -2387,7 +2388,7 @@ def check_description_gate():
     handover = " ".join((PLUGINS / "bandit-dev" / "skills" / "sprint" / "references" / "templates.md")
                         .read_text(encoding="utf-8").split())
     if "never the last block" not in handover:
-        bad.append("sprint templates.md → Handover cards: the `<pre>` is not said to be never the last block")
+        bad.append("sprint templates.md → Debug card: the `<pre>` is not said to be never the last block")
     pre_last = "<h2>Why</h2><p>x</p><h2>Prompt for the CTO agent</h2><pre>Card: a\n\n- step\n**b**</pre>"
     cases = [  # (label, tool, description, refused, text in the refusal)
         ("a prompt block last (sprint doors' CTO cards)", "update_tasks", pre_last, True, "raw text"),
@@ -2567,6 +2568,130 @@ def check_l5():
     report("L5", not bad, "; ".join(bad) or f"{len(names)} templates ≤ one page, shipped byte for byte in bandit:project")
 
 
+def sprint_module(name):
+    """One of the sprint helper's scripts, imported from its own folder (its imports of the others resolve there)."""
+    import importlib.util
+    scripts = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts"
+    sys.path.insert(0, str(scripts))
+    try:
+        spec = importlib.util.spec_from_file_location(name, scripts / f"{name}.py")
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+    finally:
+        sys.path.remove(str(scripts))
+    return mod
+
+
+# ── DW1 · what a card delivered is written once, in its Delivered comment; the wave order sits in the ledger's Waves table (BM-7) ─
+def check_delivered_once():
+    s = PLUGINS / "bandit-dev" / "skills" / "sprint"
+    refs = {p.name: p.read_text(encoding="utf-8") for p in (s / "references").glob("*.md")}
+    t = refs["templates.md"]
+    part = lambda text, head: text.split(f"\n## {head}\n", 1)[-1].split("\n## ", 1)[0] if f"\n## {head}\n" in text else ""  # noqa: E731
+    bad = []
+    home = part(t, "Delivered comment")
+    for need in ("`Delivered, awaiting your test (sprint {name}, wave {n}).`", "**How to test it:**", "**How we tested it:**",
+                 "**Different:**", "never copied"):
+        if need not in home:
+            bad.append(f"templates.md → Delivered comment lacks {need}")
+    ledger = part(t, "Ledger")
+    for need in ("`| Card | Branch | Status | Commit | Review | Verify | UI | Merged | Numbers |`", "never a sentence",
+                 "no order column", "the one place of the ledger that holds the wave order", "never list the waves again"):
+        if need not in ledger:
+            bad.append(f"templates.md → Ledger lacks {need}")
+    report_part = part(t, "Wave report")
+    if "at most one line" not in report_part or "Cards is how many" not in report_part:
+        bad.append("templates.md → Wave report does not keep a card to one line and the trend to a count of cards")
+    if "How to test it:" not in part(t, "Report") or "Delivered comment" not in part(t, "Report"):
+        bad.append("templates.md → Report does not keep how to test each card and name its Delivered comment")
+    if "**Delivered comment**" not in refs["execute.md"]:
+        bad.append("execute.md → The wave, step 5 does not write the Delivered comment")
+    if "Order column" in refs["plan.md"] or "ledger's **Waves** table, the one place of the wave order" not in refs["plan.md"]:
+        bad.append("plan.md step 6 still records the order in the Batch table")
+    stale = sorted(n for n, text in refs.items() if re.search(r"(?<!wave )report section|board comment|card and reference table|"
+                                                               r"what you get, how to test it, how we tested it", text, re.I))
+    if stale:
+        bad.append(f"the old per-paper account is still asked for in {', '.join(stale)}")
+    script = s / "scripts" / "check_sprint.py"
+    new = run_script(script, "--notes", notes_fixture("OneCardWave"))
+    old = run_script(script, "--notes", notes_fixture("Record"))
+    if new[0] != 0 or old[0] != 0:
+        bad.append(f"check_sprint on a ledger with the card first ({new[0]}) and one with a Wave cell ({old[0]}): both must pass")
+    cs = sprint_module("check_sprint")
+    rows = "| Card | Branch |\n|---|---|\n| AB-1 | feature/a |\n| 2 | AB-2 |\n| Wave 3 | AB-3, AB-4 |\n"
+    if [ids for _, ids in cs.card_rows(rows)] != [["AB-1"], ["AB-2"], ["AB-3", "AB-4"]]:
+        bad.append("check_sprint.card_rows does not read a card first, after a Wave cell and in a Waves row")
+    report("DW1", not bad, "; ".join(bad) or "the Delivered comment is the one account (templates.md), every other paper keeps the "
+           "card id and one line, the handover report keeps how to test; the wave order sits in the ledger's Waves table; "
+           "the checker reads a card row with the card first or after a Wave cell")
+
+
+# ── OC1 · a one-card wave writes its numbers once, on its card's row (BM-8) ─
+def check_one_card_wave():
+    s = PLUGINS / "bandit-dev" / "skills" / "sprint"
+    script = s / "scripts" / "check_sprint.py"
+    bad = []
+    good = run_script(script, "--notes", notes_fixture("OneCardWave"))
+    wrong = run_script(script, "--notes", notes_fixture("OneCardWaveBad"))
+    if good[0] != 0:
+        bad.append(f"OneCardWave (numbers on the card's row, no section) → {good[0]} {good[1][-160:]!r}")
+    if not (wrong[0] == 1 and wrong[1].count("\n- ") == 1 and "SP11" in wrong[1] and "one card, GA-3" in wrong[1]):
+        bad.append(f"OneCardWaveBad (no numbers, no section) → {wrong[0]} {wrong[1][-200:]!r}")
+    wf, sd = sprint_module("wave_flow"), sprint_module("sprint_data")
+    blocks = ("#### ⏱️ Flow\n- Time: 0:35 · per card: GA-3 0:35\n- Full checks: 2 runs, 9 min total, 1 failed (tests | red; slow)\n"
+              "- Test runs: 1 whole suite, 2 targeted\n- Gates: code review 2 rounds, UI check 1 rounds\n"
+              "- Search agent (Explore): 1 launch\n- Repeat runs: 1 (npx vitest a; b)\n- Time sinks: 1. Bash x 5 min\n\n"
+              "#### 🪙 Tokens\n- Total: 3.5 M re-read from cache · 60 K new · 11 K written\n- Split: main chat 3.5 M (100%)\n"
+              "- Main chat: 70 steps · start context 90 K · peak context 260 K\n- Shell output taken in: wave chat 90 K chars (main chat)"
+              " · all chats 99 K chars\n- Hooks: 9 runs, 700 ms total\n- Estimated cost: $2.40 (estimate, not billing; prices checked"
+              " 2026-11-08) · claude-opus-5-5 $2.40")
+    cell = wf.row(blocks)
+    if "|" in cell or "per card" in cell or "Time sinks" in cell or "npx vitest" in cell:
+        bad.append(f"wave_flow --row keeps a `|`, the per-card split, the time sinks or the repeat runs' commands: {cell[:160]!r}")
+    by_section = sd.Wave("x", "live", 1, ["GA-3"], "", "", "## 🌊 Wave 1\n" + blocks)
+    ledger = f"## Waves and cards\n\n| Card | Numbers |\n|---|---|\n| GA-3 | {cell} |\n"
+    by_cell = sd.Wave("x", "live", 1, ["GA-3"], "", ledger, "")
+    names = [m.name for m in sd.MEASURES if m.name not in ("done", "cards", "card_ids", "effort", "plan_deviations", "debug_lines")]
+    diff = [n for n in names if next(m for m in sd.MEASURES if m.name == n).reader(by_section)
+            != next(m for m in sd.MEASURES if m.name == n).reader(by_cell)]
+    if diff:
+        bad.append(f"the sprint data reads a one-card wave's cell differently from its section on: {', '.join(diff)}")
+    if next(m for m in sd.MEASURES if m.name == "time_min").reader(by_cell) != "35":
+        bad.append("the sprint data reads no time from a one-card wave's cell")
+    two = sd.Wave("x", "live", 1, ["GA-3", "GA-4"], "", ledger, "")
+    if two.section:
+        bad.append("a wave of two cards reads a card's Numbers cell as its section")
+    t = (s / "references" / "templates.md").read_text(encoding="utf-8")
+    if "**One-card wave.**" not in t or "--row" not in t or "--row" not in (s / "references" / "execute.md").read_text(encoding="utf-8"):
+        bad.append("templates.md → Wave report (One-card wave) and execute.md → Finishing a wave do not write the card's Numbers cell")
+    report("OC1", not bad, "; ".join(bad) or "a one-card wave: its Numbers cell from wave_flow.py --row passes SP11 with no section, "
+           "a missing one fails naming the card, the sprint data reads every measure from the cell as from a section")
+
+
+# ── RT1 · no text of the retired sprint card, sprint tags or deployment handover cards in the helpers or the docs (BM-17) ─
+RETIRED_TEXT = re.compile(r"old[- ]way|(?<![.\w])sprint/(?:\*|\{)|\bhandover cards?\b|deployment handover|"
+                          r"\bhandover\.(?:board|staging|production)\b|sprint card'?s? board shape|\bSprint card\b —|"
+                          r"\bold sprint tags?\b|tagPrefix: \"sprint/\"", re.I)
+
+
+def check_retired_text():
+    files = [p for base in (PLUGINS, ROOT / "docs") for p in base.rglob("*")
+             if p.is_file() and p.suffix in (".md", ".py", ".json", ".yaml", ".yml") and "__pycache__" not in p.parts]
+    files = [p for p in files + [ROOT / "README.md"] if p.name != "decisions.md"]   # the decision history keeps them
+    hits = [f"{p.relative_to(ROOT)}:{i}" for p in sorted(files)
+            for i, line in enumerate(p.read_text(encoding="utf-8").splitlines(), 1) if RETIRED_TEXT.search(line)]
+    probes = {"an old-way sprint card": 1, "a `sprint/*` tag": 1, "the deployment handover cards": 1, "`handover.board`": 1,
+              "`.sprint/{project}-sprint-notes.json`": 0, "the handover report": 0, "the design handover": 0, "sprint-{name}": 0}
+    wrong = [t for t, n in probes.items() if bool(RETIRED_TEXT.search(t)) != bool(n)]
+    keys = sprint_module("recipe").KEYS
+    if any(k.startswith("handover.") for k in keys):
+        hits.append("recipe.py still knows the handover keys")
+    ok = not hits and not wrong
+    report("RT1", ok, f"no old sprint card, sprint tag or deployment handover card in {len(files)} plugin and doc files "
+           f"(decisions.md keeps the history); recipe.py knows no handover key ({len(probes)} self-test lines)" if ok
+           else f"retired text in {hits[:10]}{' …' if len(hits) > 10 else ''}; self-test wrong on {wrong}")
+
+
 def main(argv):
     use_cli = "--no-cli" not in argv
     check_manifests()
@@ -2636,6 +2761,9 @@ def main(argv):
     check_code_changed()
     check_testdata()
     check_wave_note()
+    check_delivered_once()
+    check_one_card_wave()
+    check_retired_text()
     check_l5()
     for rule, ok, msg in results:
         print(f"{'✅' if ok else '❌'} {rule} {msg}")

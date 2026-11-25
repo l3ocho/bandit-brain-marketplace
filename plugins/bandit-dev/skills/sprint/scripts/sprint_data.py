@@ -7,6 +7,8 @@ record does not hold is an empty cell, never an estimate.
 Where each part is read (the measures list below is the one place a measure lives):
   ledger       `## Waves` (cards, done date; an older ledger: the cards of `## Waves and cards`, no date) · `## Batch` (effort, XS=1 S=2 M=3 L=4 XL=5) · `## Plan deviations`
   wave report  the section `## 🌊 Wave {n}`: its `#### ⏱️ Flow` and `#### 🪙 Tokens` lines, and `## 🐞 Debug` (a card's rows)
+  card row     a wave of one card with no section: its card's Numbers cell in the ledger's `## Waves and cards`, the same
+               lines joined by `; ` (wave_flow.py --row), read as the section's lines
 
 Add a measure: one `Measure(name, source, reader)` line in MEASURES. `reader` takes the wave (see Wave) and returns the
 cell text, or "" when the record does not hold it. The new measure is one new column; nothing else changes.
@@ -32,7 +34,7 @@ from typing import Callable
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from check_sprint import (CARD_ID, COMMITTED_ON, WAVE_ROW, NotesFileError, is_archived, load_notes,  # noqa: E402
-                          section, sprints_of)  # one reading of the notes file and the ledger tables
+                          numbers_of, section, sprints_of)  # one reading of the notes file and the ledger tables
 
 EFFORT = {"XS": 1, "S": 2, "M": 3, "L": 4, "XL": 5}
 FIXED = ("sprint", "where", "wave")
@@ -49,13 +51,17 @@ class Wave:
     done: str
     ledger: str
     report: str = ""  # the wave report's whole text ("" when the sprint has none)
-    section: str = field(init=False, default="")  # this wave's `## 🌊 Wave n` section ("" when absent)
+    section: str = field(init=False, default="")  # this wave's `## 🌊 Wave n` section, or its card's Numbers cell ("" when neither)
 
     def __post_init__(self):
         m = re.search(rf"^##\s+\S*\s*Wave\s+{self.number}\b.*$", self.report, re.M)
         if m:
             nxt = re.search(r"^##\s", self.report[m.end():], re.M)
             self.section = self.report[m.end(): m.end() + nxt.start() if nxt else None]
+        elif len(self.cards) == 1:
+            # A wave of one card writes no section: its numbers are the card's Numbers cell, `; `-joined lines.
+            cell = numbers_of(self.ledger).get(self.cards[0], "")
+            self.section = "\n".join(f"- {part.strip()}" for part in cell.split(";") if part.strip())
 
     def line(self, pattern):
         """The match of `pattern` on the wave section's lines, or None."""
@@ -137,6 +143,7 @@ MEASURES = [
     Measure("card_ids", "ledger Waves table: the card ids", lambda w: " ".join(w.cards)),
     Measure("effort", "ledger Batch table: the cards' effort summed (XS=1 S=2 M=3 L=4 XL=5)", _effort),
     Measure("plan_deviations", "ledger Plan deviations: lines that name one of the wave's cards (empty when a line names no card)", _deviations, direction="at most"),
+    # The wave report's lines below are read from a one-card wave's Numbers cell when it has no section (Wave).
     Measure("time_min", "wave report Flow: `- Time`, in minutes", _time, direction="at most"),
     Measure("full_check_runs", "wave report Flow: `- Full checks`, runs",
             lambda w: _group(w, r"^- Full checks: (\d+) runs?", 1), direction="at most"),

@@ -114,7 +114,7 @@ tag the user added**. A note in the inbox is exempt until it is reviewed (`refer
 | `minutes` | Meeting: `supervisors` · `department` · `project` (nothing else) — meeting date — participants: the names mentioned — room: where it was held (free text, optional) |
 | `request` | Requester: a **role**, not a name ("CS Director", "Billing team") — received: a date — due: a date or empty |
 | `brief` | Lane, handler |
-| `plan` | Lane, **left out on a sprint plan** (a sprint has no lane) — card: **required**; a sprint plan carries the sprint's name instead, or on an old-way sprint the sprint card — related notes |
+| `plan` | Lane, **left out on a sprint plan** (a sprint has no lane) — card: **required**; a sprint plan carries the sprint's name instead — related notes |
 
 The meeting field has **exactly three values**: `supervisors`, `department`, `project`. The user
 has settled it: there is **no Ad-hoc and no Outstanding**. Never propose, add or suggest another
@@ -181,7 +181,7 @@ rules wherever `file` or `lint` meet it. The card workflow itself is bandit:task
   rule). Body per §12. They're written **inbox-first** like any skill-written note; they are
   **not** part of the planning-docs exception.
   **Sprint plan:** one plan note shared by every card of a sprint, written straight in with the
-  sprint's records, no lane, the sprint's name in place of the card (old way: the sprint card).
+  sprint's records, no lane, the sprint's name in place of the card.
   Each card's `Technical plan` names it.
 - **Card briefs** (kind `brief`, §5 fields) are the long form of one card's Spec: one brief per
   card, its card set, written when `/bandit:tasks spec` writes the card (the card names it).

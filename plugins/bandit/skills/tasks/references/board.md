@@ -108,16 +108,15 @@ scores. **The skill never works them out**: it reads them, shows them and orders
 | 🤖 **Handler** | `claude-code` · `claude-design` · `claude-ai` |
 | 🏊 **Lane** (Technical boards) | `lane/incident` · `lane/issue` · `lane/feature` · `lane/maintenance` · `lane/content` · `lane/tech-debt` |
 | 🪜 **Stage** (Technical boards) | `stage/spec` · `stage/planned` · `stage/ready` |
-| 🏁 **Sprint** (Technical boards) | None now: a sprint is a record. A name starting `sprint/` is refused (`TAG_NAME_RESERVED`); the one tag left belongs to a running old-way sprint and goes at its close |
+| 🏁 **Sprint** (Technical boards) | None: a sprint is a record. A name starting `sprint/` is refused (`TAG_NAME_RESERVED`) |
 
 **Sprints are records** on a Technical board, not tags (bandit-dev:sprint plans them).
 `get_sprints { boardId }` lists a board's sprints with their status and open, completed and total
 counts; `get_sprints { sprintId }` (run order) or `list_tasks { sprintId }` gives one sprint's cards;
 `list_tasks { noSprint: true }` the cards in none; `get_task` → `sprint` one card's sprint;
 `get_context` → `sprints` every sprint you can see (id, name, status, board, expected date, open,
-completed and total). `list_tasks` has no sprint view any more. **An old-way sprint still running**
-keeps its `sprint/{name}` tag until its close (`list_tasks { tagName: "sprint/{name}" }` gives its
-cards), so a card is in a sprint when a record holds it or it carries a `sprint/*` tag. **Sprints off**
+completed and total). `list_tasks` has no sprint view. A card is in a sprint when a sprint record
+holds it. **Sprints off**
 (`MODULE_DISABLED`, `references/errors.md`) is never read as "no sprints".
 
 **Waves, run state, cancel.** A sprint's cards sit in waves, Wave 1 to `waveCount`, run in order
@@ -180,7 +179,7 @@ entry is all or nothing, applied in the order move, fields, tags, state, complet
 `<ul>`, `<ol>` or `<blockquote>` (app code: `rich-text.ts` → `looksLikeHtml`). Anything else, a
 value starting with `<b>` or bare text included, is shown as plain text: every tag appears as
 literal characters. Applies to every surface that writes one: capture, email, load, dev, triage
-splits, and bandit-dev:sprint's sprint card.
+splits, and bandit-dev:sprint's debug card.
 
 | Tag | For |
 |---|---|
@@ -264,8 +263,8 @@ interview answer produces a bad board.
   its profile, as an approved row of bandit:project' onboarding proposal. Columns and lanes come
   later, from a load or the design conversation (with `dev: true`, onboard adds the dev board shape rows).
 - **Dev board shape** (`references/dev.md`): checks the app's `lane/*` / `stage/*` tags, sets
-  the six dev lanes and adds the `PM` column, as approved rows — from `onboard` with `dev: true`, a
-  bandit:audit S9 fix row, or (the `PM` column only) a sprint plan. Nothing else.
+  the six dev lanes and adds the `PM` column, as approved rows — from `onboard` with `dev: true` or a
+  bandit:audit S9 fix row. Nothing else.
 
 `manage_boards { action: "archive" }` is the other exception, and it lives in audit because audit is what discovers the
 need for it.

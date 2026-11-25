@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-"""PostToolUse hook (note writes): inside the wave-records agent, a note write answers in a few lines, not the whole note.
+"""PostToolUse hook (note writes): inside the wave-records agent, an older app's note write answers short too.
 
-Every note write tool of the app answers with the whole note, text included: a ledger section write brought the
-whole ledger back into the chat each time (about 15,000 tokens a write). The records agent writes a wave's records
-one section at a time, so this hook replaces the answer it sees (`updatedMCPToolOutput`, Claude Code hooks →
-PostToolUse) with the note's id, title, kind, status, tags, place and size, its headings, and whether the text
-written is what the note now holds (`sectionMatches` for a section write, `textMatches` for a whole save). The note
-itself is unchanged: only what the chat sees is shorter. A read (`notes_get`) is never shortened.
+The app now answers a note write without the note's text: `{ ok, note: { id, title, kind, status, summary, tags,
+boardId, boardColumnId, lane, cards, updatedAt, bodyChars, headings }, sectionMatches | textMatches }`. An app from
+before that change answers with the whole note, text included: a ledger section write brought the whole ledger back
+into the chat each time (about 15,000 tokens a write). For such an app this hook gives the records agent the same
+short answer (`updatedMCPToolOutput`, Claude Code hooks → PostToolUse), the match flags worked out on the saved text.
+The note itself is unchanged: only what the chat sees is shorter. A read (`notes_get`) is never shortened.
 
-Runs only for the agent whose type ends in `wave-records` (the hook's `agent_type`); any other chat, a refused
-write (`ok: false`) and an answer it cannot read pass through as they are (no output).
+Runs only for the agent whose type ends in `wave-records` (the hook's `agent_type`) and only on an answer whose note
+still holds its text (`body`); an answer already short, any other chat, a refused write (`ok: false`) and an answer it
+cannot read pass through as they are (no output).
 """
 import json
 import re
@@ -18,7 +19,7 @@ import sys
 TOOL = re.compile(r"^mcp__.+__(notes_create|notes_update|notes_update_section|notes_set_fields|notes_set_status|"
                   r"notes_file|notes_move|notes_link_card|notes_unlink_card)$")
 AGENT = "wave-records"
-KEEP = ("id", "title", "kind", "status", "tags", "boardId", "boardColumnId", "lane", "updatedAt")
+KEEP = ("id", "title", "kind", "status", "summary", "tags", "boardId", "boardColumnId", "lane", "cards", "updatedAt")
 HEADING = re.compile(r"^(#{1,3})\s+(.+?)\s*$", re.M)
 
 
@@ -55,17 +56,17 @@ def section_of(body, heading):
 
 
 def short(tool, tool_input, note):
-    out = {k: note[k] for k in KEEP if k in note}
-    body = note.get("body") if isinstance(note.get("body"), str) else ""
-    out["bodyChars"] = len(body)
-    out["headings"] = [f"{h[0]} {h[1]}" for h in HEADING.findall(body)]
+    """The app's short answer (the note without its text, and the write's match flag) built from an older app's note."""
+    body = note["body"]
+    small = {k: note[k] for k in KEEP if k in note}
+    small["bodyChars"] = len(body)
+    small["headings"] = [f"{h[0]} {h[1]}" for h in HEADING.findall(body)]
+    out = {"ok": True, "note": small}
     if tool == "notes_update_section" and isinstance(tool_input.get("heading"), str):
         now = section_of(body, tool_input["heading"])
-        out["section"] = tool_input["heading"]
         out["sectionMatches"] = now is not None and now.strip() == str(tool_input.get("text") or "").strip()
     elif tool in ("notes_update", "notes_create") and isinstance(tool_input.get("text"), str):
         out["textMatches"] = body.strip() == tool_input["text"].strip()
-    out["shortened"] = "for the records agent: the note is saved whole; read it with notes_get"
     return out
 
 
@@ -80,7 +81,9 @@ def reply(payload):
     answer, shape = answer_of(response)
     if not answer or answer.get("ok") is not True or not isinstance(answer.get("note"), dict):
         return None
-    small = {"ok": True, "note": short(m.group(1), payload.get("tool_input") or {}, answer["note"])}
+    if not isinstance(answer["note"].get("body"), str):
+        return None   # the app already answers short: nothing to do
+    small = short(m.group(1), payload.get("tool_input") or {}, answer["note"])
     text = json.dumps(small, ensure_ascii=False)
     if shape == "text":
         new = [{"type": "text", "text": text}]

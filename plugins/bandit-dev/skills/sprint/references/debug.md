@@ -47,7 +47,7 @@ Per approved row, in card order and wave order where they interact:
 1. Reproduce or confirm from the code. If it does not reproduce, say so and ask.
 2. Fix with a test that fails against the old behaviour. Then, per fix, only the tests that cover the change, run by name: no code review and no browser check per fix. No full check per fix: it runs once, before the one push (Pushing).
 3. Commit on the local development branch (or the card's branch if it is still open).
-4. Record in the ledger Bug log: row, card, the debug card line it fixes, cause, fix, commit, how verified (the targeted tests it ran, by name or pattern). Tick that line, or end it with its outcome (`templates.md` → Debug card). Update the handover report's card section.
+4. Record in the ledger Bug log: row, card, the debug card line it fixes, cause, fix, commit, how verified (the targeted tests it ran, by name or pattern). Tick that line, or end it with its outcome (`templates.md` → Debug card). The handover report's card line changes only when how to test the card changed (`templates.md` → Report).
 5. Comment on the card: what was adjusted and why. Reopen nothing; the card stays in Stand By.
 
 ## Pushing

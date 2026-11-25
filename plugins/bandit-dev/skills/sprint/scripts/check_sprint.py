@@ -21,12 +21,15 @@ Rules (each one a failure, not a warning):
        plan review record, a note titled {project}-review-sprint-{name}-YYYY-MM-DD with the sprint's tag
   SP9  a sprint kept in the app (its ledger has a `Sprint record:` line) lists the 12 plan steps in order in
        its ## Plan steps table; a step marked done carries a YYYY-MM-DD date and its evidence; a committed ledger has steps 1 to 11 done
-  SP10 a committed sprint kept in the app has a ## Waves table, one row per wave in order; a wave marked done
-       carries its evidence and needs only the waves it depends on to be done (a card under `Blocked by` in the
-       ## Batch table, or a pair on the plan's `Lands after:` line); every card it names is in the Waves and cards table
-       (an old-way ledger, with no `Sprint record:` line, is skipped by SP9 and SP10)
-  SP11 a committed sprint kept in the app has, for every wave marked done in its ## Waves table, a section
-       (sprints committed after 2026-11-04) `## 🌊 Wave {n}` in its wave report {project}-sprint-{name}-wave-report holding a `#### ⏱️ Flow` and a `#### 🪙 Tokens` block
+  SP10 a committed sprint kept in the app has a ## Waves table, one row per wave in order (the one place of the wave
+       order); a wave marked done carries its evidence and needs only the waves it depends on to be done (a card under
+       `Blocked by` in the ## Batch table, or a pair on the plan's `Lands after:` line); every card it names has a row in
+       the Waves and cards table (the card in its first cell, or in its second after a Wave cell)
+       (a ledger written before sprints were records in the app, with no `Sprint record:` line, is skipped by SP9 and SP10)
+  SP11 a committed sprint kept in the app has, for every wave marked done in its ## Waves table (sprints committed after
+       2026-11-04), a section `## 🌊 Wave {n}` in its wave report {project}-sprint-{name}-wave-report holding a
+       `#### ⏱️ Flow` and a `#### 🪙 Tokens` block; a wave of one card may instead carry its numbers on its card's row
+       of the Waves and cards table, a Numbers cell holding `Time:` and `Total:` (wave_flow.py --row), with no section
   SP13 a committed sprint kept in the app (committed after 2026-11-08) has, in its step 9 evidence, `{card}: {n} steps`
        (n at least 1, build steps only) for every card in its ## Batch table: every planned card carries its build steps as sub-tasks
   SP14 a live sprint's plan (not archived, its sprint not closed as SP15 reads it) leaves nothing for after debug: its `Items to register` section
@@ -62,6 +65,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 RECORDS = ("plan", "handover-prompt", "progress")
+# A card row of a ledger table: the card ids in the second cell (`| Wave {n} | {card}, {card} |`, an older Waves and cards
+# row `| {n} | {card} |`) or in the first (`| {card} | {branch} |`, the Waves and cards row with no Wave cell).
+CARD_FIRST = re.compile(r"^\|\s*((?:[A-Z0-9]*[A-Z][A-Z0-9]*-T?\d+)(?:\s*,\s*[A-Z0-9]*[A-Z][A-Z0-9]*-T?\d+)*)\s*\|", re.M)
 CARD_ROW = re.compile(r"^\|\s*[^|]+\|\s*((?:[A-Z0-9]*[A-Z][A-Z0-9]*-T?\d+)(?:\s*,\s*[A-Z0-9]*[A-Z][A-Z0-9]*-T?\d+)*)\s*\|", re.M)
 CARD_ID = re.compile(r"[A-Z0-9]*[A-Z][A-Z0-9]*-T?\d+")  # a proper id ({prefix}-{n}) or a temporary one ({prefix}-T{n}); a prefix may hold digits
 COMMITTED = re.compile(r"^\W*Committed:", re.M)
@@ -151,6 +157,34 @@ def sprint_closed(project: str, name: str, mine: dict, closed_in_app: set) -> bo
     return name in closed_in_app or is_archived(ledger) or bool(ledger and CLOSED.search(ledger["text"]))
 
 
+def card_rows(text: str) -> list:
+    """(where the row starts, its card ids) for every card row of `text`, the card first or second (CARD_FIRST, CARD_ROW)."""
+    found = {m.start(): CARD_ID.findall(m.group(1)) for m in CARD_ROW.finditer(text)}
+    for m in CARD_FIRST.finditer(text):
+        found.setdefault(m.start(), CARD_ID.findall(m.group(1)))
+    return sorted(found.items())
+
+
+def table(text: str, heading: str) -> list:
+    """The markdown table of `## heading` as rows of {lower-case column: cell}."""
+    rows = [r for r in section(text, heading).splitlines() if r.startswith("|")]
+    if len(rows) < 3:
+        return []
+    head = [c.strip().lower() for c in rows[0].strip().strip("|").split("|")]
+    return [dict(zip(head, [c.strip() for c in r.strip().strip("|").split("|")])) for r in rows[2:]]
+
+
+def numbers_of(ledger_text: str) -> dict:
+    """card -> its Numbers cell in the Waves and cards table (a wave of one card writes its numbers there), or nothing."""
+    return {CARD_ID.findall(r["card"])[0]: r.get("numbers", "") for r in table(ledger_text, "Waves and cards")
+            if CARD_ID.findall(r.get("card", ""))}
+
+
+def holds_numbers(cell: str) -> bool:
+    """A Numbers cell from `wave_flow.py --row`: its Flow part (`Time:`) and its Tokens part (`Total:`)."""
+    return bool(re.search(r"\bTime:\s*\d", cell)) and bool(re.search(r"\bTotal:\s*[\d.]", cell))
+
+
 def card_dependencies(text: str, plan_text: str) -> dict:
     """card -> the cards it depends on: the Batch table's `Blocked by` column and the plan's `Lands after:` pairs."""
     deps = defaultdict(set)
@@ -228,21 +262,30 @@ def check_build_steps(where, text: str) -> list[str]:
 
 
 def check_wave_report(where, ledger_text: str, title: str, report) -> list[str]:
-    """SP11: every done wave has its section, Flow block and Tokens block in the wave report (`report` is its note)."""
+    """SP11: every done wave has its section, Flow block and Tokens block in the wave report (`report` is its note); a
+    wave of one card may carry its numbers on its card's row instead (a Numbers cell), with no section."""
     on = COMMITTED_ON.search(ledger_text)
     if not on or on.group(1) <= REPORTS_FROM:
         return []
-    done = [n for n, _, d, _ in WAVE_ROW.findall(section(ledger_text, "Waves")) if d]
+    done = [(n, CARD_ID.findall(ids)) for n, ids, d, _ in WAVE_ROW.findall(section(ledger_text, "Waves")) if d]
     if not done:
         return []
-    if report is None:
-        return [f"SP11 {where}: Wave {', '.join(done)} done but there is no wave report {title} (the wave-end rebuild)"]
-    text = report["text"]
+    numbers = numbers_of(ledger_text)
+    text = report["text"] if report else ""
     errors = []
-    for n in done:
+    for n, cards in done:
         m = re.search(rf"^##\s+\S*\s*Wave\s+{n}\b.*$", text, re.M)
         if not m:
-            errors.append(f"SP11 {where}: Wave {n} is done but {title} has no `## 🌊 Wave {n}` section")
+            if len(cards) == 1 and holds_numbers(numbers.get(cards[0], "")):
+                continue
+            if len(cards) == 1:
+                errors.append(f"SP11 {where}: Wave {n} (one card, {cards[0]}) is done but neither its card's row in the "
+                              "Waves and cards table has a Numbers cell with `Time:` and `Total:` (wave_flow.py --row) "
+                              f"nor {title} has a `## 🌊 Wave {n}` section")
+            elif report is None:
+                errors.append(f"SP11 {where}: Wave {n} done but there is no wave report {title} (the wave-end rebuild)")
+            else:
+                errors.append(f"SP11 {where}: Wave {n} is done but {title} has no `## 🌊 Wave {n}` section")
             continue
         nxt = re.search(r"^##\s", text[m.end():], re.M)
         body = text[m.end(): m.end() + nxt.start() if nxt else None]
@@ -370,8 +413,7 @@ def check(data: dict, folder: Path, closed_in_app: set = frozenset()) -> list[st
         plan = mine.get(f"{project}-sprint-{name}-plan")
         plan_text = plan["text"] if plan else ""
         if SPRINT_RECORD.search(ledger_text):
-            table_cards = {i for m in CARD_ROW.finditer(section(ledger_text, "Waves and cards"))
-                           for i in CARD_ID.findall(m.group(1))}
+            table_cards = {i for _, ids in card_rows(section(ledger_text, "Waves and cards")) for i in ids}
             errors.extend(check_record_ledger(where, ledger_text, table_cards, plan_text))
             errors.extend(check_build_steps(where, ledger_text))
             report_title = f"{project}-sprint-{name}-wave-report"
@@ -379,10 +421,9 @@ def check(data: dict, folder: Path, closed_in_app: set = frozenset()) -> list[st
         if not is_archived(plan) and not sprint_closed(project, name, mine, closed_in_app):
             errors.extend(check_owed(where, plan_text))
         cards, detached = set(), set()
-        for match in CARD_ROW.finditer(ledger_text):
-            ids = CARD_ID.findall(match.group(1))
-            line_end = ledger_text.find("\n", match.start())
-            if "detached" in ledger_text[match.start():line_end if line_end > 0 else None].lower():
+        for start, ids in card_rows(ledger_text):
+            line_end = ledger_text.find("\n", start)
+            if "detached" in ledger_text[start:line_end if line_end > 0 else None].lower():
                 detached.update(ids)
             cards.update(ids)
         # A card detached at close keeps its single brief in the inbox for the next plan to file.

@@ -2,6 +2,12 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
+## Unreleased
+
+### Changed
+- **What a card delivered is written once** (BM-7, sprint dev-efficiency-3). The card's Delivered comment, written when it reaches Stand By, is now the one full account: what you get, how it was tested, what came out different and why, how to test it, how to undo it. The ledger's card row keeps short values only (a hash, a verdict, seconds), the milestone log, the wave report and the handover report name the card with at most one line, and the handover report keeps how to test each card. The wave order sits in one place, the ledger's Waves table, written when the waves are drawn: the Batch table loses its Order column, the card rows lose their Wave column, and the other papers name the table instead of listing the waves. The sprint checker reads a ledger in either shape. Checker rule DW1 tests it.
+- **A one-card wave keeps no separate wave records** (BM-8, sprint dev-efficiency-3). A wave of one card writes its numbers once, on its card's row in the ledger (a Numbers cell printed by `wave_flow.py --row`), and no wave section or trend row in the wave report. The sprint checker accepts that cell in place of the section, and the sprint data reads every number from it as it did from the section; a one-card wave written the old way still passes. Checker rule OC1 tests it.
+
 ## 2.0.0 · 2026-11-24
 
 Version 2.0.0 when released: the Project Context format changes and commands are removed (card BM-15).

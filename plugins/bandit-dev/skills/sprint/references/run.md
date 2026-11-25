@@ -2,7 +2,7 @@
 
 Part of `bandit-dev:sprint`. Read before running `/bandit-dev:sprint run {sprint} [{sprint} …]`. It runs every open wave of one or more sprints, each wave in its own subagent, from one orchestrator chat. A subagent is the "new chat" of `execute`: a fresh context that reads the documents and nothing else. Board moves, gates and the wave cycle are `references/execute.md`'s; this file only says how the orchestrator drives them.
 
-Contents: Command · Rules · Before the first wave · The loop · Paced mode · Gates the wave agent cannot run · Stop and resume · Notifications · Final report · Never
+Contents: Command · Rules · Before the first wave · The loop · Side by side · Paced mode · Gates the wave agent cannot run · Stop and resume · Notifications · Final report · Never
 
 ## Command
 
@@ -17,8 +17,8 @@ Contents: Command · Rules · Before the first wave · The loop · Paced mode ·
 
 ## Rules
 
-- **One wave, one agent.** Each wave is executed by one new subagent. The orchestrator never implements, never edits code and never reads diffs. It reads the board, the ledgers and the agents' reports.
-- **One wave at a time.** Waves in plan order, sprints in the order given; a wave whose dependencies are delivered runs even while an earlier wave holds a paused or blocked card. Never two wave agents at once: they share one working tree, the local `development` branch and the migration numbers, so parallel waves would collide.
+- **One wave, one agent.** Each wave is executed by one new subagent, except the cards the plan marks side by side, one agent each (Side by side). The orchestrator never implements, never edits code and never reads diffs. It reads the board, the ledgers and the agents' reports; in a side-by-side wave it also makes the working copies and merges the ready branches, nothing else.
+- **One wave at a time.** Waves in plan order, sprints in the order given; a wave whose dependencies are delivered runs even while an earlier wave holds a paused or blocked card. Never two waves at once. What this protects: two agents never share a working copy, the trunk or a migration number. Inside one wave, the cards on the plan's `Side by side:` line are built at the same time, each in its own working copy (Side by side).
 - **The orchestrator checks every wave before the next starts.** No wave starts on a report alone.
 - **The wave agent follows `execute` exactly.** Same rules, same board choreography, same ledger, same stop-lines. Nothing is relaxed because there is no human in the chat.
 - **Context stays small.** Agent reports have a fixed short shape (below). Ask for nothing longer.
@@ -54,6 +54,17 @@ For each wave, in order:
    Any mismatch: treat the wave as not done and stop (see below).
 4. **Add one line to the ledger's Milestone log**: `Run: Wave {n} done by agent, checked ({what was checked}). Next: Wave {n+1}` or the next sprint.
 5. Next workable wave. After a sprint's last wave, move on to the next sprint's first open wave.
+
+## Side by side
+
+For a wave whose wave note carries a `Side by side:` line (`references/plan.md` step 6), in place of loop step 1 for those cards; the wave's other cards run as the loop says, after them.
+
+1. **Working copies.** For each card on the line: `git worktree add .claude/worktrees/{card} -b {its branch} {trunk}` in the main checkout, the branch the plan names, cut from the trunk as it is now. The files the project's rules say a working copy needs (its local settings) are copied in; a service the project already runs (a database, a dev server) is shared, never started a second time. Each card to `doing`.
+2. **One card agent per card, at the same time** (the Agent tool, type `general-purpose`, in the background). Its prompt is loop step 1's for this one card, plus: "Work only in {working copy}. Never touch the main checkout, the trunk, another card's working copy, the ledger, or a migration number the plan did not give this card. Run the gates in the Gate order; your full check runs once, last, behind the project's one-at-a-time lock, and you write down how long it waited for the lock (the full check's own output). Then report `READY TO MERGE {branch}` with your card's line of the WAVE SUMMARY (`execute.md` → Finishing a wave, step 2, the lock wait added after the full check) and wait for the orchestrator's message." The orchestrator never ends its turn while a card agent runs: it waits for each one's notification.
+3. **Merges, one at a time, in the wave's order** (its row in the ledger's Waves table): a card ready before an earlier one waits. The orchestrator merges its branch into the trunk in the main checkout (`git merge --no-ff`, the project's branching rules), writes the card's ledger row right after (the merge commit), and sends the commit to that card agent (SendMessage), which writes its Delivered comment, moves its card to `standby` and ends. A conflict is not fixed by the orchestrator: it tells the card agent to merge the trunk into its branch, run its tests and its full check again, and report ready again; the conflict and its cause go in the ledger's Plan deviations. A merged card's working copy is removed (No leftovers).
+4. **Migrations stay one at a time:** the plan puts on the line at most one card that adds a migration, so no number is taken twice. A number taken twice anyway stops the wave: the card is Blocked with the output, and the line goes under Needs the user.
+5. **After the last card,** the orchestrator writes the WAVE SUMMARY from the card agents' lines and launches the records agent with it (`execute.md` → Finishing a wave, step 3), then runs loop steps 2 and 3.
+6. **The trial.** The first wave run this way is a trial, read in its wave report: `wave_flow.py`'s `Side by side` line (the wave's clock time beside the sum of its cards' times), minutes per card beside the comparison the project's brief names, full checks per card, each card's wait for the full-check lock, and any merge conflict or migration number taken twice, with its cause; the defects the user finds come from the debug card. Side by side is kept only if the wave's clock time is clearly under its cards' sum and the user's test finds no more defects than that comparison; the wave report names the result as an Open call either way, and a plan marks no card side by side again until the user says to keep it.
 
 ## Paced mode
 
@@ -95,7 +106,7 @@ Ten lines at most per sprint: waves run, cards now in Stand By awaiting the user
 
 ## Never
 
-- Run two wave agents at once, or a wave before the previous one is checked, or a wave before the cards it depends on are delivered.
+- Run two waves at once, two agents in one working copy, on the trunk or on one migration number, or a wave before the previous one is checked, or a wave before the cards it depends on are delivered.
 - Implement, review or read diffs in the orchestrator.
 - Start `debug` or `close`, complete a card, merge into `main`, deploy or force-push. The orchestrator itself never pushes; the wave agent pushes `development` as `execute.md` says.
 - Continue past a stop condition, or tick a wave the check did not confirm.

@@ -11,7 +11,10 @@ Counting:
   step         one assistant message; log lines sharing a `message.id` are one step
   re-read      cache_read_input_tokens · new = input_tokens + cache_creation_input_tokens · written = output_tokens
   context      input + cache_read + cache_creation of a step; start = the main chat's first step, peak = its largest
-  card         from its `echo CARD-START {card}` mark to the next mark or the end of the window
+  card         from its `echo CARD-START {card}` mark to the next mark or the end of the window; when the marks sit in
+               two or more logs (cards built side by side, one agent each), from its mark to the next mark in the same
+               log or that log's last step, its tokens that log's steps only, and a `Side by side` line sets the wave's
+               clock time beside the sum of its cards' times
   full check   a Bash call whose command contains the recipe's `verify` command; failed = its result is an error
   test run     a Bash call matching --test; targeted when the command carries more after the match
   gate round   one Agent launch, counted by its type; the search agent is the launches of type Explore
@@ -178,6 +181,7 @@ def measure(logs, since, until):
     edits = []            # times of file edits (main chat and agents)
     shell = defaultdict(int)  # log file index → characters of shell (Bash) results that chat took in
     names, wave_logs = {}, []  # log file index → its part name; (time, index) of each CARD-START mark
+    step_log, last_step, mark_log = {}, {}, {}  # step → its log index; log index → its last step time; card → its log index
     for idx, (part, rows) in enumerate(parts(logs)):
         names[idx] = part
         for row in rows:
@@ -187,6 +191,8 @@ def measure(logs, since, until):
             msg = row.get("message") or {}
             if row.get("type") == "assistant" and msg.get("id"):
                 steps.setdefault((part, msg["id"]), (t, msg.get("usage") or {}))
+                step_log.setdefault((part, msg["id"]), idx)
+                last_step[idx] = max(last_step.get(idx, t), t)
                 info.setdefault((part, msg["id"]), {
                     "model": msg.get("model"), "skill": row.get("attributionSkill"),
                     "plugin": row.get("attributionPlugin"), "server": row.get("attributionMcpServer"),
@@ -200,6 +206,7 @@ def measure(logs, since, until):
                     if m:
                         marks.append((t, m.group(1)))
                         wave_logs.append((t, idx))
+                        mark_log.setdefault(m.group(1), idx)
                     if b.get("name") in EDITS:
                         edits.append(t)
                 elif b.get("type") == "tool_result":
@@ -208,7 +215,8 @@ def measure(logs, since, until):
                         shell[idx] += len(result_text(b))
     wave = min(wave_logs)[1] if wave_logs else None
     return steps, calls, results, sorted(marks), sorted(edits), {"info": info, "hooks": hooks, "shell": shell,
-                                                                 "names": names, "wave_log": wave}
+                                                                 "names": names, "wave_log": wave, "step_log": step_log,
+                                                                 "last_step": last_step, "mark_log": mark_log}
 
 
 def report(steps, calls, results, marks, edits, extra, verify, test, since, until, cfg):
@@ -217,9 +225,21 @@ def report(steps, calls, results, marks, edits, extra, verify, test, since, unti
     times = sorted(t for t, _ in steps.values())
     end = until or times[-1]
     lines = ["#### ⏱️ Flow"]
-    windows = [(c, t, marks[i + 1][0] if i + 1 < len(marks) else end) for i, (t, c) in enumerate(marks)]
+    mark_log = extra.get("mark_log") or {}
+    side = len({mark_log.get(c) for _, c in marks}) > 1
+    if side:
+        # Cards built side by side: each card's window lives in its own agent's log.
+        windows = []
+        for i, (t, c) in enumerate(marks):
+            later = [u for u, d in marks[i + 1:] if mark_log.get(d) == mark_log.get(c)]
+            windows.append((c, t, later[0] if later else extra["last_step"].get(mark_log.get(c), end)))
+    else:
+        windows = [(c, t, marks[i + 1][0] if i + 1 < len(marks) else end) for i, (t, c) in enumerate(marks)]
     per_card = " · per card: " + ", ".join(f"{c} {hmm((b - a).total_seconds())}" for c, a, b in windows) if windows else " · per card: " + NM
     lines.append(f"- Time: {hmm((times[-1] - times[0]).total_seconds())}{per_card}")
+    if side:
+        lines.append(f"- Side by side: {len(windows)} cards in {len({mark_log.get(c) for _, c in marks})} chats · wave clock "
+                     f"{hmm((times[-1] - times[0]).total_seconds())} · cards' sum {hmm(sum((b - a).total_seconds() for _, a, b in windows))}")
 
     def dur(cid):
         c = calls[cid]
@@ -290,7 +310,9 @@ def report(steps, calls, results, marks, edits, extra, verify, test, since, unti
         for c, a, b in windows:
             n = sum((u.get("cache_read_input_tokens") or 0) + (u.get("input_tokens") or 0)
                     + (u.get("cache_creation_input_tokens") or 0) + (u.get("output_tokens") or 0)
-                    for (t, u) in steps.values() if a <= t < b or (b == end and t == b))
+                    for key, (t, u) in steps.items()
+                    if (a <= t < b or (b in (end, extra["last_step"].get(mark_log.get(c))) and t == b))
+                    and (not side or extra["step_log"].get(key) == mark_log.get(c)))
             cards.append(f"{c} {big(n)}")
         lines.append("- Per card: " + ", ".join(cards))
     else:

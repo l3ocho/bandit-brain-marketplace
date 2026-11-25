@@ -2747,6 +2747,38 @@ def check_wave_records():
            "note writes (section checked) and leaves every other chat, reads, refusals and unreadable answers alone")
 
 
+# ── SS1 · independent cards of one wave are built side by side, one agent and one working copy each (BM-18) ─
+def check_side_by_side():
+    sprint = PLUGINS / "bandit-dev" / "skills" / "sprint"
+    refs = {n: (sprint / "references" / n).read_text(encoding="utf-8") for n in ("run.md", "plan.md", "execute.md", "templates.md")}
+    skill = (sprint / "SKILL.md").read_text(encoding="utf-8")
+    bad = []
+    side = refs["run.md"].split("\n## Side by side\n", 1)[-1].split("\n## ", 1)[0] if "\n## Side by side\n" in refs["run.md"] else ""
+    for need in ("git worktree add .claude/worktrees/{card}", "READY TO MERGE", "one at a time, in the wave's order",
+                 "never ends its turn while a card agent runs", "at most one card that adds a migration", "The trial.",
+                 "clearly under its cards' sum"):
+        if need not in side:
+            bad.append(f"run.md → Side by side lacks `{need}`")
+    if "Never two wave agents at once" in refs["run.md"] or "two agents never share a working copy, the trunk or a migration number" not in refs["run.md"]:
+        bad.append("run.md's rule is not narrowed to what it protects (a working copy, the trunk, a migration number)")
+    if "`Side by side: {card}, {card} (wave {n})`" not in refs["plan.md"] or "at most one of them adds a migration" not in refs["plan.md"]:
+        bad.append("plan.md step 6 does not write the Side by side line with its conditions")
+    if "Side by side only under `run`" not in refs["execute.md"] or "its wait for the lock" not in refs["execute.md"]:
+        bad.append("execute.md does not keep side by side to run, or the summary has no lock wait")
+    if "`Side by side:` line" not in refs["templates.md"] or "two agents in one working copy" not in skill:
+        bad.append("templates.md (plan, wave note) or SKILL.md's Never does not carry the side-by-side rule")
+    got, out = run_script(sprint / "scripts" / "wave_flow.py", "--logs", str(ROOT / "tests" / "fixture-logs-side"),
+                          "--since", "2026-11-25T09:00:00Z", "--verify", "make verify", "--test", "^run-tests", cwd=ROOT)
+    for want in ("- Time: 1:00 · per card: AB-1 0:40, AB-2 0:30", "- Side by side: 2 cards in 2 chats · wave clock 1:00 · cards' sum 1:10",
+                 "- Per card: AB-1 30 K, AB-2 40 K"):
+        if want not in out:
+            bad.append(f"wave_flow on two card agents lacks {want!r} ({got})")
+    report("SS1", not bad, "; ".join(bad) or "side by side: the plan's line and its conditions, one agent and one working copy per card "
+           "under run only, merges and migration numbers one at a time in the wave's order, the full check behind its lock with "
+           "its wait reported, the trial and when it is kept; wave_flow times each card in its own log and sets the wave's clock "
+           "beside the cards' sum")
+
+
 def main(argv):
     use_cli = "--no-cli" not in argv
     check_manifests()
@@ -2820,6 +2852,7 @@ def main(argv):
     check_one_card_wave()
     check_retired_text()
     check_wave_records()
+    check_side_by_side()
     check_l5()
     for rule, ok, msg in results:
         print(f"{'✅' if ok else '❌'} {rule} {msg}")

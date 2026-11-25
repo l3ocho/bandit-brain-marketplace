@@ -15,6 +15,7 @@ Contents: Command · Rules · Start · The wave · Sprint status · Run state ·
 
 ## Rules
 
+- **Side by side only under `run`.** Cards the plan puts on a `Side by side:` line are built one agent each only by `run` (`references/run.md` → Side by side); `execute` builds them one after the other in this chat.
 - **One wave per run, one chat per wave.** The run does the wave chosen above, then stops and tells the user to open a new chat for the next. To run every wave unattended, one subagent per wave, use `run` (`references/run.md`); the wave agent then follows this file exactly.
 - **The ledger is the memory.** A new chat knows nothing: it starts from its wave note, the execution prompt, the sprint (`get_sprints { sprintId }`) and the repository (Start), and reads the ledger before its first ledger write and on a resume.
 - **The sprint's execution prompt governs the work itself** (authority, stop-lines, autonomy, gates, handover report). This file adds the board choreography on top.
@@ -95,7 +96,7 @@ Waves in between move nothing. A `debug` round keeps it in `debugging`.
 
    ```
    WAVE SUMMARY · sprint {name} · wave {n} · first step {the first CARD-START time, ISO} · last merge {ISO time}
-   {card}: merged {commit} · review {verdict, rounds} · full check {result and seconds, or code_changed.py's line} · UI {result, or n/a} · {Different | Issue | Your call: one line, or "as specified"}
+   {card}: merged {commit} · review {verdict, rounds} · full check {result and seconds, its wait for the lock when it waited, or code_changed.py's line} · UI {result, or n/a} · {Different | Issue | Your call: one line, or "as specified"}
    Open calls: {one line each, or none}
    Debug card: Expected {one line per issue the user will meet in testing, or none} · Process lines written {n}
    Conventions applied: {lines} · Plan deviations: {lines} · Verify-first: {lines} · Follow-ups: {lines}

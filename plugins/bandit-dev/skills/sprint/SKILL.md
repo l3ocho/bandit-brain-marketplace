@@ -29,7 +29,7 @@ live, `get_sprints { boardId }`). No command → offer the table and ask which.
 |---|---|---|---|
 | `plan` | Nothing (every open High card not in a sprint) or a list of card ids | The plan cycle (`references/plan.md`); no list means go straight: state the selection, list open Urgent cards as "not selected", start | `references/plan.md` |
 | `execute` | Sprint and wave (`execute {sprint} wave 2`) | One wave, one chat; refuses a wave whose cards depend on an undelivered card; refuses a batch card; moves cards on the Execution board | `references/execute.md` |
-| `run` | One or more sprints; `--paced [minutes]` under `/loop` | Every open wave, each in its own subagent, one wave at a time, each once its dependencies are delivered; checks each wave on the board; stops on a blocker | `references/run.md` |
+| `run` | One or more sprints; `--paced [minutes]` under `/loop` | Every open wave, each in its own subagent (a wave's side-by-side cards one agent each), one wave at a time, each once its dependencies are delivered; checks each wave on the board; stops on a blocker | `references/run.md` |
 | `debug` | Sprint | Turns the user's adjustments into verified fixes | `references/debug.md` |
 | `release` | Sprint, with the user's deploy word | Preconditions (cards tested, debug done, deploy word, migration tail, backup), then the project's `bandit.yaml` recipe; plugin release for Marketplace cards | `references/release.md` |
 | `close` | Sprint | Releasing is optional (no app release: `Release: deferred`, the next release covers it; helpers changed: their release first); completes the approved cards, closes the sprint, archives the sprint's papers | `references/close.md` |
@@ -90,7 +90,7 @@ The full list is `references/gotchas.md`: read it once at the start of any comma
 - Rewrite a locked Spec without showing old and new and getting a yes
 - Write to a card outside the batch and its debug card, or to a sprint but this one; create columns or boards
 - Merge into the deploy branch or deploy outside `release`; force-push, or push anything but the trunk (`references/execute.md` → Pushing)
-- Run two wave agents at once, two waves in one chat, a single card, or a wave before the cards it depends on are delivered without the user's say-so
+- Run two waves at once, two agents in one working copy, two waves in one chat, a single card, or a wave before the cards it depends on are delivered without the user's say-so
 - Move a card to Done by anything but `close`, or treat an urgency remark as approval
 - Edit the user's verbatim documents or any rule in `CLAUDE.md` without permission
 - Store IDs, write inside the skill folder, or mark a step done without its evidence in the ledger

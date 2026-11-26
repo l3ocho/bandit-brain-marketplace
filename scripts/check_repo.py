@@ -1001,6 +1001,12 @@ def check_staging_step():
         "execute.md Pushing: reads staging.refresh": "`recipe.py opt staging.refresh`" in push,
         "execute.md Pushing: reads staging.after_push": "`recipe.py opt staging.after_push`" in push,
         "execute.md Pushing: reads staging.commit": "`recipe.py opt staging.commit`" in push,
+        "execute.md Pushing: reads staging.branch": "`recipe.py opt staging.branch`" in push,
+        "execute.md Pushing: another branch reaches staging at release":
+            "`Staging: staging follows {branch}; this push reaches it at release`" in push
+            and "nothing is run or shown" in push,
+        "execute.md Pushing: staging.branch read before after_push":
+            0 <= push.find("`recipe.py opt staging.branch`") < push.find("`recipe.py opt staging.after_push`"),
         "execute.md Pushing: ready to test only on a match": "only then may the summary and the final message say" in push,
         "execute.md Never: no ready to test before staging runs the push": "ready to test on staging before" in never,
         "execute.md wave summary: Staging field": "· Staging: {" in execute,
@@ -1013,9 +1019,10 @@ def check_staging_step():
                 and st1_hits("x", "Right after the push, the staging step") == [])
     ok = not hits and not missing and selftest
     report("ST1", ok, "no plugin file assumes what a push does to staging or points at a project's numbered rule; the "
-           "staging step after every push has its home in execute.md and debug points to it (4 self-test lines)"
+           "staging step after every push has its home in execute.md (staging that follows another branch than the trunk: "
+           "the reaches-it-at-release line, nothing run or shown) and debug points to it (4 self-test lines)"
            if ok else f"staging claim or project rule number in {hits[:8]}; missing {missing}; "
-           f"self-test {'ok' if selftest else 'failed'} (BM-26)")
+           f"self-test {'ok' if selftest else 'failed'} (BM-26, BM-28)")
 
 
 # ── DC1 · the design card rule has one home, and sprint planning points to it ─

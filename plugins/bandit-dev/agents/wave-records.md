@@ -39,7 +39,8 @@ per write. A note write answers you in a few lines (the note's headings and whet
    Finishing a wave), At a glance (current wave, next action, last update), the Status line, one Milestone log line
    per card and the wave's line, Conventions applied, Plan deviations, Verify-first results, Follow-ups noticed.
    A push writes its hash and its Staging line in the wave's Milestone line; a Staging line saying staging does not
-   run the pushed commit also goes under Needs the user, with the command it names.
+   run the pushed commit also goes under Needs the user, with the command it names; one saying staging follows
+   another branch and the push reaches it at release does not.
    **Right after the last card's row: complete that card** (`get_task`, every sub-task ticked, then `update_tasks`
    with `complete: true`, read back; `references/templates.md` → Check lines). A line still open is named in your
    report and under Needs the user, never ticked to pass. A sprint whose ledger has no `Approvals: debug card` line

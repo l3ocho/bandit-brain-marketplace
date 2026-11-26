@@ -1,4 +1,4 @@
-| plan_deviations | 0.5 | at most | proposed | | |
+| plan_deviations | 0 | at most | proposed | | |
 | full_check_min | 3 | at most | proposed | | |
 | full_check_failed | 0 | at most | proposed | | |
 | code_review_rounds | 1 | at most | proposed | | |
@@ -8,3 +8,10 @@
 | tokens_written_k | 3 | at most | proposed | | |
 | peak_context_k | 1200 | at most | proposed | | |
 | est_cost_usd | 5.16 | at most | proposed | | |
+| defect_lines | 2 | at most | proposed | | |
+| process_lines | 0.5 | at most | proposed | | |
+| cause_request_unclear | 0.5 | at most | proposed | | |
+| cause_built_wrong | 0.5 | at most | proposed | | |
+| cause_check_missed_it | 0.5 | at most | proposed | | |
+| cause_environment | 0.5 | at most | proposed | | |
+| debug_card_effort | 3 | at most | proposed | | |

@@ -32,7 +32,7 @@ live, `get_sprints { boardId }`). No command → offer the table and ask which.
 | `run` | One or more sprints; `--paced [minutes]` under `/loop` | Every open wave, each in its own subagent (a wave's side-by-side cards one agent each), one wave at a time, each once its dependencies are delivered; checks each wave on the board; stops on a blocker | `references/run.md` |
 | `debug` | Sprint | Turns the user's adjustments into verified fixes | `references/debug.md` |
 | `release` | Sprint, with the user's deploy word | Preconditions (cards tested, debug done, deploy word, migration tail, backup), then the project's `bandit.yaml` recipe; plugin release for Marketplace cards | `references/release.md` |
-| `close` | Sprint | Releasing is optional (no app release: `Release: deferred`, the next release covers it; helpers changed: their release first); completes the approved cards, closes the sprint, archives the sprint's papers | `references/close.md` |
+| `close` | Sprint | Releasing is optional (no app release: `Release: deferred`, the next release covers it; helpers changed: their release first); once every approval line on the debug card is ticked, sizes and completes the debug card, closes the sprint, archives the sprint's papers | `references/close.md` |
 
 | Read | When |
 |---|---|
@@ -86,12 +86,12 @@ The full list is `references/gotchas.md`: read it once at the start of any comma
 - Break a hard rule (bandit:tasks `references/hard-rules.md`): names, tool limits, field limits, where information goes
 - Run any command on a project without `dev: true`, or from Claude.ai
 - Ask which cards when no list was given
-- Mark a card complete, tick its approval line or call anything approved, except `close` doing so for cards the user approved (approval line ticked by the user, or approved in that chat)
+- Complete a card other than as `references/templates.md` → Check lines says (a build card at its delivery, every sub-task ticked; the debug card at `close`), tick an approval line or call anything approved, except `close` doing so for cards the user approved (approval line ticked by the user, or approved in that chat)
 - Rewrite a locked Spec without showing old and new and getting a yes
 - Write to a card outside the batch and its debug card, or to a sprint but this one; create columns or boards
 - Merge into the deploy branch or deploy outside `release`; force-push, or push anything but the trunk (`references/execute.md` → Pushing)
 - Run two waves at once, two agents in one working copy, two waves in one chat, a single card, or a wave before the cards it depends on are delivered without the user's say-so
-- Move a card to Done by anything but `close`, or treat an urgency remark as approval
+- Tick a sub-task ahead of its work, reopen a completed build card, or treat an urgency remark as approval
 - Edit the user's verbatim documents or any rule in `CLAUDE.md` without permission
 - Store IDs, write inside the skill folder, or mark a step done without its evidence in the ledger
 - Write one card's Spec or plan (`/bandit:tasks spec`, `plan-tech`) or file notes (bandit:notes)

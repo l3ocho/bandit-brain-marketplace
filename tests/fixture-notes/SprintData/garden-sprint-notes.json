@@ -3,12 +3,25 @@
  "built": "2026-11-20T00:00:00Z",
  "notes": [
   {
-   "title": "garden-sprint-targets",
-   "kind": "reference",
-   "status": "active",
-   "tags": [],
+   "title": "garden-sprint-autumn-progress",
+   "kind": "log",
+   "status": "archived",
+   "tags": [
+    "sprint-autumn"
+   ],
    "cards": [],
-   "text": "# Garden — sprint targets\n\n| Measure | Target | Direction | Status | Approved | Words |\n|---|---|---|---|---|---|\n| time_min | 30 | at most | approved | 2026-11-08 | \"Use these.\" |\n| debug_lines | 1 | at most | approved | 2026-11-08 | \"Use these.\" |\n| test_runs | 5 | at most | approved | 2026-11-08 | \"Use these.\" |\n| full_check_runs | 1 | at most | proposed | | |\n| tokens_new_k | 100 | at most | approved | | |\n"
+   "text": "# Sprint autumn — progress ledger\n\n## At a glance\n\n- Sprint: autumn\n- Committed: 2026-10-01\n\n## Waves\n\n| Wave | Cards | Done | Evidence |\n|---|---|---|---|\n| Wave 1 | GA-1 | 2026-10-02 | Delivered. |\n| Wave 2 | GA-2, GA-3 | 2026-10-03 | Delivered. |\n\n## Batch\n\n| Card | Title | Lane | Effort | Complexity | Order | Blocked by |\n|---|---|---|---|---|---|---|\n| GA-1 | Sow | issue | L | Medium | 1 | — |\n| GA-2 | Hoe | issue | XS | Simple | 2 | — |\n| GA-3 | Weed | issue | S | Simple | 3 | — |\n\n## Plan deviations\n\nNone.\n"
+  },
+  {
+   "title": "garden-sprint-autumn-wave-report",
+   "kind": "reference",
+   "status": "archived",
+   "tags": [
+    "sprint-autumn"
+   ],
+   "cards": [],
+   "text": "# Sprint autumn — wave report (after wave 2)\n\n## 🌊 Wave 1 — 2026-10-02\n\n### GA-1 Sow — ✅ As specified\n\n#### ⏱️ Flow\n- Time: 0:20 · per card: GA-1 0:15\n- Full checks: 1 runs, 2 min total, 0 failed\n- Test runs: not measured (no test command given)\n- Gates: code review 0 rounds, UI check 0 rounds\n- Repeat runs: 0\n\n## 🌊 Wave 2 — 2026-10-03\n\n### GA-2 Hoe — ✅ As specified\n\n### GA-3 Weed — ✅ As specified\n\n#### ⏱️ Flow\n- Time: 0:10 · per card: GA-2 0:05, GA-3 0:04\n- Full checks: 2 runs, 3 min total, 0 failed\n- Test runs: not measured (no test command given)\n- Gates: code review 1 rounds, UI check 0 rounds\n- Repeat runs: 0\n\n## 🐞 Debug\n\n| Card | Expected | Found | Process | Fixed | Declined | New card |\n|---|---|---|---|---|---|---|\n| GA-1 | 1 | 2 | 0 | 3 | 0 | 0 |\n| GA-3 | 0 | 1 | 1 | 2 | 0 | 0 |\n| sprint | 0 | 0 | 1 | 1 | 0 | 0 |\n| Total | 1 | 3 | 2 | 6 | 0 | 0 |\n",
+   "frontmatter_error": "frontmatter is not valid YAML (mapping values are not allowed here)"
   },
   {
    "title": "garden-sprint-broken-progress",
@@ -20,6 +33,26 @@
    "cards": [],
    "text": "# Sprint broken: ledger\n\n## At a glance\n\n- Sprint: broken\n",
    "frontmatter_error": "frontmatter is not valid YAML (mapping values are not allowed here)"
+  },
+  {
+   "title": "garden-sprint-harvest-progress",
+   "kind": "reference",
+   "status": "archived",
+   "tags": [
+    "sprint-harvest"
+   ],
+   "cards": [],
+   "text": "# Sprint harvest — progress ledger\n\n## At a glance\n\n- Sprint: harvest\n- Committed: 2026-11-10\n- Approvals: debug card\n- Debug card: GA-33\n\n## Waves\n\n| Wave | Cards | Done | Evidence |\n|---|---|---|---|\n| Wave 1 | GA-30, GA-31 | 2026-11-11 | Delivered. |\n| Wave 2 | GA-32 | 2026-11-12 | Delivered. |\n\n## Batch\n\n| Card | Title | Lane | Effort | Complexity | Blocked by |\n|---|---|---|---|---|---|\n| GA-30 | Pick | feature | M | Medium | — |\n| GA-31 | Sort | feature | S | Simple | — |\n| GA-32 | Store | issue | XS | Simple | — |\n\n## Plan deviations\n\nNone.\n"
+  },
+  {
+   "title": "garden-sprint-harvest-wave-report",
+   "kind": "reference",
+   "status": "archived",
+   "tags": [
+    "sprint-harvest"
+   ],
+   "cards": [],
+   "text": "# Sprint harvest — wave report (after wave 2)\n\n## 🌊 Wave 1 — 2026-11-11\n\n### GA-30 Pick — ✅ As specified\n\n### GA-31 Sort — ✅ As specified\n\n## 🐞 Debug\n\n| Card | Expected | Found | Process | Fixed | Declined | New card | Request unclear | Built wrong | Check missed it | Environment |\n|---|---|---|---|---|---|---|---|---|---|---|\n| GA-30 | 1 | 2 | 1 | 4 | 0 | 0 | 1 | 1 | 1 | 0 |\n| GA-31 | 0 | 1 | 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 |\n| GA-32 | 0 | 1 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 1 |\n| sprint | 0 | 0 | 2 | 2 | 0 | 0 | 0 | 0 | 0 | 0 |\n| Total | 1 | 4 | 3 | 7 | 0 | 1 | 1 | 1 | 1 | 1 |\n\nDebug card: GA-33 · effort M · complexity Simple · 5 defect lines · 3 process lines\n"
   },
   {
    "title": "garden-sprint-spring-progress",
@@ -54,6 +87,14 @@
    "frontmatter_error": "frontmatter is not valid YAML (mapping values are not allowed here)"
   },
   {
+   "title": "garden-sprint-targets",
+   "kind": "reference",
+   "status": "active",
+   "tags": [],
+   "cards": [],
+   "text": "# Garden — sprint targets\n\n| Measure | Target | Direction | Status | Approved | Words |\n|---|---|---|---|---|---|\n| time_min | 30 | at most | approved | 2026-11-08 | \"Use these.\" |\n| debug_lines | 1 | at most | approved | 2026-11-08 | \"Use these.\" |\n| test_runs | 5 | at most | approved | 2026-11-08 | \"Use these.\" |\n| full_check_runs | 1 | at most | proposed | | |\n| tokens_new_k | 100 | at most | approved | | |\n"
+  },
+  {
    "title": "garden-sprint-winter-progress",
    "kind": "log",
    "status": "active",
@@ -62,27 +103,6 @@
    ],
    "cards": [],
    "text": "# Sprint winter — progress ledger\n\n## At a glance\n\n- Sprint: winter\n- Committed: 2026-09-01\n\n## Waves\n\n| Wave | Cards | Done | Evidence |\n|---|---|---|---|\n| Wave 1 | GA-10 | 2026-09-03 | GA-10 delivered. |\n| Wave 2 | GA-11, GA-12 | 2026-09-05 | Both delivered. |\n\n## Batch\n\n| Card | Title | Lane |\n|---|---|---|\n| GA-10 | Prune | issue |\n| GA-11 | Mulch | issue |\n| GA-12 | Rake | issue |\n\n## Plan deviations\n\n- The shed was repainted as well.\n",
-   "frontmatter_error": "frontmatter is not valid YAML (mapping values are not allowed here)"
-  },
-  {
-   "title": "garden-sprint-autumn-progress",
-   "kind": "log",
-   "status": "archived",
-   "tags": [
-    "sprint-autumn"
-   ],
-   "cards": [],
-   "text": "# Sprint autumn — progress ledger\n\n## At a glance\n\n- Sprint: autumn\n- Committed: 2026-10-01\n\n## Waves\n\n| Wave | Cards | Done | Evidence |\n|---|---|---|---|\n| Wave 1 | GA-1 | 2026-10-02 | Delivered. |\n| Wave 2 | GA-2, GA-3 | 2026-10-03 | Delivered. |\n\n## Batch\n\n| Card | Title | Lane | Effort | Complexity | Order | Blocked by |\n|---|---|---|---|---|---|---|\n| GA-1 | Sow | issue | L | Medium | 1 | — |\n| GA-2 | Hoe | issue | XS | Simple | 2 | — |\n| GA-3 | Weed | issue | S | Simple | 3 | — |\n\n## Plan deviations\n\nNone.\n"
-  },
-  {
-   "title": "garden-sprint-autumn-wave-report",
-   "kind": "reference",
-   "status": "archived",
-   "tags": [
-    "sprint-autumn"
-   ],
-   "cards": [],
-   "text": "# Sprint autumn — wave report (after wave 2)\n\n## 🌊 Wave 1 — 2026-10-02\n\n### GA-1 Sow — ✅ As specified\n\n#### ⏱️ Flow\n- Time: 0:20 · per card: GA-1 0:15\n- Full checks: 1 runs, 2 min total, 0 failed\n- Test runs: not measured (no test command given)\n- Gates: code review 0 rounds, UI check 0 rounds\n- Repeat runs: 0\n\n## 🌊 Wave 2 — 2026-10-03\n\n### GA-2 Hoe — ✅ As specified\n\n### GA-3 Weed — ✅ As specified\n\n#### ⏱️ Flow\n- Time: 0:10 · per card: GA-2 0:05, GA-3 0:04\n- Full checks: 2 runs, 3 min total, 0 failed\n- Test runs: not measured (no test command given)\n- Gates: code review 1 rounds, UI check 0 rounds\n- Repeat runs: 0\n\n## 🐞 Debug\n\n| Card | Expected | Found | Process | Fixed | Declined | New card |\n|---|---|---|---|---|---|---|\n| GA-1 | 1 | 2 | 0 | 3 | 0 | 0 |\n| GA-3 | 0 | 1 | 1 | 2 | 0 | 0 |\n| sprint | 0 | 0 | 1 | 1 | 0 | 0 |\n| Total | 1 | 3 | 2 | 6 | 0 | 0 |\n",
    "frontmatter_error": "frontmatter is not valid YAML (mapping values are not allowed here)"
   }
  ],

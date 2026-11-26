@@ -6,7 +6,8 @@ record does not hold is an empty cell, never an estimate.
 
 Where each part is read (the measures list below is the one place a measure lives):
   ledger       `## Waves` (cards, done date; an older ledger: the cards of `## Waves and cards`, no date) · `## Batch` (effort, XS=1 S=2 M=3 L=4 XL=5) · `## Plan deviations`
-  wave report  the section `## 🌊 Wave {n}`: its `#### ⏱️ Flow` and `#### 🪙 Tokens` lines, and `## 🐞 Debug` (a card's rows)
+  wave report  the section `## 🌊 Wave {n}`: its `#### ⏱️ Flow` and `#### 🪙 Tokens` lines, and `## 🐞 Debug` (a card's rows,
+               and the debug card's size line under the table, read on the sprint's last wave only)
   card row     a wave of one card with no section: its card's Numbers cell in the ledger's `## Waves and cards`, the same
                lines joined by `; ` (wave_flow.py --row), read as the section's lines
 
@@ -51,6 +52,7 @@ class Wave:
     done: str
     ledger: str
     report: str = ""  # the wave report's whole text ("" when the sprint has none)
+    last: bool = False  # the sprint's last wave of work (the debug card's own wave has no row)
     section: str = field(init=False, default="")  # this wave's `## 🌊 Wave n` section, or its card's Numbers cell ("" when neither)
 
     def __post_init__(self):
@@ -114,6 +116,22 @@ def _debug(w):
     return str(sum(int(rows[c].get(k, "0") or 0) for c in w.cards if c in rows for k in ("expected", "found", "process")))
 
 
+def _debug_count(w, *columns):
+    """The Debug table's `columns` summed over the wave's cards; "" when the report has no Debug table, or when a
+    column is missing (a table written before that column existed holds no record of it, never 0)."""
+    rows = {r.get("card"): r for r in w.table(w.report, "🐞 Debug")}
+    if not rows or any(c not in next(iter(rows.values())) for c in columns):
+        return ""
+    return str(sum(int(rows[c].get(k, "0") or 0) for c in w.cards if c in rows for k in columns))
+
+
+def _debug_card_effort(w):
+    """The debug card's effort (XS=1 … XL=5) from the size line `close` writes under the Debug table, on the sprint's
+    last wave only, so the sprint's one card is counted once."""
+    m = re.search(r"^Debug card: \S+ · effort (XS|S|M|L|XL)\b", section(w.report, "🐞 Debug"), re.M) if w.last else None
+    return str(EFFORT[m.group(1)]) if m else ""
+
+
 def _deviations(w):
     """Bullets of Plan deviations that name one of the wave's cards. A bullet naming no card cannot be placed on a
     wave, so any such bullet leaves the cell empty rather than a count that might be short. A section still `_Pending_`
@@ -167,6 +185,20 @@ MEASURES = [
             lambda w: _group(w, r"^- Estimated cost: \$([\d.]+)", 1), direction="at most"),
     Measure("hook_runs", "wave report Tokens: `- Hooks`, runs", lambda w: _group(w, r"^- Hooks: (\d+) runs?", 1)),
     Measure("debug_lines", "wave report Debug table: Expected + Found + Process of the wave's cards", _debug, direction="at most"),
+    Measure("defect_lines", "wave report Debug table: Expected + Found of the wave's cards",
+            lambda w: _debug_count(w, "expected", "found"), direction="at most"),
+    Measure("process_lines", "wave report Debug table: Process of the wave's cards",
+            lambda w: _debug_count(w, "process"), direction="at most"),
+    Measure("cause_request_unclear", "wave report Debug table: fixed lines with the cause `request unclear`",
+            lambda w: _debug_count(w, "request unclear"), direction="at most"),
+    Measure("cause_built_wrong", "wave report Debug table: fixed lines with the cause `built wrong`",
+            lambda w: _debug_count(w, "built wrong"), direction="at most"),
+    Measure("cause_check_missed_it", "wave report Debug table: fixed lines with the cause `check missed it`",
+            lambda w: _debug_count(w, "check missed it"), direction="at most"),
+    Measure("cause_environment", "wave report Debug table: fixed lines with the cause `environment`",
+            lambda w: _debug_count(w, "environment"), direction="at most"),
+    Measure("debug_card_effort", "wave report Debug section: the debug card's size line (XS=1 … XL=5), on the sprint's last wave",
+            _debug_card_effort, direction="at most"),
 ]
 
 
@@ -188,7 +220,9 @@ def waves_of(project: str, name: str, papers: dict) -> tuple[list, str]:
         return [], f"sprint-{name}: the ledger has neither a ## Waves nor a ## Waves and cards table"
     report_note = papers.get(f"{project}-sprint-{name}-wave-report")
     report = report_note["text"] if report_note else ""
-    return [Wave(name, where, int(n), CARD_ID.findall(ids), done, ledger, report) for n, ids, done, _ in rows], ""
+    waves = [Wave(name, where, int(n), CARD_ID.findall(ids), done, ledger, report) for n, ids, done, _ in rows]
+    max(waves, key=lambda w: w.number).last = True
+    return waves, ""
 
 
 def collect(data: dict, project: str = "") -> tuple[list, list]:

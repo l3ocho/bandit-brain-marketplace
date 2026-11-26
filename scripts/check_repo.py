@@ -2304,6 +2304,79 @@ def check_subtask_gate():
            "step or not read; gate and approval lines and refused adds do not count; debug and completed cards skipped)")
 
 
+# ── CP1 · a card of a sprint is completed only once every one of its sub-tasks is ticked (BM-25) ─
+def check_completion_gate():
+    import tempfile
+    sprint = PLUGINS / "bandit-dev" / "skills" / "sprint"
+    script = sprint / "scripts" / "completion_gate.py"
+    bad = []
+    hooks = json.loads((PLUGINS / "bandit-dev" / "hooks" / "hooks.json").read_text(encoding="utf-8"))
+    if not any("completion_gate.py" in h.get("command", "") and "update_tasks" in e.get("matcher", "")
+               for e in hooks["hooks"].get("PreToolUse", []) for h in e.get("hooks", [])):
+        bad.append("hooks.json: no PreToolUse hook runs completion_gate.py on update_tasks")
+
+    def card(sprint=True, ticks=(False, False), done=False, title="Build it"):
+        return {"id": "u-1", "shortId": "AB-1", "title": title, "completed": done,
+                "sprint": {"id": "sp-1", "name": "one"} if sprint else None,
+                "subtasks": [{"id": f"s{i}", "title": t, "completed": c}
+                             for i, (t, c) in enumerate(zip(["Write it", "Merged into the trunk"], ticks))]}
+
+    def chat(name, *calls, extra=(), where=None):
+        """A recorded chat: each call is (tool, input, answer); `extra` lines are appended as they are."""
+        lines = [{"type": "api-request-blob", "message": {"content": []}}]
+        for i, (tool, given, answer) in enumerate(calls):
+            lines.append({"type": "assistant", "message": {"content": [
+                {"type": "tool_use", "id": f"{name}{i}", "name": f"mcp__board__{tool}", "input": given}]}})
+            lines.append({"type": "user", "message": {"content": [
+                {"type": "tool_result", "tool_use_id": f"{name}{i}", "content": [{"type": "text", "text": json.dumps(answer)}]}]}})
+        path = Path(where or Path(d) / f"{name}.jsonl")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("".join(json.dumps(x) + "\n" for x in [*lines, *extra]))
+        return str(path)
+
+    read = ("get_task", {"taskId": "AB-1"}, card())
+    tick = lambda sid, ok=True: ("manage_subtasks", {"action": "tick", "subtaskId": sid, "completed": True},  # noqa: E731
+                                 {"ok": True} if ok else {"ok": False, "code": "NOT_FOUND"})
+    done = lambda ref="AB-1": {"tool_name": "mcp__board__update_tasks",  # noqa: E731
+                               "tool_input": {"items": [{"taskId": ref, "complete": True}]}}
+    blob = {"type": "api-request-blob", "message": {"content": [
+        {"type": "tool_use", "id": "zz", "name": "mcp__board__manage_subtasks",
+         "input": {"action": "tick", "subtaskId": "s1", "completed": True}},
+        {"type": "tool_result", "tool_use_id": "zz", "content": [{"type": "text", "text": "{\"ok\": true}"}]}]}}
+    with tempfile.TemporaryDirectory() as d:
+        main = chat("main")
+        chat("sub", read, tick("s0"), tick("s1"), where=Path(main[:-6]) / "subagents" / "agent-a1.jsonl")
+        cases = [
+            ("open lines are named", 2, '"Merged into the trunk"', done(), chat("c1", read), {}),
+            ("every line ticked", 0, "", done(), chat("c2", read, tick("s0"), tick("s1")), {}),
+            ("a card not read", 2, "get_task AB-1", done(), chat("c3"), {}),
+            ("a card in no sprint", 0, "", done(), chat("c4", ("get_task", {"taskId": "AB-1"}, card(sprint=False))), {}),
+            ("a refused tick does not count", 2, "Merged", done(), chat("c5", read, tick("s0"), tick("s1", ok=False)), {}),
+            ("completed by uuid", 2, "AB-1: open", done("u-1"), chat("c6", read), {}),
+            ("a line added after the read is open", 2, "Gate: AB-9", done(), chat("c7", read, tick("s0"), tick("s1"),
+             ("manage_subtasks", {"action": "add", "taskId": "AB-1", "title": "Gate: AB-9"}, {"ok": True})), {}),
+            ("a deleted line no longer counts", 0, "", done(), chat("c8", read, tick("s0"), ("delete_tasks", {
+             "items": [{"kind": "subtask", "subtaskId": "s1"}]}, {"ok": True, "results": [{"ok": True}]})), {}),
+            ("the debug card is covered", 2, "Tested and approved by you: AB-1",  done("AB-2"), chat("c9", ("get_task",
+             {"taskId": "AB-2"}, {"id": "u-2", "shortId": "AB-2", "title": "Debug: sprint one", "completed": False,
+                                  "sprint": {"id": "sp-1"}, "subtasks": [{"id": "d0", "title": "Tested and approved by you: "
+                                  "AB-1 Build it", "completed": False}]})), {}),
+            ("an already completed card", 0, "", done(), chat("c10", ("get_task", {"taskId": "AB-1"}, card(done=True))), {}),
+            ("another update is silent", 0, "", {"tool_name": "mcp__board__update_tasks", "tool_input": {"items": [
+             {"taskId": "AB-1", "executionState": "doing"}]}}, chat("c11"), {}),
+            ("a subagent's own record is read", 0, "", done(), main, {"agent_id": "a1"}),
+            ("the main record alone does not hold the subagent's reads", 2, "get_task", done(), main, {}),
+            ("request copies are not read", 2, "Merged", done(), chat("c12", read, tick("s0"), extra=[blob]), {}),
+        ]
+        for label, code, text, payload, transcript, extra in cases:
+            got, out = run_hook(script, {**payload, "transcript_path": transcript, **extra}, ROOT)
+            if got != code or text not in out:
+                bad.append(f"{label} → {got} {out[-100:]!r}")
+    report("CP1", not bad, "; ".join(bad) or f"completion gate: registered on update_tasks, {len(cases)} recorded chats "
+           "(completing a sprint card with an open line refused naming it, the debug card too; a card not read refused "
+           "with its get_task; a subagent's own record read; refused ticks and request copies not counted)")
+
+
 # ── TC1 · the Execution column is called To Do; the stored value stays `assigned` (BB-481) ─
 TODO_ROW = "| 2 | **To Do** | ✅ `assigned`"
 TODO_SAID = 'A person who says "To Do" means `executionState: "assigned"`'
@@ -2850,6 +2923,7 @@ def main(argv):
     check_stop_gate()
     check_dependency_gate()
     check_subtask_gate()
+    check_completion_gate()
     check_description_gate()
     check_todo_name()
     check_card_ids()

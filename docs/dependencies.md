@@ -69,12 +69,7 @@ These start outside, so no file here triggers them. Each has its own check.
 A place the done check lists as open, checked and found to need nothing for this release. One line
 each: the path as the map writes it, then why. `scripts/release.py --write` empties this list.
 
-- `plugins/bandit/skills/tasks/references/execution.md` — its Stand By rule (a card waits on someone else) and the sprint exemption still hold: the debug card and an old-shape sprint's cards wait there (BM-25)
-- `plugins/bandit/skills/tasks/references/errors.md` — BM-25 adds no refusal code; the completion gate is a hook, not an app refusal
-- `plugins/bandit/skills/tasks/references/dev-workflow.md` — `plan-tech` writes build steps only; check lines are sprint planning's (BM-25)
-- `plugins/bandit/skills/notes/references/other-skills.md` — close still writes a finished card's conclusions; who writes what is unchanged (BM-25)
-- `plugins/bandit/skills/notes/references/conventions.md` — it names the execution states only; none changed (BM-25)
-- `tests/fixture-estimate/estimate.csv` — the estimate reads `time_min` and `effort` only, both unchanged; ES1 green (BM-25)
+- none yet
 
 ## ✅ Before saying done
 

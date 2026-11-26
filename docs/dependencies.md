@@ -69,8 +69,7 @@ These start outside, so no file here triggers them. Each has its own check.
 A place the done check lists as open, checked and found to need nothing for this release. One line
 each: the path as the map writes it, then why. `scripts/release.py --write` empties this list.
 
-- `bandit.yaml` — this repo's own recipe has no staging section, so the two new optional staging lines do not apply to it (BM-26).
-- `docs/dependencies.md` — ST1 checks text the map already lists (`execute.md`, `debug.md`, every plugin file); it adds no file that changes with another (BM-26).
+- none yet
 
 ## ✅ Before saying done
 

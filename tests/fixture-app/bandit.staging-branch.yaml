@@ -1,0 +1,13 @@
+# bandit.yaml whose staging follows the `staging` branch, which only the release steps move (BM-28).
+# Test fixture (contract: plugins/bandit-dev/skills/sprint/references/bandit-yaml.md).
+verify: "true"
+branches: { trunk: development, deploy: main }
+release:
+  - "echo bump the version"
+  - "echo merge development into staging"
+  - "echo fast-forward the deploy branch"
+staging:
+  refresh: "echo pull origin/staging on staging"
+  commit: "echo 1a2b3c4"
+  after_push: run
+  branch: staging

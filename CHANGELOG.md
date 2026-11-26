@@ -2,6 +2,11 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
+## Unreleased
+
+### Added
+- **A recipe can say staging follows a branch other than the trunk** (BM-28). A new optional line, `staging.branch`, names the branch staging deploys (for a project whose staging follows `staging`, which only its release moves). With it, a push of the trunk says "staging follows {branch}; this push reaches it at release", runs and shows no staging command, and calls nothing ready to test on staging; `release` shows the refresh command after its steps, naming the branch. A recipe without the line works as in 2.3.0.
+
 ## 2.3.0 · 2026-11-26
 
 ### Added

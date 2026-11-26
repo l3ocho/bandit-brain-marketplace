@@ -4,6 +4,9 @@ All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace s
 
 ## Unreleased
 
+### Changed
+- **A sprint card is completed when it is built, and your approvals wait on the debug card** (BM-25). Planning ends every build card with four check lines (code review, browser check on a screen card, full check, merge), and the wave ticks each only when its verdict is back, and a build step only once its code and tests are committed, one at a time: a card's checklist no longer reads all done while its checks run. Right after its merge, its ledger row and its Delivered comment the wave completes the card, so the app's sprint page shows each wave done as it happens; the records agent does it for a wave's last card. A completed card stays completed: what you find in testing is a Found line on the debug card, fixed in debug. Your approval lines move to the debug card, one per build card, with a test plan saying how to test each; the debug card waits in Stand By for you once the waves end, goes to Doing while debug works and back when nothing is left. Close runs when every build card is completed and every line on the debug card is ticked (an open approval line stops it, named), sizes the debug card from its Expected and Found lines and completes it. Each fixed defect line ends with one cause (request unclear, built wrong, check missed it, environment), counted in the wave report's Debug table and in new sprint data columns. A sprint committed before this release, like dev-efficiency-3, closes the old way. Checker rule CK1 tests it; DK1, SB1 and SD1 follow.
+
 ### Added
 - **A card of a sprint is completed only once every sub-task is ticked** (BM-25). A new hook refuses completing a sprint card, the debug card included, while one of its sub-tasks is open, naming the open lines; a card the chat has not read is refused with the read that settles it. Inside a subagent it reads that subagent's own record. Checker rule CP1 tests it.
 

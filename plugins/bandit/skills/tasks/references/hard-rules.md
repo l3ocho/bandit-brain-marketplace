@@ -24,7 +24,7 @@ break one is not sent, and the reason is said in one line.
 - A card description is block-tag HTML only: no markdown, no `<br>`, a `<pre>` only between two blocks; read back after the write (`references/board.md` → Card descriptions).
 - A card's Spec section is locked once written: a change goes through a `Spec change needed:` comment (`references/dev.md` → Spec lock).
 - At most one `stage/*` tag on a card, and none beside `lane/incident` (`references/board.md` → Tags).
-- A dev card's checklist holds its build steps, a `Gate:` line for each card that blocks it, and the approval line `Tested and approved by you` last (`references/dev.md` → Card fields; bandit-dev:sprint `references/templates.md` → Approval line).
+- A dev card's checklist holds its build steps and a `Gate:` line for each card that blocks it; a sprint card then carries its check lines last, ticked only when each check's verdict is in, and its approval sits on the sprint's debug card (a sprint committed before that rule: the approval line last on the card) (`references/dev.md` → Card fields; bandit-dev:sprint `references/templates.md` → Check lines, Approval line).
 - A note holds at most 200 KB; a longer one is split by section on the user's yes, never cut (bandit:notes `references/storage-app.md` → Refusals).
 - A note's summary is one sentence of at most 25 words (bandit:notes `references/conventions.md` §5).
 

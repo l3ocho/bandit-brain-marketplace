@@ -19,13 +19,13 @@ and its sprint close complete the cards and write no note.
 | Caller | When | Mode |
 |---|---|---|
 | bandit:tasks `done`, one card or several at once (`execution.md`) | Before the cards are completed | In a chat: one row a card, only approved rows run |
-| bandit-dev:sprint `close` (`close.md`, step 1) | After the approval lines are ticked, before the cards are completed | Unattended: running `close` is the go |
+| bandit-dev:sprint `close` (`close.md`, step 1) | After the approval lines are ticked, before the cards close; a sprint whose build cards were completed at delivery has its conclusions written here all the same | Unattended: running `close` is the go |
 
 In a chat nothing is completed until the proposal is answered (all, a list or none). Then the
 caller completes the cards, whatever happened here: a row left out of the answer, skipped or
 refused never holds back the completion. This skill writes the note; the card's new description
 is drafted here and written by the caller, since this skill never writes to the board
-(`references/other-skills.md`). A card that is already complete is not read again.
+(`references/other-skills.md`). A card that is already complete is not read again, except a sprint's build card at `close` (completed at its delivery, its conclusions still owed).
 
 ## 🪜 The steps
 

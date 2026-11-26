@@ -1208,6 +1208,7 @@ def check_app_compat():
 PROCESS_SHAPE = "Process: {step} —"
 DEBUG_NEEDLES = (("plan.md", "Create the debug card"), ("execute.md", "`Expected:` line"),
                  ("debug.md", "The debug card first"), ("close.md", "The debug card"), ("run.md", "debug card"))
+DEBUG_CAUSES = ("`request unclear`", "`built wrong`", "`check missed it`", "`environment`")
 DEBUG_OLD = ("stays where `plan` seeded it until `close`", "and never the debug card", "is not one and stays put",
              "two line shapes", "The debug card is never moved by a wave.")
 
@@ -1229,7 +1230,18 @@ def debug_card_problems(files):
     if "Process lines** (the one home" not in t or "**Moves.**" not in t or "ticked once it is fixed or its lesson" not in t:
         bad.append("templates.md lost the Process lines rule, the Moves rule or the Process outcome")
     if "`doing` when `debug` starts" not in t or "`standby` when `release` starts" not in t:
-        bad.append("templates.md must say the debug card goes to doing at debug and standby at release")
+        bad.append("templates.md must say the debug card goes to doing at debug and, in an old-shape sprint, standby at release")
+    if "`standby` when the last wave ends" not in t or "back to `standby` when debug has nothing left to fix" not in t:
+        bad.append("templates.md must say the debug card goes to standby when the last wave ends and back to standby when "
+                   "debug has nothing left to fix (BM-25)")
+    if not all(c in t for c in DEBUG_CAUSES) or "| Request unclear | Built wrong | Check missed it | Environment |" not in t:
+        bad.append("templates.md must name the four causes and give the Debug table a column for each (BM-25)")
+    if "**Size, at close.**" not in t or "0: XS, 1 to 2: S, 3 to 5: M, 6 to 9: L, 10 or more: XL" not in t:
+        bad.append("templates.md lost the debug card's size table (BM-25)")
+    if "The debug card back to `standby`" not in flat.get("debug.md", "") or "ends with its one cause" not in flat.get("debug.md", ""):
+        bad.append("debug.md must give each fixed line its cause and put the debug card back to standby when nothing is left (BM-25)")
+    if "Size the debug card" not in flat.get("close.md", ""):
+        bad.append("close.md must size the debug card before it completes it (BM-25)")
     if not re.search(r"Move the sprint's debug card .{0,80}to `doing`", flat.get("debug.md", "")):
         bad.append("debug.md Intake 1 must move the debug card to doing")
     if not re.search(r"move the sprint's debug card .{0,80}to `standby`", flat.get("release.md", "")):
@@ -1270,13 +1282,22 @@ def check_debug_card():
                without("close.md", "Process lines", "notes"),
                without("close.md", "The debug card", "The bug card"),
                {**files, "execute.md": files["execute.md"] + "\nthe debug card stays where `plan` seeded it until `close`\n"},
-               {**files, "debug.md": files["debug.md"] + f"\n`{PROCESS_SHAPE}` again\n"}]
+               {**files, "debug.md": files["debug.md"] + f"\n`{PROCESS_SHAPE}` again\n"},
+               without("templates.md", "`standby` when the last wave ends", "`standby` when it ends"),
+               without("templates.md", "back to `standby` when debug has nothing left to fix", "left in `doing`"),
+               without("templates.md", "`check missed it`", "`missed`"),
+               without("templates.md", "| Check missed it | Environment |", "| Environment |"),
+               without("templates.md", "6 to 9: L", "6 to 8: L"),
+               without("debug.md", "The debug card back to `standby`", "The debug card stays"),
+               without("debug.md", "ends with its one cause", "ends"),
+               without("close.md", "Size the debug card", "Leave the debug card")]
     missed = [i for i, m in enumerate(mutants) if not debug_card_problems(m)]
     if missed:
         bad.append(f"the rule does not fail on every broken copy (missed {missed})")
     report("DK1", not bad, "; ".join(bad) + " (BB-381)" if bad else
-           "debug card: three line shapes in templates.md only; plan creates it, debug moves it to doing, release to "
-           "standby, close completes it; every step points to the Process line rule; the wave adds Expected lines, "
+           "debug card: three line shapes in templates.md only; plan creates it, it goes to standby when the last wave "
+           "ends, debug moves it to doing and back to standby (old shape: release to standby), close sizes and completes it; "
+           "a fixed line ends with one of four causes, a Debug table column each; every step points to the Process line rule; the wave adds Expected lines, "
            "debug reads it first, close refuses an unticked line, run names it")
 
 
@@ -1508,6 +1529,90 @@ def check_approval_line():
            "approval line: one home in templates.md; execute, run and debug never tick it; plan adds and checks it; close "
            "ticks it on the quoted approval and refuses an open one; a line the user ticked is the approval and close archives "
            "without asking; the repo CLAUDE.md leaves cards in Stand By until Leo's yes")
+
+
+# ── CK1 · a build card's checks are lines of its own, it is completed at delivery, and the approvals wait on the debug card (BM-25) ─
+CHECK_LINES = ("`Code review passed, its fixes in`", "`Browser check passed`", "`Full check green`", "`Merged into the trunk`")
+SHAPE_LINE = "`Approvals: debug card`"
+CHECK_NEEDLES = (
+    ("templates.md", "## Check lines"), ("templates.md", "**Completing is the delivery.**"),
+    ("templates.md", "completion_gate.py"), ("templates.md", "**An old-shape sprint**"),
+    ("templates.md", "`Tested and approved by you: {card id} {title}`"), ("templates.md", "<h3>Test plan</h3>"),
+    ("templates.md", "An open approval line refuses the close"), ("templates.md", "(rejected: new card {id})"),
+    ("plan.md", "then its **check lines**, last"), ("plan.md", "no build card gets an approval line"),
+    ("plan.md", "its approval lines in `subtasks`"), ("plan.md", "take each build card's approval line off"),
+    ("plan.md", SHAPE_LINE),
+    ("execute.md", "each check line only when its gate's verdict or result is back"),
+    ("execute.md", "then **complete it**, once `get_task` shows every sub-task ticked"),
+    ("execute.md", "before every one of its sub-tasks is ticked"),
+    ("run.md", "completes its card once every sub-task is ticked"), ("run.md", "every sub-task ticked, build steps and check lines"),
+    ("wave-records.md", "complete that card"), ("wave-records.md", "the debug card to `standby`"),
+    ("close.md", "An approval line that is open refuses the close"), ("close.md", "every build card is completed"),
+    ("debug.md", "a completed card stays completed"),
+)
+CHECK_OLD = ("Only `close` completes cards", "Done is never a move", "(code, tests, gates passed) moves to `standby`",
+             "each finished card to `standby`, and tick each card's build steps as you go",
+             "add the approval line as the very last sub-task of every batch card")
+
+
+def check_lines_problems(files, gate_checks):
+    """`files` maps a sprint reference name (and `wave-records.md`) to its text; `gate_checks` is subtask_gate.CHECKS."""
+    flat = {n: " ".join(x.split()) for n, x in files.items()}
+    bad = [f"{name} lacks '{words}'" for name, words in CHECK_NEEDLES if words not in flat.get(name, "")]
+    for line in CHECK_LINES:
+        homes = sorted(n for n, x in flat.items() if line in x)
+        if homes != ["templates.md"]:
+            bad.append(f"check line {line} lives in {homes or 'nowhere'} (one home: templates.md)")
+    if {c.strip("`").lower() for c in CHECK_LINES} != set(gate_checks):
+        bad.append("subtask_gate.py CHECKS differ from the check lines in templates.md")
+    for name, x in flat.items():
+        for old in CHECK_OLD:
+            if old in x:
+                bad.append(f"{name} still says '{old}'")
+    return bad
+
+
+def check_check_lines():
+    import importlib.util
+    dev = PLUGINS / "bandit-dev"
+    s = dev / "skills" / "sprint"
+    files = {p.name: p.read_text(encoding="utf-8") for p in (s / "references").glob("*.md")}
+    files["wave-records.md"] = (dev / "agents" / "wave-records.md").read_text(encoding="utf-8")
+    spec = importlib.util.spec_from_file_location("subtask_gate_ck1", s / "scripts" / "subtask_gate.py")
+    gate = importlib.util.module_from_spec(spec)
+    sys.path.insert(0, str(s / "scripts"))
+    spec.loader.exec_module(gate)
+    bad = check_lines_problems(files, gate.CHECKS)
+    if gate.build_steps(["Write it", "Merged into the trunk", "Tested and approved by you: AB-1 Build it"]) != ["Write it"]:
+        bad.append("subtask_gate.build_steps counts a check line or an approval line as a build step")
+
+    def without(name, old, new=""):
+        copy = dict(files)
+        assert old in copy[name], (name, old)
+        copy[name] = copy[name].replace(old, new)
+        return copy
+    mutants = [without("templates.md", "## Check lines", "## Checks"),
+               without("templates.md", "`Full check green`", "`Full check`"),
+               without("templates.md", "**Completing is the delivery.**", "**Delivery.**"),
+               without("templates.md", "`Tested and approved by you: {card id} {title}`", "`Tested and approved by you`"),
+               without("templates.md", "<h3>Test plan</h3>", ""),
+               without("plan.md", "then its **check lines**, last", "then its lines"),
+               without("plan.md", "take each build card's approval line off", "keep each build card's approval line"),
+               without("execute.md", "then **complete it**, once", "then leave it, once"),
+               without("run.md", "completes its card once every sub-task is ticked", "moves its card on"),
+               without("wave-records.md", "complete that card", "leave that card"),
+               without("close.md", "An approval line that is open refuses the close", "An approval line that is open is asked about"),
+               without("debug.md", "a completed card stays completed", "the card is reopened"),
+               {**files, "execute.md": files["execute.md"] + "\n- **Done is never a move.** Only `close` completes cards.\n"},
+               {**files, "run.md": files["run.md"] + "\nTick `Merged into the trunk` here.\n"}]
+    missed = [i for i, m in enumerate(mutants) if not check_lines_problems(m, gate.CHECKS)]
+    if missed or not check_lines_problems(files, gate.CHECKS + ("an extra line",)):
+        bad.append(f"the rule does not fail on every broken copy (missed {missed})")
+    report("CK1", not bad, "; ".join(bad) + " (BM-25)" if bad else
+           "check lines: one home in templates.md, the sub-task gate reads the same four and counts none of them (nor an "
+           "approval line) as a build step; plan writes them and the debug card's approval lines and test plan, and takes "
+           "old approval lines off; execute ticks each on its verdict and completes a card at delivery, run and the records "
+           f"agent too; close refuses an open approval line; a completed card stays completed; {len(mutants)} broken copies all fail")
 
 
 # ── VO1 · no shipped file reads or writes the MyNotes vault (BM-15, 2.0.0) ─
@@ -2271,6 +2376,9 @@ def check_subtask_gate():
             ("commit after a build step was added", 0, "", commit, chat("c2", read_sprint, bare, add("Write the query"))),
             ("commit with only a gate and the approval line", 2, "AB-1: no build step", commit,
              chat("c3", read_sprint, bare, add("Tested and approved by you"), add("Gate: AB-9 delivered before deploy"))),
+            ("commit with only check lines", 2, "AB-1: no build step", commit,
+             chat("c3b", read_sprint, bare, add("Merged into the trunk"), add("Full check green"),
+                  add("Code review passed, its fixes in"))),
             ("commit, a refused add does not count", 2, "AB-1: no build step", commit,
              chat("c4", read_sprint, bare, add("Write the query", ok=False))),
             ("commit, a card not read", 2, "get_task AB-1", commit, chat("c5", read_sprint)),
@@ -2301,7 +2409,7 @@ def check_subtask_gate():
                 bad.append(f"{label} → {got} {out[-100:]!r}")
     report("SB1", not bad, "; ".join(bad) or f"sub-task gate: registered on the board writes, plan step 7 puts the build "
            f"steps first, {len(cases)} recorded chats (commit and Technical plan refused naming the card without a build "
-           "step or not read; gate and approval lines and refused adds do not count; debug and completed cards skipped)")
+           "step or not read; gate, check and approval lines and refused adds do not count; debug and completed cards skipped)")
 
 
 # ── CP1 · a card of a sprint is completed only once every one of its sub-tasks is ticked (BM-25) ─
@@ -2915,6 +3023,7 @@ def main(argv):
     check_design_sync()
     check_tag_creation()
     check_approval_line()
+    check_check_lines()
     check_recipe()
     check_contract()
     check_release_guard()

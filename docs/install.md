@@ -28,6 +28,7 @@
 | 2.0.0 | v0.56.0 | same |
 | 2.1.0 | v0.56.0 | same |
 | 2.2.0 | v0.56.0 | same |
+| 2.3.0 | v0.56.0; Rewards (`coins`, `shop`, `games`) needs the app release after v0.57.0 that ships the Rewards tools | same |
 | 1.1.0 | v0.55.0 | same |
 | 1.0.2 | v0.55.0 | same |
 | 1.0.1 | v0.55.0 | same |

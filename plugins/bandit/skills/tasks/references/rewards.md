@@ -78,9 +78,12 @@ returned: never one worked out here.
 
   A field the request does not give is asked, never filled in. Then `rewards_manage_games { action: "create", … }`.
 - **Change a game:** `rewards_get_game` first, then `update` with the whole form as it should be (reward `{ keep: true }`
-  keeps its reward). Say before the yes: the name changes at once, everything else from the next period (the answer's
-  `changesFrom`); after the game has started, its `startDate` is sent unchanged. Only the adult who made it, or any
-  adult for a child's game, may change it: anyone else is refused `ROLE_CANNOT`.
+  keeps its reward). An update replaces any edit already waiting for the next period: when `nextRule` is not null,
+  start the form from `nextRule`, not `rule`, and say before the yes that this change replaces the waiting one. Say
+  before the yes: the name changes at once, everything else from the next period (the answer's `changesFrom`; `null`
+  means only the name changed); after the game has started, its `startDate` is sent unchanged. Only the adult who made
+  it, or any adult for a child's game, may change it: a game the member sees but may not change is refused
+  `ROLE_CANNOT`, and one they don't see answers `NOT_FOUND`.
 - **End a game:** confirm first, saying it cannot be undone and what it counted stays. `GAME_ENDED`: it was already ended.
 
 ## 🚫 Never

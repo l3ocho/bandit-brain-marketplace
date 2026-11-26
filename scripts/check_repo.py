@@ -456,7 +456,9 @@ def check_rewards():
         return report("RW1", False, "plugins/bandit/skills/tasks/references/rewards.md missing (BM-14)")
     text, skill = ref.read_text(encoding="utf-8"), (tasks / "SKILL.md").read_text(encoding="utf-8")
     errors_md = (tasks / "references" / "errors.md").read_text(encoding="utf-8")
-    bad = [f"rewards.md does not name `{t}`" for t in REWARDS_TOOLS if f"`{t}" not in text]
+    bad = [f"rewards.md does not name `{t}`" for t in REWARDS_TOOLS if not re.search(rf"`{t}\b", text)]
+    if "nextRule" not in text:
+        bad.append("rewards.md: a game change no longer starts from the waiting edit (nextRule)")
     desc = re.search(r'^description: "(.*)"$', skill, re.M)
     if not desc or not all(w in desc.group(1).lower() for w in ("rewards", "coins", "shop", "games")):
         bad.append("the tasks description does not name Rewards, coins, the shop and games")

@@ -2,6 +2,11 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
+## Unreleased
+
+### Fixed
+- **A sprint no longer calls work ready to test while staging runs an old commit** (BM-26). The sprint helper said a push of the trunk builds staging by itself, which was true for one project once and stopped being true when its staging moved, so waves reported ready to test on an old commit. That sentence is gone, and so is a pointer to one project's numbered branching rule. Right after every push of the trunk, from a wave or from debug, the helper now checks which commit staging runs: it says "ready to test on staging" only when that is the pushed commit, and otherwise names both commits and the command that updates staging. Whether it runs that command itself is the project's choice, in its recipe: two new optional lines in `bandit.yaml`'s `staging` section, `commit` (prints the commit staging runs) and `after_push` (`run` or `show`, `show` when left out). Checker rule ST1 keeps the old claim out.
+
 ## 2.2.0 · 2026-11-26
 
 ### Changed

@@ -54,6 +54,8 @@ Per approved row, in card order and wave order where they interact:
 
 One push, at the end: every fix is committed locally and they all go out together once the last approved row is fixed. Right before that push of `development`: one full check, the recipe's `verify`, on the code being pushed, only when `python3 ${CLAUDE_SKILL_DIR}/scripts/code_changed.py` says "full check: needed" (on `development` it compares with `origin/development`, what the push sends). "Not needed" (only docs, notes or comments) → no full check, and the Milestone log carries its line next to the push. Red stops the push: fix it first, as a row of its own if it is a new defect. The Milestone log names that full check (green, and the commit it ran on) next to the push.
 
+Right after the push, the staging step (`execute.md` → Pushing `development`, Staging), with its Staging line in the Milestone log next to the push. The fixes are offered to the user to test on staging only when that line says staging runs the pushed commit; otherwise the message names the commit staging runs and the command that puts the push there.
+
 ## Board
 
 - A completed build card is not moved while its fix is made: the debug card, in `doing`, shows the work. In an old-shape sprint a card with an adjustment moves `standby` → `doing` while being fixed, back to `standby` when done. The cap applies as in `execute.md`; a blocker never stops the move.

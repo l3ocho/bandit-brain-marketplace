@@ -28,7 +28,9 @@ KEYS = {
     "release": "release: the ordered release steps",
     "migrations.dir": "plan: where migrations live",
     "migrations.check": "execute, run, release: prints the current migration tail",
-    "staging.refresh": "release: the instruction the user runs to test the release on staging",
+    "staging.refresh": "execute, debug, release: the command that puts the pushed trunk on staging",
+    "staging.commit": "execute, debug: prints the commit staging runs (optional part)",
+    "staging.after_push": "execute, debug: `run` or `show`, whether a push of the trunk runs staging.refresh (optional part)",
     "testdata.schema": "testdata: where the tables are defined",
     "testdata.logic": "testdata: where the app enforces its rules",
     "testdata.databases": "testdata: one command per database that runs SQL from stdin",
@@ -45,10 +47,10 @@ KEYS = {
     "release_checks.whats_new": "release: prints the version the app's What's new shows",
 }
 # A repo without an optional section leaves it out; a section present is complete, except its
-# optional parts: `testdata.owner` may be left out, and each `release_checks` command may be left out on its own.
+# optional parts: `testdata.owner`, `staging.commit` and `staging.after_push` may be left out, and each `release_checks` command may be left out on its own.
 OPTIONAL = ("migrations", "staging", "testdata", "guard", "stop", "release_checks")
-OPTIONAL_PARTS = ("testdata.owner", "release_checks.gate", "release_checks.ci", "release_checks.version",
-                  "release_checks.whats_new")
+OPTIONAL_PARTS = ("testdata.owner", "staging.commit", "staging.after_push", "release_checks.gate", "release_checks.ci",
+                  "release_checks.version", "release_checks.whats_new")
 
 
 def absent(data, dotted):

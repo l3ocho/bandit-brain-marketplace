@@ -19,7 +19,7 @@ skill's folder (`{skill}` below), where the sprint's papers are, and the **wave 
 Finishing a wave): one line per card (merge commit, review, full check, UI check, and its one line of Different, Issue
 or Your call, or none), the wave's first step and last merge times, the open calls, the issues to raise on the debug
 card, the Process lines already written, conventions applied, plan deviations, verify-first results, follow-ups, the
-board moves made and the push. Nothing else is assumed: a fact the summary, a card or a script does not give is
+board moves made, the push and its Staging line. Nothing else is assumed: a fact the summary, a card or a script does not give is
 written "not measured" or left out, never guessed.
 
 ## ✍️ What you write, in this order
@@ -38,6 +38,8 @@ per write. A note write answers you in a few lines (the note's headings and whet
    Delivered comment), the Waves row done with its date and evidence when every card is delivered (`execute.md` →
    Finishing a wave), At a glance (current wave, next action, last update), the Status line, one Milestone log line
    per card and the wave's line, Conventions applied, Plan deviations, Verify-first results, Follow-ups noticed.
+   A push writes its hash and its Staging line in the wave's Milestone line; a Staging line saying staging does not
+   run the pushed commit also goes under Needs the user, with the command it names.
    **Right after the last card's row: complete that card** (`get_task`, every sub-task ticked, then `update_tasks`
    with `complete: true`, read back; `references/templates.md` → Check lines). A line still open is named in your
    report and under Needs the user, never ticked to pass. A sprint whose ledger has no `Approvals: debug card` line

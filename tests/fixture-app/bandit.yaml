@@ -11,6 +11,8 @@ migrations:
 staging:
   up: "echo staging up"
   refresh: "echo staging refresh"
+  commit: "echo 1a2b3c4"
+  after_push: show
   down: "echo staging down"
   where: test-host
 testdata:

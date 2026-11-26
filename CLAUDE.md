@@ -36,6 +36,15 @@ Read first. This wins over every other habit in this repo.
 
 The single source of the skills, agents and hooks Claude uses with Bandit Brain: marketplace `bandit-brain`, three plugins. `bandit` (core skills, Claude.ai + Claude Code), `bandit-dev` (the sprint pipeline, Claude Code) and `bandit-maker` (building these skills, Bandit Port only). This project's home board is **BB: Marketplace** (columns Bandit and Bandit Dev): its cards since 2026-11-22, its notes and its marketplace-only sprints since 2026-11-24 (BM-T5). A mixed sprint that also carries app cards stays on BB: Development and runs from the app project. Decisions: `docs/decisions.md`. The pipeline: `docs/pipeline.md`.
 
+## ⚖️ Project matter or plugin matter
+
+Decide this before every change. Leo, 2026-11-26.
+
+- **Project settings** belong to one project and live in that project: its `CLAUDE.md` (with the Project Context block) and `.claude/` in Claude Code, or its Claude.ai project instructions, plus its `bandit.yaml` recipe. They hold everything true for that project only: names, boards, columns, IDs, paths, commands, environments (how its staging updates, its freeze), its own rules and choices. One copy, in the project.
+- **Plugin settings** are what ships in `plugins/`: skills, references, scripts, hooks, agents. Every project that installs them gets them, so they hold only the generic how: steps, formats, gates. They never state a fact about one project (not a name, and not how its environment behaves either). Where a step depends on the project, the plugin reads the project's settings or recipe; when the recipe has nothing, it asks or shows, never assumes.
+- **The test:** would it be true for every project that installs the plugin? Yes → plugin matter: I change the plugin and release it. No → project matter: it goes in that project's settings, not in a skill. Another project's settings are its own agent's: I open a card for that agent and stop there.
+- **This repo is both.** How this marketplace project works goes in this `CLAUDE.md`, never in a skill; a skill's rule never goes in this `CLAUDE.md`.
+
 ## 📁 Layout
 
 ```

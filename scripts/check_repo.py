@@ -918,6 +918,51 @@ def check_debug_push():
            if ok else f"debug.md: fix loop asks for a full check per fix: {fix_full}; push step with verify: {push_ok} (BB-299)")
 
 
+# ── ST1 · a push never assumes staging; the staging step has one home (BM-26) ─
+# How a project's staging is updated is the project's (its recipe), never a fact a plugin states.
+ST1_CLAIM = re.compile(r"\bpush\w*\b[^.\n]{0,80}\bstaging\b[^.\n]{0,40}\b(by itself|on its own|automatically)"
+                       r"|\bstaging (build|update|refresh)\w* (by itself|on its own|automatically)", re.I)
+ST1_RULE_NUMBER = re.compile(r"\b(branching|runbook|deploy\w*) rule \d+", re.I)
+
+
+def st1_hits(name, text):
+    return [f"{name}:{i}" for i, line in enumerate(text.splitlines(), 1)
+            if ST1_CLAIM.search(line) or ST1_RULE_NUMBER.search(line)]
+
+
+def check_staging_step():
+    sprint = PLUGINS / "bandit-dev" / "skills" / "sprint" / "references"
+    hits = []
+    for f in sorted(PLUGINS.rglob("*")):
+        if f.is_file() and f.suffix in TEXT_SUFFIXES and "__pycache__" not in f.parts:
+            hits += st1_hits(str(f.relative_to(ROOT)), f.read_text(encoding="utf-8", errors="replace"))
+    execute = (sprint / "execute.md").read_text(encoding="utf-8")
+    push = execute.split("## Pushing `development`", 1)[-1].split("\n## ", 1)[0]
+    never = execute.split("## Never", 1)[-1]
+    debug = (sprint / "debug.md").read_text(encoding="utf-8")
+    debug_push = debug.split("## Pushing", 1)[-1].split("\n## ", 1)[0]
+    needs = {
+        "execute.md Pushing: the staging step": "**Staging, right after every push of `development`**" in push,
+        "execute.md Pushing: reads staging.refresh": "`recipe.py opt staging.refresh`" in push,
+        "execute.md Pushing: reads staging.after_push": "`recipe.py opt staging.after_push`" in push,
+        "execute.md Pushing: reads staging.commit": "`recipe.py opt staging.commit`" in push,
+        "execute.md Pushing: ready to test only on a match": "only then may the summary and the final message say" in push,
+        "execute.md Never: no ready to test before staging runs the push": "ready to test on staging before" in never,
+        "execute.md wave summary: Staging field": "· Staging: {" in execute,
+        "debug.md Pushing: points to the staging step": "Pushing `development`, Staging" in debug_push,
+    }
+    missing = [k for k, v in needs.items() if not v]
+    selftest = (st1_hits("x", "A push of `development` starts the repo's own checks and staging build by itself") == ["x:1"]
+                and st1_hits("x", "(project branching rule 9)") == ["x:1"]
+                and st1_hits("x", "the project's branching rules") == []
+                and st1_hits("x", "Right after the push, the staging step") == [])
+    ok = not hits and not missing and selftest
+    report("ST1", ok, "no plugin file assumes what a push does to staging or points at a project's numbered rule; the "
+           "staging step after every push has its home in execute.md and debug points to it (4 self-test lines)"
+           if ok else f"staging claim or project rule number in {hits[:8]}; missing {missing}; "
+           f"self-test {'ok' if selftest else 'failed'} (BM-26)")
+
+
 # ── DC1 · the design card rule has one home, and sprint planning points to it ─
 def check_design_card():
     tasks = PLUGINS / "bandit" / "skills" / "tasks" / "references"
@@ -2090,6 +2135,11 @@ def check_recipe():
         (("--file", "bandit.no-migrations.yaml", "check-tail", "none"), 0, "matches"),
         (("--file", "bandit.no-migrations.yaml", "opt", "staging.refresh"), 0, "none"),
         (("opt", "staging.refresh"), 0, "echo staging refresh"),
+        (("opt", "staging.commit"), 0, "echo 1a2b3c4"),
+        (("opt", "staging.after_push"), 0, "show"),
+        (("--file", "bandit.testdata-owner.yaml", "opt", "staging.commit"), 0, "none"),
+        (("--file", "bandit.testdata-owner.yaml", "opt", "staging.after_push"), 0, "none"),
+        (("--file", "bandit.no-migrations.yaml", "opt", "staging.commit"), 0, "none"),
         (("get", "testdata.schema"), 0, "schema.sql"),
         (("--file", "bandit.no-migrations.yaml", "opt", "testdata.schema"), 0, "none"),
         (("--file", "bandit.missing-key.yaml", "require", "release", "branches.trunk", "branches.deploy"), 0, "present"),
@@ -3001,6 +3051,7 @@ def main(argv):
     check_no_decide_and_continue()
     check_execution_by_date()
     check_debug_push()
+    check_staging_step()
     check_design_card()
     check_wave_flow()
     check_sprint_data()

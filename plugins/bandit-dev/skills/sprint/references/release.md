@@ -53,7 +53,7 @@ Check all before anything runs. Each miss is refused by name, with what would sa
 5. **The deploy is the recipe's.** Its own steps (step 1) carry the deploy, its watch and its version
    check, and the Milestone log holds each one's result.
 6. **Staging.** `recipe.py opt staging.refresh`: give the user that instruction to put the release on
-   staging; never run it. `none` → no staging step.
+   staging; release never runs it (a push of the trunk may, `execute.md` → Pushing `development`). `none` → no staging step.
 7. Final message, ten lines at most, with the running version the recipe confirmed and the paste for
    `close`.
 

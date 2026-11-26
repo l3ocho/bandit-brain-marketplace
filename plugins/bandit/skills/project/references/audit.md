@@ -95,7 +95,10 @@ template section. Note:
   `finance_manage_settlements`, the note tools `notes_list`, `notes_get`, `notes_create`, `notes_update`,
   `notes_update_section`, `notes_link_card`, `notes_unlink_card`, `notes_set_status`, `notes_set_fields`,
   `notes_move`, `notes_file`, `notes_delete`, `notes_restore`, `notes_list_trash`, `notes_relate`,
-  `notes_unrelate`, `notes_list_related`, and `search`. Any other board
+  `notes_unrelate`, `notes_list_related`, the Rewards tools `rewards_get_coins`, `rewards_list_coin_owners`,
+  `rewards_list_coin_boards`, `rewards_set_coin_board`, `rewards_get_shop`, `rewards_buy`, `rewards_list_rewards`,
+  `rewards_manage_rewards`, `rewards_list_games`, `rewards_get_game`, `rewards_get_game_options`,
+  `rewards_manage_games`, and `search`. Any other board
   tool name → ⚠️ **Legacy tool name**: the
   updated version names the current call (bandit:tasks references give the shape).
 - **Legacy lifecycle** — a `## 🔄 Project Lifecycle Workflow` section is left over from an old

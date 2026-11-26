@@ -1,6 +1,6 @@
 ---
 name: "tasks"
-description: "Works the Bandit Brain task board: capture, inbox triage, today, the week, recurring rules, audits, email to tasks, WBS load and, on dev projects, the card workflow (spec, plan-tech, stage). Use for any request to add, file, schedule, complete or review tasks."
+description: "Works the Bandit Brain task board and Rewards: capture, triage, today, the week, repeats, audits, email to tasks, WBS load, coins, the reward shop, goal games and, on dev projects, the card workflow. Use to add, file, schedule, complete or review tasks, or for coins, rewards or games."
 ---
 
 # 🗂️ Tasks
@@ -25,6 +25,7 @@ Natural language always works; a request that spans two surfaces reads both file
 | 📧 Email | `email` | `references/email.md` | Gmail → proposals only, zero writes |
 | 🏗️ Load | `load` | `references/load.md` | WBS → a new board |
 | 🚀 Onboard | `onboard` | `references/onboard.md` | The board step of project onboarding, run by bandit:project |
+| 🪙 Rewards | `coins` `shop` `games` | `references/rewards.md` | Coins and their history, the reward shop and buying, goal games and their results, the boards that earn coins: the `rewards_` tools |
 | 🛠️ Dev | `spec` `scope` `plan-tech` `stage` `pick-ready` | `references/dev.md` · `references/dev-workflow.md` | Dev projects only: lanes, stages, card sections · the card procedures |
 
 | Also read | When |

@@ -18,14 +18,16 @@ the app's own refusal set and the tools that return them.
 - **`field`** names the argument that failed, as a path (`items[2].tagIds`). Use it to say which
   part of which entry was refused.
 - 👶 **A child's assistant** lists only `get_context`, `list_tasks`, `get_task`, `create_tasks`,
-  `update_tasks` and `manage_subtasks`. Any other tool is refused with `ROLE_CANNOT`.
+  `update_tasks` and `manage_subtasks`. Any other board tool is refused with `ROLE_CANNOT`. The `rewards_` tools are
+  listed to a child too (when Rewards is on): a child's adult action on them is refused `ROLE_CANNOT` on the call
+  (`references/rewards.md`).
 
 ## 🗂️ Codes
 
 | Code | Means | Where | Do |
 |---|---|---|---|
 | `NOT_FOUND` | The id names nothing, or something hidden from you. Also an unknown or deleted task in `get_task`, an unknown short id, and a malformed id (in an array call, that entry's `NOT_FOUND`) | Any call that takes an id. `update_tasks` by origin with no match: not an error | Re-resolve the name live (`list_tasks`, `get_context`); never guess the nearest match |
-| `NOT_VISIBLE_TO_MEMBER` | The task is in your household but not shared with you | Writes on a task by id: `update_tasks`, `reopen_tasks`, `delete_tasks`, `manage_subtasks`, `manage_recurrence` | Tell the user it is not shared with them; stop |
+| `NOT_VISIBLE_TO_MEMBER` | The task is in your household but not shared with you | Writes on a task by id: `update_tasks`, `reopen_tasks`, `delete_tasks`, `manage_subtasks`, `manage_recurrence`. Rewards: a child asking for another member's coins (`rewards_get_coins`), or a reward not in this member's shop (`rewards_buy`) | Tell the user it is not shared with them (Rewards: not theirs to see, or not in their shop); stop |
 | `INVALID_ARGUMENTS` | A malformed call: a missing or wrong-type argument, a bad date, `weekStart` not a Monday, a `view` with another filter, an action given another action's argument, a patch naming no change, two entries for one task (the first applies), a partial or gapped reorder, a filter value out of range, a malformed rule, a recurring occurrence's date cleared, a rule attached to a task with no due date | Every tool | Fix the call: reorders need **every** item, positions 0..n-1 once; merge two entries for one task |
 | `UNKNOWN_FIELD` | An argument the tool or entry does not take; the reason lists what it takes | Structure tools, array-call entries | Fix the call |
 | `BULK_SET_TOO_LARGE` | More than 100 entries: the whole call is refused, nothing changed | The array calls | Split the set and call again |
@@ -50,7 +52,7 @@ the app's own refusal set and the tools that return them.
 | `ORIGIN_FIELD_READ_ONLY` | A task's origin never changes | `update_tasks` entry with a `taskId` and an origin | Drop the origin, or name the origin alone to complete its cards |
 | `ORIGIN_INCOMPLETE` · `ORIGIN_LINK_NOT_IN_APP` | An origin needs system, reference and link; the link is a path in the app | `create_tasks` (`origin`) | Fix it, or leave `origin` out for anything a person asked for |
 | `SYSTEM_OWNED_BOARD` | The board is kept in step with another module (`systemOwner`) | `create_tasks`, `update_tasks` (move), `delete_tasks` (series), `manage_subtasks` (promote), `manage_recurrence`, `manage_boards`, `manage_columns_lanes`, `manage_tags`, `set_visibility`, `delete_board_items` | Tell the user to change it there |
-| `ROLE_CANNOT` | The household role doesn't allow it on this board, or a child's assistant called a tool outside its seven | Any card write; a Board tag in `manage_tags` or `delete_board_items`; for a child, any tool outside the seven (`manage_inbox_groups` is one of them) | Stop: it is the role, not the arguments |
+| `ROLE_CANNOT` | The household role doesn't allow it on this board, or a child's assistant called a tool outside its seven | Any card write; a Board tag in `manage_tags` or `delete_board_items`; for a child, any tool outside the seven (`manage_inbox_groups` is one of them). Rewards: a child on an adult's action (coin boards, stocking the shop, setting up or changing a game), an adult changing a game another adult made for this member, a lane pick without Builder | Stop: it is the role, not the arguments. Rewards: say in plain words who may do it (`references/rewards.md`) |
 | `ASSISTANT_CANNOT` | An assistant never does this: complete, reopen or delete a card another member created; change a board's sharing; delete a board or column | `update_tasks` (`complete`), `reopen_tasks`, `delete_tasks`, `set_visibility`, `delete_board_items`, `manage_inbox_groups` (delete of a group holding such a card: nothing deleted) | Tell the user to do it in the app |
 | `REQUIRES_ADMIN` | Only the board's creator or the admin may do this (a profile: the creator alone; name them from `get_context → boards → createdBy`); App tags are the admin's | `manage_boards`, `manage_columns_lanes`, `set_visibility`, `delete_board_items`, `manage_tags` | Name who can; stop |
 | `BOARD_HAS_OTHERS_CARDS` | Not the admin, and the board holds other people's cards | `manage_boards` (archive), `delete_board_items` (board) | Ask the admin to do it |
@@ -58,7 +60,7 @@ the app's own refusal set and the tools that return them.
 | `SHORT_PREFIX_TAKEN` | Another board uses that card id prefix (`relatedId`) | `manage_boards` (`shortPrefix`) | Offer another prefix; the user picks |
 | `TAG_SYSTEM_LOCKED` | A System tag (`lane/*`, `stage/*`) is locked for everyone | `manage_tags` (update, promote), `delete_board_items` (tag) | Correct. Report it; no workaround |
 | `TAG_NAME_TAKEN` · `TAG_NAME_RESERVED` | The name is another tag's, or starts with `lane/`, `stage/` or `sprint/` (a sprint is its own record) | `manage_tags` (create, update, promote) | Report the app's answer; no workaround |
-| `MODULE_DISABLED` | Sprints is off for this member or the household | `get_sprints`, `manage_sprints`, `list_tasks` (`sprintId`, `noSprint`), `create_tasks` (`sprintId`, a sprint end), `link_tasks` (a sprint end) | Never read it as "no sprints". Say Sprints is off: the admin turns it on in Settings → Household → Members, anyone else asks the admin. A command whose job is sprints (a sprint plan, the audit snapshot's sprint cards, test data's sprint input, `pick-ready`) stops; one that reads sprints only for an exemption (`today`, the hygiene audit) says so and goes on without the exemption |
+| `MODULE_DISABLED` | Sprints is off for this member or the household. On a `rewards_` tool: Tasks is off for this member, or the Account may not use Rewards (the reason says "This account may not use Rewards."), the admin included | `get_sprints`, `manage_sprints`, `list_tasks` (`sprintId`, `noSprint`), `create_tasks` (`sprintId`, a sprint end), `link_tasks` (a sprint end) | Never read it as "no sprints". Say Sprints is off: the admin turns it on in Settings → Household → Members, anyone else asks the admin. A command whose job is sprints (a sprint plan, the audit snapshot's sprint cards, test data's sprint input, `pick-ready`) stops; one that reads sprints only for an exemption (`today`, the hygiene audit) says so and goes on without the exemption. On a `rewards_` tool: say Rewards is not on for this member or this Account, show the reason, and stop |
 | `SPRINT_MOVE_REFUSED` | A status move that is not true: one step at a time either way (Executing to Closed is the one skip), Ready to execute needs an expected date and a card, Closed needs no open card (hidden ones count), Closed is final; a Paused or Replanning sprint does not move until it is resumed or its new plan approved | `manage_sprints` (move) | Show the reason; fix what it names, or report it |
 | `SPRINT_CLOSED` | A Closed sprint changes only its papers link (it can still be deleted) | `manage_sprints` | Report it; nothing changed |
 | `SPRINT_CANCELLED` | A Cancelled sprint changes only its papers link, like a Closed one (it can still be deleted; its cards stay on their boards) | `manage_sprints` | Report it; nothing changed |
@@ -83,6 +85,9 @@ the app's own refusal set and the tools that return them.
 | `RULE_YIELDS_NO_OCCURRENCE` | The rule never fires, e.g. its end date is past | `create_tasks` (`repeat`), `manage_recurrence` (attach, update) | Fix the end, after the user agrees |
 | `SERIES_UNREADABLE` | The stored rule can't be read; nothing changed | `update_tasks`, `reopen_tasks`, `delete_tasks`, `manage_recurrence` | Report it; the user fixes it in the app |
 | `RECURRING_NEXT_CHANGED` · `RECURRING_NOT_LATEST_COMPLETION` · `RECURRING_SERIES_ENDED` · `RECURRING_MULTIPLE_OPEN` · `RECURRING_COMPLETION_UNVERIFIABLE` | Reopening a recurring occurrence isn't safe | `reopen_tasks` | Report it; nothing changed |
+| `PRICE_CHANGED` | An adult changed the reward's price after the member saw it; nothing was charged | `rewards_buy` | Read the shop again, show the new price, ask again |
+| `NOT_ENOUGH_COINS` | The balance is short; the reason says how many more | `rewards_buy` | Show the reason; never suggest a way around it |
+| `GAME_ENDED` | The game was already ended | `rewards_manage_games` (`update`, `end`) | Say so; an ended game cannot change |
 
 ## 🔕 Refusals with no documented code
 

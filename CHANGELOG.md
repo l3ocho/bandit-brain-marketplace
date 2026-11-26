@@ -4,6 +4,9 @@ All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace s
 
 ## Unreleased
 
+### Added
+- **Rewards from Claude** (BM-14). `bandit:tasks` works Rewards the way a member does in the app, with three new commands. `coins`: a balance and its history (earned, taken back, bought, won), whose coins you may see, and for adults the boards that earn coins. `shop`: your shop with your balance, buying on your yes at the price you saw (a price an adult changed meanwhile is shown and asked again), and for adults adding, changing and deleting rewards. `games`: how each goal game is going and its results, and for adults setting up, changing (from the next period) and ending a game, the whole game shown before it is sent. Every number shown is the app's. A child's refusals and the Rewards switch are said plainly and never worked around. Needs the app release that ships the Rewards tools (after v0.57.0). Checker rule RW1 tests it, and AT1 and the project audit now read the 12 Rewards tools.
+
 ### Fixed
 - **A sprint no longer calls work ready to test while staging runs an old commit** (BM-26). The sprint helper said a push of the trunk builds staging by itself, which was true for one project once and stopped being true when its staging moved, so waves reported ready to test on an old commit. That sentence is gone, and so is a pointer to one project's numbered branching rule. Right after every push of the trunk, from a wave or from debug, the helper now checks which commit staging runs: it says "ready to test on staging" only when that is the pushed commit, and otherwise names both commits and the command that updates staging. Whether it runs that command itself is the project's choice, in its recipe: two new optional lines in `bandit.yaml`'s `staging` section, `commit` (prints the commit staging runs) and `after_push` (`run` or `show`, `show` when left out). Checker rule ST1 keeps the old claim out.
 

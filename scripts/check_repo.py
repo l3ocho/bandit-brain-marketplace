@@ -343,11 +343,16 @@ NOTES_TOOLS = (
     "notes_set_status notes_set_fields notes_move notes_file notes_delete notes_restore notes_list_trash "
     "notes_relate notes_unrelate notes_list_related").split()
 SEARCH_TOOL = "search"
+# The 12 Rewards tools (bandit:tasks references/rewards.md), from the app's gamification descriptors (BB-528, BM-14).
+REWARDS_TOOLS = (
+    "rewards_get_coins rewards_list_coin_owners rewards_list_coin_boards rewards_set_coin_board rewards_get_shop "
+    "rewards_buy rewards_list_rewards rewards_manage_rewards rewards_list_games rewards_get_game "
+    "rewards_get_game_options rewards_manage_games").split()
 # The app clone on this host (read-only) and the branch the skills are built against.
 APP_REPO = Path(os.environ.get("BANDIT_APP_REPO") or ROOT.parent / "dev")
 # The app's 0.56.0, the release that ships waves, lands-after links, pause, replan and cancel (BM-21);
 # 0.55.0 (1e0170c1) shipped the note tools (BB-590; sprint 2026-w47, BB-596).
-APP_REF = os.environ.get("BANDIT_APP_REF") or "cf14b641"   # the app's development: note writes answer short (BB-622)
+APP_REF = os.environ.get("BANDIT_APP_REF") or "72316ac6"   # the app's development: Rewards tools on the connection (BB-528)
 
 
 def app_file(path):
@@ -406,6 +411,8 @@ def check_app_tools():
     notes_src = app_file("src/domains/notes/descriptors.ts") or ""
     notes_tools = set(re.findall(r"^\s{4}name: '([a-z_]+)'", notes_src.split("NOTES_OPERATIONS", 1)[-1], re.M))
     search = re.search(r"SEARCH_TOOL_NAME = '([a-z_]+)'", notes_src)
+    rewards_src = app_file("src/domains/gamification/descriptors.ts") or ""
+    rewards_tools = set(re.findall(r"^\s{4}name: '(rewards_[a-z_]+)'", rewards_src.split("REWARDS_OPERATIONS", 1)[-1], re.M))
     removed_src = app_file("src/domains/tasks/removedTools.ts") or ""
     app_removed = set(re.findall(r"^\s{2}([a-z_]+): \{ tool:", removed_src, re.M))
     bad = []
@@ -418,13 +425,59 @@ def check_app_tools():
     if notes_tools != set(NOTES_TOOLS):
         bad.append(f"app note tools ≠ NOTES_TOOLS: new {sorted(notes_tools - set(NOTES_TOOLS))}, "
                    f"gone {sorted(set(NOTES_TOOLS) - notes_tools)}")
+    if rewards_tools != set(REWARDS_TOOLS):
+        bad.append(f"app rewards tools ≠ REWARDS_TOOLS: new {sorted(rewards_tools - set(REWARDS_TOOLS))}, "
+                   f"gone {sorted(set(REWARDS_TOOLS) - rewards_tools)}")
     if not search or search.group(1) != SEARCH_TOOL:
         bad.append(f"app search tool ≠ {SEARCH_TOOL!r}: {search.group(1) if search else 'none'}")
     if removed_src and app_removed != set(REMOVED_TOOLS):
         bad.append(f"app removed list ≠ REMOVED_TOOLS: {sorted(app_removed ^ set(REMOVED_TOOLS))}")
     report("AT1", not bad, "; ".join(bad) + " — update the skills, then both lists (docs/dependencies.md)" if bad
            else f"skills' tool lists = the app's at {APP_REF} ({len(app_tools)} board, {len(fin_tools)} finance, "
-                f"{len(notes_tools)} notes + {SEARCH_TOOL}, {len(app_removed)} removed)")
+                f"{len(notes_tools)} notes + {SEARCH_TOOL}, {len(rewards_tools)} rewards, {len(app_removed)} removed)")
+
+
+def rewards_codes(src):
+    """The refusal codes the Rewards descriptors name: upper-case words with an underscore, outside comments,
+    less the module's own constant names."""
+    body = re.sub(r"^\s*//.*$", "", re.sub(r"/\*.*?\*/", "", src, flags=re.S), flags=re.M)
+    body = re.sub(r"//[^'\"`\n]*$", "", body, flags=re.M)
+    idents = (set(re.findall(r"\b(?:const|let|var|function|type|interface)\s+([A-Z][A-Z_]+)", body))
+              | set(re.findall(r"\$\{\s*([A-Z][A-Z_]+)", body)) | set(re.findall(r"\b([A-Z][A-Z_]+)\s*\[", body))
+              | set(re.findall(r"\.\.\.([A-Z][A-Z_]+)", body)))
+    return sorted(set(re.findall(r"\b([A-Z]+(?:_[A-Z]+)+)\b", body)) - idents)
+
+
+# ── RW1 · Rewards has one home in bandit:tasks, names every Rewards tool, and every code they refuse with has a row ─
+def check_rewards():
+    tasks = PLUGINS / "bandit" / "skills" / "tasks"
+    ref = tasks / "references" / "rewards.md"
+    if not ref.exists():
+        return report("RW1", False, "plugins/bandit/skills/tasks/references/rewards.md missing (BM-14)")
+    text, skill = ref.read_text(encoding="utf-8"), (tasks / "SKILL.md").read_text(encoding="utf-8")
+    errors_md = (tasks / "references" / "errors.md").read_text(encoding="utf-8")
+    bad = [f"rewards.md does not name `{t}`" for t in REWARDS_TOOLS if f"`{t}" not in text]
+    desc = re.search(r'^description: "(.*)"$', skill, re.M)
+    if not desc or not all(w in desc.group(1).lower() for w in ("rewards", "coins", "shop", "games")):
+        bad.append("the tasks description does not name Rewards, coins, the shop and games")
+    if not re.search(r"^\| 🪙 Rewards \| `coins` `shop` `games` \| `references/rewards.md` \|", skill, re.M):
+        bad.append("the tasks router has no Rewards row for coins, shop and games")
+    never = text.split("## 🚫 Never", 1)[-1]
+    for words in ("number the app did not return", "without the user's yes", "Work around a refusal"):
+        if words not in never:
+            bad.append(f"rewards.md Never lost: {words!r}")
+    if "expectedPrice" not in text or "with a yes first" not in text:
+        bad.append("rewards.md: buying no longer asks first and sends the price seen")
+    src = app_file("src/domains/gamification/descriptors.ts") if (APP_REPO / ".git").exists() else None
+    codes = rewards_codes(src) if src else []
+    if rewards_codes("const GATES = ' MODULE_DISABLED while'; // ASSISTANT_CANNOT\nx(`${GATES} NOT_ENOUGH_COINS`)") \
+            != ["MODULE_DISABLED", "NOT_ENOUGH_COINS"]:
+        bad.append("self-test: the Rewards code reader")
+    bad += [f"errors.md has no row for `{c}` (a Rewards refusal)" for c in codes
+            if not re.search(rf"^\| (?:`[A-Z_]+` · )*`{c}`", errors_md, re.M)]
+    report("RW1", not bad, "; ".join(bad) or f"Rewards: one home (rewards.md) naming the {len(REWARDS_TOOLS)} tools, the "
+           f"router row and description, a yes before every buy and change, and a row in errors.md for each of the "
+           f"{len(codes)} codes the app's Rewards tools name" + ("" if src else " (app clone not read)"))
 
 
 # ── AT2 · copies that must match: the project audit's tool list, the Project Context lines and keys ──
@@ -482,9 +535,9 @@ def check_copies():
     audit = PROJECT_AUDIT.read_text(encoding="utf-8")
     sec = audit.split("**Legacy tool names**", 1)[-1].split("- **Legacy lifecycle**", 1)[0]
     listed = re.findall(r"`([a-z_]+)`", sec.split("Any other", 1)[0])
-    every_tool = CURRENT_TOOLS + FINANCE_TOOLS + NOTES_TOOLS + [SEARCH_TOOL]
+    every_tool = CURRENT_TOOLS + FINANCE_TOOLS + NOTES_TOOLS + REWARDS_TOOLS + [SEARCH_TOOL]
     if sorted(listed) != sorted(every_tool):
-        bad.append(f"project audit's tool list ≠ CURRENT_TOOLS + FINANCE_TOOLS + NOTES_TOOLS + search: "
+        bad.append(f"project audit's tool list ≠ CURRENT_TOOLS + FINANCE_TOOLS + NOTES_TOOLS + REWARDS_TOOLS + search: "
                    f"{sorted(set(listed) ^ set(every_tool))}")
     block = CONTEXT_BLOCK.read_text(encoding="utf-8")
     canon, canon_keys = context_lines(block), context_keys(block)
@@ -3031,6 +3084,7 @@ def main(argv):
     check_bridge_names()
     check_board_type()
     check_app_tools()
+    check_rewards()
     check_error_rows()
     check_copies()
     check_changelog_entry()

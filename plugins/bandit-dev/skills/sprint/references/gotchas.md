@@ -72,9 +72,9 @@ Contents: Interview and pace · Scope · Cards and Specs · Agents and checks ·
 - Count Next + Doing with `list_tasks` by state before each move; overflow waits in To Do and is reported.
 - A blocker never stops a move between Execution columns; only completing waits for blockers. Re-read the board tool's own description before writing a board rule.
 - Never write a rule the board does not enforce; the board is set at the start of every wave; a refused move is recorded on the card and in the ledger, never skipped silently.
-- The next wave's cards go to Next the moment the last card reaches Stand By; the orchestrator sets the board before checking anything, whatever the wave reported, and even when it sent no report.
+- The next wave's cards go to Next the moment the last card is delivered; the orchestrator sets the board before checking anything, whatever the wave reported, and even when it sent no report.
 - Read the sprint's cards by column with `list_tasks` (`execute.md` → Reading the board), never the whole Execution board.
-- Delivery is `standby`; only `close` completes, on the user's quoted approval.
+- Delivery is completion, once every sub-task is ticked, each when its work or verdict is in (an old-shape sprint: `standby`); the approvals wait on the debug card, which only `close` completes.
 - Tick each sub-task as it is done so the card shows live progress.
 - Every debug adjustment is a row in the decision table; apply only approved rows.
 - The execution prompt only points to the references; it carries no procedure of its own.

@@ -33,7 +33,7 @@ Check all before anything runs. Each miss is refused by name, with what would sa
 
 ## Steps
 
-1. **Debug card to Stand By, then run the recipe.** Before the first recipe step (on the marketplace repo, before `release.py --write`), move the sprint's debug card (`Debug card:` in the ledger) to `standby` with `update_tasks`, read back; `close` completes it. A release step that stalls or fails writes a Process line on it at once (`references/templates.md` → Debug card, Process lines). `recipe.py get release` lists the steps. Run them one at a time, in order,
+1. **Debug card in Stand By, then run the recipe.** Before the first recipe step (on the marketplace repo, before `release.py --write`), read the sprint's debug card (`Debug card:` in the ledger): debug left it in `standby` when nothing was left to fix; in any other column (an old-shape sprint, or debug that never ran), move the sprint's debug card to `standby` with `update_tasks`, read back; `close` completes it. A release step that stalls or fails writes a Process line on it at once (`references/templates.md` → Debug card, Process lines). `recipe.py get release` lists the steps. Run them one at a time, in order,
    showing each command and its result, each wrapped by the release guard with a state file in the session's scratch
    folder: `release_guard.py --state {file} start` before the first step, `before {n}` before step n and `after {n}`
    after it. `before` refuses when the trunk moved after the bump's tag (nothing is committed between the bump and the

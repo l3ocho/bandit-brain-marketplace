@@ -8,7 +8,8 @@ Two calls are refused with exit 2 (the reason on stderr), so the call never runs
   2. Writing a card's Technical plan (`update_tasks` or `create_tasks` with a description whose
      `<h2>Technical plan</h2>` section is filled) while that card has no build step.
 
-A build step is a sub-task that is neither a `Gate:` line nor the approval line (`Tested and approved by you`).
+A build step is a sub-task that is not a `Gate:` line, a check line (references/templates.md → Check lines) or an
+approval line (`Tested and approved by you`, alone or followed by `: {card id} {title}`).
 The hook cannot read the board, so it reads the chat's own record (`transcript_path`), oldest first: each
 `get_task` answer sets a card's sub-tasks as the app returned them; each accepted `manage_subtasks` add, and
 each created card's `subtasks`, adds to them; `get_sprints { sprintId }` answers, `add_cards` and cards created
@@ -31,6 +32,7 @@ from dependency_gate import answer_of, refused  # noqa: E402  (one reader of a t
 TOOL = re.compile(r"^mcp__.+__(manage_sprints|update_tasks|create_tasks|get_task|get_sprints|manage_subtasks)$")
 COMMIT = "ready_to_execute"
 APPROVAL = "tested and approved by you"
+CHECKS = ("code review passed, its fixes in", "browser check passed", "full check green", "merged into the trunk")
 PLAN = re.compile(r"<h2[^>]*>\s*Technical plan\s*</h2>(.*?)(?=<h2|\Z)", re.S | re.I)
 PLACEHOLDER = "how it will be built"
 HTML = re.compile(r"<[^>]+>|&nbsp;")
@@ -45,8 +47,11 @@ def plan_filled(description):
 
 
 def build_steps(titles):
-    return [t for t in titles or [] if isinstance(t, str) and t.strip()
-            and not t.strip().lower().startswith("gate:") and t.strip().lower() != APPROVAL]
+    def step(t):
+        low = t.strip().lower()
+        return bool(low) and not low.startswith("gate:") and low not in CHECKS and not (
+            low == APPROVAL or low.startswith(APPROVAL + ":"))
+    return [t for t in titles or [] if isinstance(t, str) and step(t)]
 
 
 class Record:
@@ -191,7 +196,7 @@ def refusal(tool, given, transcript):
         return None
     return ([f"- {c}: no build step on the board, so {what}. Write its build steps from its plan section as sub-tasks "
              "(manage_subtasks { action: \"add\" }, one line each; an add lands at the top, so add them last to first "
-             "or reorder), the approval line `Tested and approved by you` last, then get_task to read it back."
+             "or reorder), then its check lines last (references/templates.md → Check lines), then get_task to read it back."
              for c in missing]
             + [f"- {c}: not read in this chat. get_task {c}; if it already has its build steps, retry." for c in unread])
 

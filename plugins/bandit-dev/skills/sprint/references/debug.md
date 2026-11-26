@@ -9,7 +9,7 @@ Contents: Rules · Read first · Intake · Combined test · Fix loop · Pushing 
 - **Documents first, then code.** Read the sprint's papers before the diff, so each fix is judged against what was promised.
 - **The user's words are the baseline.** Each adjustment is judged against what they asked for, never against the plan's summary of it.
 - **Every adjustment is a row in the one decision table** (`references/plan.md` → Conventions), plain words, no numbers or codes: what the user saw, the card, the cause, the fix, the recommendation. A fix is applied only on the user's say-so, or under their standing "go with the recommendations".
-- **The debug list holds defects only:** what does not match its card's Spec or the project's approved design. A visual point is checked against the card's design handover (its files are found through the `Handover:` line: the design card's, or the build card's own Source without a design card; the `Design:` line is the page to look at) before it is called a defect. Anything new (more than the card asked for, a better layout, an idea) goes to the board as a card for a later sprint, through bandit:tasks capture, with no question about joining this one.
+- **The debug list holds defects only:** what does not match its card's Spec or the project's approved design. A visual point is checked against the card's design handover (its files are found through the `Handover:` line: the design card's, or the build card's own Source without a design card; the `Design:` line is the page to look at) before it is called a defect. Anything new (more than the card asked for, a better layout, an idea) goes to the board as a card for a later sprint, through bandit:tasks capture, with no question about joining this one. A card the user rejects outright becomes such a card too, and its approval line on the debug card is renamed to end `(rejected: new card {id})` (`templates.md` → Approval line); `close` ticks it on the user's quoted word.
 - **Same authority as `execute`:** work on the trunk; the push follows `execute.md` → Pushing `development`. Never deploy or touch production: release is its own command.
 
 ## Read first
@@ -47,8 +47,8 @@ Per approved row, in card order and wave order where they interact:
 1. Reproduce or confirm from the code. If it does not reproduce, say so and ask.
 2. Fix with a test that fails against the old behaviour. Then, per fix, only the tests that cover the change, run by name: no code review and no browser check per fix. No full check per fix: it runs once, before the one push (Pushing).
 3. Commit on the local development branch (or the card's branch if it is still open).
-4. Record in the ledger Bug log: row, card, the debug card line it fixes, cause, fix, commit, how verified (the targeted tests it ran, by name or pattern). Tick that line, or end it with its outcome (`templates.md` → Debug card). The handover report's card line changes only when how to test the card changed (`templates.md` → Report).
-5. Comment on the card: what was adjusted and why. Reopen nothing; the card stays in Stand By.
+4. Record in the ledger Bug log: row, card, the debug card line it fixes, cause, fix, commit, how verified (the targeted tests it ran, by name or pattern). End that line with its outcome and tick it: a fixed `Expected:` or `Found:` line ends with its one cause, chosen now from the four (`templates.md` → Debug card, Outcomes and Causes), renamed with `manage_subtasks { action: "rename" }` before the tick. The card's test plan entry on the debug card changes only when how to test the card changed (an old-shape sprint: the handover report's card line, `templates.md` → Report).
+5. Comment on the card: what was adjusted and why. Reopen nothing: a completed card stays completed (an old-shape sprint: in Stand By).
 
 ## Pushing
 
@@ -56,15 +56,16 @@ One push, at the end: every fix is committed locally and they all go out togethe
 
 ## Board
 
-- A card with an adjustment moves `standby` → `doing` while being fixed, back to `standby` when done. The cap applies as in `execute.md`; a blocker never stops the move.
+- A completed build card is not moved while its fix is made: the debug card, in `doing`, shows the work. In an old-shape sprint a card with an adjustment moves `standby` → `doing` while being fixed, back to `standby` when done. The cap applies as in `execute.md`; a blocker never stops the move.
 - Nothing is completed here, and the approval line is never ticked here (`templates.md` → Approval line). The user's approval and `close` do that.
+- **The debug card back to `standby`** once debug has nothing left to fix (Finishing): it then waits for the user's approval lines. A new point from the user brings it back to `doing` at the next Intake.
 
 ## Finishing
 
 **No leftovers.** Before this step ends, anything it used to make something else and no longer needs (a draft, a scratch file, a superseded copy, a test fixture, a temporary branch) is archived or deleted, only on proof that its successor exists (`references/homes.md` → Leftovers). A fix branch is deleted once merged; test data is removed.
 
 
-Every row fixed or declined with the user's word; anything new filed as a card. Ledger Status per card moves to `Tested by the user` for every card the user says they tested; every debug card line (a Process line too: fixed, or its lesson recorded) is ticked with its outcome and the wave report's Debug section counts them (`templates.md` → Debug card); the ledger's Status line becomes `Debug done, ready to release`, and At a glance says debug is done; Milestone log `Debug done: {n} adjustments, {n} new cards. Ready to release.` The sprint stays `debugging`; final message of ten lines at most with the paste for `release`.
+Every row fixed or declined with the user's word; anything new filed as a card. Ledger Status per card moves to `Tested by the user` for every card the user says they tested; every issue line on the debug card (a Process line too: fixed, or its lesson recorded; the approval lines are the user's) is ticked with its outcome, each fixed defect line ending with its cause, and the wave report's Debug section counts them, a column per cause (`templates.md` → Debug card); the debug card goes back to `standby` (`update_tasks`, read back; an old-shape sprint leaves it in `doing` for `release`); the ledger's Status line becomes `Debug done, ready to release`, and At a glance says debug is done; Milestone log `Debug done: {n} adjustments, {n} new cards. Ready to release.` The sprint stays `debugging`; final message of ten lines at most with the paste for `release`.
 
 ## Never
 

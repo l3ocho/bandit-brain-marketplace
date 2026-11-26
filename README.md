@@ -35,7 +35,7 @@
 | Plugin | For | Contents | Runs on |
 |---|---|---|---|
 | **`bandit`** | Everyone | 9 skills: `tasks` · `notes` · `project` · `audit` · `clarify` · `rewrite` · `plan` · `minutes` · `finance` | Claude.ai + Claude Code |
-| **`bandit-dev`** | Developers | Skills `sprint` and `testdata` · agents `plan-reviewer` and `wave-records` · hooks: sprint checker (Stop), credential guard (PreToolUse, on with a `guard` section in `bandit.yaml`), stop gate (Stop, on with a `stop` section), dependency gate (PostToolUse on board links, always on), sub-task gate (PreToolUse on the sprint commit and Technical plans, always on), description gate (PreToolUse on card writes, always on), gate wait (Stop and SubagentStop: a wave cannot end while its code review or browser check is still running, always on), note reply (PostToolUse on note writes: on an app from before note writes answered short, the records agent still gets the short answer). Needs `bandit` | Claude Code |
+| **`bandit-dev`** | Developers | Skills `sprint` and `testdata` · agents `plan-reviewer` and `wave-records` · hooks: sprint checker (Stop), credential guard (PreToolUse, on with a `guard` section in `bandit.yaml`), stop gate (Stop, on with a `stop` section), dependency gate (PostToolUse on board links, always on), sub-task gate (PreToolUse on the sprint commit and Technical plans, always on), completion gate (PreToolUse on card updates: a sprint card is completed only once every sub-task is ticked, always on), description gate (PreToolUse on card writes, always on), gate wait (Stop and SubagentStop: a wave cannot end while its code review or browser check is still running, always on), note reply (PostToolUse on note writes: on an app from before note writes answered short, the records agent still gets the short answer). Needs `bandit` | Claude Code |
 | **`bandit-maker`** | Maintainers | Skill `skill`: create, evaluate and lint skills to the house standard | Claude Code |
 
 Every skill is called by plugin and area, with the verb as argument:
@@ -87,6 +87,7 @@ Then `/plugin` → Marketplaces → `bandit-brain` → **Enable auto-update** (o
 | 0.20.0 | v0.41.0 | same |
 | 2.0.0 | v0.56.0 | same |
 | 2.1.0 | v0.56.0 | same |
+| 2.2.0 | v0.56.0 | same |
 | 1.1.0 | v0.55.0 | same |
 | 1.0.2 | v0.55.0 | same |
 | 1.0.1 | v0.55.0 | same |

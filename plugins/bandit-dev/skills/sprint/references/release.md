@@ -3,7 +3,7 @@
 Part of `bandit-dev:sprint`. Read before running `/bandit-dev:sprint release {sprint}`. Run after
 debug and before close (pipeline stage 10). **Releasing is the user's option**: a sprint may close
 with no app release, and a later release covers it (Covering, below). The recipe is the project's
-`bandit.yaml` (`release`, `branches`, and the optional `migrations.check` and `staging.refresh`), read through
+`bandit.yaml` (`release`, `branches`, and the optional `migrations.check`, `staging.refresh` and `staging.branch`), read through
 `scripts/recipe.py`; this file holds the gate, never the project's commands.
 
 Contents: Preconditions · Steps · Covering · Marketplace cards · Never
@@ -54,6 +54,8 @@ Check all before anything runs. Each miss is refused by name, with what would sa
    check, and the Milestone log holds each one's result.
 6. **Staging.** `recipe.py opt staging.refresh`: give the user that instruction to put the release on
    staging; release never runs it (a push of the trunk may, `execute.md` → Pushing `development`). `none` → no staging step.
+   When `recipe.py opt staging.branch` names a branch other than the trunk, this is the first point that branch holds the
+   work (the recipe steps above moved it): name it, `staging follows {branch}`, with the instruction.
 7. Final message, ten lines at most, with the running version the recipe confirmed and the paste for
    `close`.
 

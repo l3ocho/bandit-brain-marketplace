@@ -996,6 +996,8 @@ def check_staging_step():
     never = execute.split("## Never", 1)[-1]
     debug = (sprint / "debug.md").read_text(encoding="utf-8")
     debug_push = debug.split("## Pushing", 1)[-1].split("\n## ", 1)[0]
+    release = (sprint / "release.md").read_text(encoding="utf-8")
+    release_staging = release.split("6. **Staging.**", 1)[-1].split("\n7. ", 1)[0]
     needs = {
         "execute.md Pushing: the staging step": "**Staging, right after every push of `development`**" in push,
         "execute.md Pushing: reads staging.refresh": "`recipe.py opt staging.refresh`" in push,
@@ -1011,6 +1013,8 @@ def check_staging_step():
         "execute.md Never: no ready to test before staging runs the push": "ready to test on staging before" in never,
         "execute.md wave summary: Staging field": "· Staging: {" in execute,
         "debug.md Pushing: points to the staging step": "Pushing `development`, Staging" in debug_push,
+        "release.md step 6: names the branch staging follows": "`recipe.py opt staging.branch`" in release_staging
+            and "`staging follows {branch}`" in release_staging,
     }
     missing = [k for k, v in needs.items() if not v]
     selftest = (st1_hits("x", "A push of `development` starts the repo's own checks and staging build by itself") == ["x:1"]
@@ -1020,7 +1024,8 @@ def check_staging_step():
     ok = not hits and not missing and selftest
     report("ST1", ok, "no plugin file assumes what a push does to staging or points at a project's numbered rule; the "
            "staging step after every push has its home in execute.md (staging that follows another branch than the trunk: "
-           "the reaches-it-at-release line, nothing run or shown) and debug points to it (4 self-test lines)"
+           "the reaches-it-at-release line, nothing run or shown, and release names the branch) and debug points to it (4 "
+           "self-test lines)"
            if ok else f"staging claim or project rule number in {hits[:8]}; missing {missing}; "
            f"self-test {'ok' if selftest else 'failed'} (BM-26, BM-28)")
 

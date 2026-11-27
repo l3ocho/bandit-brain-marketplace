@@ -70,10 +70,7 @@ These start outside, so no file here triggers them. Each has its own check.
 A place the done check lists as open, checked and found to need nothing for this release. One line
 each: the path as the map writes it, then why. `scripts/release.py --write` empties this list.
 
-- `bandit.yaml` — this repo's own recipe has no staging section, so `staging.branch` does not apply to it (BM-28).
-- `CLAUDE.md` — the new line is plugin matter; this project's staging rules (`bb-staging`) are unchanged (BM-28).
-- `docs/dependencies.md` — ST1 and Y1 check text and fixtures the map already lists; no new file changes with another (BM-28).
-- `tests/fixture-app/bandit.notes-after-bump.yaml` — it tests the notes-after-bump lint only; the no-CI cases are written by RG1 in its scratch repo (BM-30).
+- none yet
 
 ## ✅ Before saying done
 

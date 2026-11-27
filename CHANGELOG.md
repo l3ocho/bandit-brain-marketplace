@@ -2,7 +2,7 @@
 
 All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace share one version, following [Semantic Versioning](https://semver.org): **major** when a command, mode or skill is removed or renamed or the Project Context format changes, **minor** for a new command, mode, skill or behaviour, **patch** for fixes and wording. Entries group changes as Added, Changed and Fixed, in the spirit of [Keep a Changelog](https://keepachangelog.com). `scripts/release.py` cuts a release: it dates the `Unreleased` entry, bumps every version and tags `vX.Y.Z` on `main`; each tag becomes a [GitHub release](https://github.com/l3ocho/bandit-brain-marketplace/releases).
 
-## Unreleased
+## 2.4.0 · 2026-11-27
 
 ### Added
 - **A sprint makes staging ready before it says "ready for your test"** (BM-29). After the final push the helper first asks staging which commit it runs; when it is older and the project's recipe lets the helper update staging (`after_push: run`), it runs the update and then waits, checking every minute for up to 30 minutes, until staging runs the pushed commit. The plan now lists the per-person switches the sprint adds that start off, and a new optional recipe line, `staging.switch_on`, gives the project's command that turns one on for staging's logins: the helper turns each on once staging runs the push. The final report names the commit staging runs and the switches turned on, or says staging is not ready for your test, why, and what would make it so. A recipe that says `show`, or whose staging follows another branch, still has nothing run.

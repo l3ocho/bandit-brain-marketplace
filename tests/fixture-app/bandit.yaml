@@ -13,6 +13,7 @@ staging:
   refresh: "echo staging refresh"
   commit: "echo 1a2b3c4"
   after_push: show
+  switch_on: "echo on {switch}"
   down: "echo staging down"
   where: test-host
 testdata:

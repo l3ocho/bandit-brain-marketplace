@@ -49,7 +49,7 @@ For each wave, in order:
    - the ledger's "At a glance" names the next wave, and the wave's migration-tail line (`execute.md` → The wave, step 3) shows the tail matched;
    - the ledger's Status line reads `Wave {n} of {total} delivered…` for this wave: a stale line fails the wave;
    - `git status --short` is clean and `git branch --show-current` is `development`;
-   - if the wave carries the final push (`execute.md` → Pushing `development`): the ledger records the pushed hash and `git status -sb` shows `development` level with `origin/development`, and the push's Staging line is there (`execute.md` → Pushing `development`, Staging); the run's messages say "ready to test on staging" only when that line says staging runs the pushed commit. A recorded push failure is a "Needs the user" item, not a failed wave.
+   - if the wave carries the final push (`execute.md` → Pushing `development`): the ledger records the pushed hash and `git status -sb` shows `development` level with `origin/development`, and the push's Staging line is there (`execute.md` → Pushing `development`, Staging); the run's messages say "ready to test on staging" only when that line says staging runs the pushed commit with every switch on (`Staging: runs {hash} · switches on: …`). A recorded push failure is a "Needs the user" item, not a failed wave.
    - `python3 ${CLAUDE_SKILL_DIR}/scripts/check_sprint.py` prints OK on a notes file built for this check (`references/templates.md` → Notes file).
    Any mismatch: treat the wave as not done and stop (see below).
 4. **Add one line to the ledger's Milestone log**: `Run: Wave {n} done by agent, checked ({what was checked}). Next: Wave {n+1}` or the next sprint.
@@ -102,7 +102,7 @@ Use `PushNotification` (it reaches the user's phone when Remote Control is conne
 
 ## Final report
 
-Ten lines at most per sprint: waves run, cards delivered awaiting the user's test (their approval lines on the debug card), any question waiting for them (a paused card), every open call of every wave's report in one list, the debug card and how many lines it holds, anything else that needs them, and the paste for the next step: `/bandit-dev:sprint debug {sprint}` once they have tested. `run` never starts `debug` or `close`: both wait for the user's own test.
+Ten lines at most per sprint: waves run, where to test (the final push's Staging line: the commit staging runs and the switches turned on; or that staging is not ready for the test, why, and the commands that would make it so), cards delivered awaiting the user's test (their approval lines on the debug card), any question waiting for them (a paused card), every open call of every wave's report in one list, the debug card and how many lines it holds, anything else that needs them, and the paste for the next step: `/bandit-dev:sprint debug {sprint}` once they have tested. `run` never starts `debug` or `close`: both wait for the user's own test.
 
 ## Never
 

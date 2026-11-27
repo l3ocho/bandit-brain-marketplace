@@ -15,6 +15,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -998,6 +999,9 @@ def check_staging_step():
     debug_push = debug.split("## Pushing", 1)[-1].split("\n## ", 1)[0]
     release = (sprint / "release.md").read_text(encoding="utf-8")
     release_staging = release.split("6. **Staging.**", 1)[-1].split("\n7. ", 1)[0]
+    plan = (sprint / "plan.md").read_text(encoding="utf-8")
+    run = (sprint / "run.md").read_text(encoding="utf-8")
+    records = (PLUGINS / "bandit-dev" / "agents" / "wave-records.md").read_text(encoding="utf-8")
     needs = {
         "execute.md Pushing: the staging step": "**Staging, right after every push of `development`**" in push,
         "execute.md Pushing: reads staging.refresh": "`recipe.py opt staging.refresh`" in push,
@@ -1015,6 +1019,20 @@ def check_staging_step():
         "debug.md Pushing: points to the staging step": "Pushing `development`, Staging" in debug_push,
         "release.md step 6: names the branch staging follows": "`recipe.py opt staging.branch`" in release_staging
             and "`staging follows {branch}`" in release_staging,
+        # BM-29: status first, wait until staging serves the push, the sprint's switches on, both in the Staging line
+        "execute.md Pushing: status first": "staging_wait.py --once {hash}" in push
+            and 0 <= push.find("staging_wait.py --once") < push.find("`recipe.py opt staging.after_push`"),
+        "execute.md Pushing: waits up to 30 minutes after the refresh": "staging_wait.py --state" in push
+            and "30 minutes" in push,
+        "execute.md Pushing: turns the sprint's switches on": "`recipe.py opt staging.switch_on`" in push
+            and "`Staging switches:`" in push,
+        "execute.md Pushing: the Staging line names commit and switches":
+            "`Staging: runs {hash} · switches on: {names, or none}`" in push,
+        "plan.md: the Final push section lists the switches": "`Staging switches: {names, or none}`" in plan,
+        "run.md: ready only with every switch on, final report names them": "switches on: …" in run
+            and "the commit staging runs and the switches turned on" in run,
+        "wave-records: Milestone line names the switches": "the switches\n   turned on" in records
+            or "the switches turned on" in " ".join(records.split()),
     }
     missing = [k for k, v in needs.items() if not v]
     selftest = (st1_hits("x", "A push of `development` starts the repo's own checks and staging build by itself") == ["x:1"]
@@ -1024,10 +1042,48 @@ def check_staging_step():
     ok = not hits and not missing and selftest
     report("ST1", ok, "no plugin file assumes what a push does to staging or points at a project's numbered rule; the "
            "staging step after every push has its home in execute.md (staging that follows another branch than the trunk: "
-           "the reaches-it-at-release line, nothing run or shown, and release names the branch) and debug points to it (4 "
-           "self-test lines)"
+           "the reaches-it-at-release line, nothing run or shown, and release names the branch; status first, the wait after "
+           "the refresh, the plan's switches turned on, both in the Staging line, run's report and the records) and debug "
+           "points to it (4 self-test lines)"
            if ok else f"staging claim or project rule number in {hits[:8]}; missing {missing}; "
-           f"self-test {'ok' if selftest else 'failed'} (BM-26, BM-28)")
+           f"self-test {'ok' if selftest else 'failed'} (BM-26, BM-28, BM-29)")
+
+
+# ── SW1 · staging_wait.py: status first, then wait until staging serves the push (BM-29) ─
+def check_staging_wait():
+    script = PLUGINS / "bandit-dev" / "skills" / "sprint" / "scripts" / "staging_wait.py"
+    bad = []
+    with tempfile.TemporaryDirectory() as d:
+        base = Path(d)
+        (base / "bandit.yaml").write_text("verify: 'true'\nbranches: { trunk: development, deploy: main }\nrelease: [x]\n"
+                                          "staging:\n  refresh: echo refresh\n  commit: cat served\n")
+        (base / "nocommit.yaml").write_text("verify: 'true'\nbranches: { trunk: development, deploy: main }\n"
+                                            "release: [x]\nstaging:\n  refresh: echo refresh\n")
+        served = base / "served"
+        sw = lambda *a: run_script(script, "--file", str(base / "bandit.yaml"), *a, cwd=base)  # noqa: E731
+        served.write_text("note\n1a2b3c4\n")
+        cases = [("--once, staging runs the push (short hash)", sw("--once", "1a2b3c4d5e6f"), 0, "staging runs 1a2b3c4"),
+                 ("--once, another commit", sw("--once", "9f9f9f9"), 1, "not 9f9f9f9")]
+        timer = threading.Timer(0.6, lambda: served.write_text("9f9f9f9e8\n"))
+        timer.start()
+        cases.append(("the wait sees the new commit", sw("--state", str(base / "a.json"), "--every", "0.2", "--call", "0.1",
+                                                         "9f9f9f9"),
+                      0, "staging runs 9f9f9f9e8"))
+        timer.join()
+        served.write_text("1a2b3c4\n")
+        cases += [("one call ends, still waiting", sw("--state", str(base / "b.json"), "--every", "0.1", "--call", "0.005",
+                                                      "9f9f9f9"), 1, "still waiting"),
+                  ("the limit since the first call", sw("--state", str(base / "b.json"), "--every", "0.1", "--limit",
+                                                        "0.001", "9f9f9f9"), 5, "staging runs 1a2b3c4, not 9f9f9f9"),
+                  ("no staging.commit", run_script(script, "--file", str(base / "nocommit.yaml"), "--once", "1a2b3c4",
+                                                   cwd=base), 4, "no `staging.commit`"),
+                  ("usage: neither --once nor --state", sw("1a2b3c4"), 2, "Usage")]
+        bad += [f"{name} → {got} {out[-80:]!r}" for name, (got, out), want, text in cases
+                if got != want or text not in out]
+    report("SW1", not bad, "; ".join(bad[:4]) + " (BM-29)" if bad else
+           f"staging_wait.py: {len(cases)} cases (one check before the refresh matches a short hash or names both commits; "
+           "the wait sees staging change, returns within one call while still waiting, and stops at the limit since its "
+           "first call naming both commits; no staging.commit and bad usage said)")
 
 
 # ── DC1 · the design card rule has one home, and sprint planning points to it ─
@@ -2225,6 +2281,8 @@ def check_recipe():
         (("--file", "bandit.staging-branch.yaml", "opt", "staging.refresh"), 0, "pull origin/staging"),
         (("opt", "staging.branch"), 0, "none"),
         (("--file", "bandit.no-migrations.yaml", "opt", "staging.branch"), 0, "none"),
+        (("opt", "staging.switch_on"), 0, "echo on {switch}"),
+        (("--file", "bandit.staging-branch.yaml", "opt", "staging.switch_on"), 0, "none"),
         (("get", "testdata.schema"), 0, "schema.sql"),
         (("--file", "bandit.no-migrations.yaml", "opt", "testdata.schema"), 0, "none"),
         (("--file", "bandit.missing-key.yaml", "require", "release", "branches.trunk", "branches.deploy"), 0, "present"),
@@ -3138,6 +3196,7 @@ def main(argv):
     check_execution_by_date()
     check_debug_push()
     check_staging_step()
+    check_staging_wait()
     check_design_card()
     check_wave_flow()
     check_sprint_data()

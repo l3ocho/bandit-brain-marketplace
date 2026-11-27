@@ -3,7 +3,7 @@
 Part of `bandit-dev:sprint`. Read before running `/bandit-dev:sprint release {sprint}`. Run after
 debug and before close (pipeline stage 10). **Releasing is the user's option**: a sprint may close
 with no app release, and a later release covers it (Covering, below). The recipe is the project's
-`bandit.yaml` (`release`, `branches`, and the optional `migrations.check`, `staging.refresh` and `staging.branch`), read through
+`bandit.yaml` (`release`, `branches`, and the optional `migrations.check`, `staging.refresh`, `staging.branch` and `release_checks`), read through
 `scripts/recipe.py`; this file holds the gate, never the project's commands.
 
 Contents: Preconditions · Steps · Covering · Marketplace cards · Never
@@ -38,7 +38,10 @@ Check all before anything runs. Each miss is refused by name, with what would sa
    folder: `release_guard.py --state {file} start` before the first step, `before {n}` before step n and `after {n}`
    after it. `before` refuses when the trunk moved after the bump's tag (nothing is committed between the bump and the
    deploy branch's push), and once the deploy branch is pushed it runs `release_checks.ci` and stops on red, so no
-   deploy step runs before a green build; with no `ci` named it stops until the user confirms the CI run is green, quoted.
+   deploy step runs before a green build. A recipe whose release has no CI run says so in `release_checks.no_ci`: the
+   guard then goes on after the push, printing that line, and the recipe's own gate steps before the push are its
+   check (a project's own deploy command, such as one that builds the image elsewhere, is one of its steps). With
+   neither named it stops until the user confirms the CI run is green, quoted.
    After the last step, `release_guard.py --state {file} final {version}` checks `release_checks.version` (and
    `whats_new`) print the released version; a recipe that names neither gets one line saying so. A step that runs the recipe's `verify` runs only when
    `python3 ${CLAUDE_SKILL_DIR}/scripts/code_changed.py --since {the commit of the last green full check, from the Milestone log}`
@@ -51,7 +54,7 @@ Check all before anything runs. Each miss is refused by name, with what would sa
 4. **Status line.** Ledger: `Released {version} on {date}; ready to close`. Milestone log: version,
    commit, recipe steps run.
 5. **The deploy is the recipe's.** Its own steps (step 1) carry the deploy, its watch and its version
-   check, and the Milestone log holds each one's result.
+   check, with or without a CI run (`release_checks.no_ci`), and the Milestone log holds each one's result.
 6. **Staging.** `recipe.py opt staging.refresh`: give the user that instruction to put the release on
    staging; release never runs it (a push of the trunk may, `execute.md` → Pushing `development`). `none` → no staging step.
    When `recipe.py opt staging.branch` names a branch other than the trunk, this is the first point that branch holds the

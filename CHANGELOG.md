@@ -5,6 +5,7 @@ All three plugins (`bandit`, `bandit-dev`, `bandit-maker`) and the marketplace s
 ## Unreleased
 
 ### Added
+- **A release with no CI run goes through the sprint release** (BM-30). A project that builds and checks its release without CI (BanditBrain since its image is built on Home Lab) says so in a new optional recipe line, `release_checks.no_ci`, one sentence on where its build is checked instead. After the deploy branch's push the release guard then goes on, printing that sentence, instead of stopping for a green CI run the project does not have. A recipe naming a CI watch, or neither line, works as in 2.3.0; one naming both is refused by name.
 - **A recipe can say staging follows a branch other than the trunk** (BM-28). A new optional line, `staging.branch`, names the branch staging deploys (for a project whose staging follows `staging`, which only its release moves). With it, a push of the trunk says "staging follows {branch}; this push reaches it at release", runs and shows no staging command, and calls nothing ready to test on staging; `release` shows the refresh command after its steps, naming the branch. A recipe without the line works as in 2.3.0.
 
 ## 2.3.0 · 2026-11-26

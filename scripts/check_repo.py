@@ -2164,6 +2164,14 @@ def check_release_guard():
         results.append(rg("after", "2"))
         (repo / "ci-ok").unlink()
         red = rg("before", "3")
+        no_ci = base / "no-ci.yaml"     # BM-30: a release with no CI run says so; the push needs no CI watch
+        no_ci.write_text("verify: 'true'\nbranches: { trunk: development, deploy: main }\nrelease: [git tag v1.0.0, push]\n"
+                         "release_checks:\n  no_ci: the release steps run verify before the push\n")
+        shutil.copy(state, base / "state-no-ci.json")
+        nci = run_script(script, "--file", str(no_ci), "--state", str(base / "state-no-ci.json"), "before", "3", cwd=repo)
+        no_ci.write_text(no_ci.read_text().replace("release_checks:", "release_checks:\n  ci: 'true'"))
+        both = run_script(script, "--file", str(no_ci), "--state", str(base / "state-no-ci.json"), "before", "3", cwd=repo)
+        no_ci.write_text(no_ci.read_text().replace("  no_ci: the release steps run verify before the push\n", ""))
         (repo / "ci-ok").write_text("1")
         green = rg("before", "3")
         final = rg("final", "1.0.0")
@@ -2176,15 +2184,21 @@ def check_release_guard():
         bad.append(f"the trunk at the tag → {level[0]} {level[1][-100:]!r}")
     if red[0] != 5:
         bad.append(f"a red CI run after the push → {red[0]} {red[1][-100:]!r}")
+    if nci[0] != 0 or "has no CI run: the release steps run verify before the push" not in nci[1]:
+        bad.append(f"a recipe with no CI (no_ci) after the push → {nci[0]} {nci[1][-100:]!r}")
+    if both[0] != 3 or "names both" not in both[1]:
+        bad.append(f"a recipe naming ci and no_ci → {both[0]} {both[1][-100:]!r}")
     if green[0] != 0 or final[0] != 0 or wrong[0] != 5:
         bad.append(f"green CI → {green[0]}; final 1.0.0 → {final[0]}; final 2.0.0 → {wrong[0]}")
     rel = " ".join((s / "references" / "release.md").read_text(encoding="utf-8").split())
     bad += [f"release.md lacks {w!r}" for w in ("release_guard.py lint", "release_guard.py --state {file} start",
                                                 "so no deploy step runs before a green build",
+                                                "`release_checks.no_ci`",
                                                 "release_guard.py --state {file} final {version}") if w not in rel]
     report("RG1", not bad, "; ".join(bad[:4]) + " (BB-465)" if bad else
            "release guard: notes after the bump refused by name, this repo's recipe passes; on a scratch repo a commit "
-           "after the tag stops the release, a red CI run after the deploy push stops it, a green one lets it go on, "
+           "after the tag stops the release, a red CI run after the deploy push stops it, a green one lets it go on, a "
+           "recipe saying it has no CI (no_ci) goes on with that line, one naming both is refused, "
            "and the running version is checked; release.md runs it around every step")
 
 

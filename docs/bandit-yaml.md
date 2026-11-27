@@ -56,6 +56,8 @@ The recipe has no `handover` section: no helper creates or fills a deployment ca
 
 The `staging` section may also carry `commit` (a command printing the commit staging runs) and `after_push` (`run` or `show`), added in BM-26 (RS55). The example above is from 2026-10-13 and has neither; the app's real lines are the app's to write (the app agent's card on BB: Development).
 
+The `release_checks` section may carry `no_ci` in place of `ci`: one line saying the release has no CI run and where its build is checked instead (BM-30, RS58). BanditBrain's release lost its CI build when GitHub Actions stopped (its D219): its steps run `verify` and its release gate on the development machine before the push and deploy an image built on Home Lab. Its line is the app's to write (the app agent's card on BB: Development).
+
 The `staging` section may also carry `branch`: the branch staging follows, when it is not the trunk (BM-28, RS57). Absent means the trunk. A project whose staging deploys a `staging` branch that only its release moves writes `branch: staging`.
 
 The `testdata` lines are a proposal for the app (checked 2026-10-15: tables in `src/domains/*/schema.ts`, rules in the server actions, staging's database publishes no port, the test suite reads `DATABASE_URL` from the git-ignored `.env.test`). Development reads `DATABASE_URL` from the shell the skill runs in. The app commits its own `bandit.yaml` and adds `.testdata/` to its `.gitignore`.

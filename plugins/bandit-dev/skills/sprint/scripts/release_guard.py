@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """Guards a sprint release around the project's recipe steps (references/release.md). The recipe holds the
 commands; this script holds the order: notes before the bump, nothing committed between the bump's tag and the
-deploy branch's push, a green CI run before anything after that push, and the running version at the end.
+deploy branch's push, a green CI run before anything after that push (or the recipe's word that it has none), and
+the running version at the end.
 
 The project names its own checks in the optional `release_checks` section of `bandit.yaml`:
   gate       a command run before the first step; non-zero stops the release (BanditBrain: its release-docs gate)
   ci         a command that waits for the deploy branch's CI run and exits non-zero on red
+  no_ci      one line saying the release has no CI run and where its build is checked instead (the recipe's own gate
+             steps); with it the deploy push needs no CI run. Never together with `ci`
   version    a command that prints the version production runs
   whats_new  a command that prints the version the app's What's new shows
 
@@ -14,13 +17,15 @@ Usage:
   release_guard.py [--file PATH] gate                         run `release_checks.gate` (or say none is named)
   release_guard.py [--file PATH] --state FILE start           before step 1: record the tags and the deploy branch on origin
   release_guard.py [--file PATH] --state FILE before N        before step N: the trunk has not moved since the bump's tag;
-                                                              after the deploy push, the CI run is green
+                                                              after the deploy push, the CI run is green (or the
+                                                              recipe says it has none)
   release_guard.py [--file PATH] --state FILE after N         after step N: note a new `v*` tag (the bump) and a moved
                                                               deploy branch on origin (the push)
   release_guard.py [--file PATH] --state FILE final VERSION   after the last step: `version` (and `whats_new`) print VERSION
 
 The state file lives in the session's scratch folder, never in the repo.
-Exit codes: 0 ok · 2 usage · 3 recipe (named) · 4 order refused (named) · 5 a check failed · 6 no CI watch named.
+Exit codes: 0 ok · 2 usage · 3 recipe (named) · 4 order refused (named) · 5 a check failed · 6 neither a CI watch nor
+`no_ci` named.
 """
 import json
 import os
@@ -75,6 +80,14 @@ def check(data, key):
     return str(sect[key])
 
 
+def ci_checks(data):
+    """`release_checks.ci` and `release_checks.no_ci`; a recipe naming both is refused by name."""
+    ci, no_ci = check(data, "ci"), check(data, "no_ci")
+    if ci and no_ci:
+        refuse(3, "bandit.yaml names both `release_checks.ci` and `release_checks.no_ci`: keep the one that is true")
+    return ci, no_ci
+
+
 def run(root, cmd):
     r = subprocess.run(cmd, shell=True, cwd=root, capture_output=True, text=True)
     return r.returncode, (r.stdout + r.stderr).strip()
@@ -124,6 +137,7 @@ def main(argv):
         print("release guard: the project's release gate passed")
     elif cmd in ("start", "before", "after", "final") and state:
         deploy = str(recipe.lookup(data, "branches.deploy"))
+        ci, no_ci = ci_checks(data)
         if cmd == "start" and not args:
             st = {"tags": tags(root), "deploy": deploy_on_origin(root, deploy), "bump_tag": None, "pushed": False,
                   "ci_green": False}
@@ -149,13 +163,16 @@ def main(argv):
                     refuse(4, f"the trunk moved after {st['bump_tag']}: nothing may be committed between the bump and "
                               f"the push of {deploy}. Commits: {moved or 'HEAD is not the tag'}")
             if st["pushed"] and not st["ci_green"]:
-                ci = check(data, "ci")
-                if ci is None:
-                    refuse(6, f"{deploy} is pushed and the recipe names no CI watch (release_checks.ci): the user "
-                              "confirms the CI run is green before any later step")
-                code, out = run(root, ci)
-                if code != 0:
-                    refuse(5, f"the CI run on {deploy} is not green ({code}): no later step runs. {out[-300:]}")
+                if no_ci:
+                    print(f"release guard: {deploy} is pushed; the recipe has no CI run: {no_ci}")
+                elif ci is None:
+                    refuse(6, f"{deploy} is pushed and the recipe names no CI watch (release_checks.ci) and does not "
+                              "say it has none (release_checks.no_ci): the user confirms the CI run is green before "
+                              "any later step")
+                else:
+                    code, out = run(root, ci)
+                    if code != 0:
+                        refuse(5, f"the CI run on {deploy} is not green ({code}): no later step runs. {out[-300:]}")
                 st["ci_green"] = True
                 Path(state).write_text(json.dumps(st), encoding="utf-8")
             print(f"release guard: step {args[0]} may run")

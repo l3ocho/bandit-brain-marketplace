@@ -44,6 +44,7 @@ KEYS = {
     "stop.close": "stop gate hook: the close step its message names",
     "release_checks.gate": "release: the project's own release gate, run before the first step",
     "release_checks.ci": "release: waits for the deploy branch's CI run, non-zero on red",
+    "release_checks.no_ci": "release: says the release has no CI run and where its build is checked instead",
     "release_checks.version": "release: prints the version production runs",
     "release_checks.whats_new": "release: prints the version the app's What's new shows",
 }
@@ -52,7 +53,7 @@ KEYS = {
 # `release_checks` command may be left out on its own.
 OPTIONAL = ("migrations", "staging", "testdata", "guard", "stop", "release_checks")
 OPTIONAL_PARTS = ("testdata.owner", "staging.commit", "staging.after_push", "staging.branch", "release_checks.gate",
-                  "release_checks.ci", "release_checks.version", "release_checks.whats_new")
+                  "release_checks.ci", "release_checks.no_ci", "release_checks.version", "release_checks.whats_new")
 
 
 def absent(data, dotted):
